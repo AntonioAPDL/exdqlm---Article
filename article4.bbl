@@ -1,0 +1,135 @@
+\begin{thebibliography}{20}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Barata \emph{et~al.}(2020)Barata, Prado, and Sanso}]{me}
+Barata R, Prado R, Sanso B (2020).
+\newblock \enquote{{Fast inference for time-varying quantiles via flexible
+  dynamic models with application to the characterization of atmospheric }.}
+\newblock \emph{Technical report}, University of California Santa Cruz,
+  Department of Statistical Science.
+\newblock
+  \urlprefix\url{https://www.soe.ucsc.edu/research/technical-reports/UCSC-SOE-20-14}.
+
+\bibitem[{Benoit \emph{et~al.}(2011)Benoit, Al-Hamzawi, Yu, and Van~den
+  Poel}]{bayesQR}
+Benoit D, Al-Hamzawi R, Yu K, Van~den Poel D (2011).
+\newblock \emph{\pkg{bayesQR}: A Bayesian approach to quantile regression}.
+\newblock R package version 2.3,
+  \urlprefix\url{https://CRAN.R-project.org/package=bayesQR}.
+
+\bibitem[{Fox(2012)}]{sunspot}
+Fox K (2012).
+\newblock \enquote{Solar Minimum; Solar Maximum.}
+\newblock
+  \urlprefix\url{https://www.nasa.gov/mission_pages/sunearth/news/solarmin-max.html}.
+
+\bibitem[{Gelfand and Ghosh(1998)}]{gelfand1998model}
+Gelfand AE, Ghosh SK (1998).
+\newblock \enquote{Model choice: a minimum posterior predictive loss approach.}
+\newblock \emph{Biometrika}, \textbf{85}(1), 1--11.
+
+\bibitem[{Gon{\c{c}}alves \emph{et~al.}(2017)Gon{\c{c}}alves, Migon, and
+  Bastos}]{gonccalves2017dynamic}
+Gon{\c{c}}alves K, Migon HS, Bastos LS (2017).
+\newblock \enquote{Dynamic quantile linear model: a {B}ayesian approach.}
+\newblock \emph{arXiv preprint arXiv:1711.00162}.
+
+\bibitem[{Huerta \emph{et~al.}(2003)Huerta, Jiang, and Tanner}]{huerta2003time}
+Huerta G, Jiang W, Tanner MA (2003).
+\newblock \enquote{Time series modeling via hierarchical mixtures.}
+\newblock \emph{Statistica Sinica}, pp. 1097--1118.
+
+\bibitem[{Koenker(2005)}]{koenkerquantile}
+Koenker R (2005).
+\newblock \enquote{Quantile regression.}
+
+\bibitem[{Koenker(2021)}]{quantreg}
+Koenker R (2021).
+\newblock \emph{\pkg{quantreg}: Quantile Regression}.
+\newblock R package version 5.85,
+  \urlprefix\url{https://CRAN.R-project.org/package=quantreg}.
+
+\bibitem[{Kozumi and Kobayashi(2011)}]{kozumi2011gibbs}
+Kozumi H, Kobayashi G (2011).
+\newblock \enquote{Gibbs sampling methods for {B}ayesian quantile regression.}
+\newblock \emph{Journal of statistical computation and simulation},
+  \textbf{81}(11), 1565--1578.
+
+\bibitem[{Kullback and Leibler(1951)}]{kullback1951information}
+Kullback S, Leibler RA (1951).
+\newblock \enquote{On information and sufficiency.}
+\newblock \emph{The annals of mathematical statistics}, \textbf{22}(1), 79--86.
+
+\bibitem[{Ou \emph{et~al.}(2021)Ou, Hunter, Chow, Ji, Chen, Hung, Lee, Li, and
+  Park}]{dynr}
+Ou L, Hunter M, Chow SM, Ji L, Chen M, Hung HJ, Lee J, Li Y, Park J (2021).
+\newblock \emph{\pkg{dynr}: Dynamic Models with Regime-Switching}.
+\newblock R package version 0.1.16-2,
+  \urlprefix\url{https://CRAN.R-project.org/package=dynr}.
+
+\bibitem[{Petris and Gilks(2018)}]{dlm}
+Petris G, Gilks W (2018).
+\newblock \emph{\pkg{dlm}: Bayesian and Likelihood Analysis of Dynamic Linear
+  Models}.
+\newblock R package version 1.1-5,
+  \urlprefix\url{https://CRAN.R-project.org/package=dlm}.
+
+\bibitem[{Prado \emph{et~al.}(2006)Prado, Molina, and
+  Huerta}]{prado2006multivariate}
+Prado R, Molina F, Huerta G (2006).
+\newblock \enquote{Multivariate time series modeling and classification via
+  hierarchical VAR mixtures.}
+\newblock \emph{Computational Statistics \& Data Analysis}, \textbf{51}(3),
+  1445--1462.
+
+\bibitem[{{R Core Team}(2013)}]{R}
+{R Core Team} (2013).
+\newblock \emph{R: A Language and Environment for Statistical Computing}.
+\newblock R Foundation for Statistical Computing, Vienna, Austria.
+\newblock \urlprefix\url{http://www.R-project.org/}.
+
+\bibitem[{Rosenblatt(1952)}]{rosenblatt1952remarks}
+Rosenblatt M (1952).
+\newblock \enquote{Remarks on a multivariate transformation.}
+\newblock \emph{The annals of mathematical statistics}, \textbf{23}(3),
+  470--472.
+
+\bibitem[{{U.S. Geological Survey}(2016)}]{btflow}
+{US Geological Survey} (2016).
+\newblock \enquote{National Water Information System data available on the
+  World Wide Web (USGS Water Data for the Nation).}
+\newblock \urlprefix\url{http://waterdata.usgs.gov/nwis/}.
+
+\bibitem[{West \emph{et~al.}(1985)West, Harrison, and Migon}]{west1985dynamic}
+West M, Harrison PJ, Migon HS (1985).
+\newblock \enquote{Dynamic generalized linear models and {B}ayesian
+  forecasting.}
+\newblock \emph{Journal of the American Statistical Association},
+  \textbf{80}(389), 73--83.
+
+\bibitem[{Williams and Patricola(2018)}]{williams2018diversity}
+Williams IN, Patricola CM (2018).
+\newblock \enquote{Diversity of ENSO events unified by convective threshold sea
+  surface temperature: a nonlinear ENSO index.}
+\newblock \emph{Geophysical Research Letters}, \textbf{45}(17), 9236--9244.
+
+\bibitem[{Yan and Kottas(2017)}]{yan2017new}
+Yan Y, Kottas A (2017).
+\newblock \enquote{A new family of error distributions for Bayesian quantile
+  regression.}
+\newblock \emph{arXiv preprint arXiv:1701.05666}.
+
+\bibitem[{Yu and Moyeed(2001)}]{yu2001bayesian}
+Yu K, Moyeed RA (2001).
+\newblock \enquote{Bayesian quantile regression.}
+\newblock \emph{Statistics \& Probability Letters}, \textbf{54}(4), 437--447.
+
+\end{thebibliography}
