@@ -1,0 +1,23 @@
+fig:
+  width: 10
+  height: 6
+  dpi: 300
+  bg: "white"
+  base_size: 13
+
+palette:
+  primary: "#1b9e77"
+  secondary: "#d95f02"
+  tertiary: "#7570b3"
+  quaternary: "#e7298a"
+  neutral: "#4d4d4d"
+
+linetype:
+  base: "solid"
+  alt1: "dashed"
+  alt2: "dotdash"
+
+labels:
+  x: "x"
+  density: "Density"
+  cdf: "Cumulative probability"

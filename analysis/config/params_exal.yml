@@ -1,0 +1,132 @@
+seed: 20260302
+
+grid:
+  x_min: -8
+  x_max: 8
+  x_n: 1201
+  p_n: 81
+  p_min: 0.20
+  p_max: 0.80
+  bounds_p0_n: 250
+  bounds_p0_min: 0.001
+  bounds_p0_max: 0.999
+
+baseline:
+  p0: [0.15, 0.50, 0.85]
+  mu: 0.0
+  sigma: 1.0
+  gamma: 0.0
+
+exal_gamma_sweep:
+  p0: 0.60
+  fractions:
+    negative: 0.65
+    positive: 0.65
+
+location_scale_cases:
+  - label: "case_A"
+    p0: 0.60
+    gamma_fraction_positive: 0.45
+    mu: 2.0
+    sigma: 1.5
+  - label: "case_B"
+    p0: 0.60
+    gamma_fraction_negative: 0.45
+    mu: -2.5
+    sigma: 2.0
+  - label: "case_C"
+    p0: 0.60
+    gamma: 0.0
+    mu: 0.0
+    sigma: 1.0
+
+inversion_cases:
+  - label: "inv_A"
+    p0: 0.30
+    gamma_fraction_positive: 0.10
+    mu: 1.0
+    sigma: 1.0
+  - label: "inv_B"
+    p0: 0.50
+    gamma: 0.0
+    mu: -1.0
+    sigma: 0.9
+  - label: "inv_C"
+    p0: 0.80
+    gamma_fraction_negative: 0.10
+    mu: 2.5
+    sigma: 1.8
+
+identity_cases:
+  - p0: 0.10
+    gamma_fraction_positive: 0.05
+    mu: -5.0
+    sigma: 1.0
+  - p0: 0.10
+    gamma: 0.0
+    mu: -5.0
+    sigma: 1.0
+  - p0: 0.10
+    gamma_fraction_negative: 0.05
+    mu: -5.0
+    sigma: 1.0
+  - p0: 0.50
+    gamma_fraction_positive: 0.05
+    mu: 3.0
+    sigma: 1.0
+  - p0: 0.50
+    gamma: 0.0
+    mu: 3.0
+    sigma: 1.0
+  - p0: 0.50
+    gamma_fraction_negative: 0.05
+    mu: 3.0
+    sigma: 1.0
+  - p0: 0.85
+    gamma_fraction_positive: 0.05
+    mu: 10.0
+    sigma: 1.0
+  - p0: 0.85
+    gamma: 0.0
+    mu: 10.0
+    sigma: 1.0
+  - p0: 0.85
+    gamma_fraction_negative: 0.05
+    mu: 10.0
+    sigma: 1.0
+
+sampling_cases:
+  - label: "samp_A"
+    p0: 0.12
+    gamma_fraction_positive: 0.20
+    mu: 3.0
+    sigma: 0.7
+    sample_n: 12000
+    bins: 80
+  - label: "samp_B"
+    p0: 0.80
+    gamma_fraction_negative: 0.20
+    mu: -2.0
+    sigma: 1.6
+    sample_n: 12000
+    bins: 80
+  - label: "samp_C"
+    p0: 0.35
+    gamma: 0.0
+    mu: 0.0
+    sigma: 1.2
+    sample_n: 12000
+    bins: 80
+
+thresholds:
+  inversion_max_abs_error: 5.0e-4
+  identity_abs_error: 2.0e-5
+  sampling_q_error: 0.12
+  cdf_monotonic_tol: 1.0e-12
+
+promotion:
+  figures:
+    - exal_fig_03_exal_density_gamma_sweep.png
+    - exal_fig_07_gamma_bounds_region.png
+    - exal_fig_08_qexal_pexal_inversion_panels.png
+    - exal_fig_10_rexal_density_overlay_3cases.png
