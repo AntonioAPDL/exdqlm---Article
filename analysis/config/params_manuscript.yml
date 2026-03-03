@@ -25,8 +25,8 @@ profiles:
     ex1:
       n_burn: 700
       n_mcmc: 300
-      n_burn_trace: 2000
-      n_mcmc_trace: 5000
+      n_burn_trace: 500
+      n_mcmc_trace: 10500
       thin_trace: 5
     ex2:
       n_is: 500
