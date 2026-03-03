@@ -1,10 +1,9 @@
 # exdqlm Manuscript Master Checklist (Current Package State)
 
-## Objective
-Prepare a high-quality software-paper manuscript that reflects the **current** package capabilities and standards expected by a strong software/statistics journal.
+ToDos before submission:
 
-## Editorial Policy (Mandatory)
-- Write the paper as a description of the **current package**, not as a version history.
+## An editorial Policy
+- Write the paper as a description of the **current package**.
 - Avoid release-tag framing (e.g., "v0.x.y") in the main narrative unless needed in a short reproducibility note.
 - Keep claims evidence-based and reproducible from code, figures, and tables included in the manuscript workflow.
 - Ensure method descriptions, API usage, and examples match the package exactly at submission time.
@@ -42,9 +41,8 @@ Prepare a high-quality software-paper manuscript that reflects the **current** p
 
 ### Inference narrative mismatch
 - Manuscript is currently ISVB-centric in method exposition and examples.
-- Updated target: make LDVB the primary approximate-inference method in the manuscript.
+- Updated target: make LDVB the primary approximate-inference method in the manuscript for VB.
 - Keep MCMC as exact posterior reference/baseline.
-- If ISVB is retained at all, confine to short legacy context (or appendix) and avoid making it the recommended primary path.
 
 ---
 
@@ -86,7 +84,7 @@ Prepare a high-quality software-paper manuscript that reflects the **current** p
 
 ---
 
-## P1: Strongly Recommended
+## P1: Other things to do.
 
 ### F) Computational evidence section
 - [ ] Add runtime and quality comparison tables for representative tasks:
@@ -107,9 +105,8 @@ Prepare a high-quality software-paper manuscript that reflects the **current** p
 
 ---
 
-## P2: Nice-to-Have
+## P2: Nice-to-Haves
 
-- [ ] Add an appendix mapping old API names/signatures to current ones.
 - [ ] Add sensitivity checks for at least one key example (prior/tuning robustness).
 - [ ] Add supplementary material index for scripts and data artifacts.
 
