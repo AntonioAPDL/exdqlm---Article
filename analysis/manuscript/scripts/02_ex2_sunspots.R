@@ -172,100 +172,183 @@ if (!need_ex2) {
   )
 
   xlim_idx <- time_window_to_index(y_ts, 1750, 1850)
+  xlim_time <- c(1750, 1850)
 
   if (need_ex2quant) {
-    ex2_extreme <- load_or_fit_cache("ex2_extreme_quants_v1", {
-      M95_ext <- exdqlm::exdqlmISVB(
-        y = y_ts, p0 = 0.95, model = model,
+    ex2_extreme_isvb <- load_or_fit_cache("ex2_quant_grid_isvb_v1", {
+      M99_dqlm <- exdqlm::exdqlmISVB(
+        y = y_ts, p0 = 0.99, model = model,
+        df = c(0.9, 0.85), dim.df = c(1, 8),
+        dqlm.ind = TRUE, sig.init = 2,
+        n.IS = n_is, n.samp = n_samp, tol = tol,
+        verbose = FALSE
+      )
+      M99_exdqlm <- exdqlm::exdqlmISVB(
+        y = y_ts, p0 = 0.99, model = model,
         df = c(0.9, 0.85), dim.df = c(1, 8),
         sig.init = 2,
         n.IS = n_is, n.samp = n_samp, tol = tol,
         verbose = FALSE
       )
-      M05_ext <- exdqlm::exdqlmISVB(
+      M05_dqlm <- exdqlm::exdqlmISVB(
+        y = y_ts, p0 = 0.05, model = model,
+        df = c(0.9, 0.85), dim.df = c(1, 8),
+        dqlm.ind = TRUE, sig.init = 2,
+        n.IS = n_is, n.samp = n_samp, tol = tol,
+        verbose = FALSE
+      )
+      M05_exdqlm <- exdqlm::exdqlmISVB(
         y = y_ts, p0 = 0.05, model = model,
         df = c(0.9, 0.85), dim.df = c(1, 8),
         sig.init = 2,
         n.IS = n_is, n.samp = n_samp, tol = tol,
         verbose = FALSE
       )
-      list(M95_ext = M95_ext, M05_ext = M05_ext)
-    }, note = "ex2_extreme_quants_v1")
-
-    M95_ext <- ex2_extreme$M95_ext
-    M05_ext <- ex2_extreme$M05_ext
-
-    save_png_plot("ex2quant.png", {
-      graphics::par(mfcol = c(1, 2))
-
-      # Use time-aware copies so x-axis labels are in years.
-      M95_plot <- M95_ext
-      M05_plot <- M05_ext
-      M95_plot$y <- y_ts
-      M05_plot$y <- y_ts
-
-      exdqlm::exdqlmPlot(M95_plot, col = "red")
-      exdqlm::exdqlmPlot(M05_plot, add = TRUE, col = "blue")
-      graphics::legend(
-        "topright",
-        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.05)),
-        col = c("red", "blue"),
-        lty = 1,
-        bty = "n"
+      list(
+        M99_dqlm = M99_dqlm, M99_exdqlm = M99_exdqlm,
+        M05_dqlm = M05_dqlm, M05_exdqlm = M05_exdqlm
       )
+    }, note = "ex2_quant_grid_isvb_v1")
 
-      fFF <- model$FF
-      fGG <- model$GG
-      k_fore <- 10L
-      t_end <- tail(grDevices::xy.coords(y_ts)$x, 1L)
-      dt <- 1 / stats::frequency(y_ts)
-      xlim_fore <- c(1935, t_end + k_fore * dt)
-      stats::plot.ts(y_ts, xlim = xlim_fore, col = "grey50", ylab = "quantile forecast")
+    M99_dqlm <- ex2_extreme_isvb$M99_dqlm
+    M99_exdqlm <- ex2_extreme_isvb$M99_exdqlm
+    M05_dqlm <- ex2_extreme_isvb$M05_dqlm
+    M05_exdqlm <- ex2_extreme_isvb$M05_exdqlm
 
-      fc95 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M95_plot, fFF = fFF, fGG = fGG, plot = FALSE)
-      plot(fc95, add = TRUE, cols = c("red", "magenta"))
-      fc05 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M05_plot, fFF = fFF, fGG = fGG, plot = FALSE)
-      plot(fc05, add = TRUE, cols = c("blue", "lightblue"))
-      graphics::legend(
-        "topleft",
-        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.05)),
-        col = c("red", "blue"),
-        lty = 1,
-        bty = "n"
-      )
-    })
+    plot_quant_triplet_isvb <- function(filename, m_dqlm, m_exdqlm, p0_label) {
+      m_dqlm_plot <- m_dqlm
+      m_exdqlm_plot <- m_exdqlm
+      m_dqlm_plot$y <- y_ts
+      m_exdqlm_plot$y <- y_ts
+      save_png_plot(filename, {
+        graphics::par(mfrow = c(1, 3))
+        stats::plot.ts(y_ts, col = "darkgrey", ylab = "sunspot count")
+        graphics::title(main = sprintf("Sunspots data"))
+
+        stats::plot.ts(y_ts, xlim = xlim_time, col = "darkgrey", ylab = "quantile 95% CrIs")
+        exdqlm::exdqlmPlot(m_dqlm_plot, add = TRUE, col = "red")
+        exdqlm::exdqlmPlot(m_exdqlm_plot, add = TRUE, col = "blue")
+        graphics::legend("topleft", legend = c("DQLM (ISVB)", "exDQLM (ISVB)"), col = c("red", "blue"), lty = 1, bty = "n")
+        graphics::title(main = sprintf("ISVB fit (p0 = %s)", p0_label))
+
+        graphics::hist(as.numeric(m_exdqlm$samp.gamma), xlab = expression(gamma), main = sprintf("ISVB exDQLM gamma (p0 = %s)", p0_label))
+      })
+    }
+
+    # Keep legacy filename for manuscript references: original p0 = 0.85.
+    plot_quant_triplet_isvb("ex2quant.png", M1, M2, "0.85")
+    plot_quant_triplet_isvb("ex2quant_p099.png", M99_dqlm, M99_exdqlm, "0.99")
+    plot_quant_triplet_isvb("ex2quant_p005.png", M05_dqlm, M05_exdqlm, "0.05")
     register_artifact(
       artifact_id = "fig_ex2quant",
       artifact_type = "figure",
       relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
       manuscript_target = "fig:ex2quant",
       status = "reproduced",
-      notes = "Two-panel ISVB extreme-quantile figure (p0=0.05 and p0=0.95) with fit and forecast views."
+      notes = "Three-panel ISVB figure for original p0=0.85 comparing DQLM and exDQLM."
+    )
+    register_artifact(
+      artifact_id = "fig_ex2quant_p099",
+      artifact_type = "figure",
+      relative_path = "analysis/manuscript/outputs/figures/ex2quant_p099.png",
+      manuscript_target = "new: fig ex2quant ISVB upper-tail (p0=0.99)",
+      status = "reproduced",
+      notes = "Three-panel ISVB figure for p0=0.99 comparing DQLM and exDQLM."
+    )
+    register_artifact(
+      artifact_id = "fig_ex2quant_p005",
+      artifact_type = "figure",
+      relative_path = "analysis/manuscript/outputs/figures/ex2quant_p005.png",
+      manuscript_target = "new: fig ex2quant ISVB lower-tail (p0=0.05)",
+      status = "reproduced",
+      notes = "Three-panel ISVB figure for p0=0.05 comparing DQLM and exDQLM."
     )
   }
 
   if (need_ex2quant_ldvb) {
-    if (ex2_ldvb_pair_ok) {
-      save_png_plot("ex2quant_ldvb.png", {
+    ex2_extreme_ldvb <- load_or_fit_cache("ex2_quant_grid_ldvb_v2", {
+      M99_dqlm_ldvb <- tryCatch(
+        exdqlm::exdqlmLDVB(
+          y = y_ts, p0 = 0.99, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          # Stabilize extreme upper-tail DQLM fit under LDVB.
+          dqlm.ind = TRUE, sig.init = 10, fix.sigma = FALSE,
+          n.samp = n_samp, tol = tol,
+          verbose = FALSE
+        ),
+        error = function(e) e
+      )
+      M99_exdqlm_ldvb <- tryCatch(
+        exdqlm::exdqlmLDVB(
+          y = y_ts, p0 = 0.99, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          sig.init = 2,
+          n.samp = n_samp, tol = tol,
+          verbose = FALSE
+        ),
+        error = function(e) e
+      )
+      M05_dqlm_ldvb <- tryCatch(
+        exdqlm::exdqlmLDVB(
+          y = y_ts, p0 = 0.05, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          dqlm.ind = TRUE, sig.init = 2,
+          n.samp = n_samp, tol = tol,
+          verbose = FALSE
+        ),
+        error = function(e) e
+      )
+      M05_exdqlm_ldvb <- tryCatch(
+        exdqlm::exdqlmLDVB(
+          y = y_ts, p0 = 0.05, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          sig.init = 2,
+          n.samp = n_samp, tol = tol,
+          verbose = FALSE
+        ),
+        error = function(e) e
+      )
+      list(
+        M99_dqlm_ldvb = M99_dqlm_ldvb, M99_exdqlm_ldvb = M99_exdqlm_ldvb,
+        M05_dqlm_ldvb = M05_dqlm_ldvb, M05_exdqlm_ldvb = M05_exdqlm_ldvb
+      )
+    }, note = "ex2_quant_grid_ldvb_v2")
+
+    plot_quant_triplet_ldvb <- function(filename, m_dqlm, m_exdqlm, p0_label) {
+      m_dqlm_plot <- m_dqlm
+      m_exdqlm_plot <- m_exdqlm
+      m_dqlm_plot$y <- y_ts
+      m_exdqlm_plot$y <- y_ts
+      save_png_plot(filename, {
         graphics::par(mfrow = c(1, 3))
         stats::plot.ts(y_ts, col = "darkgrey", ylab = "sunspot count")
+        graphics::title(main = sprintf("Sunspots data"))
 
-        stats::plot.ts(y, xlim = xlim_idx, col = "darkgrey", ylab = "quantile 95% CrIs")
-        q_m1_ld <- quantile_summary_from_fit(M1_ldvb, cr.percent = 0.95)
-        q_m2_ld <- quantile_summary_from_fit(M2_ldvb, cr.percent = 0.95)
-        plot_quantile_summary(q_m1_ld, col = ldvb_cols$m1, add = TRUE)
-        plot_quantile_summary(q_m2_ld, col = ldvb_cols$m2, add = TRUE)
+        stats::plot.ts(y_ts, xlim = xlim_time, col = "darkgrey", ylab = "quantile 95% CrIs")
+        q_d <- quantile_summary_from_fit(m_dqlm_plot, cr.percent = 0.95)
+        q_e <- quantile_summary_from_fit(m_exdqlm_plot, cr.percent = 0.95)
+        plot_quantile_summary(q_d, col = ldvb_cols$m1, add = TRUE)
+        plot_quantile_summary(q_e, col = ldvb_cols$m2, add = TRUE)
         graphics::legend("topleft", legend = c("DQLM (LDVB)", "exDQLM (LDVB)"), col = c(ldvb_cols$m1, ldvb_cols$m2), lty = 1, bty = "n")
+        graphics::title(main = sprintf("LDVB fit (p0 = %s)", p0_label))
 
-        graphics::hist(M2_ldvb$samp.gamma, xlab = expression(gamma), main = "")
+        graphics::hist(as.numeric(m_exdqlm_plot$samp.gamma), xlab = expression(gamma), main = sprintf("LDVB exDQLM gamma (p0 = %s)", p0_label))
       })
+    }
+
+    ldvb_p099_ok <- fit_ok(ex2_extreme_ldvb$M99_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M99_exdqlm_ldvb)
+    ldvb_p005_ok <- fit_ok(ex2_extreme_ldvb$M05_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M05_exdqlm_ldvb)
+
+    if (ex2_ldvb_pair_ok) {
+      # Keep legacy filename for manuscript references: original p0 = 0.85.
+      plot_quant_triplet_ldvb("ex2quant_ldvb.png", M1_ldvb, M2_ldvb, "0.85")
       register_artifact(
         artifact_id = "fig_ex2quant_ldvb",
         artifact_type = "figure",
         relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb.png",
         manuscript_target = "new: fig ex2quant LDVB counterpart",
         status = "reproduced",
-        notes = "LDVB counterpart of ex2quant with DQLM/exDQLM overlays and gamma histogram."
+        notes = "Three-panel LDVB figure for original p0=0.85 comparing DQLM and exDQLM."
       )
     } else {
       register_artifact(
@@ -274,7 +357,49 @@ if (!need_ex2) {
         relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb.png",
         manuscript_target = "new: fig ex2quant LDVB counterpart",
         status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for quantile panel."
+        notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.85 quantile panel."
+      )
+    }
+
+    if (ldvb_p099_ok) {
+      plot_quant_triplet_ldvb("ex2quant_ldvb_p099.png", ex2_extreme_ldvb$M99_dqlm_ldvb, ex2_extreme_ldvb$M99_exdqlm_ldvb, "0.99")
+      register_artifact(
+        artifact_id = "fig_ex2quant_ldvb_p099",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
+        manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
+        status = "reproduced",
+        notes = "Three-panel LDVB figure for p0=0.99 comparing DQLM and exDQLM."
+      )
+    } else {
+      register_artifact(
+        artifact_id = "fig_ex2quant_ldvb_p099",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
+        manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.99 quantile panel."
+      )
+    }
+
+    if (ldvb_p005_ok) {
+      plot_quant_triplet_ldvb("ex2quant_ldvb_p005.png", ex2_extreme_ldvb$M05_dqlm_ldvb, ex2_extreme_ldvb$M05_exdqlm_ldvb, "0.05")
+      register_artifact(
+        artifact_id = "fig_ex2quant_ldvb_p005",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
+        manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
+        status = "reproduced",
+        notes = "Three-panel LDVB figure for p0=0.05 comparing DQLM and exDQLM."
+      )
+    } else {
+      register_artifact(
+        artifact_id = "fig_ex2quant_ldvb_p005",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
+        manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.05 quantile panel."
       )
     }
   }

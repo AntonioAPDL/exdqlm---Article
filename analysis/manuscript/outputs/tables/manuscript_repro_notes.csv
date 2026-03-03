@@ -4,6 +4,6 @@
 "ldvb_note","Added ISVB vs LDVB comparison figure for dynamic Sunspots example."
 "backend","MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'."
 "ex2","Used explicit dlm->exdqlm conversion because as.exdqlm(dlm) errors in current package."
-"coverage","Targeted run; requested targets: ex2quant."
+"coverage","Targeted run; requested targets: ex2quant, ex2quant_ldvb."
 "timing","Exact runtime printouts in manuscript are historical and expected to differ."
 "scope","Main manuscript .tex was not modified; all updates are isolated under analysis/manuscript."

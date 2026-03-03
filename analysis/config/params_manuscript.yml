@@ -72,7 +72,11 @@ promotion:
     - ex1mcmc.png
     - ex1quants.png
     - ex2quant.png
+    - ex2quant_p099.png
+    - ex2quant_p005.png
     - ex2quant_ldvb.png
+    - ex2quant_ldvb_p099.png
+    - ex2quant_ldvb_p005.png
     - ex2checks.png
     - ex2checks_ldvb.png
     - ex2_isvb_ldvb_compare.png
