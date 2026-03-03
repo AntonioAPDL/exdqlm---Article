@@ -40,6 +40,18 @@ testthat::test_that("key figure overlays are present (color checks)", {
     testthat::expect_gt(count_near_color(ex2v, darkorange), 20)
   }
 
+  ex2d <- read_img("analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png")
+  if (!is.null(ex2d)) {
+    testthat::expect_gt(count_near_color(ex2d, blue), 20)
+    testthat::expect_gt(count_near_color(ex2d, darkorange), 40)
+  }
+
+  ex2g <- read_img("analysis/manuscript/outputs/figures/ex2_gamma_posteriors.png")
+  if (!is.null(ex2g)) {
+    testthat::expect_gt(count_near_color(ex2g, blue), 20)
+    testthat::expect_gt(count_near_color(ex2g, darkorange), 20)
+  }
+
   ex3q <- read_img("analysis/manuscript/outputs/figures/ex3quantcomps.png")
   if (!is.null(ex3q)) {
     testthat::expect_gt(count_near_color(ex3q, purple), 40)

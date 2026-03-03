@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-03-02 22:45:52
+Generated: 2026-03-03 00:10:22
 Profile: standard
 Seed: 20260302
 
@@ -16,6 +16,10 @@ Seed: 20260302
 - [reproduced] `fig_ex2quant` -> `analysis/manuscript/outputs/figures/ex2quant.png` (fig:ex2quant). Three-panel Sunspots figure (data, quantiles, gamma histogram).
 - [reproduced] `fig_ex2checks` -> `analysis/manuscript/outputs/figures/ex2checks.png` (fig:ex2checks). Generated via exdqlmDiagnostics replacement for legacy exdqlmChecks.
 - [reproduced] `fig_ex2_isvb_ldvb_compare` -> `analysis/manuscript/outputs/figures/ex2_isvb_ldvb_compare.png` (new: ISVB vs LDVB dynamic comparison). Includes robust LDVB display when gamma posterior is near-degenerate.
+- [reproduced] `fig_ex2_gamma_posteriors` -> `analysis/manuscript/outputs/figures/ex2_gamma_posteriors.png` (new: ISVB and LDVB gamma posteriors (side-by-side)). Separate gamma posterior densities with median and 95% credible intervals for each method.
+- [reproduced] `tab_ex2_gamma_credible_intervals` -> `analysis/manuscript/outputs/tables/ex2_gamma_credible_intervals.csv` (new: Example 2 gamma 95% credible intervals). Summaries from posterior samples of gamma for ISVB and LDVB.
+- [reproduced] `fig_ex2_ldvb_diagnostics` -> `analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png` (new: LDVB convergence diagnostics). LDVB diagnostics with stricter tolerance (tol=0.01, n.samp=400); includes fit overlay, seq.gamma, seq.sigma, ELBO trace.
+- [reproduced] `ex2_ldvb_diagnostics_summary` -> `analysis/manuscript/outputs/logs/ex2_ldvb_diagnostics_summary.txt` (new: LDVB convergence diagnostics summary). Text summary for LDVB convergence diagnostics.
 - [reproduced] `tab_ex2_df_scan` -> `analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv` (Example 2 discount-factor KL selection). Best pair in this run: (0.90, 0.85)
 - [reproduced] `tab_ex2_diagnostics` -> `analysis/manuscript/outputs/tables/ex2_diagnostics_summary.csv` (Example 2 diagnostic narrative). Computed with exdqlmDiagnostics.
 - [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log BTflow. Bottom: nino34.
@@ -35,6 +39,7 @@ Seed: 20260302
 - backend: MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
 - ex1: Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain.
 - ex2: Used explicit dlm->exdqlm conversion because as.exdqlm(dlm) errors in current package.
+- ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=400, iter=33).
 - ex2: Sunspots KL search best seasonal discount factor=0.85 for this run profile.
 - ex3: Best lambda by KL in this run profile: 0.900.
 - coverage: All main manuscript example figures were targeted in this pipeline.

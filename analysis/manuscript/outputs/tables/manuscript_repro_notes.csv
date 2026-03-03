@@ -5,6 +5,7 @@
 "backend","MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'."
 "ex1","Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain."
 "ex2","Used explicit dlm->exdqlm conversion because as.exdqlm(dlm) errors in current package."
+"ex2_ldvb_diag","Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=400, iter=33)."
 "ex2","Sunspots KL search best seasonal discount factor=0.85 for this run profile."
 "ex3","Best lambda by KL in this run profile: 0.900."
 "coverage","All main manuscript example figures were targeted in this pipeline."

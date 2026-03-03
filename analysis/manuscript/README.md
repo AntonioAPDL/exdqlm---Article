@@ -10,6 +10,7 @@ without modifying `article4.tex`.
 - Rebuilds Example 2 (Sunspots) figures + diagnostics with `exdqlmDiagnostics`.
 - Rebuilds Example 3 (Big Tree) figures + diagnostics table.
 - Adds one extra dynamic comparison figure: ISVB vs LDVB (`ex2_isvb_ldvb_compare.png`).
+- Adds side-by-side gamma posterior comparison for Example 2 with 95% CrIs (`ex2_gamma_posteriors.png` + `ex2_gamma_credible_intervals.csv`).
 - Writes a reproducibility tracker with per-artifact status notes.
 
 ## Run
@@ -29,6 +30,8 @@ Rscript analysis/run_all.R --stage manuscript --skip-tests
 Rscript analysis/run_all.R --stage manuscript --promote
 Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex2_gamma_posteriors --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 ```

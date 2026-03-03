@@ -15,6 +15,8 @@ testthat::test_that("core manuscript figure targets are reproduced", {
     "fig_ex1quants",
     "fig_ex2quant",
     "fig_ex2checks",
+    "fig_ex2_gamma_posteriors",
+    "fig_ex2_ldvb_diagnostics",
     "fig_ex3data",
     "fig_ex3quantcomps",
     "fig_ex3zetapsi",
