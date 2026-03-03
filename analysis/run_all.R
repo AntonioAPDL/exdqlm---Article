@@ -22,7 +22,9 @@ parse_args <- function(args) {
     promote = FALSE,
     profile = "standard",
     pkg_path = NULL,
-    seed = NULL
+    seed = NULL,
+    targets = character(0),
+    force_refit = FALSE
   )
 
   i <- 1L
@@ -46,6 +48,15 @@ parse_args <- function(args) {
     } else if (a == "--seed") {
       i <- i + 1L
       out$seed <- as.integer(args[[i]])
+    } else if (a == "--targets") {
+      i <- i + 1L
+      raw <- args[[i]]
+      if (nzchar(raw)) {
+        parts <- trimws(unlist(strsplit(raw, ",")))
+        out$targets <- unique(parts[nzchar(parts)])
+      }
+    } else if (a == "--force-refit") {
+      out$force_refit <- TRUE
     } else {
       stop(sprintf("Unknown argument: %s", a), call. = FALSE)
     }
@@ -81,6 +92,8 @@ main <- function() {
   ctx$profile <- args$profile
   ctx$pkg_path <- args$pkg_path
   ctx$seed_override <- args$seed
+  ctx$targets <- args$targets
+  ctx$force_refit <- args$force_refit
 
   valid_stages <- c("exal", "manuscript")
   if (!args$stage %in% valid_stages) {
@@ -96,8 +109,13 @@ main <- function() {
   source(file.path(stage_scripts, "00_setup.R"), local = ctx)
 
   if (!args$tests_only) {
-    ctx$log_msg(sprintf("Clearing previous %s outputs", args$stage))
-    clear_stage_outputs(file.path(repo_root, "analysis", args$stage))
+    skip_clear <- identical(args$stage, "manuscript") && length(args$targets) > 0L
+    if (skip_clear) {
+      ctx$log_msg("Targeted manuscript run: keeping existing outputs (no stage-wide clear).")
+    } else {
+      ctx$log_msg(sprintf("Clearing previous %s outputs", args$stage))
+      clear_stage_outputs(file.path(repo_root, "analysis", args$stage))
+    }
 
     run_order <- switch(
       args$stage,

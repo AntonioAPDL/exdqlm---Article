@@ -28,6 +28,30 @@ expected_targets <- data.frame(
   stringsAsFactors = FALSE
 )
 
+if (targeted_run) {
+  target_map <- list(
+    ex1 = c("fig_ex1mcmc", "fig_ex1quants", "tab_ex1_runtime"),
+    ex1mcmc = c("fig_ex1mcmc"),
+    ex1quants = c("fig_ex1quants"),
+    ex2 = c("fig_ex2quant", "fig_ex2checks", "fig_ex2_isvb_ldvb_compare"),
+    ex2quant = c("fig_ex2quant"),
+    ex2checks = c("fig_ex2checks"),
+    ex2_isvb_ldvb_compare = c("fig_ex2_isvb_ldvb_compare"),
+    ex3 = c("fig_ex3data", "fig_ex3quantcomps", "fig_ex3zetapsi", "fig_ex3forecast", "tab_ex3_diagnostics"),
+    ex3data = c("fig_ex3data"),
+    ex3quantcomps = c("fig_ex3quantcomps"),
+    ex3zetapsi = c("fig_ex3zetapsi"),
+    ex3forecast = c("fig_ex3forecast"),
+    ex3tables = c("tab_ex3_diagnostics")
+  )
+  exp_ids <- unique(unlist(target_map[intersect(names(target_map), targets)], use.names = FALSE))
+  if (length(exp_ids) > 0L) {
+    expected_targets <- expected_targets[expected_targets$artifact_id %in% exp_ids, , drop = FALSE]
+  } else {
+    expected_targets <- expected_targets[0, , drop = FALSE]
+  }
+}
+
 for (i in seq_len(nrow(expected_targets))) {
   id <- expected_targets$artifact_id[i]
   if (!any(artifact_registry$artifact_id == id)) {
@@ -89,7 +113,11 @@ save_table_csv(
   notes = "Maps deprecated manuscript calls to current package API."
 )
 
-register_note("coverage", "All main manuscript example figures were targeted in this pipeline.")
+if (targeted_run) {
+  register_note("coverage", sprintf("Targeted run; requested targets: %s.", paste(targets, collapse = ", ")))
+} else {
+  register_note("coverage", "All main manuscript example figures were targeted in this pipeline.")
+}
 register_note("timing", "Exact runtime printouts in manuscript are historical and expected to differ.")
 register_note("scope", "Main manuscript .tex was not modified; all updates are isolated under analysis/manuscript.")
 

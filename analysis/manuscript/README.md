@@ -28,6 +28,9 @@ Rscript analysis/run_all.R --stage manuscript --profile standard
 Rscript analysis/run_all.R --stage manuscript --skip-tests
 Rscript analysis/run_all.R --stage manuscript --promote
 Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
+Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 ```
 
 ## Outputs
@@ -35,6 +38,7 @@ Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
 - `analysis/manuscript/outputs/figures/`: generated figure files.
 - `analysis/manuscript/outputs/tables/`: diagnostics summaries + reproducibility tracker.
 - `analysis/manuscript/outputs/logs/`: compact textual outputs and session metadata.
+- `analysis/manuscript/outputs/cache/`: cached fitted objects to support fast targeted reruns.
 
 Main tracker files:
 

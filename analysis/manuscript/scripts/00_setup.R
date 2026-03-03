@@ -25,8 +25,9 @@ output_root <- file.path(stage_root, "outputs")
 figures_dir <- file.path(output_root, "figures")
 tables_dir <- file.path(output_root, "tables")
 logs_dir <- file.path(output_root, "logs")
+cache_dir <- file.path(output_root, "cache")
 
-for (d in c(figures_dir, tables_dir, logs_dir)) ensure_dir(d)
+for (d in c(figures_dir, tables_dir, logs_dir, cache_dir)) ensure_dir(d)
 
 cfg_params <- yaml::read_yaml(file.path(analysis_root, "config", "params_manuscript.yml"))
 selected_profile <- profile %||% "standard"
@@ -44,6 +45,11 @@ cfg_profile <- cfg_params$profiles[[selected_profile]]
 
 seed_value <- seed_override %||% cfg_params$seed
 set.seed(seed_value)
+
+targets <- if (exists("targets")) as.character(targets) else character(0)
+targets <- targets[nzchar(targets)]
+targeted_run <- length(targets) > 0L
+force_refit <- isTRUE(force_refit)
 
 resolve_pkg_path <- function() {
   cand <- unique(c(
@@ -153,6 +159,22 @@ save_png_plot <- function(filename, expr,
   invisible(path)
 }
 
+cache_file <- function(key) {
+  file.path(cache_dir, sprintf("%s_%s.rds", key, selected_profile))
+}
+
+load_or_fit_cache <- function(key, expr, note = NULL) {
+  path <- cache_file(key)
+  if (file.exists(path) && !force_refit) {
+    if (!is.null(note)) log_msg(sprintf("Loading cache for %s", key))
+    return(readRDS(path))
+  }
+  if (!is.null(note)) log_msg(sprintf("Fitting cache for %s", key))
+  val <- eval.parent(substitute(expr))
+  saveRDS(val, path)
+  val
+}
+
 capture_output_file <- function(filename, expr) {
   path <- file.path(logs_dir, filename)
   txt <- utils::capture.output(eval.parent(substitute(expr)))
@@ -192,6 +214,18 @@ quantile_summary_from_fit <- function(mfit, cr.percent = 0.95) {
     lb = matrixStats::rowQuantiles(draws, probs = half.alpha),
     ub = matrixStats::rowQuantiles(draws, probs = cr.percent + half.alpha)
   )
+}
+
+time_window_to_index <- function(ts_ref, t_from, t_to) {
+  tx <- grDevices::xy.coords(ts_ref)$x
+  idx <- which(tx >= t_from & tx <= t_to)
+  if (length(idx) == 0L) return(c(1L, length(tx)))
+  c(min(idx), max(idx))
+}
+
+target_enabled <- function(id, aliases = character()) {
+  if (!targeted_run) return(TRUE)
+  any(c(id, aliases) %in% targets)
 }
 
 plot_quantile_summary <- function(qsum, col = "purple", add = TRUE, lwd = 1.5) {
@@ -306,5 +340,6 @@ promote_publication_figures <- function() {
 register_note("api_update", "Deprecated exdqlmChecks replaced with exdqlmDiagnostics.")
 register_note("api_update", "Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.")
 register_note("ldvb_note", "Added ISVB vs LDVB comparison figure for dynamic Sunspots example.")
+register_note("backend", "MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.")
 
 log_msg(sprintf("00_setup complete (profile=%s)", selected_profile))

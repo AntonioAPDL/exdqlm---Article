@@ -6,6 +6,8 @@ analysis/exal/outputs/logs/*
 !analysis/exal/outputs/logs/.gitkeep
 analysis/manuscript/outputs/logs/*
 !analysis/manuscript/outputs/logs/.gitkeep
+analysis/manuscript/outputs/cache/*
+!analysis/manuscript/outputs/cache/.gitkeep
 
 # OS/editor artifacts
 .DS_Store
