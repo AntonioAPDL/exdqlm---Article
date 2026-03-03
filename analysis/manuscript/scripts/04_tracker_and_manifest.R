@@ -5,29 +5,45 @@ expected_targets <- data.frame(
     "fig_ex1mcmc",
     "fig_ex1quants",
     "fig_ex2quant",
+    "fig_ex2quant_ldvb",
     "fig_ex2checks",
+    "fig_ex2checks_ldvb",
     "fig_ex2_isvb_ldvb_compare",
     "fig_ex2_gamma_posteriors",
     "fig_ex2_ldvb_diagnostics",
+    "tab_ex2_diagnostics",
+    "tab_ex2_diagnostics_ldvb",
     "fig_ex3data",
     "fig_ex3quantcomps",
+    "fig_ex3quantcomps_ldvb",
     "fig_ex3zetapsi",
+    "fig_ex3zetapsi_ldvb",
     "fig_ex3forecast",
-    "tab_ex3_diagnostics"
+    "fig_ex3forecast_ldvb",
+    "tab_ex3_diagnostics",
+    "tab_ex3_diagnostics_ldvb"
   ),
   manuscript_target = c(
     "fig:ex1mcmc",
     "fig:ex1quants",
     "fig:ex2quant",
+    "new: fig ex2quant LDVB counterpart",
     "fig:ex2checks",
+    "new: fig ex2checks LDVB counterpart",
     "new: ISVB vs LDVB dynamic comparison",
     "new: ISVB and LDVB gamma posteriors (side-by-side)",
     "new: LDVB convergence diagnostics",
+    "Example 2 diagnostic narrative",
+    "new: Example 2 diagnostic narrative (LDVB)",
     "fig:ex3data",
     "fig:ex3quant",
+    "new: fig ex3quant LDVB counterpart",
     "fig:ex3tftheta",
+    "new: fig ex3tftheta LDVB counterpart",
     "fig:ex3forecast",
-    "tab:ex3"
+    "new: fig ex3forecast LDVB counterpart",
+    "tab:ex3",
+    "new: tab ex3 LDVB counterpart"
   ),
   stringsAsFactors = FALSE
 )
@@ -37,18 +53,39 @@ if (targeted_run) {
     ex1 = c("fig_ex1mcmc", "fig_ex1quants", "tab_ex1_runtime"),
     ex1mcmc = c("fig_ex1mcmc"),
     ex1quants = c("fig_ex1quants"),
-    ex2 = c("fig_ex2quant", "fig_ex2checks", "fig_ex2_isvb_ldvb_compare", "fig_ex2_gamma_posteriors", "fig_ex2_ldvb_diagnostics", "tab_ex2_gamma_credible_intervals"),
+    ex2 = c(
+      "fig_ex2quant", "fig_ex2quant_ldvb",
+      "fig_ex2checks", "fig_ex2checks_ldvb",
+      "fig_ex2_isvb_ldvb_compare", "fig_ex2_gamma_posteriors", "fig_ex2_ldvb_diagnostics",
+      "tab_ex2_gamma_credible_intervals", "tab_ex2_diagnostics", "tab_ex2_diagnostics_ldvb",
+      "tab_ex2_df_scan", "tab_ex2_df_scan_ldvb"
+    ),
     ex2quant = c("fig_ex2quant"),
+    ex2quant_ldvb = c("fig_ex2quant_ldvb"),
     ex2checks = c("fig_ex2checks"),
+    ex2checks_ldvb = c("fig_ex2checks_ldvb"),
     ex2_isvb_ldvb_compare = c("fig_ex2_isvb_ldvb_compare"),
     ex2_gamma_posteriors = c("fig_ex2_gamma_posteriors", "tab_ex2_gamma_credible_intervals"),
     ex2_ldvb_diagnostics = c("fig_ex2_ldvb_diagnostics"),
-    ex3 = c("fig_ex3data", "fig_ex3quantcomps", "fig_ex3zetapsi", "fig_ex3forecast", "tab_ex3_diagnostics"),
+    ex2tables = c("tab_ex2_diagnostics", "tab_ex2_df_scan"),
+    ex2tables_ldvb = c("tab_ex2_diagnostics_ldvb", "tab_ex2_df_scan_ldvb"),
+    ex3 = c(
+      "fig_ex3data",
+      "fig_ex3quantcomps", "fig_ex3quantcomps_ldvb",
+      "fig_ex3zetapsi", "fig_ex3zetapsi_ldvb",
+      "fig_ex3forecast", "fig_ex3forecast_ldvb",
+      "tab_ex3_diagnostics", "tab_ex3_diagnostics_ldvb",
+      "tab_ex3_lambda_scan", "tab_ex3_lambda_scan_ldvb"
+    ),
     ex3data = c("fig_ex3data"),
     ex3quantcomps = c("fig_ex3quantcomps"),
+    ex3quantcomps_ldvb = c("fig_ex3quantcomps_ldvb"),
     ex3zetapsi = c("fig_ex3zetapsi"),
+    ex3zetapsi_ldvb = c("fig_ex3zetapsi_ldvb"),
     ex3forecast = c("fig_ex3forecast"),
-    ex3tables = c("tab_ex3_diagnostics")
+    ex3forecast_ldvb = c("fig_ex3forecast_ldvb"),
+    ex3tables = c("tab_ex3_diagnostics", "tab_ex3_lambda_scan"),
+    ex3tables_ldvb = c("tab_ex3_diagnostics_ldvb", "tab_ex3_lambda_scan_ldvb")
   )
   exp_ids <- unique(unlist(target_map[intersect(names(target_map), targets)], use.names = FALSE))
   if (length(exp_ids) > 0L) {

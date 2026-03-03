@@ -1,15 +1,26 @@
-need_ex2 <- target_enabled("ex2", c("ex2quant", "ex2checks", "ex2_isvb_ldvb_compare", "ex2_ldvb_diagnostics", "ex2_gamma_posteriors", "ex2tables"))
+need_ex2 <- target_enabled(
+  "ex2",
+  c(
+    "ex2quant", "ex2quant_ldvb",
+    "ex2checks", "ex2checks_ldvb",
+    "ex2_isvb_ldvb_compare", "ex2_ldvb_diagnostics", "ex2_gamma_posteriors",
+    "ex2tables", "ex2tables_ldvb"
+  )
+)
 if (!need_ex2) {
   log_msg("Example 2 (Sunspots): skipped (target filter)")
 } else {
   log_msg("Example 2 (Sunspots): start")
 
   need_ex2quant <- target_enabled("ex2quant", "ex2")
+  need_ex2quant_ldvb <- target_enabled("ex2quant_ldvb", "ex2")
   need_ex2checks <- target_enabled("ex2checks", "ex2")
+  need_ex2checks_ldvb <- target_enabled("ex2checks_ldvb", "ex2")
   need_ex2_ldvb <- target_enabled("ex2_isvb_ldvb_compare", "ex2")
   need_ex2_ldvb_diag <- target_enabled("ex2_ldvb_diagnostics", "ex2")
   need_ex2_gamma <- target_enabled("ex2_gamma_posteriors", "ex2")
   need_ex2_tables <- target_enabled("ex2tables", "ex2")
+  need_ex2_tables_ldvb <- target_enabled("ex2tables_ldvb", "ex2")
 
   y_ts <- datasets::sunspot.year
   y <- as.numeric(y_ts)
@@ -46,7 +57,7 @@ if (!need_ex2) {
   ldvb_diag_n_samp <- as.integer(cfg_profile$ex2$ldvb_diag_n_samp %||% n_samp)
   df_grid <- as.numeric(cfg_profile$ex2$df_grid)
 
-  ex2_core <- load_or_fit_cache("ex2_core_models", {
+  ex2_core <- load_or_fit_cache("ex2_core_models_v2", {
     M_sigma <- exdqlm::exdqlmISVB(
       y = y_ts, p0 = 0.85, model = model,
       df = c(0.9, 0.85), dim.df = c(1, 8),
@@ -71,6 +82,28 @@ if (!need_ex2) {
       verbose = FALSE
     )
 
+    M_sigma_ldvb <- tryCatch(
+      exdqlm::exdqlmLDVB(
+        y = y_ts, p0 = 0.85, model = model,
+        df = c(0.9, 0.85), dim.df = c(1, 8),
+        dqlm.ind = TRUE, fix.sigma = FALSE,
+        n.samp = n_samp, tol = tol,
+        verbose = FALSE
+      ),
+      error = function(e) e
+    )
+
+    M1_ldvb <- tryCatch(
+      exdqlm::exdqlmLDVB(
+        y = y_ts, p0 = 0.85, model = model,
+        df = c(0.9, 0.85), dim.df = c(1, 8),
+        dqlm.ind = TRUE, sig.init = 2,
+        n.samp = n_samp, tol = tol,
+        verbose = FALSE
+      ),
+      error = function(e) e
+    )
+
     M2_ldvb <- tryCatch(
       exdqlm::exdqlmLDVB(
         y = y_ts, p0 = 0.85, model = model,
@@ -81,30 +114,52 @@ if (!need_ex2) {
       error = function(e) e
     )
 
-    list(M_sigma = M_sigma, M1 = M1, M2 = M2, M2_ldvb = M2_ldvb, model = model)
-  }, note = "ex2_core_models")
+    list(
+      M_sigma = M_sigma, M1 = M1, M2 = M2,
+      M_sigma_ldvb = M_sigma_ldvb, M1_ldvb = M1_ldvb, M2_ldvb = M2_ldvb,
+      model = model
+    )
+  }, note = "ex2_core_models_v2")
 
+  fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
   M_sigma <- ex2_core$M_sigma
   M1 <- ex2_core$M1
   M2 <- ex2_core$M2
+  M_sigma_ldvb <- ex2_core$M_sigma_ldvb
+  M1_ldvb <- ex2_core$M1_ldvb
   M2_ldvb <- ex2_core$M2_ldvb
+  ex2_ldvb_pair_ok <- fit_ok(M1_ldvb) && fit_ok(M2_ldvb)
 
   capture_output_file("ex2_run_summary.txt", {
     cat(sprintf("profile=%s\n", selected_profile))
     cat(sprintf("n.IS=%d, n.samp=%d, tol=%s\n\n", n_is, n_samp, format(tol)))
     cat("Summary(M_sigma$samp.sigma):\n")
     print(summary(M_sigma$samp.sigma))
+    if (fit_ok(M_sigma_ldvb)) {
+      cat("\nSummary(M_sigma_ldvb$samp.sigma):\n")
+      print(summary(M_sigma_ldvb$samp.sigma))
+    }
     cat("\nRuntime seconds:\n")
     rt <- c(M_sigma = M_sigma$run.time, M1_isvb = M1$run.time, M2_isvb = M2$run.time)
-    if (!inherits(M2_ldvb, "error")) rt <- c(rt, M2_ldvb = M2_ldvb$run.time)
+    if (fit_ok(M_sigma_ldvb)) rt <- c(rt, M_sigma_ldvb = M_sigma_ldvb$run.time)
+    if (fit_ok(M1_ldvb)) rt <- c(rt, M1_ldvb = M1_ldvb$run.time)
+    if (fit_ok(M2_ldvb)) rt <- c(rt, M2_ldvb = M2_ldvb$run.time)
     print(rt)
-    if (inherits(M2_ldvb, "error")) {
-      cat("\nLDVB status: failed\n")
-      cat(M2_ldvb$message, "\n")
-    } else {
+    if (!fit_ok(M_sigma_ldvb)) {
+      cat("\nLDVB status M_sigma: failed\n")
+      cat(M_sigma_ldvb$message, "\n")
+    }
+    if (!fit_ok(M1_ldvb)) {
+      cat("\nLDVB status M1: failed\n")
+      cat(M1_ldvb$message, "\n")
+    }
+    if (fit_ok(M2_ldvb)) {
       cat("\nLDVB status: success\n")
       cat("Summary(M2_ldvb$samp.gamma):\n")
       print(summary(M2_ldvb$samp.gamma))
+    } else {
+      cat("\nLDVB status M2: failed\n")
+      cat(M2_ldvb$message, "\n")
     }
   })
   register_artifact(
@@ -112,7 +167,7 @@ if (!need_ex2) {
     artifact_type = "log",
     relative_path = "analysis/manuscript/outputs/logs/ex2_run_summary.txt",
     manuscript_target = "Example 2 textual outputs",
-    status = if (inherits(M2_ldvb, "error")) "approximate" else "reproduced",
+    status = if (fit_ok(M_sigma_ldvb) && fit_ok(M1_ldvb) && fit_ok(M2_ldvb)) "reproduced" else "approximate",
     notes = "Includes sigma summary and ISVB/LDVB runtime diagnostics."
   )
 
@@ -140,6 +195,41 @@ if (!need_ex2) {
     )
   }
 
+  if (need_ex2quant_ldvb) {
+    if (ex2_ldvb_pair_ok) {
+      save_png_plot("ex2quant_ldvb.png", {
+        graphics::par(mfrow = c(1, 3))
+        stats::plot.ts(y_ts, col = "darkgrey", ylab = "sunspot count")
+
+        stats::plot.ts(y, xlim = xlim_idx, col = "darkgrey", ylab = "quantile 95% CrIs")
+        q_m1_ld <- quantile_summary_from_fit(M1_ldvb, cr.percent = 0.95)
+        q_m2_ld <- quantile_summary_from_fit(M2_ldvb, cr.percent = 0.95)
+        plot_quantile_summary(q_m1_ld, col = "darkorange", add = TRUE)
+        plot_quantile_summary(q_m2_ld, col = "sienna4", add = TRUE)
+        graphics::legend("topleft", legend = c("DQLM (LDVB)", "exDQLM (LDVB)"), col = c("darkorange", "sienna4"), lty = 1, bty = "n")
+
+        graphics::hist(M2_ldvb$samp.gamma, xlab = expression(gamma), main = "")
+      })
+      register_artifact(
+        artifact_id = "fig_ex2quant_ldvb",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb.png",
+        manuscript_target = "new: fig ex2quant LDVB counterpart",
+        status = "reproduced",
+        notes = "LDVB counterpart of ex2quant with DQLM/exDQLM overlays and gamma histogram."
+      )
+    } else {
+      register_artifact(
+        artifact_id = "fig_ex2quant_ldvb",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb.png",
+        manuscript_target = "new: fig ex2quant LDVB counterpart",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for quantile panel."
+      )
+    }
+  }
+
   if (need_ex2checks) {
     save_png_plot("ex2checks.png", {
       graphics::par(mfrow = c(2, 3))
@@ -155,8 +245,35 @@ if (!need_ex2) {
     )
   }
 
+  if (need_ex2checks_ldvb) {
+    if (ex2_ldvb_pair_ok) {
+      save_png_plot("ex2checks_ldvb.png", {
+        graphics::par(mfrow = c(2, 3))
+        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c("darkorange", "darkorange"))
+        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c("sienna4", "sienna4"))
+      })
+      register_artifact(
+        artifact_id = "fig_ex2checks_ldvb",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2checks_ldvb.png",
+        manuscript_target = "new: fig ex2checks LDVB counterpart",
+        status = "reproduced",
+        notes = "LDVB counterpart of ex2checks using exdqlmDiagnostics."
+      )
+    } else {
+      register_artifact(
+        artifact_id = "fig_ex2checks_ldvb",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2checks_ldvb.png",
+        manuscript_target = "new: fig ex2checks LDVB counterpart",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for diagnostics panel."
+      )
+    }
+  }
+
   if (need_ex2_ldvb) {
-    if (!inherits(M2_ldvb, "error")) {
+    if (fit_ok(M2_ldvb)) {
       save_png_plot("ex2_isvb_ldvb_compare.png", {
         graphics::par(mfrow = c(1, 2))
 
@@ -212,7 +329,7 @@ if (!need_ex2) {
   }
 
   if (need_ex2_gamma) {
-    if (!inherits(M2_ldvb, "error")) {
+    if (fit_ok(M2_ldvb)) {
       gamma_is <- as.numeric(M2$samp.gamma)
       gamma_ld <- as.numeric(M2_ldvb$samp.gamma)
       gamma_is <- gamma_is[is.finite(gamma_is)]
@@ -444,6 +561,92 @@ if (!need_ex2) {
       "ex2",
       sprintf("Sunspots KL search best seasonal discount factor=%0.2f for this run profile.", best_df[2])
     )
+  }
+
+  if (need_ex2_tables_ldvb) {
+    ex2_df_scan_ldvb <- load_or_fit_cache("ex2_df_scan_ldvb", {
+      possible_dfs <- cbind(0.9, df_grid)
+      ref_samp <- stats::rnorm(length(y_ts))
+      KLs <- rep(NA_real_, nrow(possible_dfs))
+      for (i in seq_len(nrow(possible_dfs))) {
+        temp_M <- tryCatch(
+          exdqlm::exdqlmLDVB(
+            y = y_ts, p0 = 0.85, model = model,
+            df = possible_dfs[i, ], dim.df = c(1, 8),
+            sig.init = 2,
+            n.samp = n_samp, tol = tol,
+            verbose = FALSE
+          ),
+          error = function(e) e
+        )
+        if (!inherits(temp_M, "error")) {
+          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp)
+          KLs[i] <- temp_check$m1.KL
+        }
+      }
+      list(possible_dfs = possible_dfs, KLs = KLs)
+    }, note = "ex2_df_scan_ldvb")
+
+    possible_dfs_ld <- ex2_df_scan_ldvb$possible_dfs
+    KLs_ld <- ex2_df_scan_ldvb$KLs
+    df_scan_ld <- data.frame(
+      trend_df = possible_dfs_ld[, 1],
+      seasonal_df = possible_dfs_ld[, 2],
+      KL = KLs_ld
+    )
+    finite_ld <- is.finite(KLs_ld)
+    if (any(finite_ld)) {
+      best_df_ld <- possible_dfs_ld[which.min(KLs_ld), ]
+      save_table_csv(
+        df_scan_ld,
+        filename = "ex2_df_scan_kl_ldvb.csv",
+        artifact_id = "tab_ex2_df_scan_ldvb",
+        manuscript_target = "new: Example 2 discount-factor KL selection (LDVB)",
+        status = "reproduced",
+        notes = sprintf("Best pair in this run: (%0.2f, %0.2f)", best_df_ld[1], best_df_ld[2])
+      )
+      register_note(
+        "ex2_ldvb",
+        sprintf("Sunspots LDVB KL search best seasonal discount factor=%0.2f for this run profile.", best_df_ld[2])
+      )
+    } else {
+      save_table_csv(
+        df_scan_ld,
+        filename = "ex2_df_scan_kl_ldvb.csv",
+        artifact_id = "tab_ex2_df_scan_ldvb",
+        manuscript_target = "new: Example 2 discount-factor KL selection (LDVB)",
+        status = "not_reproduced",
+        notes = "No finite KL values were obtained in LDVB discount-factor scan."
+      )
+    }
+
+    if (ex2_ldvb_pair_ok) {
+      diag_m1_ld <- diagnostics_from_fit(M1_ldvb, plot = FALSE)
+      diag_m2_ld <- diagnostics_from_fit(M2_ldvb, plot = FALSE)
+      diag_table_ld <- data.frame(
+        model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
+        KL = c(diag_m1_ld$m1.KL, diag_m2_ld$m1.KL),
+        pplc = c(diag_m1_ld$m1.pplc, diag_m2_ld$m1.pplc),
+        run_time_seconds = c(diag_m1_ld$m1.rt, diag_m2_ld$m1.rt)
+      )
+      save_table_csv(
+        diag_table_ld,
+        filename = "ex2_diagnostics_summary_ldvb.csv",
+        artifact_id = "tab_ex2_diagnostics_ldvb",
+        manuscript_target = "new: Example 2 diagnostic narrative (LDVB)",
+        status = "reproduced",
+        notes = "LDVB counterpart computed with exdqlmDiagnostics."
+      )
+    } else {
+      register_artifact(
+        artifact_id = "tab_ex2_diagnostics_ldvb",
+        artifact_type = "table",
+        relative_path = "analysis/manuscript/outputs/tables/ex2_diagnostics_summary_ldvb.csv",
+        manuscript_target = "new: Example 2 diagnostic narrative (LDVB)",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for diagnostics summary."
+      )
+    }
   }
 
   log_msg("Example 2 (Sunspots): complete")

@@ -4,7 +4,7 @@ if (!exists("repo_root")) {
   stop("repo_root is not defined. Run via analysis/run_all.R.", call. = FALSE)
 }
 
-required_pkgs <- c("yaml", "matrixStats", "coda", "dlm")
+required_pkgs <- c("yaml", "matrixStats", "coda", "dlm", "FNN")
 for (p in required_pkgs) {
   if (!requireNamespace(p, quietly = TRUE)) {
     stop(sprintf("Package '%s' is required for manuscript stage.", p), call. = FALSE)
@@ -235,6 +235,177 @@ plot_quantile_summary <- function(qsum, col = "purple", add = TRUE, lwd = 1.5) {
   lines(qsum$x, qsum$map, col = col, lwd = lwd)
   lines(qsum$x, qsum$lb, col = col, lwd = 0.8, lty = 2)
   lines(qsum$x, qsum$ub, col = col, lwd = 0.8, lty = 2)
+}
+
+component_summary_from_fit <- function(mfit, index, just.theta = FALSE, cr.percent = 0.95) {
+  theta <- mfit$samp.theta
+  d <- dim(theta)
+  if (length(d) != 3L) stop("samp.theta must be a 3D array.", call. = FALSE)
+  TT <- d[2]
+  n_samp <- d[3]
+  if (cr.percent <= 0 || cr.percent >= 1) stop("cr.percent must be between 0 and 1", call. = FALSE)
+  half.alpha <- (1 - cr.percent) / 2
+
+  if (!just.theta) {
+    p <- length(index)
+    FF <- array(mfit$model$FF[index, ], dim = c(p, TT, n_samp))
+    theta_sub <- array(theta[index, , ], dim = c(p, TT, n_samp))
+    draws <- colSums(FF * theta_sub)
+  } else {
+    if (length(index) != 1L) stop("when just.theta=TRUE, index must have length 1", call. = FALSE)
+    draws <- matrix(theta[index, , ], nrow = TT, ncol = n_samp)
+  }
+
+  x_vals <- if (!is.null(mfit$y) && length(mfit$y) == TT) grDevices::xy.coords(mfit$y)$x else seq_len(TT)
+  list(
+    x = x_vals,
+    map = rowMeans(draws),
+    lb = matrixStats::rowQuantiles(draws, probs = half.alpha),
+    ub = matrixStats::rowQuantiles(draws, probs = cr.percent + half.alpha)
+  )
+}
+
+plot_component_summary <- function(csum, add = TRUE, col = "purple", lwd = 1.5) {
+  if (!add) {
+    graphics::plot(csum$x, csum$map, type = "n", xlab = "time", ylab = "component CrIs", ylim = range(c(csum$lb, csum$ub), na.rm = TRUE))
+  }
+  graphics::lines(csum$x, csum$map, col = col, lwd = lwd)
+  graphics::lines(csum$x, csum$lb, col = col, lwd = 0.8, lty = 2)
+  graphics::lines(csum$x, csum$ub, col = col, lwd = 0.8, lty = 2)
+}
+
+forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRUE, add = FALSE, cols = c("purple", "magenta"), cr.percent = 0.95, y_data = NULL) {
+  y <- if (!is.null(y_data)) as.numeric(y_data) else as.numeric(m1$y)
+  if (length(y) == 0L) stop("y_data must be provided when fitted object has no y series.", call. = FALSE)
+  p <- dim(m1$model$GG)[1]
+  TT <- dim(m1$model$GG)[3]
+  if (cr.percent <= 0 || cr.percent >= 1) {
+    stop("cr.percent must be between 0 and 1", call. = FALSE)
+  }
+  if (is.null(fFF)) {
+    if (TT - start.t < k) {
+      stop("fFF and fGG must be provided for forecasts extending past the length of the estimated model", call. = FALSE)
+    }
+    fFF <- m1$model$FF[, (start.t + 1):(start.t + k)]
+    fGG <- m1$model$GG[, , (start.t + 1):(start.t + k)]
+  } else {
+    fFF <- as.matrix(fFF)
+    if (nrow(fFF) != p) stop("dimension of fFF must match fitted model", call. = FALSE)
+    if (!any(ncol(fFF) == c(1, k))) stop("fFF must have 1 or k columns", call. = FALSE)
+    fGG <- as.array(fGG)
+    if (any(dim(fGG)[1:2] != p)) stop("dimension of fGG must match fitted model", call. = FALSE)
+    if (!is.na(dim(fGG)[3]) && dim(fGG)[3] != k) {
+      stop("fGG must be matrix or array of depth k", call. = FALSE)
+    }
+  }
+  fFF <- matrix(fFF, p, k)
+  fGG <- array(fGG, c(p, p, TT))
+
+  df.mat <- exdqlm:::make_df_mat(m1$df, m1$dim.df, p)
+  fm <- m1$theta.out$fm[, start.t]
+  fC <- m1$theta.out$fC[, , start.t]
+  fa <- matrix(NA_real_, p, k)
+  fR <- array(NA_real_, c(p, p, k))
+  ff <- rep(NA_real_, k)
+  fQ <- rep(NA_real_, k)
+  for (i in seq_len(k)) {
+    if (i == 1L) {
+      fa[, 1] <- fGG[, , i] %*% fm
+      fR[, , 1] <- fGG[, , i] %*% fC %*% t(fGG[, , i]) + df.mat * fC
+      ff[1] <- t(fFF[, i]) %*% fa[, 1]
+      fQ[1] <- t(fFF[, i]) %*% fR[, , 1] %*% fFF[, i]
+    } else {
+      fa[, i] <- fGG[, , i] %*% fa[, i - 1]
+      fR[, , i] <- fGG[, , i] %*% fR[, , i - 1] %*% t(fGG[, , i]) + df.mat * fR[, , i - 1]
+      ff[i] <- t(fFF[, i]) %*% fa[, i]
+      fQ[i] <- t(fFF[, i]) %*% fR[, , i] %*% fFF[, i]
+    }
+  }
+  m1_plot <- m1
+  m1_plot$y <- y
+  retlist <- list(start.t = start.t, k = k, cr.percent = cr.percent, m1 = m1_plot, fa = fa, fR = fR, ff = ff, fQ = fQ)
+  class(retlist) <- "exdqlmForecast"
+  if (plot) plot(retlist, cols = cols, add = add)
+  invisible(retlist)
+}
+
+diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "blue"), ref = NULL, y_data = NULL) {
+  y_full <- if (!is.null(y_data)) as.numeric(y_data) else as.numeric(m1$y)
+  has_y <- length(y_full) > 0L
+  nrow_or_len <- function(x) if (is.null(dim(x))) length(x) else nrow(x)
+
+  m1_msfe_full <- as.numeric(m1$map.standard.forecast.errors)
+  m1_post_full <- m1$samp.post.pred
+  tt_candidates <- c(length(m1_msfe_full), nrow_or_len(m1_post_full))
+  if (has_y) tt_candidates <- c(tt_candidates, length(y_full))
+
+  if (!is.null(m2)) {
+    m2_msfe_full <- as.numeric(m2$map.standard.forecast.errors)
+    m2_post_full <- m2$samp.post.pred
+    tt_candidates <- c(tt_candidates, length(m2_msfe_full), nrow_or_len(m2_post_full))
+  }
+
+  TT <- min(tt_candidates, na.rm = TRUE)
+  if (!is.finite(TT) || TT < 2L) stop("Insufficient aligned observations for diagnostics.", call. = FALSE)
+
+  y <- if (has_y) y_full[seq_len(TT)] else seq_len(TT)
+  m1_msfe <- m1_msfe_full[seq_len(TT)]
+  m1_post_pred <- m1_post_full[seq_len(TT), , drop = FALSE]
+  cols <- c(matrix(cols, 2, 1))
+
+  m1.uts <- stats::pnorm(m1_msfe)
+  if (is.null(ref)) {
+    ref <- stats::rnorm(TT)
+  } else {
+    ref <- c(ref)
+    if (length(ref) != TT) stop("ref must have size equal to diagnostics span", call. = FALSE)
+  }
+  m1.KL <- mean(FNN::KL.divergence(ref, m1_msfe))
+  if (has_y) {
+    m1.loss <- matrix(NA_real_, TT, dim(m1_post_pred)[2])
+    for (t in seq_len(TT)) {
+      m1.loss[t, ] <- exdqlm:::CheckLossFn(m1$p0, y[t] - m1_post_pred[t, ])
+    }
+    m1.pplc <- sum(rowMeans(m1.loss))
+  } else {
+    m1.pplc <- NA_real_
+  }
+  m1.qq <- stats::qqnorm(m1_msfe, plot = FALSE)
+  m1.acf <- stats::acf(m1.uts, plot = FALSE)
+
+  retlist <- list(
+    m1.uts = m1.uts, m1.KL = m1.KL, m1.pplc = m1.pplc,
+    m1.qq = m1.qq, m1.acf = m1.acf, m1.rt = m1$run.time,
+    m1.msfe = m1_msfe, y = y
+  )
+
+  if (!is.null(m2)) {
+    if (!is.null(m1$p0) && !is.null(m2$p0) && m1$p0 != m2$p0) {
+      stop("m1 and m2 must target the same quantile p0", call. = FALSE)
+    }
+    m2_msfe <- m2_msfe_full[seq_len(TT)]
+    m2_post_pred <- m2_post_full[seq_len(TT), , drop = FALSE]
+    m2.uts <- stats::pnorm(m2_msfe)
+    if (has_y) {
+      m2.loss <- matrix(NA_real_, TT, dim(m2_post_pred)[2])
+      for (t in seq_len(TT)) {
+        m2.loss[t, ] <- exdqlm:::CheckLossFn(m2$p0, y[t] - m2_post_pred[t, ])
+      }
+      m2.pplc <- sum(rowMeans(m2.loss))
+    } else {
+      m2.pplc <- NA_real_
+    }
+    retlist$m2.msfe <- m2_msfe
+    retlist$m2.uts <- m2.uts
+    retlist$m2.KL <- mean(FNN::KL.divergence(ref, m2_msfe))
+    retlist$m2.pplc <- m2.pplc
+    retlist$m2.qq <- stats::qqnorm(m2_msfe, plot = FALSE)
+    retlist$m2.acf <- stats::acf(m2.uts, plot = FALSE)
+    retlist$m2.rt <- m2$run.time
+  }
+  class(retlist) <- "exdqlmDiagnostic"
+  if (plot) plot(retlist, cols = cols)
+  invisible(retlist)
 }
 
 save_table_csv <- function(df, filename, artifact_id, manuscript_target = "", status = "reproduced", notes = "") {

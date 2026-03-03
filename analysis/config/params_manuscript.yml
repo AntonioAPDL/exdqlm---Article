@@ -69,9 +69,16 @@ promotion:
     - ex1mcmc.png
     - ex1quants.png
     - ex2quant.png
+    - ex2quant_ldvb.png
     - ex2checks.png
+    - ex2checks_ldvb.png
     - ex2_isvb_ldvb_compare.png
+    - ex2_gamma_posteriors.png
+    - ex2_ldvb_diagnostics.png
     - ex3data.png
     - ex3quantcomps.png
+    - ex3quantcomps_ldvb.png
     - ex3zetapsi.png
+    - ex3zetapsi_ldvb.png
     - ex3forecast.png
+    - ex3forecast_ldvb.png
