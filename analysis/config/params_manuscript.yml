@@ -7,6 +7,7 @@ profiles:
       n_mcmc: 140
       n_burn_trace: 500
       n_mcmc_trace: 500
+      thin_trace: 2
     ex2:
       n_is: 180
       n_samp: 140
@@ -24,8 +25,9 @@ profiles:
     ex1:
       n_burn: 700
       n_mcmc: 300
-      n_burn_trace: 1500
-      n_mcmc_trace: 1500
+      n_burn_trace: 2000
+      n_mcmc_trace: 5000
+      thin_trace: 5
     ex2:
       n_is: 500
       n_samp: 200
@@ -44,7 +46,8 @@ profiles:
       n_burn: 1000
       n_mcmc: 800
       n_burn_trace: 2500
-      n_mcmc_trace: 2500
+      n_mcmc_trace: 5000
+      thin_trace: 5
     ex2:
       n_is: 700
       n_samp: 300

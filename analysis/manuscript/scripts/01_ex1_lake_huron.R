@@ -27,6 +27,7 @@ if (!need_ex1) {
   nmcmc <- as.integer(cfg_profile$ex1$n_mcmc)
   nburn_trace <- as.integer(cfg_profile$ex1$n_burn_trace %||% nburn)
   nmcmc_trace <- as.integer(cfg_profile$ex1$n_mcmc_trace %||% nmcmc)
+  thin_trace <- max(1L, as.integer(cfg_profile$ex1$thin_trace %||% 1L))
 
   ex1_quants <- load_or_fit_cache("ex1_quants_models", {
     M95 <- exdqlm::exdqlmMCMC(
@@ -56,7 +57,7 @@ if (!need_ex1) {
     list(model = model, M95 = M95, M50_dqlm = M50_dqlm, M5 = M5)
   }, note = "ex1_quants_models")
 
-  ex1_trace <- load_or_fit_cache("ex1_trace_model", {
+  ex1_trace <- load_or_fit_cache("ex1_trace_model_v2", {
     M50_trace <- exdqlm::exdqlmMCMC(
       y = y, p0 = 0.50, model = model,
       df = 0.9, dim.df = 2,
@@ -66,19 +67,25 @@ if (!need_ex1) {
       verbose = FALSE
     )
     list(M50_trace = M50_trace)
-  }, note = "ex1_trace_model")
+  }, note = "ex1_trace_model_v2")
 
   M95 <- ex1_quants$M95
   M50_dqlm <- ex1_quants$M50_dqlm
   M5 <- ex1_quants$M5
   M50_trace <- ex1_trace$M50_trace
 
+  gamma_trace <- as.numeric(M50_trace$samp.gamma)
+  thin_idx <- seq.int(1L, length(gamma_trace), by = thin_trace)
+  gamma_trace_thin <- coda::mcmc(gamma_trace[thin_idx], thin = thin_trace)
+
   capture_output_file("ex1_run_summary.txt", {
     cat(sprintf("profile=%s\n", selected_profile))
     cat(sprintf("quantile run settings: n.burn=%d, n.mcmc=%d\n", nburn, nmcmc))
-    cat(sprintf("trace run settings: n.burn=%d, n.mcmc=%d\n\n", nburn_trace, nmcmc_trace))
+    cat(sprintf("trace run settings: n.burn=%d, n.mcmc=%d, thin=%d, saved_for_plot=%d\n\n", nburn_trace, nmcmc_trace, thin_trace, length(thin_idx)))
     cat("M50_trace gamma summary:\n")
-    print(summary(M50_trace$samp.gamma))
+    print(summary(gamma_trace))
+    cat("\nM50_trace gamma summary (thinned chain used in ex1mcmc.png):\n")
+    print(summary(as.numeric(gamma_trace_thin)))
     cat("\nM50_dqlm gamma fixed:\n")
     print(unique(as.numeric(M50_dqlm$samp.gamma)))
     cat("\nBackend metadata (trace model):\n")
@@ -98,8 +105,8 @@ if (!need_ex1) {
   if (need_ex1mcmc) {
     save_png_plot("ex1mcmc.png", {
       graphics::par(mfcol = c(1, 2))
-      coda::traceplot(M50_trace$samp.gamma, main = "")
-      coda::densplot(M50_trace$samp.gamma, main = "")
+      coda::traceplot(gamma_trace_thin, main = "")
+      coda::densplot(gamma_trace_thin, main = "")
     })
     register_artifact(
       artifact_id = "fig_ex1mcmc",
@@ -107,7 +114,7 @@ if (!need_ex1) {
       relative_path = "analysis/manuscript/outputs/figures/ex1mcmc.png",
       manuscript_target = "fig:ex1mcmc",
       status = "reproduced",
-      notes = "Trace and density plot using dedicated higher-iteration median MCMC run."
+      notes = sprintf("Trace and density plot using dedicated higher-iteration median MCMC run with thinning=%d.", thin_trace)
     )
   }
 
