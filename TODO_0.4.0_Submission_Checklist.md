@@ -24,6 +24,15 @@ Prepare a high-quality software-paper manuscript that reflects the **current** p
 - exAL utility functions are not currently presented:
   - `dexal`, `pexal`, `qexal`, `rexal`, `get_gamma_bounds`
 
+### Missing provenance and related-software positioning
+- exAL utility functions should be explicitly tied to the distribution introduced in:
+  - Yan, Y., Zheng, X., and Kottas, A. (2025). *A new family of error distributions for Bayesian quantile regression*. Bayesian Analysis. DOI: `10.1214/25-BA1507`.
+- Add a brief related-software note for:
+  - `https://github.com/xzheng42/bqrgal-examples/tree/main`
+- Clarify manuscript positioning:
+  - `bqrgal-examples` provides result-reproduction scripts for regression/prediction workflows.
+  - `exdqlm` provides a packaged R interface with distribution-level utilities (`d/p/q/r`), diagnostics/forecast workflows, and robust C++-backed implementations where available.
+
 ### Outdated API usage in manuscript code
 - `exdqlmChecks(...)` appears in manuscript code; should be `exdqlmDiagnostics(...)`.
 - Old helper signatures still appear (explicit `y =` where current API no longer expects it):
@@ -62,6 +71,7 @@ Prepare a high-quality software-paper manuscript that reflects the **current** p
   - `exdqlm_synthesize_from_draws` (inputs, assumptions, outputs, constraints).
 - [ ] Add concise subsection for exAL distribution helpers:
   - `dexal`, `pexal`, `qexal`, `rexal`, `get_gamma_bounds`.
+- [ ] In the exAL subsection, cite Yan et al. (2025; DOI `10.1214/25-BA1507`) and add a brief, neutral comparison to `bqrgal-examples` (scope and interface differences).
 
 ### D) Replace and regenerate examples/figures tied to old approach
 - [ ] Identify all figures/tables generated from ISVB-centered analyses.
@@ -136,3 +146,4 @@ Prepare a high-quality software-paper manuscript that reflects the **current** p
 - [ ] Main narrative reflects current package capabilities (version-agnostic framing).
 - [ ] Inference narrative is coherent and aligned with LDVB-first positioning.
 - [ ] Claims are supported by reproducible empirical evidence in manuscript artifacts.
+- [ ] exAL provenance and related-software positioning are accurate and appropriately cited.
