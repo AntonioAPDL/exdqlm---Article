@@ -1,15 +1,15 @@
 fig:
-  width: 10
-  height: 6
-  dpi: 300
+  width: 10.5
+  height: 6.5
+  dpi: 450
   bg: "white"
-  base_size: 13
+  base_size: 13.5
 
 palette:
-  primary: "#1b9e77"
-  secondary: "#d95f02"
-  tertiary: "#7570b3"
-  quaternary: "#e7298a"
+  primary: "#0072B2"
+  secondary: "#D55E00"
+  tertiary: "#009E73"
+  quaternary: "#CC79A7"
   neutral: "#4d4d4d"
 
 linetype:

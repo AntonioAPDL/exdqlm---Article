@@ -10,6 +10,8 @@ grid:
   bounds_p0_n: 250
   bounds_p0_min: 0.001
   bounds_p0_max: 0.999
+  bounds_log_resid_tol: 1.0e-8
+  bounds_clip_tol: 1.0e-10
 
 baseline:
   p0: [0.15, 0.50, 0.85]

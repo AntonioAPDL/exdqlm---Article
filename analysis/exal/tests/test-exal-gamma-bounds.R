@@ -30,4 +30,15 @@ test_that("gamma bounds table exists and is sane on full grid", {
   expect_true(all(tab$L < tab$U))
   expect_true(all(tab$L <= 0))
   expect_true(all(tab$U >= 0))
+  expect_true(all(c("used_in_plot", "resid_ok", "tail_clipped") %in% names(tab)))
+})
+
+test_that("displayed gamma bounds region is strictly monotone", {
+  tab <- utils::read.csv(file.path(tables_dir, "exal_tab_02_gamma_bounds_reference_grid.csv"))
+  plot_tab <- tab[tab$used_in_plot, , drop = FALSE]
+  expect_true(nrow(plot_tab) >= 50)
+  expect_true(all(diff(plot_tab$L) < 0))
+  expect_true(all(diff(plot_tab$U) < 0))
+  expect_true(all(plot_tab$resid_ok))
+  expect_true(all(!plot_tab$tail_clipped))
 })

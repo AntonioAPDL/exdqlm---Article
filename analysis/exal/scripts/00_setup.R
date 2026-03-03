@@ -85,13 +85,19 @@ if (length(missing_fns) > 0L) {
 }
 
 exal_theme <- function() {
-  theme_minimal(base_size = cfg_style$fig$base_size) +
+  theme_bw(base_size = cfg_style$fig$base_size) +
     theme(
-      plot.title = element_text(face = "bold", hjust = 0.5),
-      plot.subtitle = element_text(hjust = 0.5),
+      plot.title = element_text(face = "bold", hjust = 0, size = rel(1.1)),
+      plot.subtitle = element_text(hjust = 0),
       legend.position = "top",
+      legend.title = element_text(face = "bold"),
+      strip.text = element_text(face = "bold"),
+      strip.background = element_rect(fill = "#f2f2f2", color = "#d9d9d9"),
+      panel.grid.major = element_line(color = "#d9d9d9", linewidth = 0.25),
       panel.grid.minor = element_blank(),
-      axis.title = element_text(face = "bold")
+      axis.title = element_text(face = "bold"),
+      panel.border = element_rect(color = "#555555", linewidth = 0.5),
+      plot.margin = margin(8, 10, 8, 10)
     )
 }
 
@@ -137,7 +143,8 @@ save_plot_file <- function(plot_obj, filename, description, section = "exAL", ma
     width = cfg_style$fig$width,
     height = cfg_style$fig$height,
     dpi = cfg_style$fig$dpi,
-    bg = cfg_style$fig$bg
+    bg = cfg_style$fig$bg,
+    limitsize = FALSE
   )
   register_figure(filename, description, section, main_text_candidate)
   invisible(path)
@@ -157,12 +164,18 @@ resolve_case_gamma <- function(case) {
   U <- as.numeric(bounds[["U"]])
   eps <- 1e-6
 
-  if (!is.null(case$gamma)) {
-    g <- as.numeric(case$gamma)
-  } else if (!is.null(case$gamma_fraction_positive)) {
-    g <- as.numeric(case$gamma_fraction_positive) * U
-  } else if (!is.null(case$gamma_fraction_negative)) {
-    g <- as.numeric(case$gamma_fraction_negative) * L
+  # Use exact key lookups; `$` on lists does partial matching and can
+  # accidentally map gamma_fraction_* to gamma.
+  gamma_val <- case[["gamma"]]
+  frac_pos <- case[["gamma_fraction_positive"]]
+  frac_neg <- case[["gamma_fraction_negative"]]
+
+  if (!is.null(gamma_val)) {
+    g <- as.numeric(gamma_val)
+  } else if (!is.null(frac_pos)) {
+    g <- as.numeric(frac_pos) * U
+  } else if (!is.null(frac_neg)) {
+    g <- as.numeric(frac_neg) * L
   } else {
     stop("Case does not define gamma or gamma fraction.", call. = FALSE)
   }
