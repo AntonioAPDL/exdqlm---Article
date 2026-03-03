@@ -1,115 +1,138 @@
-# exdqlm Article TODO/Checklist for 0.4.0 Submission
+# exdqlm Manuscript Master Checklist (Current Package State)
 
-This is a checklist that tracks the minimum manuscript updates required so the article matches the current package scope (`exdqlm` 0.4.0) and is submission-ready.
+## Objective
+Prepare a high-quality software-paper manuscript that reflects the **current** package capabilities and standards expected by a strong software/statistics journal.
 
-## Gap Summary (Current article vs package 0.4.0)
+## Editorial Policy (Mandatory)
+- Write the paper as a description of the **current package**, not as a version history.
+- Avoid release-tag framing (e.g., "v0.x.y") in the main narrative unless needed in a short reproducibility note.
+- Keep claims evidence-based and reproducible from code, figures, and tables included in the manuscript workflow.
+- Ensure method descriptions, API usage, and examples match the package exactly at submission time.
 
-### Major missing features in article text/examples
-- Not covered at all in `article4.tex`:
-  - `exdqlmLDVB`
-  - `exdqlm_synthesize_from_draws`
+---
+
+## Critical Gap Summary (Current manuscript vs current package)
+
+### Missing core functionality in manuscript
+- Dynamic LDVB estimation (`exdqlmLDVB`) is not currently presented.
+- Static regression workflow is not currently presented:
   - `regMod`
   - `exal_static_LDVB`
   - `exal_static_mcmc`
-  - exAL distribution helpers: `dexal`, `pexal`, `qexal`, `rexal`
-  - `get_gamma_bounds`
+- Posterior predictive synthesis is not currently presented:
+  - `exdqlm_synthesize_from_draws`
+- exAL utility functions are not currently presented:
+  - `dexal`, `pexal`, `qexal`, `rexal`, `get_gamma_bounds`
 
-### Outdated API usage in article examples
-- Uses `exdqlmChecks(...)` instead of `exdqlmDiagnostics(...)`.
-- Uses old signatures with explicit `y = ...` in plotting/forecasting helpers:
+### Outdated API usage in manuscript code
+- `exdqlmChecks(...)` appears in manuscript code; should be `exdqlmDiagnostics(...)`.
+- Old helper signatures still appear (explicit `y =` where current API no longer expects it):
   - `exdqlmPlot(y = ..., ...)`
   - `compPlot(y = ..., ...)`
   - `exdqlmForecast(y = ..., ...)`
-- These should be updated to current interfaces.
 
-### Computational story mismatch
-- Article currently emphasizes MCMC + ISVB only.
-- Package 0.4.0 now includes dynamic LDVB + static exAL workflows + synthesis helper.
-- C++ acceleration exists for selected paths (Kalman/builder/sampler/postpred toggles), but **no C++ MCMC implementation**; this should be stated explicitly.
+### Inference narrative mismatch
+- Manuscript is currently ISVB-centric in method exposition and examples.
+- Updated target: make LDVB the primary approximate-inference method in the manuscript.
+- Keep MCMC as exact posterior reference/baseline.
+- If ISVB is retained at all, confine to short legacy context (or appendix) and avoid making it the recommended primary path.
 
 ---
 
 ## P0: Must Complete Before Submission
 
-### A) Core narrative and positioning
-- [ ] Update Introduction to describe 0.4.0 scope (MCMC, ISVB, LDVB, static regression, synthesis).
-- [ ] Update Conclusion to reflect new functionality and current boundaries (including no C++ MCMC).
+### A) Reframe core methodology around current inference strategy
+- [ ] Replace ISVB-first exposition in Methods with LDVB-first exposition.
+- [ ] Update algorithm descriptions/equations/pseudocode to match LDVB implementation.
+- [ ] Reframe comparative text: LDVB (fast approximate) vs MCMC (exact baseline).
+- [ ] Decide final ISVB policy for paper:
+  - remove from main text entirely, or
+  - keep only brief legacy note (not central method).
 
-### B) Function/API correctness pass
+### B) API and code-block correctness pass (full manuscript)
 - [ ] Replace all `exdqlmChecks` references with `exdqlmDiagnostics`.
-- [ ] Update all old calls using `y =` in helper functions to current signatures.
-- [ ] Verify every function call shown in the manuscript runs with the current package API.
+- [ ] Update outdated helper calls (`exdqlmPlot`, `compPlot`, `exdqlmForecast`) to current signatures.
+- [ ] Execute every manuscript code block and verify no stale arguments/functions remain.
 
-### C) New methods sections (short, focused)
-- [ ] Add subsection: dynamic LDVB (`exdqlmLDVB`) and when to use it vs ISVB/MCMC.
-- [ ] Add subsection: static regression builder (`regMod`) and static exAL inference (`exal_static_LDVB`, `exal_static_mcmc`).
-- [ ] Add subsection: posterior predictive synthesis (`exdqlm_synthesize_from_draws`) with constraints (quantile grid monotonicity/anchors).
-- [ ] Add short reference subsection for exAL distribution helpers (`dexal`, `pexal`, `qexal`, `rexal`, `get_gamma_bounds`).
+### C) Add missing methods coverage
+- [ ] Add concise subsection for dynamic LDVB (`exdqlmLDVB`).
+- [ ] Add concise subsection for static regression/exAL workflows:
+  - `regMod`, `exal_static_LDVB`, `exal_static_mcmc`.
+- [ ] Add concise subsection for synthesis:
+  - `exdqlm_synthesize_from_draws` (inputs, assumptions, outputs, constraints).
+- [ ] Add concise subsection for exAL distribution helpers:
+  - `dexal`, `pexal`, `qexal`, `rexal`, `get_gamma_bounds`.
 
-### D) New examples (required)
-- [ ] Add one minimal dynamic LDVB example (small, fast, reproducible).
-- [ ] Add one minimal static regression example using `regMod` + at least one static inference routine.
-- [ ] Add one synthesis example showing input draws -> synthesized output + basic diagnostic summary.
-- [ ] Add one short exAL helper example block (density/CDF/quantile/random generation sanity).
+### D) Replace and regenerate examples/figures tied to old approach
+- [ ] Identify all figures/tables generated from ISVB-centered analyses.
+- [ ] Replace those analyses with LDVB-centered workflows where appropriate.
+- [ ] Regenerate all affected figures/tables and update captions/discussion text.
+- [ ] Ensure examples are small, deterministic, and reviewer-runnable.
 
-### E) Reproducibility and consistency gates
-- [ ] Ensure all printed code chunks are executable as-is (no stale arguments/functions).
-- [ ] Update figures/tables impacted by API or algorithm additions.
-- [ ] Confirm notation and terminology are consistent across dynamic/static/synthesis sections.
+### E) Submission-quality writing and structure
+- [ ] Tighten Introduction to state problem, contribution, and package scope clearly.
+- [ ] Ensure method-order is logical: model -> inference -> diagnostics -> examples.
+- [ ] Tighten Conclusion to reflect delivered functionality and realistic limitations.
 
 ---
 
-## P1: Strongly Recommended (High Value)
+## P1: Strongly Recommended
 
-### F) Performance/computation section refresh
-- [ ] Add a compact runtime table comparing representative workloads:
-  - ISVB vs LDVB (dynamic)
+### F) Computational evidence section
+- [ ] Add runtime and quality comparison tables for representative tasks:
+  - LDVB vs MCMC (dynamic)
   - static LDVB vs static MCMC
-- [ ] Add a clear note on optional C++ toggles and defaults:
-  - `exdqlm.use_cpp_kf`
-  - `exdqlm.use_cpp_builders`
-  - `exdqlm.use_cpp_samplers`
-  - `exdqlm.use_cpp_postpred`
-- [ ] Explicitly state that MCMC remains R-path (no C++ MCMC backend).
+- [ ] Report environment details for reproducibility (CPU, R version, seeds, dataset sizes).
+- [ ] Include uncertainty/accuracy metrics alongside runtime (not runtime alone).
 
-### G) Example modernization
-- [ ] Keep examples short enough for editorial/reviewer reproducibility.
-- [ ] Prefer deterministic seeds and compact windows in demonstration code.
-- [ ] Cross-reference examples to package help pages for exact argument contracts.
+### G) Backend implementation clarity
+- [ ] Add a short implementation note on optional C++ acceleration paths and defaults.
+- [ ] State explicitly that there is currently no C++ MCMC backend.
+- [ ] Avoid overstating backend acceleration as universal across all inference routines.
 
----
-
-## P2: Nice-to-Have (If Time Allows)
-
-- [ ] Add a one-page appendix table mapping "function -> purpose -> key inputs -> key outputs".
-- [ ] Add a small migration note from older API names/signatures to current ones.
-- [ ] Add supplementary script list for end-to-end reproduction of all article figures.
+### H) Software-paper quality controls
+- [ ] Add a compact function map table: function, purpose, key inputs, key outputs.
+- [ ] Add reproducibility paragraph: how to rerun all manuscript figures/tables end-to-end.
+- [ ] Ensure notation is consistent across dynamic, static, and synthesis sections.
 
 ---
 
-## Example Coverage Matrix (Target)
+## P2: Nice-to-Have
 
-- [ ] `exdqlmISVB` (existing, update calls)
-- [ ] `exdqlmMCMC` (existing)
-- [ ] `exdqlmLDVB` (new)
-- [ ] `transfn_exdqlmISVB` (existing)
-- [ ] `regMod` (new)
-- [ ] `exal_static_LDVB` (new)
-- [ ] `exal_static_mcmc` (new)
-- [ ] `exdqlm_synthesize_from_draws` (new)
-- [ ] `exdqlmForecast` (existing, update calls)
-- [ ] `exdqlmDiagnostics` (replace old `exdqlmChecks` references)
-- [ ] `exdqlmPlot`, `compPlot` (existing, update calls)
-- [ ] `dexal`, `pexal`, `qexal`, `rexal`, `get_gamma_bounds` (newly documented usage)
+- [ ] Add an appendix mapping old API names/signatures to current ones.
+- [ ] Add sensitivity checks for at least one key example (prior/tuning robustness).
+- [ ] Add supplementary material index for scripts and data artifacts.
 
 ---
 
-## Submission-Readiness Checklist
+## Required Example Coverage Matrix
 
-- [ ] All manuscript code blocks compile/run with current package version.
-- [ ] All figures/tables regenerate without manual patching.
-- [ ] No references to deprecated names/signatures remain.
-- [ ] New 0.4.0 functionality is represented with at least one concrete example each.
-- [ ] Computational claims match actual implementation status (including backend limits).
-- [ ] Final proofreading pass for notation consistency and concise language.
+### Dynamic modeling
+- [ ] `exdqlmMCMC` (exact posterior baseline)
+- [ ] `exdqlmLDVB` (primary approximate inference in manuscript)
+- [ ] `transfn_exdqlmISVB` only if retained with explicit legacy/limited framing
 
+### Static modeling
+- [ ] `regMod`
+- [ ] `exal_static_LDVB`
+- [ ] `exal_static_mcmc`
+
+### Synthesis and utilities
+- [ ] `exdqlm_synthesize_from_draws`
+- [ ] `dexal`, `pexal`, `qexal`, `rexal`, `get_gamma_bounds`
+
+### Diagnostics/forecast/visualization
+- [ ] `exdqlmDiagnostics`
+- [ ] `exdqlmForecast`
+- [ ] `exdqlmPlot`
+- [ ] `compPlot`
+
+---
+
+## Final Submission Gates
+- [ ] All manuscript code blocks execute successfully with the current package.
+- [ ] All figures/tables are regenerated from tracked scripts (no manual edits).
+- [ ] No deprecated function names or outdated signatures remain.
+- [ ] Main narrative reflects current package capabilities (version-agnostic framing).
+- [ ] Inference narrative is coherent and aligned with LDVB-first positioning.
+- [ ] Claims are supported by reproducible empirical evidence in manuscript artifacts.
