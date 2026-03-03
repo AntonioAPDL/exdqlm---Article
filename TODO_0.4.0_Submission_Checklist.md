@@ -2,6 +2,12 @@
 
 ToDos before submission:
 
+## Current Implementation Status (Package)
+- Dynamic MCMC FFBS now has a C++ implementation integrated in `exdqlm`.
+- Backend controls are available via `exdqlm.use_cpp_mcmc` and `exdqlm.cpp_mcmc_mode` (`strict|fast`).
+- Current package default is C++ MCMC enabled in `fast` mode.
+- Backend parity/validation is covered by package tests; manuscript benchmarks must still disclose backend profile.
+
 ## An editorial Policy
 - Write the paper as a description of the **current package**.
 - Avoid release-tag framing (e.g., "v0.x.y") in the main narrative unless needed in a short reproducibility note.
@@ -43,6 +49,7 @@ ToDos before submission:
 - Manuscript is currently ISVB-centric in method exposition and examples.
 - Updated target: make LDVB the primary approximate-inference method in the manuscript for VB.
 - Keep MCMC as exact posterior reference/baseline.
+- Dynamic MCMC now includes a C++ FFBS backend path; manuscript/runtime comparisons must explicitly state backend mode/profile.
 
 ---
 
@@ -90,12 +97,18 @@ ToDos before submission:
 - [ ] Add runtime and quality comparison tables for representative tasks:
   - LDVB vs MCMC (dynamic)
   - static LDVB vs static MCMC
+- [ ] Define and report benchmark backend profiles explicitly for fair comparisons:
+  - Profile A: pure R baseline (`use_cpp_kf=FALSE`, `use_cpp_mcmc=FALSE`, samplers/postpred OFF).
+  - Profile B: matched core C++ (`use_cpp_kf=TRUE`, `use_cpp_mcmc=TRUE`, `cpp_mcmc_mode="fast"`, samplers/postpred OFF).
 - [ ] Report environment details for reproducibility (CPU, R version, seeds, dataset sizes).
 - [ ] Include uncertainty/accuracy metrics alongside runtime (not runtime alone).
 
 ### G) Backend implementation clarity
 - [ ] Add a short implementation note on optional C++ acceleration paths and defaults.
-- [ ] State explicitly that there is currently no C++ MCMC backend.
+- [ ] State explicitly that dynamic MCMC now has a C++ FFBS backend (`exdqlm.use_cpp_mcmc`, mode `strict|fast`; current default `fast`).
+- [ ] Clarify strict-vs-fast semantics in text:
+  - `strict` preserves legacy R-kernel parity behavior.
+  - `fast` enables C++ FFBS acceleration.
 - [ ] Avoid overstating backend acceleration as universal across all inference routines.
 
 ### H) Software-paper quality controls
@@ -115,7 +128,7 @@ ToDos before submission:
 ## Required Example Coverage Matrix
 
 ### Dynamic modeling
-- [ ] `exdqlmMCMC` (exact posterior baseline)
+- [ ] `exdqlmMCMC` (exact posterior baseline; disclose backend mode/profile used in each result)
 - [ ] `exdqlmLDVB` (primary approximate inference in manuscript)
 - [ ] `transfn_exdqlmISVB` only if retained with explicit legacy/limited framing
 
@@ -142,5 +155,7 @@ ToDos before submission:
 - [ ] No deprecated function names or outdated signatures remain.
 - [ ] Main narrative reflects current package capabilities (version-agnostic framing).
 - [ ] Inference narrative is coherent and aligned with LDVB-first positioning.
+- [ ] Runtime comparison sections disclose backend profile/mode so VB-vs-MCMC timing is backend-fair.
+- [ ] Any claim of MCMC/VB speed advantage is tied to one disclosed backend profile and one disclosed dataset/task setting.
 - [ ] Claims are supported by reproducible empirical evidence in manuscript artifacts.
 - [ ] exAL provenance and related-software positioning are accurate and appropriately cited.
