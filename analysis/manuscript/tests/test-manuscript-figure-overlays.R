@@ -20,7 +20,8 @@ testthat::test_that("key figure overlays are present (color checks)", {
   purple <- c(160/255, 32/255, 240/255)
   forestgreen <- c(34/255, 139/255, 34/255)
   darkorange <- c(1, 140/255, 0)
-  sienna4 <- c(139/255, 71/255, 38/255)
+  ldvb_m1 <- c(230/255, 159/255, 0)
+  ldvb_m2 <- c(0, 114/255, 178/255)
 
   ex1q <- read_img("analysis/manuscript/outputs/figures/ex1quants.png")
   if (!is.null(ex1q)) {
@@ -55,14 +56,14 @@ testthat::test_that("key figure overlays are present (color checks)", {
 
   ex2q_ld <- read_img("analysis/manuscript/outputs/figures/ex2quant_ldvb.png")
   if (!is.null(ex2q_ld)) {
-    testthat::expect_gt(count_near_color(ex2q_ld, darkorange), 30)
-    testthat::expect_gt(count_near_color(ex2q_ld, sienna4), 20)
+    testthat::expect_gt(count_near_color(ex2q_ld, ldvb_m1), 30)
+    testthat::expect_gt(count_near_color(ex2q_ld, ldvb_m2), 20)
   }
 
   ex2c_ld <- read_img("analysis/manuscript/outputs/figures/ex2checks_ldvb.png")
   if (!is.null(ex2c_ld)) {
-    testthat::expect_gt(count_near_color(ex2c_ld, darkorange), 20)
-    testthat::expect_gt(count_near_color(ex2c_ld, sienna4), 20)
+    testthat::expect_gt(count_near_color(ex2c_ld, ldvb_m1), 20)
+    testthat::expect_gt(count_near_color(ex2c_ld, ldvb_m2), 20)
   }
 
   ex3q <- read_img("analysis/manuscript/outputs/figures/ex3quantcomps.png")
@@ -79,18 +80,18 @@ testthat::test_that("key figure overlays are present (color checks)", {
 
   ex3q_ld <- read_img("analysis/manuscript/outputs/figures/ex3quantcomps_ldvb.png")
   if (!is.null(ex3q_ld)) {
-    testthat::expect_gt(count_near_color(ex3q_ld, darkorange), 30)
-    testthat::expect_gt(count_near_color(ex3q_ld, sienna4), 20)
+    testthat::expect_gt(count_near_color(ex3q_ld, ldvb_m1), 30)
+    testthat::expect_gt(count_near_color(ex3q_ld, ldvb_m2), 20)
   }
 
   ex3z_ld <- read_img("analysis/manuscript/outputs/figures/ex3zetapsi_ldvb.png")
   if (!is.null(ex3z_ld)) {
-    testthat::expect_gt(count_near_color(ex3z_ld, sienna4), 20)
+    testthat::expect_gt(count_near_color(ex3z_ld, ldvb_m2), 20)
   }
 
   ex3f_ld <- read_img("analysis/manuscript/outputs/figures/ex3forecast_ldvb.png")
   if (!is.null(ex3f_ld)) {
-    testthat::expect_gt(count_near_color(ex3f_ld, darkorange), 30)
-    testthat::expect_gt(count_near_color(ex3f_ld, sienna4), 20)
+    testthat::expect_gt(count_near_color(ex3f_ld, ldvb_m1), 30)
+    testthat::expect_gt(count_near_color(ex3f_ld, ldvb_m2), 20)
   }
 })

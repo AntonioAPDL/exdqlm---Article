@@ -104,6 +104,14 @@ options(
   exdqlm.cpp_threads = 1L
 )
 
+# High-contrast LDVB palette used across LD-only counterpart artifacts.
+ldvb_cols <- list(
+  m1 = "#E69F00",
+  m2 = "#0072B2",
+  m1_aux = "#CC79A7",
+  m2_aux = "#009E73"
+)
+
 artifact_registry <- data.frame(
   artifact_id = character(),
   artifact_type = character(),

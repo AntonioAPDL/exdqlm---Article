@@ -204,9 +204,9 @@ if (!need_ex2) {
         stats::plot.ts(y, xlim = xlim_idx, col = "darkgrey", ylab = "quantile 95% CrIs")
         q_m1_ld <- quantile_summary_from_fit(M1_ldvb, cr.percent = 0.95)
         q_m2_ld <- quantile_summary_from_fit(M2_ldvb, cr.percent = 0.95)
-        plot_quantile_summary(q_m1_ld, col = "darkorange", add = TRUE)
-        plot_quantile_summary(q_m2_ld, col = "sienna4", add = TRUE)
-        graphics::legend("topleft", legend = c("DQLM (LDVB)", "exDQLM (LDVB)"), col = c("darkorange", "sienna4"), lty = 1, bty = "n")
+        plot_quantile_summary(q_m1_ld, col = ldvb_cols$m1, add = TRUE)
+        plot_quantile_summary(q_m2_ld, col = ldvb_cols$m2, add = TRUE)
+        graphics::legend("topleft", legend = c("DQLM (LDVB)", "exDQLM (LDVB)"), col = c(ldvb_cols$m1, ldvb_cols$m2), lty = 1, bty = "n")
 
         graphics::hist(M2_ldvb$samp.gamma, xlab = expression(gamma), main = "")
       })
@@ -249,8 +249,8 @@ if (!need_ex2) {
     if (ex2_ldvb_pair_ok) {
       save_png_plot("ex2checks_ldvb.png", {
         graphics::par(mfrow = c(2, 3))
-        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c("darkorange", "darkorange"))
-        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c("sienna4", "sienna4"))
+        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1))
+        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2))
       })
       register_artifact(
         artifact_id = "fig_ex2checks_ldvb",
