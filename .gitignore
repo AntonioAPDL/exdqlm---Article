@@ -4,6 +4,8 @@ EXECUTION_SPEC_exdqlm_article_repro.md
 # Generated runtime logs
 analysis/exal/outputs/logs/*
 !analysis/exal/outputs/logs/.gitkeep
+analysis/manuscript/outputs/logs/*
+!analysis/manuscript/outputs/logs/.gitkeep
 
 # OS/editor artifacts
 .DS_Store

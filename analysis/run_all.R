@@ -82,48 +82,61 @@ main <- function() {
   ctx$pkg_path <- args$pkg_path
   ctx$seed_override <- args$seed
 
-  if (!identical(args$stage, "exal")) {
-    stop("Only --stage exal is currently implemented.", call. = FALSE)
+  valid_stages <- c("exal", "manuscript")
+  if (!args$stage %in% valid_stages) {
+    stop(sprintf("Unknown stage '%s'. Valid stages: %s", args$stage, paste(valid_stages, collapse = ", ")), call. = FALSE)
   }
 
-  exal_scripts <- file.path(repo_root, "analysis", "exal", "scripts")
-  exal_tests <- file.path(repo_root, "analysis", "exal", "tests")
+  stage_scripts <- file.path(repo_root, "analysis", args$stage, "scripts")
+  stage_tests <- file.path(repo_root, "analysis", args$stage, "tests")
+  if (!dir.exists(stage_scripts)) {
+    stop(sprintf("Stage scripts directory not found: %s", stage_scripts), call. = FALSE)
+  }
 
-  source(file.path(exal_scripts, "00_setup.R"), local = ctx)
+  source(file.path(stage_scripts, "00_setup.R"), local = ctx)
 
   if (!args$tests_only) {
-    ctx$log_msg("Clearing previous exAL outputs")
-    clear_stage_outputs(file.path(repo_root, "analysis", "exal"))
+    ctx$log_msg(sprintf("Clearing previous %s outputs", args$stage))
+    clear_stage_outputs(file.path(repo_root, "analysis", args$stage))
 
-    run_order <- c(
-      "01_al_density_by_p0.R",
-      "02_al_cdf_by_p0.R",
-      "03_exal_density_by_gamma.R",
-      "04_exal_cdf_by_gamma.R",
-      "05_exal_location_scale_density.R",
-      "06_exal_location_scale_cdf.R",
-      "07_gamma_bounds_region.R",
-      "08_qexal_pexal_inversion.R",
-      "09_qexal_p0_identity_checks.R",
-      "10_rexal_density_overlay.R",
-      "11_summary_tables.R"
+    run_order <- switch(
+      args$stage,
+      exal = c(
+        "01_al_density_by_p0.R",
+        "02_al_cdf_by_p0.R",
+        "03_exal_density_by_gamma.R",
+        "04_exal_cdf_by_gamma.R",
+        "05_exal_location_scale_density.R",
+        "06_exal_location_scale_cdf.R",
+        "07_gamma_bounds_region.R",
+        "08_qexal_pexal_inversion.R",
+        "09_qexal_p0_identity_checks.R",
+        "10_rexal_density_overlay.R",
+        "11_summary_tables.R"
+      ),
+      manuscript = c(
+        "01_ex1_lake_huron.R",
+        "02_ex2_sunspots.R",
+        "03_ex3_big_tree.R",
+        "04_tracker_and_manifest.R"
+      )
     )
 
     for (s in run_order) {
       ctx$log_msg(sprintf("Running script: %s", s))
-      source(file.path(exal_scripts, s), local = ctx)
+      source(file.path(stage_scripts, s), local = ctx)
     }
   }
 
   if (!args$skip_tests) {
-    ctx$log_msg("Running exAL tests")
+    ctx$log_msg(sprintf("Running %s tests", args$stage))
     if (!requireNamespace("testthat", quietly = TRUE)) {
       stop("testthat is required to run tests.", call. = FALSE)
     }
     Sys.setenv(EXDQLM_ARTICLE_REPO = repo_root)
     if (!is.null(args$pkg_path)) Sys.setenv(EXDQLM_PKG_PATH = args$pkg_path)
 
-    testthat::test_dir(exal_tests, reporter = "summary")
+    testthat::test_dir(stage_tests, reporter = "summary")
   }
 
   if (args$promote) {

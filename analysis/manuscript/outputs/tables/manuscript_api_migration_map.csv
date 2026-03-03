@@ -1,0 +1,5 @@
+"manuscript_call","reproduced_call","status"
+"exdqlmChecks(y = ..., M1, M2, ...)","exdqlmDiagnostics(M1, M2, ...)","replaced"
+"exdqlmPlot(y = ..., M1, ...)","exdqlmPlot(M1, ...)","replaced"
+"compPlot(y = ..., M1, ...)","compPlot(M1, ...)","replaced"
+"exdqlmForecast(y = ..., start.t, k, M1, ...)","exdqlmForecast(start.t = ..., k = ..., m1 = M1, ...)","replaced"
