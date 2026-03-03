@@ -122,9 +122,17 @@ if (!need_ex1) {
     save_png_plot("ex1quants.png", {
       graphics::par(mfcol = c(1, 2))
 
-      exdqlm::exdqlmPlot(M95)
-      exdqlm::exdqlmPlot(M50_dqlm, add = TRUE, col = "blue")
-      exdqlm::exdqlmPlot(M5, add = TRUE, col = "forestgreen")
+      # Use time-aware copies so x-axis is labeled in years (not raw index).
+      M95_plot <- M95
+      M50_dqlm_plot <- M50_dqlm
+      M5_plot <- M5
+      M95_plot$y <- y_ts
+      M50_dqlm_plot$y <- y_ts
+      M5_plot$y <- y_ts
+
+      exdqlm::exdqlmPlot(M95_plot)
+      exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = "blue")
+      exdqlm::exdqlmPlot(M5_plot, add = TRUE, col = "forestgreen")
       graphics::legend(
         "topright",
         lty = 1, col = c("purple", "blue", "forestgreen"),
@@ -133,13 +141,17 @@ if (!need_ex1) {
 
       fFF <- model$FF
       fGG <- model$GG
-      xlim_idx <- time_window_to_index(y_ts, 1952, 1980)
-      stats::plot.ts(y, xlim = xlim_idx, ylim = c(575, 581), col = "dark grey", ylab = "quantile forecast")
-      fc95 <- exdqlm::exdqlmForecast(start.t = length(y), k = 8, m1 = M95, fFF = fFF, fGG = fGG, plot = FALSE)
+      k_fore <- 8L
+      t_end <- tail(grDevices::xy.coords(y_ts)$x, 1L)
+      dt <- 1 / stats::frequency(y_ts)
+      xlim_fore <- c(1952, t_end + k_fore * dt)
+      stats::plot.ts(y_ts, xlim = xlim_fore, ylim = c(575, 581), col = "dark grey", ylab = "quantile forecast")
+
+      fc95 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M95_plot, fFF = fFF, fGG = fGG, plot = FALSE)
       plot(fc95, add = TRUE, cols = c("purple", "magenta"))
-      fc50 <- exdqlm::exdqlmForecast(start.t = length(y), k = 8, m1 = M50_dqlm, fFF = fFF, fGG = fGG, plot = FALSE)
+      fc50 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M50_dqlm_plot, fFF = fFF, fGG = fGG, plot = FALSE)
       plot(fc50, add = TRUE, cols = c("blue", "lightblue"))
-      fc05 <- exdqlm::exdqlmForecast(start.t = length(y), k = 8, m1 = M5, fFF = fFF, fGG = fGG, plot = FALSE)
+      fc05 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M5_plot, fFF = fFF, fGG = fGG, plot = FALSE)
       plot(fc05, add = TRUE, cols = c("forestgreen", "green"))
     })
     register_artifact(

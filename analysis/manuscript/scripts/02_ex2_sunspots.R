@@ -174,16 +174,65 @@ if (!need_ex2) {
   xlim_idx <- time_window_to_index(y_ts, 1750, 1850)
 
   if (need_ex2quant) {
+    ex2_extreme <- load_or_fit_cache("ex2_extreme_quants_v1", {
+      M95_ext <- exdqlm::exdqlmISVB(
+        y = y_ts, p0 = 0.95, model = model,
+        df = c(0.9, 0.85), dim.df = c(1, 8),
+        sig.init = 2,
+        n.IS = n_is, n.samp = n_samp, tol = tol,
+        verbose = FALSE
+      )
+      M05_ext <- exdqlm::exdqlmISVB(
+        y = y_ts, p0 = 0.05, model = model,
+        df = c(0.9, 0.85), dim.df = c(1, 8),
+        sig.init = 2,
+        n.IS = n_is, n.samp = n_samp, tol = tol,
+        verbose = FALSE
+      )
+      list(M95_ext = M95_ext, M05_ext = M05_ext)
+    }, note = "ex2_extreme_quants_v1")
+
+    M95_ext <- ex2_extreme$M95_ext
+    M05_ext <- ex2_extreme$M05_ext
+
     save_png_plot("ex2quant.png", {
-      graphics::par(mfrow = c(1, 3))
-      stats::plot.ts(y_ts, col = "darkgrey", ylab = "sunspot count")
+      graphics::par(mfcol = c(1, 2))
 
-      stats::plot.ts(y, xlim = xlim_idx, col = "darkgrey", ylab = "quantile 95% CrIs")
-      exdqlm::exdqlmPlot(M1, add = TRUE, col = "red")
-      exdqlm::exdqlmPlot(M2, add = TRUE, col = "blue")
-      graphics::legend("topleft", legend = c("DQLM (ISVB)", "exDQLM (ISVB)"), col = c("red", "blue"), lty = 1, bty = "n")
+      # Use time-aware copies so x-axis labels are in years.
+      M95_plot <- M95_ext
+      M05_plot <- M05_ext
+      M95_plot$y <- y_ts
+      M05_plot$y <- y_ts
 
-      graphics::hist(M2$samp.gamma, xlab = expression(gamma), main = "")
+      exdqlm::exdqlmPlot(M95_plot, col = "red")
+      exdqlm::exdqlmPlot(M05_plot, add = TRUE, col = "blue")
+      graphics::legend(
+        "topright",
+        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.05)),
+        col = c("red", "blue"),
+        lty = 1,
+        bty = "n"
+      )
+
+      fFF <- model$FF
+      fGG <- model$GG
+      k_fore <- 10L
+      t_end <- tail(grDevices::xy.coords(y_ts)$x, 1L)
+      dt <- 1 / stats::frequency(y_ts)
+      xlim_fore <- c(1935, t_end + k_fore * dt)
+      stats::plot.ts(y_ts, xlim = xlim_fore, col = "grey50", ylab = "quantile forecast")
+
+      fc95 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M95_plot, fFF = fFF, fGG = fGG, plot = FALSE)
+      plot(fc95, add = TRUE, cols = c("red", "magenta"))
+      fc05 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M05_plot, fFF = fFF, fGG = fGG, plot = FALSE)
+      plot(fc05, add = TRUE, cols = c("blue", "lightblue"))
+      graphics::legend(
+        "topleft",
+        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.05)),
+        col = c("red", "blue"),
+        lty = 1,
+        bty = "n"
+      )
     })
     register_artifact(
       artifact_id = "fig_ex2quant",
@@ -191,7 +240,7 @@ if (!need_ex2) {
       relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
       manuscript_target = "fig:ex2quant",
       status = "reproduced",
-      notes = "Three-panel Sunspots figure (data, quantiles, gamma histogram)."
+      notes = "Two-panel ISVB extreme-quantile figure (p0=0.05 and p0=0.95) with fit and forecast views."
     )
   }
 
