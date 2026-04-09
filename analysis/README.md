@@ -4,6 +4,7 @@ This folder contains reproducible analysis stages for the article.
 
 - `exal`: exAL distribution utilities/reproducibility assets.
 - `manuscript`: end-to-end regeneration of main manuscript example artifacts.
+  This includes the sparse `rhs_ns` static benchmark used in Example 4.
 
 ## Run
 
@@ -34,6 +35,10 @@ By default, the analysis workflow loads local `exdqlm` source from
 `/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`. Override that with
 `--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
 If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
+For constrained environments where rebuilding local source is not feasible,
+set `EXDQLM_LOAD_MODE=installed` and optionally
+`EXDQLM_INSTALLED_LIB=/path/to/R/library` to use an installed `exdqlm`
+package instead. Source mode remains the default.
 
 ## Structure
 

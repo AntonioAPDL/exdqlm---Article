@@ -21,16 +21,23 @@ profiles:
       tol: 0.05
       lambda_grid: [0.10, 0.30, 0.50, 0.70, 0.85]
     ex4:
-      n_train: 180
-      grid_n: 400
+      n_train: 160
       holdout_n: 450
+      n_predictors: 8
+      cov_rho: 0.5
+      sigma_eps: 1.5
+      true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
       p_levels: [0.05, 0.25, 0.50]
-      ldvb_max_iter: 220
-      ldvb_max_iter_tail: 450
+      ldvb_max_iter: 260
+      ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001
-      ldvb_n_samp_xi: 200
-      n_burn: 250
-      n_mcmc: 160
+      ldvb_n_samp_xi: 160
+      rhs_tau0: 0.15
+      rhs_a_zeta: 2.0
+      rhs_b_zeta: 9.0
+      rhs_zeta2_fixed: 9.0
+      n_burn: 150
+      n_mcmc: 100
       thin: 1
 
   standard:
@@ -53,14 +60,21 @@ profiles:
       tol: 0.05
       lambda_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
     ex4:
-      n_train: 180
-      grid_n: 400
+      n_train: 160
       holdout_n: 800
+      n_predictors: 8
+      cov_rho: 0.5
+      sigma_eps: 1.5
+      true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
       p_levels: [0.05, 0.25, 0.50]
-      ldvb_max_iter: 220
-      ldvb_max_iter_tail: 450
+      ldvb_max_iter: 260
+      ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001
-      ldvb_n_samp_xi: 200
+      ldvb_n_samp_xi: 160
+      rhs_tau0: 0.15
+      rhs_a_zeta: 2.0
+      rhs_b_zeta: 9.0
+      rhs_zeta2_fixed: 9.0
       n_burn: 400
       n_mcmc: 300
       thin: 1
@@ -85,14 +99,21 @@ profiles:
       tol: 0.03
       lambda_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
     ex4:
-      n_train: 180
-      grid_n: 400
+      n_train: 160
       holdout_n: 1200
+      n_predictors: 8
+      cov_rho: 0.5
+      sigma_eps: 1.5
+      true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
       p_levels: [0.05, 0.25, 0.50]
-      ldvb_max_iter: 220
-      ldvb_max_iter_tail: 450
+      ldvb_max_iter: 260
+      ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001
-      ldvb_n_samp_xi: 200
+      ldvb_n_samp_xi: 160
+      rhs_tau0: 0.15
+      rhs_a_zeta: 2.0
+      rhs_b_zeta: 9.0
+      rhs_zeta2_fixed: 9.0
       n_burn: 700
       n_mcmc: 500
       thin: 1

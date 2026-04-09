@@ -1,5 +1,5 @@
 "artifact_id","artifact_type","relative_path","manuscript_target","status","notes"
-"log_ex4_run_summary","log","analysis/manuscript/outputs/logs/ex4_run_summary.txt","Example 4 textual outputs","reproduced","Simulation settings, convergence summary, and recovery metrics for Example 4."
-"tab_ex4static_summary","table","analysis/manuscript/outputs/tables/ex4static_summary.csv","new: Example 4 static simulation summary","reproduced","Runtime and recovery metrics for LDVB and MCMC across p0 = 0.05, 0.25, 0.50."
-"fig_ex4static","figure","analysis/manuscript/outputs/figures/ex4static.png","fig:ex4static","reproduced","Static exAL simulation with truth, LDVB, and MCMC quantile curves for p0 = 0.05, 0.25, 0.50."
+"log_ex4_run_summary","log","analysis/manuscript/outputs/logs/ex4_run_summary.txt","Example 4 textual outputs","reproduced","Sparse rhs_ns static simulation settings and recovery metrics for Example 4."
+"tab_ex4static_summary","table","analysis/manuscript/outputs/tables/ex4static_summary.csv","new: Example 4 static simulation summary","reproduced","Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior."
+"fig_ex4static","figure","analysis/manuscript/outputs/figures/ex4static.png","fig:ex4static","reproduced","Sparse rhs_ns static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50."
 "tab_api_migration_map","table","analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv","global code migration","reproduced","Maps deprecated manuscript calls to current package API."

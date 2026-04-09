@@ -58,7 +58,65 @@ resolve_pkg_path <- function() {
   )
 }
 
+resolve_load_spec <- function() {
+  load_mode <- tolower(trimws(Sys.getenv("EXDQLM_LOAD_MODE", unset = "source")))
+  load_mode <- if (nzchar(load_mode)) load_mode else "source"
+  if (!load_mode %in% c("source", "installed")) {
+    stop(
+      sprintf(
+        "Unsupported EXDQLM_LOAD_MODE '%s'. Use 'source' or 'installed'.",
+        load_mode
+      ),
+      call. = FALSE
+    )
+  }
+  installed_lib <- Sys.getenv("EXDQLM_INSTALLED_LIB", unset = "")
+  installed_lib <- if (nzchar(installed_lib)) {
+    normalizePath(installed_lib, winslash = "/", mustWork = FALSE)
+  } else {
+    NULL
+  }
+  list(mode = load_mode, installed_lib = installed_lib)
+}
+
 load_exdqlm <- function() {
+  load_spec <- resolve_load_spec()
+  if (identical(load_spec$mode, "installed")) {
+    if (!is.null(pkg_path) || nzchar(Sys.getenv("EXDQLM_PKG_PATH", unset = ""))) {
+      log_msg("EXDQLM_LOAD_MODE=installed: ignoring source-path overrides and loading installed exdqlm.")
+    }
+    if (!is.null(load_spec$installed_lib)) {
+      if (!dir.exists(load_spec$installed_lib)) {
+        stop(
+          sprintf(
+            "EXDQLM_INSTALLED_LIB does not exist: %s",
+            load_spec$installed_lib
+          ),
+          call. = FALSE
+        )
+      }
+      .libPaths(unique(c(load_spec$installed_lib, .libPaths())))
+    }
+    if (!requireNamespace("exdqlm", quietly = TRUE)) {
+      stop(
+        paste(
+          "Installed exdqlm package not found.",
+          "Set EXDQLM_INSTALLED_LIB to the library containing exdqlm or switch back to source mode.",
+          sep = "\n"
+        ),
+        call. = FALSE
+      )
+    }
+    pkg_loc <- tryCatch(find.package("exdqlm"), error = function(e) NA_character_)
+    version <- as.character(utils::packageVersion("exdqlm"))
+    log_msg(sprintf(
+      "Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed): %s [version %s]",
+      pkg_loc,
+      version
+    ))
+    return(invisible(TRUE))
+  }
+
   pkg_spec <- resolve_pkg_path()
   desc_path <- file.path(pkg_spec$path, "DESCRIPTION")
 

@@ -3,7 +3,7 @@
 \usepackage{soul}
 \usepackage{tabularx}
 \usepackage{bm}
-\graphicspath{{Figures/}}
+\graphicspath{{analysis/manuscript/outputs/figures/}{Figures/}}
 
 \RequirePackage{amsthm,amsmath,amsfonts,amssymb}
 
@@ -860,7 +860,7 @@ Finally, we use the function \code{exdqlmDiagnostics} to compute the KL divergen
 	KL   & \code{m1.kl}         & 1.135   & \code{m2.kl}         & 0.880 \\
 	\hline
 \end{tabular}
-\caption{Example 3: Big Tree water flow. Model diagnostic output from \code{exdqlmDiagnostics} and resulting values.}
+\caption{Example 3: Big Tree water flow. Model diagnostic output from exdqlmDiagnostics() and resulting values.}
 \label{tab:ex3}
 \end{table}
 
@@ -879,42 +879,64 @@ The KL divergence and pplc both clearly favor the nonlinear relationship capture
 \subsection{Static exAL regression on a simulated heteroskedastic example}
 \label{sec:ex4static}
 
-To illustrate the static routines, we consider a simple simulation for which the true conditional quantile function is known. Let
+To illustrate the static routines under sparse shrinkage, we consider a correlated Gaussian regression benchmark for which the target conditional quantile is known exactly. Let
 \[
-Y_i = 0.5x_i + (1.2 + 0.35x_i)\varepsilon_i,\qquad \varepsilon_i \sim N(0,1),
+{\bf x}_i \sim N_8({\bf 0}, \Sigma_x),\qquad (\Sigma_x)_{jk} = 0.5^{|j-k|},
 \]
-with \(x_i \in [-2,2]\). Then for any quantile level \(p_0\), the true conditional quantile is
+with sparse signal
 \[
-Q_Y(p_0 \mid x) = 0.5x + (1.2 + 0.35x)\Phi^{-1}(p_0),
+\boldsymbol{\beta}^\star = (3,\,1.5,\,0,\,0,\,2,\,0,\,0,\,0)^\top.
 \]
-so every conditional quantile is linear in \(x\), while the slope varies with the quantile level. We use \(180\) equally spaced design points on \([-2,2]\) and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\) using \code{exal_static_LDVB()} and \code{exal_static_mcmc()}. The lower-tail fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model.
+For each target quantile level \(p_0\), we generate
+\[
+Y_i^{(p_0)} = {\bf x}_i^\top \boldsymbol{\beta}^\star + \sigma_\varepsilon \{Z_i - \Phi^{-1}(p_0)\},
+\qquad Z_i \sim N(0,1),\qquad \sigma_\varepsilon = 1.5.
+\]
+Then
+\[
+Q_Y(p_0 \mid {\bf x}_i) = {\bf x}_i^\top \boldsymbol{\beta}^\star,
+\]
+so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the Nishimura-Suchard regularized horseshoe prior via \code{beta_prior = "rhs_ns"} with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit \code{exal_static_LDVB()} and \code{exal_static_mcmc()}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the LDVB fit. The lower-tail LDVB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model with sparse shrinkage.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> x = seq(-2, 2, length.out = 180)
-R> X = cbind(1, x)
-R> y = 0.5 * x + (1.2 + 0.35 * x) * rnorm(length(x))
+R> Sigma.x = 0.5 ^ as.matrix(dist(1:8))
+R> beta.true = c(3, 1.5, 0, 0, 2, 0, 0, 0)
+R> rhs.ctrl = list(tau0 = 0.15, a_zeta = 2, b_zeta = 9,
+                   zeta2_fixed = 9, shrink_intercept = FALSE)
+R> sim.y = function(X.raw, p0) {
+      drop(X.raw %*% beta.true) + 1.5 * (rnorm(nrow(X.raw)) - qnorm(p0))
+    }
+R> X.raw = MASS::mvrnorm(160, mu = rep(0, 8), Sigma = Sigma.x)
+R> X = cbind(1, X.raw)
 R> p.grid = c(0.05, 0.25, 0.50)
+R> y.train = lapply(p.grid, function(p0) sim.y(X.raw, p0))
 R> M.ldvb = lapply(p.grid, function(p0) exal_static_LDVB(
-+                    y = y, X = X, p0 = p0,
-+                    max_iter = ifelse(p0 == 0.05, 450, 220),
++                    y = y.train[[which(p.grid == p0)]], X = X, p0 = p0,
++                    beta_prior = "rhs_ns",
++                    beta_prior_controls = rhs.ctrl,
++                    max_iter = ifelse(p0 == 0.05, 420, 260),
 +                    tol = 1e-4, verbose = FALSE))
 R> M.mcmc = lapply(p.grid, function(p0) exal_static_mcmc(
-+                    y = y, X = X, p0 = p0,
++                    y = y.train[[which(p.grid == p0)]], X = X, p0 = p0,
++                    beta_prior = "rhs_ns",
++                    beta_prior_controls = rhs.ctrl,
 +                    n.burn = 400, n.mcmc = 300,
++                    init.from.vb = TRUE,
 +                    verbose = FALSE))
 \end{CodeInput}
 \end{CodeChunk}
 
-For static fits, the helper function \code{exalDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on a fine grid of \(x\)-values:
+For static fits, the helper function \code{exalDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on an independent holdout design:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> x.grid = seq(-2, 2, length.out = 400)
-R> X.grid = cbind(1, x.grid)
-R> q.true = function(x, p0) 0.5 * x + (1.2 + 0.35 * x) * qnorm(p0)
+R> X.hold.raw = MASS::mvrnorm(800, mu = rep(0, 8), Sigma = Sigma.x)
+R> X.hold = cbind(1, X.hold.raw)
+R> ref.hold = drop(X.hold %*% c(0, beta.true))
+R> y.hold = sim.y(X.hold.raw, 0.25)
 R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
-+                  X = X.grid, ref = q.true(x.grid, 0.25),
++                  X = X.hold, y = y.hold, ref = ref.hold,
 +                  plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
@@ -922,33 +944,33 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth]{ex4static.png}
-\caption{Example 4: static exAL regression under a heteroskedastic normal location-scale data-generating model. Grey points show the simulated training sample. In each panel, the dashed black line is the true conditional quantile, the orange line is the LDVB fit, and the blue line is the MCMC fit.}
+\caption{Example 4: sparse static exAL regression under the correlated Gaussian benchmark with the rhs\_ns prior. Black diamonds denote the true non-intercept coefficients, orange intervals denote LDVB 95\% posterior intervals, and blue intervals denote MCMC 95\% posterior intervals. Panels correspond to p0 = 0.05, 0.25, and 0.50.}
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that both methods recover the target conditional quantiles well across the lower tail, lower-middle quantile, and median. The approximation is most demanding at \(p_0 = 0.05\), where the exact MCMC fit is slightly more accurate, while the LDVB fit remains visually close to the truth and substantially faster to compute. At \(p_0 = 0.50\), the two fitted curves are nearly indistinguishable.
+Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case: both methods recover the sparse signal well, with MCMC slightly sharper on holdout quantile RMSE, while LDVB still converges cleanly with the larger iteration budget. At \(p_0 = 0.25\) and \(p_0 = 0.50\), the two fits remain qualitatively aligned, with MCMC modestly closer to the true sparse signal and LDVB providing a faster approximation.
 
 \begin{table}
 \centering
-\begin{tabular}{c|c|ccc}
+\begin{tabular}{c|c|cccc}
  \hline
- \(p_0\) & method & runtime (s) & grid RMSE & mean check loss \\
+ \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \hline
- 0.05 & LDVB & 16.29 & 0.515 & 0.137 \\
- 0.05 & MCMC & 19.70 & 0.526 & 0.137 \\
+ 0.05 & LDVB & 23.55 & 0.117 & 0.022 & 0.245 \\
+ 0.05 & MCMC & 20.06 & 0.111 & 0.027 & 0.214 \\
  \hline
- 0.25 & LDVB & 7.16 & 0.214 & 0.392 \\
- 0.25 & MCMC & 19.87 & 0.211 & 0.392 \\
+ 0.25 & LDVB & 10.64 & 0.224 & 0.079 & 0.328 \\
+ 0.25 & MCMC & 19.02 & 0.195 & 0.049 & 0.275 \\
  \hline
- 0.50 & LDVB & 1.31 & 0.144 & 0.488 \\
- 0.50 & MCMC & 19.33 & 0.158 & 0.488 \\
+ 0.50 & LDVB & 4.66 & 0.180 & 0.162 & 0.468 \\
+ 0.50 & MCMC & 19.81 & 0.158 & 0.129 & 0.388 \\
  \hline
 \end{tabular}
-\caption{Example 4: runtime and recovery metrics for the static exAL fits. The grid RMSE is computed against the true conditional quantile on a \(400\)-point evaluation grid, and the mean check loss is computed on an independent holdout sample of size \(800\).}
+\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the rhs\_ns prior. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC fits are slightly more accurate at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is slightly better at \(p_0 = 0.50\). The main practical difference is computational: in this example LDVB is consistently faster, especially away from the lower tail. This makes the static LDVB routine a useful first-pass tool for model exploration, while static MCMC remains the exact baseline when the highest fidelity is required.
+Table \ref{tab:ex4static} reinforces the visual comparison. MCMC is modestly more accurate across the three quantile levels, especially on the holdout quantile RMSE, while LDVB offers a substantial speed advantage at \(p_0 = 0.25\) and \(p_0 = 0.50\). The main message is that the static \code{rhs_ns} workflow can recover a correlated sparse signal cleanly with both exact and approximate inference: static LDVB is a practical first-pass tool for rapid screening, whereas static MCMC remains the exact baseline when higher-fidelity sparse uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}

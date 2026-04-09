@@ -9,7 +9,7 @@ without modifying `article4.tex`.
 - Rebuilds Example 1 (Lake Huron) figures.
 - Rebuilds Example 2 (Sunspots) figures + diagnostics with `exdqlmDiagnostics`.
 - Rebuilds Example 3 (Big Tree) figures + diagnostics table.
-- Rebuilds Example 4 static exAL simulation figure + summary table.
+- Rebuilds Example 4 sparse static exAL simulation figure + summary table under the `rhs_ns` prior.
 - Adds one extra dynamic comparison figure: ISVB vs LDVB (`ex2_isvb_ldvb_compare.png`).
 - Adds side-by-side gamma posterior comparison for Example 2 with 95% CrIs (`ex2_gamma_posteriors.png` + `ex2_gamma_credible_intervals.csv`).
 - Adds LDVB-only counterparts for ISVB artifacts in Example 2 and Example 3 (figures + diagnostics/scan tables).
@@ -45,6 +45,10 @@ By default, this stage loads local `exdqlm` source from
 `/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`. Override that with
 `--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
 If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
+For constrained environments where rebuilding local source is not feasible,
+set `EXDQLM_LOAD_MODE=installed` and optionally
+`EXDQLM_INSTALLED_LIB=/path/to/R/library` to use an installed `exdqlm`
+package instead. Source mode remains the default.
 
 ## Outputs
 
