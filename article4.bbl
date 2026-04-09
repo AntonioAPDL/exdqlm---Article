@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{28}
+\begin{thebibliography}{29}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -87,6 +87,13 @@ Kozumi H, Kobayashi G (2011).
 Kullback S, Leibler RA (1951).
 \newblock \enquote{On information and sufficiency.}
 \newblock \emph{The annals of mathematical statistics}, \textbf{22}(1), 79--86.
+
+\bibitem[{Nishimura and Suchard(2023)}]{nishimura2023shrunken}
+Nishimura A, Suchard MA (2023).
+\newblock \enquote{Shrinkage with shrunken shoulders: Gibbs sampling shrinkage
+  model posteriors with guaranteed convergence rates.}
+\newblock \emph{Bayesian Analysis}, \textbf{18}(2), 367--390.
+\newblock \doi{10.1214/22-BA1308}.
 
 \bibitem[{Ostwald \emph{et~al.}(2014)Ostwald, Kirilina, Starke, and
   Blankenburg}]{ostwald2014tutorial}
