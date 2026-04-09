@@ -52,35 +52,88 @@ targeted_run <- length(targets) > 0L
 force_refit <- isTRUE(force_refit)
 
 resolve_pkg_path <- function() {
-  cand <- unique(c(
-    pkg_path,
-    file.path(dirname(repo_root), "exdqlm__wt__0.3.0-cpp"),
-    "/data/muscat_data/jaguir26/exdqlm__wt__0.3.0-cpp"
-  ))
-  cand <- cand[!is.na(cand) & nzchar(cand)]
-  cand <- cand[dir.exists(cand)]
-  if (length(cand) == 0L) return(NULL)
-  cand[[1]]
+  env_pkg_path <- Sys.getenv("EXDQLM_PKG_PATH", unset = "")
+  env_pkg_path <- if (nzchar(env_pkg_path)) env_pkg_path else NULL
+  default_pkg_path <- "/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main"
+
+  selected_path <- pkg_path %||% env_pkg_path %||% default_pkg_path
+  selected_source <- if (!is.null(pkg_path) && nzchar(pkg_path)) {
+    "--pkg-path"
+  } else if (!is.null(env_pkg_path)) {
+    "EXDQLM_PKG_PATH"
+  } else {
+    "default"
+  }
+
+  list(
+    path = normalizePath(selected_path, winslash = "/", mustWork = FALSE),
+    source = selected_source
+  )
 }
 
 load_exdqlm <- function() {
-  path <- resolve_pkg_path()
-  if (!is.null(path)) {
-    if (!requireNamespace("devtools", quietly = TRUE)) {
-      stop("devtools is required to load local exdqlm package source.", call. = FALSE)
-    }
-    devtools::load_all(path = path, quiet = TRUE, export_all = FALSE, helpers = FALSE)
-    log_msg(sprintf("Loaded local exdqlm from source: %s", path))
-    return(invisible(TRUE))
+  pkg_spec <- resolve_pkg_path()
+  desc_path <- file.path(pkg_spec$path, "DESCRIPTION")
+
+  if (!dir.exists(pkg_spec$path)) {
+    stop(
+      sprintf(
+        paste(
+          "Local exdqlm package path (%s) does not exist: %s",
+          "Use --pkg-path /path/to/exdqlm or set EXDQLM_PKG_PATH to a valid exdqlm source checkout.",
+          sep = "\n"
+        ),
+        pkg_spec$source,
+        pkg_spec$path
+      ),
+      call. = FALSE
+    )
+  }
+  if (!file.exists(desc_path)) {
+    stop(
+      sprintf(
+        paste(
+          "Local exdqlm package path (%s) is not an R package checkout (DESCRIPTION not found): %s",
+          "Use --pkg-path /path/to/exdqlm or set EXDQLM_PKG_PATH to a valid exdqlm source checkout.",
+          sep = "\n"
+        ),
+        pkg_spec$source,
+        pkg_spec$path
+      ),
+      call. = FALSE
+    )
   }
 
-  if (requireNamespace("exdqlm", quietly = TRUE)) {
-    suppressPackageStartupMessages(library(exdqlm))
-    log_msg(sprintf("Loaded installed exdqlm: %s", as.character(utils::packageVersion("exdqlm"))))
-    return(invisible(TRUE))
+  loader_name <- if (requireNamespace("pkgload", quietly = TRUE)) {
+    "pkgload::load_all"
+  } else if (requireNamespace("devtools", quietly = TRUE)) {
+    "devtools::load_all"
+  } else {
+    stop(
+      paste(
+        "pkgload (preferred) or devtools is required to load local exdqlm package source.",
+        "Install pkgload, or provide an environment where one of these loaders is available.",
+        sep = "\n"
+      ),
+      call. = FALSE
+    )
   }
 
-  stop("exdqlm package not installed and no valid local package path found.", call. = FALSE)
+  if (identical(loader_name, "pkgload::load_all")) {
+    pkgload::load_all(path = pkg_spec$path, quiet = TRUE, export_all = FALSE, helpers = FALSE)
+  } else {
+    devtools::load_all(path = pkg_spec$path, quiet = TRUE, export_all = FALSE, helpers = FALSE)
+  }
+
+  version <- as.character(utils::packageVersion("exdqlm"))
+  log_msg(sprintf(
+    "Loaded local exdqlm from source (%s via %s): %s [version %s]",
+    pkg_spec$source,
+    loader_name,
+    pkg_spec$path,
+    version
+  ))
+  invisible(TRUE)
 }
 
 load_exdqlm()

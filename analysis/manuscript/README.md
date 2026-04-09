@@ -39,6 +39,11 @@ Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecas
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 ```
 
+By default, this stage loads local `exdqlm` source from
+`/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`. Override that with
+`--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
+If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
+
 ## Outputs
 
 - `analysis/manuscript/outputs/figures/`: generated figure files.

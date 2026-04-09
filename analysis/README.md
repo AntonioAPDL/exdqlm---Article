@@ -30,6 +30,11 @@ Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3fo
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 ```
 
+By default, the analysis workflow loads local `exdqlm` source from
+`/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`. Override that with
+`--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
+If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
+
 ## Structure
 
 - `config/`: stage parameter and plotting configuration.
