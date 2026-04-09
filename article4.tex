@@ -876,15 +876,79 @@ The KL divergence and pplc both clearly favor the nonlinear relationship capture
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{add static example - maybe show off MCMC vs LDVB}
+\subsection{Static exAL regression on a simulated heteroskedastic example}
 \label{sec:ex4static}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+To illustrate the static routines, we consider a simple simulation for which the true conditional quantile function is known. Let
+\[
+Y_i = 0.5x_i + (1.2 + 0.35x_i)\varepsilon_i,\qquad \varepsilon_i \sim N(0,1),
+\]
+with \(x_i \in [-2,2]\). Then for any quantile level \(p_0\), the true conditional quantile is
+\[
+Q_Y(p_0 \mid x) = 0.5x + (1.2 + 0.35x)\Phi^{-1}(p_0),
+\]
+so every conditional quantile is linear in \(x\), while the slope varies with the quantile level. We use \(180\) equally spaced design points on \([-2,2]\) and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\) using \code{exal_static_LDVB()} and \code{exal_static_mcmc()}. The lower-tail fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model.
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> x = seq(-2, 2, length.out = 180)
+R> X = cbind(1, x)
+R> y = 0.5 * x + (1.2 + 0.35 * x) * rnorm(length(x))
+R> p.grid = c(0.05, 0.25, 0.50)
+R> M.ldvb = lapply(p.grid, function(p0) exal_static_LDVB(
++                    y = y, X = X, p0 = p0,
++                    max_iter = ifelse(p0 == 0.05, 450, 220),
++                    tol = 1e-4, verbose = FALSE))
+R> M.mcmc = lapply(p.grid, function(p0) exal_static_mcmc(
++                    y = y, X = X, p0 = p0,
++                    n.burn = 400, n.mcmc = 300,
++                    verbose = FALSE))
+\end{CodeInput}
+\end{CodeChunk}
+
+For static fits, the helper function \code{exalDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on a fine grid of \(x\)-values:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> x.grid = seq(-2, 2, length.out = 400)
+R> X.grid = cbind(1, x.grid)
+R> q.true = function(x, p0) 0.5 * x + (1.2 + 0.35 * x) * qnorm(p0)
+R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
++                  X = X.grid, ref = q.true(x.grid, 0.25),
++                  plot = FALSE)
+\end{CodeInput}
+\end{CodeChunk}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1\textwidth]{ex4static.png}
+\caption{Example 4: static exAL regression under a heteroskedastic normal location-scale data-generating model. Grey points show the simulated training sample. In each panel, the dashed black line is the true conditional quantile, the orange line is the LDVB fit, and the blue line is the MCMC fit.}
+\label{fig:ex4static}
+\end{figure}
+
+Figure \ref{fig:ex4static} shows that both methods recover the target conditional quantiles well across the lower tail, lower-middle quantile, and median. The approximation is most demanding at \(p_0 = 0.05\), where the exact MCMC fit is slightly more accurate, while the LDVB fit remains visually close to the truth and substantially faster to compute. At \(p_0 = 0.50\), the two fitted curves are nearly indistinguishable.
+
+\begin{table}
+\centering
+\begin{tabular}{c|c|ccc}
+ \hline
+ \(p_0\) & method & runtime (s) & grid RMSE & mean check loss \\
+ \hline
+ 0.05 & LDVB & 16.29 & 0.515 & 0.137 \\
+ 0.05 & MCMC & 19.70 & 0.526 & 0.137 \\
+ \hline
+ 0.25 & LDVB & 7.16 & 0.214 & 0.392 \\
+ 0.25 & MCMC & 19.87 & 0.211 & 0.392 \\
+ \hline
+ 0.50 & LDVB & 1.31 & 0.144 & 0.488 \\
+ 0.50 & MCMC & 19.33 & 0.158 & 0.488 \\
+ \hline
+\end{tabular}
+\caption{Example 4: runtime and recovery metrics for the static exAL fits. The grid RMSE is computed against the true conditional quantile on a \(400\)-point evaluation grid, and the mean check loss is computed on an independent holdout sample of size \(800\).}
+\label{tab:ex4static}
+\end{table}
+
+Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC fits are slightly more accurate at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is slightly better at \(p_0 = 0.50\). The main practical difference is computational: in this example LDVB is consistently faster, especially away from the lower tail. This makes the static LDVB routine a useful first-pass tool for model exploration, while static MCMC remains the exact baseline when the highest fidelity is required.
 
 \section{Conclusion}
 \label{sec:summary}

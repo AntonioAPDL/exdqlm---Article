@@ -1,19 +1,14 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-03-03 13:24:16
+Generated: 2026-04-09 04:46:53
 Profile: standard
 Seed: 20260302
 
 ## Artifact Status
 
-- [reproduced] `ex2_model_output` -> `analysis/manuscript/outputs/logs/ex2_model_output.txt` (Example 2 model matrix output). Combined trend/seasonal state-space matrix.
-- [reproduced] `ex2_run_summary` -> `analysis/manuscript/outputs/logs/ex2_run_summary.txt` (Example 2 textual outputs). Includes sigma summary and ISVB/LDVB runtime diagnostics.
-- [reproduced] `fig_ex2quant` -> `analysis/manuscript/outputs/figures/ex2quant.png` (fig:ex2quant). Three-panel ISVB figure for original p0=0.85 comparing DQLM and exDQLM.
-- [reproduced] `fig_ex2quant_p099` -> `analysis/manuscript/outputs/figures/ex2quant_p099.png` (new: fig ex2quant ISVB upper-tail (p0=0.99)). Three-panel ISVB figure for p0=0.99 comparing DQLM and exDQLM.
-- [reproduced] `fig_ex2quant_p005` -> `analysis/manuscript/outputs/figures/ex2quant_p005.png` (new: fig ex2quant ISVB lower-tail (p0=0.05)). Three-panel ISVB figure for p0=0.05 comparing DQLM and exDQLM.
-- [reproduced] `fig_ex2quant_ldvb` -> `analysis/manuscript/outputs/figures/ex2quant_ldvb.png` (new: fig ex2quant LDVB counterpart). Three-panel LDVB figure for original p0=0.85 comparing DQLM and exDQLM.
-- [reproduced] `fig_ex2quant_ldvb_p099` -> `analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png` (new: fig ex2quant LDVB upper-tail (p0=0.99)). Three-panel LDVB figure for p0=0.99 comparing DQLM and exDQLM.
-- [reproduced] `fig_ex2quant_ldvb_p005` -> `analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png` (new: fig ex2quant LDVB lower-tail (p0=0.05)). Three-panel LDVB figure for p0=0.05 comparing DQLM and exDQLM.
+- [reproduced] `log_ex4_run_summary` -> `analysis/manuscript/outputs/logs/ex4_run_summary.txt` (Example 4 textual outputs). Simulation settings, convergence summary, and recovery metrics for Example 4.
+- [reproduced] `tab_ex4static_summary` -> `analysis/manuscript/outputs/tables/ex4static_summary.csv` (new: Example 4 static simulation summary). Runtime and recovery metrics for LDVB and MCMC across p0 = 0.05, 0.25, 0.50.
+- [reproduced] `fig_ex4static` -> `analysis/manuscript/outputs/figures/ex4static.png` (fig:ex4static). Static exAL simulation with truth, LDVB, and MCMC quantile curves for p0 = 0.05, 0.25, 0.50.
 - [reproduced] `tab_api_migration_map` -> `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv` (global code migration). Maps deprecated manuscript calls to current package API.
 
 ## Notes
@@ -22,7 +17,9 @@ Seed: 20260302
 - api_update: Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.
 - ldvb_note: Added ISVB vs LDVB comparison figure for dynamic Sunspots example.
 - backend: MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
-- ex2: Used explicit dlm->exdqlm conversion because as.exdqlm(dlm) errors in current package.
-- coverage: Targeted run; requested targets: ex2quant, ex2quant_ldvb.
-- timing: Exact runtime printouts in manuscript are historical and expected to differ.
-- scope: Main manuscript .tex was not modified; all updates are isolated under analysis/manuscript.
+- ex4: Example 4 uses a heteroskedastic normal location-scale simulation with known linear conditional quantiles.
+- ex4: The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the default Example 4 LDVB budget.
+- ex4: Example 4 focuses on the general static exAL model; the AL special case remains available via dqlm.ind = TRUE.
+- coverage: Targeted run; requested targets: ex4.
+- timing: Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.
+- scope: Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in article4.tex.

@@ -20,6 +20,18 @@ profiles:
       n_samp: 140
       tol: 0.05
       lambda_grid: [0.10, 0.30, 0.50, 0.70, 0.85]
+    ex4:
+      n_train: 180
+      grid_n: 400
+      holdout_n: 450
+      p_levels: [0.05, 0.25, 0.50]
+      ldvb_max_iter: 220
+      ldvb_max_iter_tail: 450
+      ldvb_tol: 0.0001
+      ldvb_n_samp_xi: 200
+      n_burn: 250
+      n_mcmc: 160
+      thin: 1
 
   standard:
     ex1:
@@ -40,6 +52,18 @@ profiles:
       n_samp: 200
       tol: 0.05
       lambda_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
+    ex4:
+      n_train: 180
+      grid_n: 400
+      holdout_n: 800
+      p_levels: [0.05, 0.25, 0.50]
+      ldvb_max_iter: 220
+      ldvb_max_iter_tail: 450
+      ldvb_tol: 0.0001
+      ldvb_n_samp_xi: 200
+      n_burn: 400
+      n_mcmc: 300
+      thin: 1
 
   full:
     ex1:
@@ -60,6 +84,18 @@ profiles:
       n_samp: 300
       tol: 0.03
       lambda_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
+    ex4:
+      n_train: 180
+      grid_n: 400
+      holdout_n: 1200
+      p_levels: [0.05, 0.25, 0.50]
+      ldvb_max_iter: 220
+      ldvb_max_iter_tail: 450
+      ldvb_tol: 0.0001
+      ldvb_n_samp_xi: 200
+      n_burn: 700
+      n_mcmc: 500
+      thin: 1
 
 figures:
   width: 10
@@ -89,3 +125,4 @@ promotion:
     - ex3zetapsi_ldvb.png
     - ex3forecast.png
     - ex3forecast_ldvb.png
+    - ex4static.png

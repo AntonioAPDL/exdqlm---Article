@@ -21,7 +21,9 @@ expected_targets <- data.frame(
     "fig_ex3forecast",
     "fig_ex3forecast_ldvb",
     "tab_ex3_diagnostics",
-    "tab_ex3_diagnostics_ldvb"
+    "tab_ex3_diagnostics_ldvb",
+    "fig_ex4static",
+    "tab_ex4static_summary"
   ),
   manuscript_target = c(
     "fig:ex1mcmc",
@@ -43,7 +45,9 @@ expected_targets <- data.frame(
     "fig:ex3forecast",
     "new: fig ex3forecast LDVB counterpart",
     "tab:ex3",
-    "new: tab ex3 LDVB counterpart"
+    "new: tab ex3 LDVB counterpart",
+    "fig:ex4static",
+    "new: Example 4 static simulation summary"
   ),
   stringsAsFactors = FALSE
 )
@@ -85,7 +89,10 @@ if (targeted_run) {
     ex3forecast = c("fig_ex3forecast"),
     ex3forecast_ldvb = c("fig_ex3forecast_ldvb"),
     ex3tables = c("tab_ex3_diagnostics", "tab_ex3_lambda_scan"),
-    ex3tables_ldvb = c("tab_ex3_diagnostics_ldvb", "tab_ex3_lambda_scan_ldvb")
+    ex3tables_ldvb = c("tab_ex3_diagnostics_ldvb", "tab_ex3_lambda_scan_ldvb"),
+    ex4 = c("fig_ex4static", "tab_ex4static_summary"),
+    ex4figure = c("fig_ex4static"),
+    ex4table = c("tab_ex4static_summary")
   )
   exp_ids <- unique(unlist(target_map[intersect(names(target_map), targets)], use.names = FALSE))
   if (length(exp_ids) > 0L) {
@@ -162,7 +169,8 @@ if (targeted_run) {
   register_note("coverage", "All main manuscript example figures were targeted in this pipeline.")
 }
 register_note("timing", "Exact runtime printouts in manuscript are historical and expected to differ.")
-register_note("scope", "Main manuscript .tex was not modified; all updates are isolated under analysis/manuscript.")
+register_note("timing", "Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.")
+register_note("scope", "Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in article4.tex.")
 
 write_tracker()
 

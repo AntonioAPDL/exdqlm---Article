@@ -29,7 +29,9 @@ testthat::test_that("core manuscript figure targets are reproduced", {
     "fig_ex3forecast",
     "fig_ex3forecast_ldvb",
     "tab_ex3_diagnostics",
-    "tab_ex3_diagnostics_ldvb"
+    "tab_ex3_diagnostics_ldvb",
+    "fig_ex4static",
+    "tab_ex4static_summary"
   )
 
   if (!all(core %in% tr$artifact_id)) {

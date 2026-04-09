@@ -142,7 +142,8 @@ required_fns <- c(
   "polytrendMod", "seasMod", "as.exdqlm",
   "exdqlmMCMC", "exdqlmISVB", "exdqlmLDVB",
   "transfn_exdqlmISVB", "exdqlmDiagnostics",
-  "exdqlmPlot", "compPlot", "exdqlmForecast"
+  "exdqlmPlot", "compPlot", "exdqlmForecast",
+  "exal_static_LDVB", "exal_static_mcmc", "exalDiagnostics"
 )
 missing_fns <- required_fns[!vapply(required_fns, function(f) {
   exists(f, where = asNamespace("exdqlm"), mode = "function", inherits = FALSE)
