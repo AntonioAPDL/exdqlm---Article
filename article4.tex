@@ -465,8 +465,8 @@ The results are \code{exdqlmMCMC} objects that can be used for analysis and fore
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(M95)
-R> exdqlmPlot(y = LakeHuron, M50, add = TRUE, col = "blue")
-R> exdqlmPlot(y = LakeHuron, M5, add = TRUE, col = "forest green")
+R> exdqlmPlot(M50, add = TRUE, col = "blue")
+R> exdqlmPlot(M5, add = TRUE, col = "forest green")
 R> legend("topright", lty = 1, col = c("purple","blue","forest green"),
 +        legend = c(expression('p'[0]*'=0.95'),expression('p'[0]*'=0.50'),
 +                   expression('p'[0]*'=0.05')))
@@ -494,12 +494,12 @@ We plot the time series data in a narrower range for closer examination and add 
 \begin{CodeInput}
 R> plot(LakeHuron,  xlim = c(1952,1980), ylim = c(575,581),
 +        col = "dark grey")
-R> exdqlmForecast(y = LakeHuron, start.t = length(LakeHuron), k = 8, M95,
+R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M95,
 +               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE)
-R> exdqlmForecast(y = LakeHuron, start.t = length(LakeHuron), k = 8, M50,
+R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M50,
 +               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
 +               cols = c("blue","light blue"))
-R> exdqlmForecast(y = LakeHuron, start.t = length(LakeHuron), k = 8, M5,
+R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M5,
 +               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
 +               cols = c("forest green","green"))
 \end{CodeInput}
@@ -612,8 +612,8 @@ We can visualize the differences between the two resulting dynamic quantiles usi
 \begin{CodeInput}
 R> plot(sunspot.year, xlim = c(1750,1850), col = "dark grey",
 +       ylab = "quantile 95% CrIs")
-R> exdqlmPlot(y = sunspot.year, M1, add = TRUE, col = "red")
-R> exdqlmPlot(y = sunspot.year, M2, add = TRUE, col = "blue")
+R> exdqlmPlot(M1, add = TRUE, col = "red")
+R> exdqlmPlot(M2, add = TRUE, col = "blue")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -637,7 +637,7 @@ To further examine the two models, we use the function \code{exdqlmDiagnostics()
 % R> par(mfrow=c(2,3))
 \begin{CodeChunk}
 \begin{CodeInput}
-R> exdqlmDiagnostics(y = sunspot.year, M1, M2, cols = c("red","blue"))
+R> exdqlmDiagnostics(M1, M2, cols = c("red","blue"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -662,8 +662,8 @@ R> for(i in 1:nrow(possible.dfs)){
 +   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = possible.dfs[i,], dim.df = c(1,8),
 +                  sig.init = 2, verbose = FALSE)
-+   temp.check = exdqlmDiagnostics(y = sunspot.year, temp.M2,
-+                              plot = FALSE, ref = ref.samp)
++   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
++                              ref = ref.samp)
 +   KLs = c(KLs,temp.check$m1.KL)
 + }
 R> # optimal dfs based off KL divergence
@@ -725,8 +725,8 @@ R>   temp.M2 = transfn_exdqlmLDVB(y = log(BTflow), p0 = 0.15, model = model,
 +                               tf.m0 = c(0,0), tf.C0 = diag(c(0.1,0.005),2),
 +                               sig.init = 0.1, gam.init = - 0.1,
 +                               tol = 0.05, verbose = FALSE)
-R>   temp.check = exdqlmDiagnostics(y = log(BTflow), temp.M2,
-+                            plot = FALSE, ref = ref.samp)
+R>   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
++                            ref = ref.samp)
 R>   KLs = c(KLs,temp.check$m1.KL)
 R> }
 R> # optimal lambda based off KL divergence
@@ -767,8 +767,8 @@ To visualize the differences between the two resulting dynamic quantiles we use 
 \begin{CodeInput}
 R> plot(log(BTflow), col = "grey", ylim = c(1,8), xlim=c(1970,1990),
 +       ylab = "quantile 95% CrIs")
-R> exdqlmPlot(y = BTflow, M1, add = TRUE)
-R> exdqlmPlot(y = BTflow, M2, add = TRUE, col = "forest green")
+R> exdqlmPlot(M1, add = TRUE)
+R> exdqlmPlot(M2, add = TRUE, col = "forest green")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -784,9 +784,8 @@ Clearly the resulting quantiles have significant differences. To identify from w
 \begin{CodeInput}
 R> plot(NA, ylim = c(-1.5,1.5), xlim = c(1970,1990),
 +         ylab = "seasonal components")
-R> compPlot(y = log(BTflow), M1, index = c(2,3), add = TRUE)
-R> compPlot(y = log(BTflow), M2, index = c(2,3), add = TRUE,
-+            col = "forest green")
+R> compPlot(M1, index = c(2,3), add = TRUE)
+R> compPlot(M2, index = c(2,3), add = TRUE, col = "forest green")
 \end{CodeInput}
 \end{CodeChunk}
 Although the seasonal components of the two models exhibit differences in amplitude, we expect more significant differences to appear in the Ni\~no 3.4 component of each model. Again, we use the function \code{compPlot} to visualize these components seen in Figure \ref{fig:ex3quant} from 1970 to 1990.
@@ -794,9 +793,8 @@ Although the seasonal components of the two models exhibit differences in amplit
 \begin{CodeInput}
 R> plot(NA, ylim = c(-0.5,1.5), xlim = c(1970,1990),
 +          ylab = "Niño 3.4 components")
-R> compPlot(y = log(BTflow), M1, index = c(4), add = TRUE)
-R> compPlot(y = log(BTflow), M2, index = c(4,5), add = TRUE,
-+            col = "forest green")
+R> compPlot(M1, index = c(4), add = TRUE)
+R> compPlot(M2, index = c(4,5), add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 \end{CodeInput}
 \end{CodeChunk}
@@ -805,11 +803,11 @@ For the transfer function model, \code{M2}, it is also of interest to look at th
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> compPlot(y = log(BTflow), M2, index = 4, col= "forest green",
+R> compPlot(M2, index = 4, col= "forest green",
 +             add = FALSE, just.theta = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(eta[t]))
-R> compPlot(y = log(BTflow), M2, index = 5, col = "forest green",
+R> compPlot(M2, index = 5, col = "forest green",
 +             add = FALSE, just.theta = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[t]))
@@ -839,10 +837,9 @@ Estimates from $M_1$, the quantile regression model, are seen in purple/pink. Es
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> exdqlmForecast(y = log(BTflow), start.t = length(BTflow)-18,
-+                   k = 18, M1)
-R> exdqlmForecast(y = log(BTflow), start.t = length(BTflow)-18,
-+                   k = 18, M2, add = TRUE, cols = c("forest green","green"))
+R> exdqlmForecast(start.t = length(BTflow)-18, k = 18, m1 = M1)
+R> exdqlmForecast(start.t = length(BTflow)-18, k = 18, m1 = M2,
++                   add = TRUE, cols = c("forest green","green"))
 \end{CodeInput}
 \end{CodeChunk}
 % R> abline(v = xy.coords(log(BTflow))$x[length(BTflow)-18],
@@ -869,8 +866,8 @@ Finally, we use the function \code{exdqlmDiagnostics} to compute the KL divergen
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> checks.out = exdqlmDiagnostics(y = log(BTflow), M1, M2,
-+                              col = c("purple","orange"), plot = FALSE)
+R> checks.out = exdqlmDiagnostics(M1, M2,
++                              cols = c("purple","orange"), plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 The KL divergence and pplc both clearly favor the nonlinear relationship captured by the transfer function model.
