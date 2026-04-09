@@ -948,7 +948,7 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case: both methods recover the sparse signal well, with MCMC slightly sharper on holdout quantile RMSE, while LDVB still converges cleanly with the larger iteration budget. At \(p_0 = 0.25\) and \(p_0 = 0.50\), the two fits remain qualitatively aligned, with MCMC modestly closer to the true sparse signal and LDVB providing a faster approximation.
+Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; on this run, LDVB is slightly better on the active-signal RMSE and holdout quantile RMSE while still requiring the larger iteration budget. At \(p_0 = 0.25\), the two fits remain qualitatively aligned, with MCMC modestly closer to the true sparse signal. At \(p_0 = 0.50\), both fits again track the true sparse pattern closely, with LDVB slightly sharper on the active coefficients and holdout quantile recovery while MCMC shrinks the null coefficients more aggressively.
 
 \begin{table}
 \centering
@@ -956,21 +956,21 @@ Figure \ref{fig:ex4static} shows that both methods recover the active coefficien
  \hline
  \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \hline
- 0.05 & LDVB & 23.55 & 0.117 & 0.022 & 0.245 \\
- 0.05 & MCMC & 20.06 & 0.111 & 0.027 & 0.214 \\
+ 0.05 & LDVB & 23.40 & 0.117 & 0.022 & 0.245 \\
+ 0.05 & MCMC & 19.12 & 0.133 & 0.036 & 0.274 \\
  \hline
- 0.25 & LDVB & 10.64 & 0.224 & 0.079 & 0.328 \\
- 0.25 & MCMC & 19.02 & 0.195 & 0.049 & 0.275 \\
+ 0.25 & LDVB & 10.09 & 0.241 & 0.110 & 0.513 \\
+ 0.25 & MCMC & 18.68 & 0.177 & 0.093 & 0.402 \\
  \hline
- 0.50 & LDVB & 4.66 & 0.180 & 0.162 & 0.468 \\
- 0.50 & MCMC & 19.81 & 0.158 & 0.129 & 0.388 \\
+ 0.50 & LDVB & 2.65 & 0.074 & 0.044 & 0.225 \\
+ 0.50 & MCMC & 21.02 & 0.090 & 0.023 & 0.248 \\
  \hline
 \end{tabular}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the rhs\_ns prior. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} reinforces the visual comparison. MCMC is modestly more accurate across the three quantile levels, especially on the holdout quantile RMSE, while LDVB offers a substantial speed advantage at \(p_0 = 0.25\) and \(p_0 = 0.50\). The main message is that the static \code{rhs_ns} workflow can recover a correlated sparse signal cleanly with both exact and approximate inference: static LDVB is a practical first-pass tool for rapid screening, whereas static MCMC remains the exact baseline when higher-fidelity sparse uncertainty quantification is required.
+Table \ref{tab:ex4static} reinforces the visual comparison. The two methods are competitive across all three quantile levels, but the relative advantage is not uniform: LDVB is slightly stronger in the lower-tail and median runs on the active-signal and holdout-recovery metrics, whereas MCMC is stronger at \(p_0 = 0.25\) and also tends to shrink the null coefficients more aggressively. LDVB remains substantially faster at \(p_0 = 0.25\) and \(p_0 = 0.50\), while MCMC remains the exact baseline. The main message is that the static \code{rhs_ns} workflow can recover a correlated sparse signal cleanly with both exact and approximate inference: static LDVB is a practical first-pass tool for rapid screening, whereas static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}
