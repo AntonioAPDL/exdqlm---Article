@@ -1,14 +1,16 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-09 06:05:01
+Generated: 2026-04-09 19:48:27
 Profile: standard
 Seed: 20260302
 
 ## Artifact Status
 
-- [reproduced] `log_ex4_run_summary` -> `analysis/manuscript/outputs/logs/ex4_run_summary.txt` (Example 4 textual outputs). Sparse rhs_ns static simulation settings and recovery metrics for Example 4.
-- [reproduced] `tab_ex4static_summary` -> `analysis/manuscript/outputs/tables/ex4static_summary.csv` (new: Example 4 static simulation summary). Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior.
-- [reproduced] `fig_ex4static` -> `analysis/manuscript/outputs/figures/ex4static.png` (fig:ex4static). Sparse rhs_ns static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50.
+- [reproduced] `ex1_model_output` -> `analysis/manuscript/outputs/logs/ex1_model_output.txt` (Example 1 model block). polytrend model object output.
+- [reproduced] `log_ex1_kernel_compare` -> `analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt` (support: Example 1 kernel comparison summary). Four-chain Lake Huron median comparison of slice and laplace_rw.
+- [reproduced] `tab_ex1_kernel_summary` -> `analysis/manuscript/outputs/tables/ex1_kernel_summary.csv` (support: Example 1 kernel summary). Gamma-only pooled posterior, runtime, Rhat, and ESS summaries for slice and laplace_rw with sigma fixed.
+- [reproduced] `tab_ex1_kernel_chain_stability` -> `analysis/manuscript/outputs/tables/ex1_kernel_chain_stability.csv` (support: Example 1 kernel chain stability). Per-chain gamma posterior summaries, runtimes, and acceptance diagnostics.
+- [reproduced] `fig_ex1_kernel_compare` -> `analysis/manuscript/outputs/figures/ex1_kernel_compare.png` (support: Example 1 slice vs laplace_rw kernel comparison). Four-chain Lake Huron median comparison with gamma trace and density overlays under fixed sigma.
 - [reproduced] `tab_api_migration_map` -> `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv` (global code migration). Maps deprecated manuscript calls to current package API.
 
 ## Notes
@@ -17,11 +19,8 @@ Seed: 20260302
 - api_update: Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.
 - ldvb_note: Added ISVB vs LDVB comparison figure for dynamic Sunspots example.
 - backend: MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
-- ex4: Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0.
-- ex4: The static sparse benchmark uses the rhs_ns prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept.
-- ex4: The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget.
-- ex4: Example 4 focuses on the general static exAL model; the AL special case remains available via dqlm.ind = TRUE.
-- coverage: Targeted run; requested targets: ex4.
+- ex1_kernel: Lake Huron median kernel comparison: slice vs laplace_rw. Sigma is fixed at 0.4, so the comparison targets gamma mixing only. Mean runtime ratio (laplace_rw / slice) = 0.781. gamma Rhat: slice=1.036, laplace_rw=1.040. gamma ESS: slice=214.0, laplace_rw=77.3.
+- coverage: Targeted run; requested targets: ex1kernel.
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.
 - timing: Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.
 - scope: Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in article4.tex.

@@ -8,6 +8,10 @@ profiles:
       n_burn_trace: 500
       n_mcmc_trace: 500
       thin_trace: 2
+      n_chains_kernel: 4
+      n_burn_kernel: 250
+      n_mcmc_kernel: 180
+      thin_kernel_plot: 1
     ex2:
       n_is: 180
       n_samp: 140
@@ -47,6 +51,10 @@ profiles:
       n_burn_trace: 500
       n_mcmc_trace: 10500
       thin_trace: 5
+      n_chains_kernel: 4
+      n_burn_kernel: 1000
+      n_mcmc_kernel: 500
+      thin_kernel_plot: 1
     ex2:
       n_is: 500
       n_samp: 200
@@ -86,6 +94,10 @@ profiles:
       n_burn_trace: 2500
       n_mcmc_trace: 5000
       thin_trace: 5
+      n_chains_kernel: 4
+      n_burn_kernel: 1000
+      n_mcmc_kernel: 500
+      thin_kernel_plot: 1
     ex2:
       n_is: 700
       n_samp: 300

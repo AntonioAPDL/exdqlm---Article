@@ -57,6 +57,7 @@ if (targeted_run) {
     ex1 = c("fig_ex1mcmc", "fig_ex1quants", "tab_ex1_runtime"),
     ex1mcmc = c("fig_ex1mcmc"),
     ex1quants = c("fig_ex1quants"),
+    ex1kernel = c("fig_ex1_kernel_compare", "tab_ex1_kernel_summary", "tab_ex1_kernel_chain_stability", "log_ex1_kernel_compare"),
     ex2 = c(
       "fig_ex2quant", "fig_ex2quant_ldvb",
       "fig_ex2checks", "fig_ex2checks_ldvb",
@@ -99,6 +100,27 @@ if (targeted_run) {
     expected_targets <- expected_targets[expected_targets$artifact_id %in% exp_ids, , drop = FALSE]
   } else {
     expected_targets <- expected_targets[0, , drop = FALSE]
+  }
+
+  if ("ex1kernel" %in% targets) {
+    expected_targets <- rbind(
+      expected_targets,
+      data.frame(
+        artifact_id = c(
+          "fig_ex1_kernel_compare",
+          "tab_ex1_kernel_summary",
+          "tab_ex1_kernel_chain_stability",
+          "log_ex1_kernel_compare"
+        ),
+        manuscript_target = c(
+          "support: Example 1 slice vs laplace_rw kernel comparison",
+          "support: Example 1 kernel summary",
+          "support: Example 1 kernel chain stability",
+          "support: Example 1 kernel comparison summary"
+        ),
+        stringsAsFactors = FALSE
+      )
+    )
   }
 }
 

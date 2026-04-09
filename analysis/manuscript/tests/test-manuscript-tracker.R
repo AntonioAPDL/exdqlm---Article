@@ -47,3 +47,26 @@ testthat::test_that("core manuscript figure targets are reproduced", {
     )
   }
 })
+
+testthat::test_that("optional Example 1 kernel comparison artifacts are coherent when present", {
+  tr <- utils::read.csv(tracker_csv, stringsAsFactors = FALSE)
+  ids <- c(
+    "fig_ex1_kernel_compare",
+    "tab_ex1_kernel_summary",
+    "tab_ex1_kernel_chain_stability",
+    "log_ex1_kernel_compare"
+  )
+
+  if (!all(ids %in% tr$artifact_id)) {
+    testthat::skip("Example 1 kernel-comparison artifacts not present in this tracker run.")
+  }
+
+  for (id in ids) {
+    row <- tr[tr$artifact_id == id, , drop = FALSE]
+    testthat::expect_true(nrow(row) > 0, info = sprintf("Missing tracker row for %s", id))
+    testthat::expect_true(
+      all(row$status %in% c("reproduced", "approximate")),
+      info = sprintf("Unexpected status for %s: %s", id, paste(unique(row$status), collapse = ", "))
+    )
+  }
+})

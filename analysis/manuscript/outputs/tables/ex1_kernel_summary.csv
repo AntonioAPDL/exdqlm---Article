@@ -1,0 +1,3 @@
+"kernel","n_chains","n_burn","n_mcmc","runtime_total_sec","runtime_mean_sec","gamma_mean","gamma_q025","gamma_q975","gamma_rhat","gamma_ess","chain_mean_gamma_sd","accept_total_mean","accept_total_min","accept_total_max","vb_init_method","sigma_fixed"
+"slice",4,1000,500,96.673,24.16825,-0.0138156687419244,-0.26578845369818,0.297760772873473,1.0362299880689,213.961485350961,0.0271784668098418,NA,NA,NA,"ldvb",TRUE
+"laplace_rw",4,1000,500,75.533,18.88325,-0.0322104055183543,-0.281076274924944,0.242060140550974,1.0397239155602,77.342290947228,0.0122247343255024,0.365666666666667,0.346666666666667,0.387333333333333,"ldvb",TRUE

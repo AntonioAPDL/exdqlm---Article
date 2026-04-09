@@ -13,6 +13,7 @@ without modifying `article4.tex`.
 - Adds one extra dynamic comparison figure: ISVB vs LDVB (`ex2_isvb_ldvb_compare.png`).
 - Adds side-by-side gamma posterior comparison for Example 2 with 95% CrIs (`ex2_gamma_posteriors.png` + `ex2_gamma_credible_intervals.csv`).
 - Adds LDVB-only counterparts for ISVB artifacts in Example 2 and Example 3 (figures + diagnostics/scan tables).
+- Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the median Lake Huron fit when `sigma` is fixed.
 - Writes a reproducibility tracker with per-artifact status notes.
 
 ## Run
@@ -39,6 +40,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3fo
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit --skip-tests
 ```
 
 By default, this stage loads local `exdqlm` source from
