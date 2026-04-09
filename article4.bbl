@@ -1,4 +1,5 @@
-\begin{thebibliography}{20}
+ \newcommand{\noop}[1]{}
+\begin{thebibliography}{28}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -9,14 +10,17 @@
   \urlstyle{rm}\Url}\fi
 \providecommand{\eprint}[2][]{\url{#2}}
 
-\bibitem[{Barata \emph{et~al.}(2020)Barata, Prado, and Sanso}]{me}
-Barata R, Prado R, Sanso B (2020).
+\bibitem[{Barata \emph{et~al.}({2022})Barata, Prado, and Sans\'{o}}]{me}
+Barata R, Prado R, Sans\'{o} B ({2022}).
 \newblock \enquote{{Fast inference for time-varying quantiles via flexible
-  dynamic models with application to the characterization of atmospheric }.}
-\newblock \emph{Technical report}, University of California Santa Cruz,
-  Department of Statistical Science.
-\newblock
-  \urlprefix\url{https://www.soe.ucsc.edu/research/technical-reports/UCSC-SOE-20-14}.
+  dynamic models with application to the characterization of atmospheric
+  rivers}.}
+\newblock \emph{The annals of applied statistics}.
+
+\bibitem[{Beal(2003)}]{beal2003variational}
+Beal MJ (2003).
+\newblock \emph{Variational algorithms for approximate Bayesian inference}.
+\newblock Ph.D. thesis, UCL (University College London).
 
 \bibitem[{Benoit \emph{et~al.}(2011)Benoit, Al-Hamzawi, Yu, and Van~den
   Poel}]{bayesQR}
@@ -25,11 +29,21 @@ Benoit D, Al-Hamzawi R, Yu K, Van~den Poel D (2011).
 \newblock R package version 2.3,
   \urlprefix\url{https://CRAN.R-project.org/package=bayesQR}.
 
+\bibitem[{Carter and Kohn(1994)}]{carter1994gibbs}
+Carter CK, Kohn R (1994).
+\newblock \enquote{On Gibbs sampling for state space models.}
+\newblock \emph{Biometrika}, \textbf{81}(3), 541--553.
+
 \bibitem[{Fox(2012)}]{sunspot}
 Fox K (2012).
 \newblock \enquote{Solar Minimum; Solar Maximum.}
 \newblock
   \urlprefix\url{https://www.nasa.gov/mission_pages/sunearth/news/solarmin-max.html}.
+
+\bibitem[{Fr{\"u}hwirth-Schnatter(1994)}]{fruhwirth1994data}
+Fr{\"u}hwirth-Schnatter S (1994).
+\newblock \enquote{Data augmentation and dynamic linear models.}
+\newblock \emph{Journal of time series analysis}, \textbf{15}(2), 183--202.
 
 \bibitem[{Gelfand and Ghosh(1998)}]{gelfand1998model}
 Gelfand AE, Ghosh SK (1998).
@@ -49,13 +63,19 @@ Huerta G, Jiang W, Tanner MA (2003).
 
 \bibitem[{Koenker(2005)}]{koenkerquantile}
 Koenker R (2005).
-\newblock \enquote{Quantile regression.}
+\newblock \emph{Quantile regression}.
+\newblock Cambridge University Press, New York.
 
 \bibitem[{Koenker(2021)}]{quantreg}
 Koenker R (2021).
 \newblock \emph{\pkg{quantreg}: Quantile Regression}.
 \newblock R package version 5.85,
   \urlprefix\url{https://CRAN.R-project.org/package=quantreg}.
+
+\bibitem[{Kottas and Krnjaji{\'c}(2009)}]{kottas2009bayesian}
+Kottas A, Krnjaji{\'c} M (2009).
+\newblock \enquote{Bayesian semiparametric modelling in quantile regression.}
+\newblock \emph{Scandinavian Journal of Statistics}, \textbf{36}(2), 297--319.
 
 \bibitem[{Kozumi and Kobayashi(2011)}]{kozumi2011gibbs}
 Kozumi H, Kobayashi G (2011).
@@ -67,6 +87,13 @@ Kozumi H, Kobayashi G (2011).
 Kullback S, Leibler RA (1951).
 \newblock \enquote{On information and sufficiency.}
 \newblock \emph{The annals of mathematical statistics}, \textbf{22}(1), 79--86.
+
+\bibitem[{Ostwald \emph{et~al.}(2014)Ostwald, Kirilina, Starke, and
+  Blankenburg}]{ostwald2014tutorial}
+Ostwald D, Kirilina E, Starke L, Blankenburg F (2014).
+\newblock \enquote{A tutorial on variational Bayes for latent linear stochastic
+  time-series models.}
+\newblock \emph{Journal of Mathematical Psychology}, \textbf{60}, 1--19.
 
 \bibitem[{Ou \emph{et~al.}(2021)Ou, Hunter, Chow, Ji, Chen, Hung, Lee, Li, and
   Park}]{dynr}
@@ -96,11 +123,34 @@ Prado R, Molina F, Huerta G (2006).
 \newblock R Foundation for Statistical Computing, Vienna, Austria.
 \newblock \urlprefix\url{http://www.R-project.org/}.
 
+\bibitem[{Rayner \emph{et~al.}(2003)Rayner, Parker, Horton, Folland, Alexander,
+  Rowell, Kent, and Kaplan}]{nino34}
+Rayner N, Parker DE, Horton E, Folland CK, Alexander LV, Rowell D, Kent EC,
+  Kaplan A (2003).
+\newblock \enquote{Global analyses of sea surface temperature, sea ice, and
+  night marine air temperature since the late nineteenth century.}
+\newblock \emph{Journal of Geophysical Research: Atmospheres},
+  \textbf{108}(D14).
+
+\bibitem[{Reich \emph{et~al.}(2009)Reich, Bondell, and
+  Wang}]{reich2009flexible}
+Reich BJ, Bondell HD, Wang HJ (2009).
+\newblock \enquote{Flexible {B}ayesian quantile regression for independent and
+  clustered data.}
+\newblock \emph{Biostatistics}, \textbf{11}(2), 337--352.
+
 \bibitem[{Rosenblatt(1952)}]{rosenblatt1952remarks}
 Rosenblatt M (1952).
 \newblock \enquote{Remarks on a multivariate transformation.}
 \newblock \emph{The annals of mathematical statistics}, \textbf{23}(3),
   470--472.
+
+\bibitem[{Taddy and Kottas(2010)}]{taddy2010bayesian}
+Taddy MA, Kottas A (2010).
+\newblock \enquote{A {B}ayesian nonparametric approach to inference for
+  quantile regression.}
+\newblock \emph{Journal of Business \& Economic Statistics}, \textbf{28}(3),
+  357--369.
 
 \bibitem[{{U.S. Geological Survey}(2016)}]{btflow}
 {US Geological Survey} (2016).
@@ -108,18 +158,18 @@ Rosenblatt M (1952).
   World Wide Web (USGS Water Data for the Nation).}
 \newblock \urlprefix\url{http://waterdata.usgs.gov/nwis/}.
 
+\bibitem[{Wang and Blei(2013)}]{wang2013nonconjugatevb}
+Wang C, Blei DM (2013).
+\newblock \enquote{Variational Inference in Non-Conjugate Models.}
+\newblock \emph{arXiv preprint arXiv:1209.4360}.
+\newblock \urlprefix\url{https://arxiv.org/abs/1209.4360}.
+
 \bibitem[{West \emph{et~al.}(1985)West, Harrison, and Migon}]{west1985dynamic}
 West M, Harrison PJ, Migon HS (1985).
 \newblock \enquote{Dynamic generalized linear models and {B}ayesian
   forecasting.}
 \newblock \emph{Journal of the American Statistical Association},
   \textbf{80}(389), 73--83.
-
-\bibitem[{Williams and Patricola(2018)}]{williams2018diversity}
-Williams IN, Patricola CM (2018).
-\newblock \enquote{Diversity of ENSO events unified by convective threshold sea
-  surface temperature: a nonlinear ENSO index.}
-\newblock \emph{Geophysical Research Letters}, \textbf{45}(17), 9236--9244.
 
 \bibitem[{Yan and Kottas(2017)}]{yan2017new}
 Yan Y, Kottas A (2017).

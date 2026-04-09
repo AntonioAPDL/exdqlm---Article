@@ -83,6 +83,8 @@ ToDos before submission:
 - [ ] Replace those analyses with LDVB-centered workflows where appropriate.
 - [ ] Regenerate all affected figures/tables and update captions/discussion text.
 - [ ] Ensure examples are small, deterministic, and reviewer-runnable.
+- [ ] Finalize the Section 4.4 static-example choice (package data vs simulation) and wire the final example into the manuscript workflow.
+- [ ] Re-run Lake Huron Example 1 with multiple chains and compare `mh.proposal = "laplace_rw"` versus `"slice"` using joint `(sigma, gamma)` traces, ESS, and posterior-stability checks before finalizing the discussion text.
 
 ### E) Submission-quality writing and structure
 - [ ] Tighten Introduction to state problem, contribution, and package scope clearly.
