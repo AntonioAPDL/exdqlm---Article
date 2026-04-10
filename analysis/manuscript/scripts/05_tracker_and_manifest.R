@@ -91,6 +91,7 @@ if (targeted_run) {
     ex3forecast_ldvb = c("fig_ex3forecast_ldvb"),
     ex3tables = c("tab_ex3_diagnostics", "tab_ex3_lambda_scan"),
     ex3tables_ldvb = c("tab_ex3_diagnostics_ldvb", "tab_ex3_lambda_scan_ldvb"),
+    ex4screen = c("tab_ex4_seed_screen_summary", "tab_ex4_seed_screen_selection", "log_ex4_seed_screen_summary"),
     ex4 = c("fig_ex4static", "tab_ex4static_summary"),
     ex4figure = c("fig_ex4static"),
     ex4table = c("tab_ex4static_summary")
@@ -117,6 +118,25 @@ if (targeted_run) {
           "support: Example 1 kernel summary",
           "support: Example 1 kernel chain stability",
           "support: Example 1 kernel comparison summary"
+        ),
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+
+  if ("ex4screen" %in% targets) {
+    expected_targets <- rbind(
+      expected_targets,
+      data.frame(
+        artifact_id = c(
+          "tab_ex4_seed_screen_summary",
+          "tab_ex4_seed_screen_selection",
+          "log_ex4_seed_screen_summary"
+        ),
+        manuscript_target = c(
+          "support: Example 4 seed screen metrics",
+          "support: Example 4 seed screen selection",
+          "support: Example 4 seed screen summary"
         ),
         stringsAsFactors = FALSE
       )

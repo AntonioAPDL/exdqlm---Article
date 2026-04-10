@@ -13,7 +13,8 @@ without modifying `article4.tex`.
 - Adds one extra dynamic comparison figure: ISVB vs LDVB (`ex2_isvb_ldvb_compare.png`).
 - Adds side-by-side gamma posterior comparison for Example 2 with 95% CrIs (`ex2_gamma_posteriors.png` + `ex2_gamma_credible_intervals.csv`).
 - Adds LDVB-only counterparts for ISVB artifacts in Example 2 and Example 3 (figures + diagnostics/scan tables).
-- Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the median Lake Huron fit when `sigma` is fixed.
+- Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.
+- Adds an optional support-only Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds before promoting one seed into the tracked static example.
 - Writes a reproducibility tracker with per-artifact status notes.
 
 ## Run
@@ -38,6 +39,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex2_gamma_posteriors --s
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4screen --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit --skip-tests

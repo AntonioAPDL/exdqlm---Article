@@ -136,6 +136,7 @@ main <- function() {
         "01_ex1_lake_huron.R",
         "02_ex2_sunspots.R",
         "03_ex3_big_tree.R",
+        "04a_ex4_seed_screen.R",
         "04_ex4_static_simulation.R",
         "05_tracker_and_manifest.R"
       )

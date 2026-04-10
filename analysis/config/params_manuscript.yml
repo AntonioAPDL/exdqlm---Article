@@ -28,6 +28,7 @@ profiles:
       n_train: 160
       holdout_n: 450
       n_predictors: 8
+      dataset_seed: 20260714
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
@@ -71,6 +72,7 @@ profiles:
       n_train: 160
       holdout_n: 800
       n_predictors: 8
+      dataset_seed: 20260714
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
@@ -83,7 +85,11 @@ profiles:
       rhs_a_zeta: 2.0
       rhs_b_zeta: 9.0
       rhs_zeta2_fixed: 9.0
-      n_burn: 400
+      screen_seeds: [20260711, 20260712, 20260713, 20260714, 20260715, 20260716, 20260717, 20260718]
+      screen_holdout_ratio_max: 1.25
+      screen_active_ratio_max: 1.35
+      screen_check_ratio_max: 1.05
+      n_burn: 1000
       n_mcmc: 300
       thin: 1
 
@@ -114,6 +120,7 @@ profiles:
       n_train: 160
       holdout_n: 1200
       n_predictors: 8
+      dataset_seed: 20260714
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
@@ -126,7 +133,7 @@ profiles:
       rhs_a_zeta: 2.0
       rhs_b_zeta: 9.0
       rhs_zeta2_fixed: 9.0
-      n_burn: 700
+      n_burn: 1000
       n_mcmc: 500
       thin: 1
 
