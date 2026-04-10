@@ -14,22 +14,12 @@ testthat::test_that("core manuscript figure targets are reproduced", {
     "fig_ex1mcmc",
     "fig_ex1quants",
     "fig_ex2quant",
-    "fig_ex2quant_ldvb",
     "fig_ex2checks",
-    "fig_ex2checks_ldvb",
-    "fig_ex2_gamma_posteriors",
-    "fig_ex2_ldvb_diagnostics",
-    "tab_ex2_diagnostics",
-    "tab_ex2_diagnostics_ldvb",
     "fig_ex3data",
     "fig_ex3quantcomps",
-    "fig_ex3quantcomps_ldvb",
     "fig_ex3zetapsi",
-    "fig_ex3zetapsi_ldvb",
     "fig_ex3forecast",
-    "fig_ex3forecast_ldvb",
     "tab_ex3_diagnostics",
-    "tab_ex3_diagnostics_ldvb",
     "fig_ex4static",
     "tab_ex4static_summary"
   )
@@ -41,9 +31,8 @@ testthat::test_that("core manuscript figure targets are reproduced", {
   for (id in core) {
     row <- tr[tr$artifact_id == id, , drop = FALSE]
     testthat::expect_true(nrow(row) > 0, info = sprintf("Missing tracker row for %s", id))
-    testthat::expect_true(
-      all(row$status %in% c("reproduced", "approximate")),
-      info = sprintf("Unexpected status for %s: %s", id, paste(unique(row$status), collapse = ", "))
+    testthat::expect_true(all(row$status == "reproduced"),
+      info = sprintf("Core publication artifact %s must be fully reproduced, found: %s", id, paste(unique(row$status), collapse = ", "))
     )
   }
 })

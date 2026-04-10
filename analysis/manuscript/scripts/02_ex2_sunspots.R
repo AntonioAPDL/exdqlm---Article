@@ -21,6 +21,16 @@ if (!need_ex2) {
   need_ex2_gamma <- target_enabled("ex2_gamma_posteriors", "ex2")
   need_ex2_tables <- target_enabled("ex2tables", "ex2")
   need_ex2_tables_ldvb <- target_enabled("ex2tables_ldvb", "ex2")
+  need_ex2_ldvb_core <- any(c(
+    need_ex2quant, need_ex2quant_ldvb,
+    need_ex2checks, need_ex2checks_ldvb,
+    need_ex2_ldvb, need_ex2_ldvb_diag,
+    need_ex2_gamma, need_ex2_tables_ldvb
+  ))
+  need_ex2_isvb_core <- any(c(
+    need_ex2_ldvb, need_ex2_ldvb_diag,
+    need_ex2_gamma
+  ))
 
   y_ts <- datasets::sunspot.year
   y <- as.numeric(y_ts)
@@ -57,90 +67,103 @@ if (!need_ex2) {
   ldvb_diag_n_samp <- as.integer(cfg_profile$ex2$ldvb_diag_n_samp %||% n_samp)
   df_grid <- as.numeric(cfg_profile$ex2$df_grid)
 
-  ex2_core <- load_or_fit_cache("ex2_core_models_v2", {
-    M_sigma <- exdqlm::exdqlmISVB(
-      y = y_ts, p0 = 0.85, model = model,
-      df = c(0.9, 0.85), dim.df = c(1, 8),
-      dqlm.ind = TRUE, fix.sigma = FALSE,
-      n.IS = n_is, n.samp = n_samp, tol = tol,
-      verbose = FALSE
-    )
+  fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
+  M_sigma <- M1 <- M2 <- NULL
+  M_sigma_ldvb <- M1_ldvb <- M2_ldvb <- NULL
 
-    M1 <- exdqlm::exdqlmISVB(
-      y = y_ts, p0 = 0.85, model = model,
-      df = c(0.9, 0.85), dim.df = c(1, 8),
-      dqlm.ind = TRUE, sig.init = 2,
-      n.IS = n_is, n.samp = n_samp, tol = tol,
-      verbose = FALSE
-    )
-
-    M2 <- exdqlm::exdqlmISVB(
-      y = y_ts, p0 = 0.85, model = model,
-      df = c(0.9, 0.85), dim.df = c(1, 8),
-      sig.init = 2,
-      n.IS = n_is, n.samp = n_samp, tol = tol,
-      verbose = FALSE
-    )
-
-    M_sigma_ldvb <- tryCatch(
-      exdqlm::exdqlmLDVB(
+  if (need_ex2_isvb_core) {
+    ex2_core_isvb <- load_or_fit_cache("ex2_core_models_isvb_v1", {
+      M_sigma <- exdqlm::exdqlmISVB(
         y = y_ts, p0 = 0.85, model = model,
         df = c(0.9, 0.85), dim.df = c(1, 8),
         dqlm.ind = TRUE, fix.sigma = FALSE,
-        n.samp = n_samp, tol = tol,
+        n.IS = n_is, n.samp = n_samp, tol = tol,
         verbose = FALSE
-      ),
-      error = function(e) e
-    )
+      )
 
-    M1_ldvb <- tryCatch(
-      exdqlm::exdqlmLDVB(
+      M1 <- exdqlm::exdqlmISVB(
         y = y_ts, p0 = 0.85, model = model,
         df = c(0.9, 0.85), dim.df = c(1, 8),
         dqlm.ind = TRUE, sig.init = 2,
-        n.samp = n_samp, tol = tol,
+        n.IS = n_is, n.samp = n_samp, tol = tol,
         verbose = FALSE
-      ),
-      error = function(e) e
-    )
+      )
 
-    M2_ldvb <- tryCatch(
-      exdqlm::exdqlmLDVB(
+      M2 <- exdqlm::exdqlmISVB(
         y = y_ts, p0 = 0.85, model = model,
         df = c(0.9, 0.85), dim.df = c(1, 8),
-        sig.init = 2, n.samp = n_samp, tol = tol,
+        sig.init = 2,
+        n.IS = n_is, n.samp = n_samp, tol = tol,
         verbose = FALSE
-      ),
-      error = function(e) e
-    )
+      )
 
-    list(
-      M_sigma = M_sigma, M1 = M1, M2 = M2,
-      M_sigma_ldvb = M_sigma_ldvb, M1_ldvb = M1_ldvb, M2_ldvb = M2_ldvb,
-      model = model
-    )
-  }, note = "ex2_core_models_v2")
+      list(M_sigma = M_sigma, M1 = M1, M2 = M2)
+    }, note = "ex2_core_models_isvb_v1")
+    M_sigma <- ex2_core_isvb$M_sigma
+    M1 <- ex2_core_isvb$M1
+    M2 <- ex2_core_isvb$M2
+  }
 
-  fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
-  M_sigma <- ex2_core$M_sigma
-  M1 <- ex2_core$M1
-  M2 <- ex2_core$M2
-  M_sigma_ldvb <- ex2_core$M_sigma_ldvb
-  M1_ldvb <- ex2_core$M1_ldvb
-  M2_ldvb <- ex2_core$M2_ldvb
+  if (need_ex2_ldvb_core) {
+    ex2_core_ldvb <- load_or_fit_cache("ex2_core_models_ldvb_v1", {
+      M_sigma_ldvb <- tryCatch(
+        exdqlm::exdqlmLDVB(
+          y = y_ts, p0 = 0.85, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          dqlm.ind = TRUE, fix.sigma = FALSE,
+          n.samp = n_samp, tol = tol,
+          verbose = FALSE
+        ),
+        error = function(e) e
+      )
+
+      M1_ldvb <- tryCatch(
+        exdqlm::exdqlmLDVB(
+          y = y_ts, p0 = 0.85, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          dqlm.ind = TRUE, sig.init = 2,
+          n.samp = n_samp, tol = tol,
+          verbose = FALSE
+        ),
+        error = function(e) e
+      )
+
+      M2_ldvb <- tryCatch(
+        exdqlm::exdqlmLDVB(
+          y = y_ts, p0 = 0.85, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          sig.init = 2, n.samp = n_samp, tol = tol,
+          verbose = FALSE
+        ),
+        error = function(e) e
+      )
+
+      list(M_sigma_ldvb = M_sigma_ldvb, M1_ldvb = M1_ldvb, M2_ldvb = M2_ldvb)
+    }, note = "ex2_core_models_ldvb_v1")
+    M_sigma_ldvb <- ex2_core_ldvb$M_sigma_ldvb
+    M1_ldvb <- ex2_core_ldvb$M1_ldvb
+    M2_ldvb <- ex2_core_ldvb$M2_ldvb
+  }
+
   ex2_ldvb_pair_ok <- fit_ok(M1_ldvb) && fit_ok(M2_ldvb)
+  ex2_isvb_pair_ok <- fit_ok(M1) && fit_ok(M2)
 
   capture_output_file("ex2_run_summary.txt", {
     cat(sprintf("profile=%s\n", selected_profile))
     cat(sprintf("n.IS=%d, n.samp=%d, tol=%s\n\n", n_is, n_samp, format(tol)))
-    cat("Summary(M_sigma$samp.sigma):\n")
-    print(summary(M_sigma$samp.sigma))
+    if (fit_ok(M_sigma)) {
+      cat("Summary(M_sigma$samp.sigma):\n")
+      print(summary(M_sigma$samp.sigma))
+    }
     if (fit_ok(M_sigma_ldvb)) {
       cat("\nSummary(M_sigma_ldvb$samp.sigma):\n")
       print(summary(M_sigma_ldvb$samp.sigma))
     }
     cat("\nRuntime seconds:\n")
-    rt <- c(M_sigma = M_sigma$run.time, M1_isvb = M1$run.time, M2_isvb = M2$run.time)
+    rt <- c()
+    if (fit_ok(M_sigma)) rt <- c(rt, M_sigma = M_sigma$run.time)
+    if (fit_ok(M1)) rt <- c(rt, M1_isvb = M1$run.time)
+    if (fit_ok(M2)) rt <- c(rt, M2_isvb = M2$run.time)
     if (fit_ok(M_sigma_ldvb)) rt <- c(rt, M_sigma_ldvb = M_sigma_ldvb$run.time)
     if (fit_ok(M1_ldvb)) rt <- c(rt, M1_ldvb = M1_ldvb$run.time)
     if (fit_ok(M2_ldvb)) rt <- c(rt, M2_ldvb = M2_ldvb$run.time)
@@ -174,146 +197,7 @@ if (!need_ex2) {
   xlim_idx <- time_window_to_index(y_ts, 1750, 1850)
   xlim_time <- c(1750, 1850)
 
-  if (need_ex2quant) {
-    ex2_extreme_isvb <- load_or_fit_cache("ex2_quant_grid_isvb_v1", {
-      M99_dqlm <- exdqlm::exdqlmISVB(
-        y = y_ts, p0 = 0.99, model = model,
-        df = c(0.9, 0.85), dim.df = c(1, 8),
-        dqlm.ind = TRUE, sig.init = 2,
-        n.IS = n_is, n.samp = n_samp, tol = tol,
-        verbose = FALSE
-      )
-      M99_exdqlm <- exdqlm::exdqlmISVB(
-        y = y_ts, p0 = 0.99, model = model,
-        df = c(0.9, 0.85), dim.df = c(1, 8),
-        sig.init = 2,
-        n.IS = n_is, n.samp = n_samp, tol = tol,
-        verbose = FALSE
-      )
-      M05_dqlm <- exdqlm::exdqlmISVB(
-        y = y_ts, p0 = 0.05, model = model,
-        df = c(0.9, 0.85), dim.df = c(1, 8),
-        dqlm.ind = TRUE, sig.init = 2,
-        n.IS = n_is, n.samp = n_samp, tol = tol,
-        verbose = FALSE
-      )
-      M05_exdqlm <- exdqlm::exdqlmISVB(
-        y = y_ts, p0 = 0.05, model = model,
-        df = c(0.9, 0.85), dim.df = c(1, 8),
-        sig.init = 2,
-        n.IS = n_is, n.samp = n_samp, tol = tol,
-        verbose = FALSE
-      )
-      list(
-        M99_dqlm = M99_dqlm, M99_exdqlm = M99_exdqlm,
-        M05_dqlm = M05_dqlm, M05_exdqlm = M05_exdqlm
-      )
-    }, note = "ex2_quant_grid_isvb_v1")
-
-    M99_dqlm <- ex2_extreme_isvb$M99_dqlm
-    M99_exdqlm <- ex2_extreme_isvb$M99_exdqlm
-    M05_dqlm <- ex2_extreme_isvb$M05_dqlm
-    M05_exdqlm <- ex2_extreme_isvb$M05_exdqlm
-
-    plot_quant_triplet_isvb <- function(filename, m_dqlm, m_exdqlm, p0_label) {
-      m_dqlm_plot <- m_dqlm
-      m_exdqlm_plot <- m_exdqlm
-      m_dqlm_plot$y <- y_ts
-      m_exdqlm_plot$y <- y_ts
-      save_png_plot(filename, {
-        graphics::par(mfrow = c(1, 3))
-        stats::plot.ts(y_ts, col = "darkgrey", ylab = "sunspot count")
-        graphics::title(main = sprintf("Sunspots data"))
-
-        stats::plot.ts(y_ts, xlim = xlim_time, col = "darkgrey", ylab = "quantile 95% CrIs")
-        exdqlm::exdqlmPlot(m_dqlm_plot, add = TRUE, col = "red")
-        exdqlm::exdqlmPlot(m_exdqlm_plot, add = TRUE, col = "blue")
-        graphics::legend("topleft", legend = c("DQLM (ISVB)", "exDQLM (ISVB)"), col = c("red", "blue"), lty = 1, bty = "n")
-        graphics::title(main = sprintf("ISVB fit (p0 = %s)", p0_label))
-
-        graphics::hist(as.numeric(m_exdqlm$samp.gamma), xlab = expression(gamma), main = sprintf("ISVB exDQLM gamma (p0 = %s)", p0_label))
-      })
-    }
-
-    # Keep legacy filename for manuscript references: original p0 = 0.85.
-    plot_quant_triplet_isvb("ex2quant.png", M1, M2, "0.85")
-    plot_quant_triplet_isvb("ex2quant_p099.png", M99_dqlm, M99_exdqlm, "0.99")
-    plot_quant_triplet_isvb("ex2quant_p005.png", M05_dqlm, M05_exdqlm, "0.05")
-    register_artifact(
-      artifact_id = "fig_ex2quant",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
-      manuscript_target = "fig:ex2quant",
-      status = "reproduced",
-      notes = "Three-panel ISVB figure for original p0=0.85 comparing DQLM and exDQLM."
-    )
-    register_artifact(
-      artifact_id = "fig_ex2quant_p099",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex2quant_p099.png",
-      manuscript_target = "new: fig ex2quant ISVB upper-tail (p0=0.99)",
-      status = "reproduced",
-      notes = "Three-panel ISVB figure for p0=0.99 comparing DQLM and exDQLM."
-    )
-    register_artifact(
-      artifact_id = "fig_ex2quant_p005",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex2quant_p005.png",
-      manuscript_target = "new: fig ex2quant ISVB lower-tail (p0=0.05)",
-      status = "reproduced",
-      notes = "Three-panel ISVB figure for p0=0.05 comparing DQLM and exDQLM."
-    )
-  }
-
-  if (need_ex2quant_ldvb) {
-    ex2_extreme_ldvb <- load_or_fit_cache("ex2_quant_grid_ldvb_v2", {
-      M99_dqlm_ldvb <- tryCatch(
-        exdqlm::exdqlmLDVB(
-          y = y_ts, p0 = 0.99, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
-          # Stabilize extreme upper-tail DQLM fit under LDVB.
-          dqlm.ind = TRUE, sig.init = 10, fix.sigma = FALSE,
-          n.samp = n_samp, tol = tol,
-          verbose = FALSE
-        ),
-        error = function(e) e
-      )
-      M99_exdqlm_ldvb <- tryCatch(
-        exdqlm::exdqlmLDVB(
-          y = y_ts, p0 = 0.99, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
-          sig.init = 2,
-          n.samp = n_samp, tol = tol,
-          verbose = FALSE
-        ),
-        error = function(e) e
-      )
-      M05_dqlm_ldvb <- tryCatch(
-        exdqlm::exdqlmLDVB(
-          y = y_ts, p0 = 0.05, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
-          dqlm.ind = TRUE, sig.init = 2,
-          n.samp = n_samp, tol = tol,
-          verbose = FALSE
-        ),
-        error = function(e) e
-      )
-      M05_exdqlm_ldvb <- tryCatch(
-        exdqlm::exdqlmLDVB(
-          y = y_ts, p0 = 0.05, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
-          sig.init = 2,
-          n.samp = n_samp, tol = tol,
-          verbose = FALSE
-        ),
-        error = function(e) e
-      )
-      list(
-        M99_dqlm_ldvb = M99_dqlm_ldvb, M99_exdqlm_ldvb = M99_exdqlm_ldvb,
-        M05_dqlm_ldvb = M05_dqlm_ldvb, M05_exdqlm_ldvb = M05_exdqlm_ldvb
-      )
-    }, note = "ex2_quant_grid_ldvb_v2")
-
+  if (need_ex2quant || need_ex2quant_ldvb) {
     plot_quant_triplet_ldvb <- function(filename, m_dqlm, m_exdqlm, p0_label) {
       m_dqlm_plot <- m_dqlm
       m_exdqlm_plot <- m_exdqlm
@@ -336,11 +220,28 @@ if (!need_ex2) {
       })
     }
 
-    ldvb_p099_ok <- fit_ok(ex2_extreme_ldvb$M99_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M99_exdqlm_ldvb)
-    ldvb_p005_ok <- fit_ok(ex2_extreme_ldvb$M05_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M05_exdqlm_ldvb)
+    if (ex2_ldvb_pair_ok && need_ex2quant) {
+      plot_quant_triplet_ldvb("ex2quant.png", M1_ldvb, M2_ldvb, "0.85")
+      register_artifact(
+        artifact_id = "fig_ex2quant",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
+        manuscript_target = "fig:ex2quant",
+        status = "reproduced",
+        notes = "Three-panel LDVB figure for original p0=0.85 comparing DQLM and exDQLM."
+      )
+    } else if (need_ex2quant) {
+      register_artifact(
+        artifact_id = "fig_ex2quant",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
+        manuscript_target = "fig:ex2quant",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for the primary Example 2 quantile panel."
+      )
+    }
 
-    if (ex2_ldvb_pair_ok) {
-      # Keep legacy filename for manuscript references: original p0 = 0.85.
+    if (ex2_ldvb_pair_ok && need_ex2quant_ldvb) {
       plot_quant_triplet_ldvb("ex2quant_ldvb.png", M1_ldvb, M2_ldvb, "0.85")
       register_artifact(
         artifact_id = "fig_ex2quant_ldvb",
@@ -361,70 +262,134 @@ if (!need_ex2) {
       )
     }
 
-    if (ldvb_p099_ok) {
-      plot_quant_triplet_ldvb("ex2quant_ldvb_p099.png", ex2_extreme_ldvb$M99_dqlm_ldvb, ex2_extreme_ldvb$M99_exdqlm_ldvb, "0.99")
-      register_artifact(
-        artifact_id = "fig_ex2quant_ldvb_p099",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
-        manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
-        status = "reproduced",
-        notes = "Three-panel LDVB figure for p0=0.99 comparing DQLM and exDQLM."
-      )
-    } else {
-      register_artifact(
-        artifact_id = "fig_ex2quant_ldvb_p099",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
-        manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.99 quantile panel."
-      )
-    }
+    if (need_ex2quant_ldvb) {
+      ex2_extreme_ldvb <- load_or_fit_cache("ex2_quant_grid_ldvb_v2", {
+        M99_dqlm_ldvb <- tryCatch(
+          exdqlm::exdqlmLDVB(
+            y = y_ts, p0 = 0.99, model = model,
+            df = c(0.9, 0.85), dim.df = c(1, 8),
+            # Stabilize extreme upper-tail DQLM fit under LDVB.
+            dqlm.ind = TRUE, sig.init = 10, fix.sigma = FALSE,
+            n.samp = n_samp, tol = tol,
+            verbose = FALSE
+          ),
+          error = function(e) e
+        )
+        M99_exdqlm_ldvb <- tryCatch(
+          exdqlm::exdqlmLDVB(
+            y = y_ts, p0 = 0.99, model = model,
+            df = c(0.9, 0.85), dim.df = c(1, 8),
+            sig.init = 2,
+            n.samp = n_samp, tol = tol,
+            verbose = FALSE
+          ),
+          error = function(e) e
+        )
+        M05_dqlm_ldvb <- tryCatch(
+          exdqlm::exdqlmLDVB(
+            y = y_ts, p0 = 0.05, model = model,
+            df = c(0.9, 0.85), dim.df = c(1, 8),
+            dqlm.ind = TRUE, sig.init = 2,
+            n.samp = n_samp, tol = tol,
+            verbose = FALSE
+          ),
+          error = function(e) e
+        )
+        M05_exdqlm_ldvb <- tryCatch(
+          exdqlm::exdqlmLDVB(
+            y = y_ts, p0 = 0.05, model = model,
+            df = c(0.9, 0.85), dim.df = c(1, 8),
+            sig.init = 2,
+            n.samp = n_samp, tol = tol,
+            verbose = FALSE
+          ),
+          error = function(e) e
+        )
+        list(
+          M99_dqlm_ldvb = M99_dqlm_ldvb, M99_exdqlm_ldvb = M99_exdqlm_ldvb,
+          M05_dqlm_ldvb = M05_dqlm_ldvb, M05_exdqlm_ldvb = M05_exdqlm_ldvb
+        )
+      }, note = "ex2_quant_grid_ldvb_v2")
 
-    if (ldvb_p005_ok) {
-      plot_quant_triplet_ldvb("ex2quant_ldvb_p005.png", ex2_extreme_ldvb$M05_dqlm_ldvb, ex2_extreme_ldvb$M05_exdqlm_ldvb, "0.05")
-      register_artifact(
-        artifact_id = "fig_ex2quant_ldvb_p005",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
-        manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
-        status = "reproduced",
-        notes = "Three-panel LDVB figure for p0=0.05 comparing DQLM and exDQLM."
-      )
-    } else {
-      register_artifact(
-        artifact_id = "fig_ex2quant_ldvb_p005",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
-        manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.05 quantile panel."
-      )
+      ldvb_p099_ok <- fit_ok(ex2_extreme_ldvb$M99_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M99_exdqlm_ldvb)
+      ldvb_p005_ok <- fit_ok(ex2_extreme_ldvb$M05_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M05_exdqlm_ldvb)
+
+      if (ldvb_p099_ok) {
+        plot_quant_triplet_ldvb("ex2quant_ldvb_p099.png", ex2_extreme_ldvb$M99_dqlm_ldvb, ex2_extreme_ldvb$M99_exdqlm_ldvb, "0.99")
+        register_artifact(
+          artifact_id = "fig_ex2quant_ldvb_p099",
+          artifact_type = "figure",
+          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
+          manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
+          status = "reproduced",
+          notes = "Three-panel LDVB figure for p0=0.99 comparing DQLM and exDQLM."
+        )
+      } else {
+        register_artifact(
+          artifact_id = "fig_ex2quant_ldvb_p099",
+          artifact_type = "figure",
+          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
+          manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
+          status = "not_reproduced",
+          notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.99 quantile panel."
+        )
+      }
+
+      if (ldvb_p005_ok) {
+        plot_quant_triplet_ldvb("ex2quant_ldvb_p005.png", ex2_extreme_ldvb$M05_dqlm_ldvb, ex2_extreme_ldvb$M05_exdqlm_ldvb, "0.05")
+        register_artifact(
+          artifact_id = "fig_ex2quant_ldvb_p005",
+          artifact_type = "figure",
+          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
+          manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
+          status = "reproduced",
+          notes = "Three-panel LDVB figure for p0=0.05 comparing DQLM and exDQLM."
+        )
+      } else {
+        register_artifact(
+          artifact_id = "fig_ex2quant_ldvb_p005",
+          artifact_type = "figure",
+          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
+          manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
+          status = "not_reproduced",
+          notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.05 quantile panel."
+        )
+      }
     }
   }
 
   if (need_ex2checks) {
-    save_png_plot("ex2checks.png", {
-      graphics::par(mfrow = c(2, 3))
-      exdqlm::exdqlmDiagnostics(M1, M2, plot = TRUE, cols = c("red", "blue"))
-    })
-    register_artifact(
-      artifact_id = "fig_ex2checks",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex2checks.png",
-      manuscript_target = "fig:ex2checks",
-      status = "reproduced",
-      notes = "Generated via exdqlmDiagnostics replacement for legacy exdqlmChecks."
-    )
+    if (ex2_ldvb_pair_ok) {
+      save_png_plot("ex2checks.png", {
+        graphics::par(mfrow = c(2, 3))
+        diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m2), y_data = y)
+      })
+      register_artifact(
+        artifact_id = "fig_ex2checks",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2checks.png",
+        manuscript_target = "fig:ex2checks",
+        status = "reproduced",
+        notes = "Primary Example 2 diagnostics figure generated from the LDVB fits."
+      )
+    } else {
+      register_artifact(
+        artifact_id = "fig_ex2checks",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2checks.png",
+        manuscript_target = "fig:ex2checks",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for the primary diagnostics panel."
+      )
+    }
   }
 
   if (need_ex2checks_ldvb) {
     if (ex2_ldvb_pair_ok) {
       save_png_plot("ex2checks_ldvb.png", {
         graphics::par(mfrow = c(2, 3))
-        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1))
-        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2))
+        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1), y_data = y)
+        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2), y_data = y)
       })
       register_artifact(
         artifact_id = "fig_ex2checks_ldvb",
@@ -447,7 +412,7 @@ if (!need_ex2) {
   }
 
   if (need_ex2_ldvb) {
-    if (fit_ok(M2_ldvb)) {
+    if (fit_ok(M2) && fit_ok(M2_ldvb)) {
       save_png_plot("ex2_isvb_ldvb_compare.png", {
         graphics::par(mfrow = c(1, 2))
 
@@ -497,13 +462,17 @@ if (!need_ex2) {
         relative_path = "analysis/manuscript/outputs/figures/ex2_isvb_ldvb_compare.png",
         manuscript_target = "new: ISVB vs LDVB dynamic comparison",
         status = "not_reproduced",
-        notes = sprintf("LDVB fit failed: %s", M2_ldvb$message)
+        notes = if (!fit_ok(M2)) {
+          sprintf("ISVB fit failed: %s", M2$message)
+        } else {
+          sprintf("LDVB fit failed: %s", M2_ldvb$message)
+        }
       )
     }
   }
 
   if (need_ex2_gamma) {
-    if (fit_ok(M2_ldvb)) {
+    if (fit_ok(M2) && fit_ok(M2_ldvb)) {
       gamma_is <- as.numeric(M2$samp.gamma)
       gamma_ld <- as.numeric(M2_ldvb$samp.gamma)
       gamma_is <- gamma_is[is.finite(gamma_is)]
@@ -575,7 +544,11 @@ if (!need_ex2) {
         relative_path = "analysis/manuscript/outputs/figures/ex2_gamma_posteriors.png",
         manuscript_target = "new: ISVB and LDVB gamma posteriors (side-by-side)",
         status = "not_reproduced",
-        notes = sprintf("LDVB fit failed: %s", M2_ldvb$message)
+        notes = if (!fit_ok(M2)) {
+          sprintf("ISVB fit failed: %s", M2$message)
+        } else {
+          sprintf("LDVB fit failed: %s", M2_ldvb$message)
+        }
       )
       register_artifact(
         artifact_id = "tab_ex2_gamma_credible_intervals",
@@ -583,7 +556,11 @@ if (!need_ex2) {
         relative_path = "analysis/manuscript/outputs/tables/ex2_gamma_credible_intervals.csv",
         manuscript_target = "new: Example 2 gamma 95% credible intervals",
         status = "not_reproduced",
-        notes = sprintf("LDVB fit failed: %s", M2_ldvb$message)
+        notes = if (!fit_ok(M2)) {
+          sprintf("ISVB fit failed: %s", M2$message)
+        } else {
+          sprintf("LDVB fit failed: %s", M2_ldvb$message)
+        }
       )
     }
   }
@@ -601,49 +578,60 @@ if (!need_ex2) {
     seq_s <- as.numeric(ldvb_diag$seq.sigma)
     el <- as.numeric(ldvb_diag$diagnostics$elbo)
 
-    save_png_plot("ex2_ldvb_diagnostics.png", {
-      graphics::par(mfrow = c(2, 2))
+    if (fit_ok(M2)) {
+      save_png_plot("ex2_ldvb_diagnostics.png", {
+        graphics::par(mfrow = c(2, 2))
 
-      # Fit comparison in the manuscript's focused time window.
-      stats::plot.ts(y, xlim = xlim_idx, col = "grey70", ylab = "quantile 95% CrIs")
-      exdqlm::exdqlmPlot(M2, add = TRUE, col = "blue")
-      q_ld <- quantile_summary_from_fit(ldvb_diag, cr.percent = 0.95)
-      plot_quantile_summary(q_ld, col = "darkorange", add = TRUE)
-      graphics::legend("topleft", legend = c("ISVB fit", "LDVB fit"), col = c("blue", "darkorange"), lty = 1, bty = "n")
+        # Fit comparison in the manuscript's focused time window.
+        stats::plot.ts(y, xlim = xlim_idx, col = "grey70", ylab = "quantile 95% CrIs")
+        exdqlm::exdqlmPlot(M2, add = TRUE, col = "blue")
+        q_ld <- quantile_summary_from_fit(ldvb_diag, cr.percent = 0.95)
+        plot_quantile_summary(q_ld, col = "darkorange", add = TRUE)
+        graphics::legend("topleft", legend = c("ISVB fit", "LDVB fit"), col = c("blue", "darkorange"), lty = 1, bty = "n")
 
-      # LDVB parameter paths by iteration.
-      graphics::plot(seq_along(seq_g), seq_g, type = "o", pch = 16, cex = 0.45, col = "darkorange", xlab = "Iteration", ylab = expression(seq(gamma)))
-      graphics::plot(seq_along(seq_s), seq_s, type = "o", pch = 16, cex = 0.45, col = "darkorange", xlab = "Iteration", ylab = expression(seq(sigma)))
+        # LDVB parameter paths by iteration.
+        graphics::plot(seq_along(seq_g), seq_g, type = "o", pch = 16, cex = 0.45, col = "darkorange", xlab = "Iteration", ylab = expression(seq(gamma)))
+        graphics::plot(seq_along(seq_s), seq_s, type = "o", pch = 16, cex = 0.45, col = "darkorange", xlab = "Iteration", ylab = expression(seq(sigma)))
 
-      # ELBO and delta-ELBO traces.
-      if (length(el) > 1L && all(is.finite(el))) {
-        de <- c(NA_real_, diff(el))
-        de_rng <- range(de, na.rm = TRUE)
-        el_rng <- range(el, na.rm = TRUE)
-        if (is.finite(diff(de_rng)) && diff(de_rng) > 0) {
-          de_scaled <- el_rng[1] + (de - de_rng[1]) * diff(el_rng) / diff(de_rng)
+        # ELBO and delta-ELBO traces.
+        if (length(el) > 1L && all(is.finite(el))) {
+          de <- c(NA_real_, diff(el))
+          de_rng <- range(de, na.rm = TRUE)
+          el_rng <- range(el, na.rm = TRUE)
+          if (is.finite(diff(de_rng)) && diff(de_rng) > 0) {
+            de_scaled <- el_rng[1] + (de - de_rng[1]) * diff(el_rng) / diff(de_rng)
+          } else {
+            de_scaled <- rep(mean(el_rng), length(de))
+          }
+          graphics::plot(seq_along(el), el, type = "l", lwd = 2, col = "darkorange", xlab = "Iteration", ylab = "ELBO")
+          graphics::lines(seq_along(el), de_scaled, col = "steelblue", lty = 2)
+          graphics::legend("bottomright", legend = c("ELBO", "scaled delta ELBO"), col = c("darkorange", "steelblue"), lty = c(1, 2), bty = "n")
         } else {
-          de_scaled <- rep(mean(el_rng), length(de))
+          graphics::plot.new()
+          graphics::title("ELBO trace unavailable")
         }
-        graphics::plot(seq_along(el), el, type = "l", lwd = 2, col = "darkorange", xlab = "Iteration", ylab = "ELBO")
-        graphics::lines(seq_along(el), de_scaled, col = "steelblue", lty = 2)
-        graphics::legend("bottomright", legend = c("ELBO", "scaled delta ELBO"), col = c("darkorange", "steelblue"), lty = c(1, 2), bty = "n")
-      } else {
-        graphics::plot.new()
-        graphics::title("ELBO trace unavailable")
-      }
-    })
-    register_artifact(
-      artifact_id = "fig_ex2_ldvb_diagnostics",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png",
-      manuscript_target = "new: LDVB convergence diagnostics",
-      status = "reproduced",
-      notes = sprintf(
-        "LDVB diagnostics with stricter tolerance (tol=%s, n.samp=%d); includes fit overlay, seq.gamma, seq.sigma, ELBO trace.",
-        format(ldvb_diag_tol), ldvb_diag_n_samp
+      })
+      register_artifact(
+        artifact_id = "fig_ex2_ldvb_diagnostics",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png",
+        manuscript_target = "new: LDVB convergence diagnostics",
+        status = "reproduced",
+        notes = sprintf(
+          "LDVB diagnostics with stricter tolerance (tol=%s, n.samp=%d); includes fit overlay, seq.gamma, seq.sigma, ELBO trace.",
+          format(ldvb_diag_tol), ldvb_diag_n_samp
+        )
       )
-    )
+    } else {
+      register_artifact(
+        artifact_id = "fig_ex2_ldvb_diagnostics",
+        artifact_type = "figure",
+        relative_path = "analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png",
+        manuscript_target = "new: LDVB convergence diagnostics",
+        status = "not_reproduced",
+        notes = sprintf("ISVB reference fit failed: %s", M2$message)
+      )
+    }
 
     capture_output_file("ex2_ldvb_diagnostics_summary.txt", {
       cat(sprintf("tol=%s, n.samp=%d, iter=%d\n\n", format(ldvb_diag_tol), ldvb_diag_n_samp, ldvb_diag$iter))
@@ -680,61 +668,89 @@ if (!need_ex2) {
   }
 
   if (need_ex2_tables) {
-    ex2_df_scan <- load_or_fit_cache("ex2_df_scan", {
+    ex2_df_scan <- load_or_fit_cache("ex2_df_scan_ldvb_primary_v1", {
       possible_dfs <- cbind(0.9, df_grid)
       ref_samp <- stats::rnorm(length(y_ts))
-      KLs <- numeric(nrow(possible_dfs))
+      KLs <- rep(NA_real_, nrow(possible_dfs))
       for (i in seq_len(nrow(possible_dfs))) {
-        temp_M <- exdqlm::exdqlmISVB(
-          y = y_ts, p0 = 0.85, model = model,
-          df = possible_dfs[i, ], dim.df = c(1, 8),
-          sig.init = 2,
-          n.IS = n_is, n.samp = n_samp, tol = tol,
-          verbose = FALSE
+        temp_M <- tryCatch(
+          exdqlm::exdqlmLDVB(
+            y = y_ts, p0 = 0.85, model = model,
+            df = possible_dfs[i, ], dim.df = c(1, 8),
+            sig.init = 2,
+            n.samp = n_samp, tol = tol,
+            verbose = FALSE
+          ),
+          error = function(e) e
         )
-        temp_check <- exdqlm::exdqlmDiagnostics(temp_M, plot = FALSE, ref = ref_samp)
-        KLs[i] <- temp_check$m1.KL
+        if (!inherits(temp_M, "error")) {
+          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp, y_data = y)
+          KLs[i] <- temp_check$m1.KL
+        }
       }
       list(possible_dfs = possible_dfs, KLs = KLs)
-    }, note = "ex2_df_scan")
+    }, note = "ex2_df_scan_ldvb_primary_v1")
 
     possible_dfs <- ex2_df_scan$possible_dfs
     KLs <- ex2_df_scan$KLs
-    best_df <- possible_dfs[which.min(KLs), ]
+    finite_kl <- is.finite(KLs)
     df_scan <- data.frame(
       trend_df = possible_dfs[, 1],
       seasonal_df = possible_dfs[, 2],
       KL = KLs
     )
-    save_table_csv(
-      df_scan,
-      filename = "ex2_df_scan_kl.csv",
-      artifact_id = "tab_ex2_df_scan",
-      manuscript_target = "Example 2 discount-factor KL selection",
-      status = "reproduced",
-      notes = sprintf("Best pair in this run: (%0.2f, %0.2f)", best_df[1], best_df[2])
-    )
+    if (any(finite_kl)) {
+      best_df <- possible_dfs[which.min(KLs), ]
+      save_table_csv(
+        df_scan,
+        filename = "ex2_df_scan_kl.csv",
+        artifact_id = "tab_ex2_df_scan",
+        manuscript_target = "Example 2 discount-factor KL selection",
+        status = "reproduced",
+        notes = sprintf("Best pair in this run: (%0.2f, %0.2f)", best_df[1], best_df[2])
+      )
 
-    diag_2 <- exdqlm::exdqlmDiagnostics(M1, M2, plot = FALSE)
-    diag_table <- data.frame(
-      model = c("M1_dqlm_isvb", "M2_exdqlm_isvb"),
-      KL = c(diag_2$m1.KL, diag_2$m2.KL),
-      pplc = c(diag_2$m1.pplc, diag_2$m2.pplc),
-      run_time_seconds = c(diag_2$m1.rt, diag_2$m2.rt)
-    )
-    save_table_csv(
-      diag_table,
-      filename = "ex2_diagnostics_summary.csv",
-      artifact_id = "tab_ex2_diagnostics",
-      manuscript_target = "Example 2 diagnostic narrative",
-      status = "reproduced",
-      notes = "Computed with exdqlmDiagnostics."
-    )
+      register_note(
+        "ex2",
+        sprintf("Sunspots LDVB KL search best seasonal discount factor=%0.2f for this run profile.", best_df[2])
+      )
+    } else {
+      save_table_csv(
+        df_scan,
+        filename = "ex2_df_scan_kl.csv",
+        artifact_id = "tab_ex2_df_scan",
+        manuscript_target = "Example 2 discount-factor KL selection",
+        status = "not_reproduced",
+        notes = "No finite KL values were obtained in the primary LDVB discount-factor scan."
+      )
+    }
 
-    register_note(
-      "ex2",
-      sprintf("Sunspots KL search best seasonal discount factor=%0.2f for this run profile.", best_df[2])
-    )
+    if (ex2_ldvb_pair_ok) {
+      diag_2 <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, y_data = y)
+      diag_table <- data.frame(
+        model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
+        KL = c(diag_2$m1.KL, diag_2$m2.KL),
+        pplc = c(diag_2$m1.pplc, diag_2$m2.pplc),
+        run_time_seconds = c(diag_2$m1.rt, diag_2$m2.rt)
+      )
+      save_table_csv(
+        diag_table,
+        filename = "ex2_diagnostics_summary.csv",
+        artifact_id = "tab_ex2_diagnostics",
+        manuscript_target = "Example 2 diagnostic narrative",
+        status = "reproduced",
+        notes = "Primary Example 2 diagnostics summary computed from the LDVB fits."
+      )
+    } else {
+      register_artifact(
+        artifact_id = "tab_ex2_diagnostics",
+        artifact_type = "table",
+        relative_path = "analysis/manuscript/outputs/tables/ex2_diagnostics_summary.csv",
+        manuscript_target = "Example 2 diagnostic narrative",
+        status = "not_reproduced",
+        notes = "Missing LDVB DQLM/exDQLM fits required for the primary diagnostics summary."
+      )
+    }
   }
 
   if (need_ex2_tables_ldvb) {
@@ -754,7 +770,7 @@ if (!need_ex2) {
           error = function(e) e
         )
         if (!inherits(temp_M, "error")) {
-          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp)
+          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp, y_data = y)
           KLs[i] <- temp_check$m1.KL
         }
       }
@@ -795,8 +811,8 @@ if (!need_ex2) {
     }
 
     if (ex2_ldvb_pair_ok) {
-      diag_m1_ld <- diagnostics_from_fit(M1_ldvb, plot = FALSE)
-      diag_m2_ld <- diagnostics_from_fit(M2_ldvb, plot = FALSE)
+      diag_m1_ld <- diagnostics_from_fit(M1_ldvb, plot = FALSE, y_data = y)
+      diag_m2_ld <- diagnostics_from_fit(M2_ldvb, plot = FALSE, y_data = y)
       diag_table_ld <- data.frame(
         model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
         KL = c(diag_m1_ld$m1.KL, diag_m2_ld$m1.KL),

@@ -122,28 +122,14 @@ if (!need_ex3) {
     ))
     model_w_reg <- model + reg_comp
 
-    n_is <- as.integer(cfg_profile$ex3$n_is)
     n_samp <- as.integer(cfg_profile$ex3$n_samp)
     tol <- as.numeric(cfg_profile$ex3$tol)
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
 
-    ex3_models <- load_or_fit_cache("ex3_models_v2", {
+    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v1", {
       ref_samp <- stats::rnorm(length(y_log))
-      KLs <- numeric(length(lambda_grid))
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
-        temp_M2 <- exdqlm::transfn_exdqlmISVB(
-          y = y_log, p0 = 0.15, model = model,
-          df = c(1, 0.9), dim.df = c(1, 2),
-          X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_grid[i],
-          tf.m0 = c(0, 0), tf.C0 = diag(c(0.1, 0.005), 2),
-          sig.init = 0.1, gam.init = -0.1,
-          tol = tol, n.IS = n_is, n.samp = n_samp,
-          verbose = FALSE
-        )
-        temp_check <- exdqlm::exdqlmDiagnostics(temp_M2, plot = FALSE, ref = ref_samp)
-        KLs[i] <- temp_check$m1.KL
-
         temp_M2_ldvb <- tryCatch(
           transfn_exdqlmLDVB_local(
             y = y_log, p0 = 0.15, model = model,
@@ -157,30 +143,11 @@ if (!need_ex3) {
           error = function(e) e
         )
         if (!inherits(temp_M2_ldvb, "error")) {
-          temp_check_ldvb <- diagnostics_from_fit(temp_M2_ldvb, plot = FALSE, ref = ref_samp)
+          temp_check_ldvb <- diagnostics_from_fit(temp_M2_ldvb, plot = FALSE, ref = ref_samp, y_data = y_log)
           KLs_ldvb[i] <- temp_check_ldvb$m1.KL
         }
       }
-      lambda_star <- lambda_grid[which.min(KLs)]
       lambda_star_ldvb <- if (any(is.finite(KLs_ldvb))) lambda_grid[which.min(KLs_ldvb)] else NA_real_
-
-      M1 <- exdqlm::exdqlmISVB(
-        y = y_log, p0 = 0.15, model = model_w_reg,
-        df = c(1, 0.9, 0.95), dim.df = c(1, 2, 1),
-        sig.init = 0.1, gam.init = -0.1,
-        tol = tol, n.IS = n_is, n.samp = n_samp,
-        verbose = FALSE
-      )
-
-      M2 <- exdqlm::transfn_exdqlmISVB(
-        y = y_log, p0 = 0.15, model = model,
-        df = c(1, 0.9), dim.df = c(1, 2),
-        X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_star,
-        tf.m0 = c(0, 0), tf.C0 = diag(c(0.1, 0.005), 2),
-        sig.init = 0.1, gam.init = -0.1,
-        tol = tol, n.IS = n_is, n.samp = n_samp,
-        verbose = FALSE
-      )
 
       M1_ldvb <- tryCatch(
         exdqlm::exdqlmLDVB(
@@ -211,13 +178,13 @@ if (!need_ex3) {
       }
 
       list(
-        M1 = M1, M2 = M2, M1_ldvb = M1_ldvb, M2_ldvb = M2_ldvb,
+        M1 = M1_ldvb, M2 = M2_ldvb, M1_ldvb = M1_ldvb, M2_ldvb = M2_ldvb,
         model = model, model_w_reg = model_w_reg,
-        lambda_grid = lambda_grid, KLs = KLs, KLs_ldvb = KLs_ldvb,
-        lambda_star = lambda_star, lambda_star_ldvb = lambda_star_ldvb,
-        n_is = n_is, n_samp = n_samp, tol = tol
+        lambda_grid = lambda_grid, KLs = KLs_ldvb, KLs_ldvb = KLs_ldvb,
+        lambda_star = lambda_star_ldvb, lambda_star_ldvb = lambda_star_ldvb,
+        n_samp = n_samp, tol = tol
       )
-    }, note = "ex3_models_v2")
+    }, note = "ex3_models_ldvb_v1")
 
     fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
     M1 <- ex3_models$M1
@@ -233,7 +200,7 @@ if (!need_ex3) {
 
     capture_output_file("ex3_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
-      cat(sprintf("n.IS=%d, n.samp=%d, tol=%s\n", ex3_models$n_is, ex3_models$n_samp, format(ex3_models$tol)))
+      cat(sprintf("n.samp=%d, tol=%s\n", ex3_models$n_samp, format(ex3_models$tol)))
       cat(sprintf("lambda_star=%0.3f\n\n", lambda_star))
       cat("KL grid:\n")
       print(data.frame(lambda = lambda_grid, KL = KLs))
@@ -306,7 +273,7 @@ if (!need_ex3) {
         relative_path = "analysis/manuscript/outputs/figures/ex3quantcomps.png",
         manuscript_target = "fig:ex3quant",
         status = "reproduced",
-        notes = "Three-panel quantile/components figure with index-window fix."
+        notes = "Primary Example 3 three-panel LDVB quantile/components figure with index-window fix."
       )
     }
 
@@ -371,7 +338,7 @@ if (!need_ex3) {
         relative_path = "analysis/manuscript/outputs/figures/ex3zetapsi.png",
         manuscript_target = "fig:ex3tftheta",
         status = "reproduced",
-        notes = "Transfer-function theta component plots."
+        notes = "Primary Example 3 LDVB transfer-function theta component plots."
       )
     }
 
@@ -424,7 +391,7 @@ if (!need_ex3) {
         relative_path = "analysis/manuscript/outputs/figures/ex3forecast.png",
         manuscript_target = "fig:ex3forecast",
         status = "reproduced",
-        notes = "18-step ahead forecast comparison."
+        notes = "Primary Example 3 LDVB 18-step ahead forecast comparison."
       )
     }
 
@@ -460,7 +427,7 @@ if (!need_ex3) {
     }
 
     if (need_ex3tables) {
-      diag_3 <- exdqlm::exdqlmDiagnostics(M1, M2, plot = FALSE)
+      diag_3 <- diagnostics_from_fit(M1, M2, plot = FALSE, y_data = y_log)
       diag_table <- data.frame(
         model = c("M1_regression", "M2_transfer_function"),
         KL = c(diag_3$m1.KL, diag_3$m2.KL),
@@ -473,7 +440,7 @@ if (!need_ex3) {
         artifact_id = "tab_ex3_diagnostics",
         manuscript_target = "tab:ex3",
         status = "reproduced",
-        notes = "Diagnostics table generated with exdqlmDiagnostics."
+        notes = "Primary Example 3 LDVB diagnostics table generated with manuscript diagnostics helper."
       )
 
       lambda_table <- data.frame(lambda = lambda_grid, KL = KLs)
@@ -483,10 +450,10 @@ if (!need_ex3) {
         artifact_id = "tab_ex3_lambda_scan",
         manuscript_target = "Example 3 lambda selection output",
         status = "reproduced",
-        notes = sprintf("Best lambda in this run=%0.3f", lambda_star)
+        notes = sprintf("Primary LDVB lambda scan; best lambda in this run=%0.3f", lambda_star)
       )
 
-      register_note("ex3", sprintf("Best lambda by KL in this run profile: %0.3f.", lambda_star))
+      register_note("ex3", sprintf("Best LDVB lambda by KL in this run profile: %0.3f.", lambda_star))
     }
 
     if (need_ex3tables_ldvb) {
@@ -505,8 +472,8 @@ if (!need_ex3) {
       )
 
       if (ex3_ldvb_pair_ok) {
-        diag_3_m1_ldvb <- diagnostics_from_fit(M1_ldvb, plot = FALSE)
-        diag_3_m2_ldvb <- diagnostics_from_fit(M2_ldvb, plot = FALSE)
+        diag_3_m1_ldvb <- diagnostics_from_fit(M1_ldvb, plot = FALSE, y_data = y_log)
+        diag_3_m2_ldvb <- diagnostics_from_fit(M2_ldvb, plot = FALSE, y_data = y_log)
         diag_table_ldvb <- data.frame(
           model = c("M1_regression_ldvb", "M2_transfer_function_ldvb"),
           KL = c(diag_3_m1_ldvb$m1.KL, diag_3_m2_ldvb$m1.KL),
@@ -519,7 +486,7 @@ if (!need_ex3) {
           artifact_id = "tab_ex3_diagnostics_ldvb",
           manuscript_target = "new: tab ex3 LDVB counterpart",
           status = "reproduced",
-          notes = "LDVB counterpart diagnostics table generated with exdqlmDiagnostics."
+          notes = "LDVB counterpart diagnostics table generated with manuscript diagnostics helper."
         )
       } else {
         register_artifact(
@@ -533,7 +500,7 @@ if (!need_ex3) {
       }
 
       if (any(is.finite(KLs_ldvb))) {
-        register_note("ex3_ldvb", sprintf("Best lambda by KL for LDVB in this run profile: %0.3f.", lambda_star_ldvb))
+        register_note("ex3_ldvb", sprintf("Best lambda by KL for LDVB support run: %0.3f.", lambda_star_ldvb))
       }
     }
   }

@@ -582,7 +582,7 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \label{fig:ex2quant}
 \end{figure}
 
-We call the function \code{exdqlmLDVB()} to apply the LDVB algorithm. We use the algorithm with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the LDVB algorithm takes 146 iterations and approximately 5 seconds to converge for the DQLM. Alternatively the exDQLM takes 200 iterations and approximately 31 seconds to converge.
+We call the function \code{exdqlmLDVB()} to apply the LDVB algorithm. We use the algorithm with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the LDVB DQLM fit completes in about 9 seconds. The corresponding exDQLM fit is more computationally demanding and takes about 113 seconds.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -731,10 +731,10 @@ R> model.w.reg = model + reg.comp
 
 To allow the Ni\~no 3.4 input components of both models to vary over time, we set the respective discount factors to be $0.95$ (this is done via the parameter \code{df} in \code{exdqlmLDVB()} and the parameter \code{tf.df} in \code{transfn_exdqlmLDVB()}). Alternatively, we set the discount factors to 1 and 0.9 for the trend and seasonal components, respectively. This allows the seasonal amplitudes to evolve over time, while any further variation in the $0.15$ quantile from year to year will solely be attributed to the effects of the Ni\~no 3.4 input in our models.
 
-The transfer function model is created within the function \code{transfn_exdqlmLDVB()} and follows the structure detailed in Section \ref{sec:tf}. Optimization using the KL divergence suggests the effects of the Ni\~no 3.4 index decay at an optimal transfer function rate of $\lambda = 0.85$.
+The transfer function model is created within the function \code{transfn_exdqlmLDVB()} and follows the structure detailed in Section \ref{sec:tf}. On the coarse candidate grid used in this illustration, optimization using the KL divergence suggests the effects of the Ni\~no 3.4 index decay at an optimal transfer function rate of $\lambda = 0.85$.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> possible.lams = seq(0.1,0.9,0.05)
+R> possible.lams = c(0.1,0.3,0.5,0.7,0.85)
 R> KLs <- vector("numeric")
 R> ref.samp = rnorm(length(BTflow))
 R> for(i in 1:length(possible.lams)){
@@ -833,13 +833,13 @@ R> title(expression(psi[t]))
 \end{CodeInput}
 \end{CodeChunk}
 
-To further understand these transfer function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the $0.15$ quantile is less than or equal to $1\mathrm{e}{-3}$, as discussed in Section \ref{sec:tf}. A median value $20.76$ suggests the effect of the Ni\~no 3.4 index value at time $t$ last for around $21$ months.
+To further understand these transfer function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the $0.15$ quantile is less than or equal to $1\mathrm{e}{-3}$, as discussed in Section \ref{sec:tf}. A median value $22.47$ suggests the effect of the Ni\~no 3.4 index value at time $t$ lasts for around $22$ months.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 20.76305
+[1] 22.46999
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -874,9 +874,9 @@ Finally, we use the function \code{exdqlmDiagnostics} to compute the KL divergen
        \hline
 	     &  output & value &  output & value \\
 	\hline
-	pplc & \code{m1.pplc}       & 957.72 & \code{m2.pplc}       & 897.22 \\
+	pplc & \code{m1.pplc}       & 306.41 & \code{m2.pplc}       & 312.04 \\
 	\hline
-	KL   & \code{m1.kl}         & 1.135   & \code{m2.kl}         & 0.880 \\
+	KL   & \code{m1.kl}         & 0.257   & \code{m2.kl}         & 0.224 \\
 	\hline
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Model diagnostic output from exdqlmDiagnostics() and resulting values.}
@@ -889,7 +889,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2,
 +                              cols = c("purple","orange"), plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-The KL divergence and pplc both clearly favor the nonlinear relationship captured by the transfer function model.
+The refreshed diagnostics are not unanimous. The KL divergence favors the nonlinear relationship captured by the transfer function model, whereas the pplc is slightly smaller for the regression model. In this example we therefore treat the transfer function specification as a useful alternative whose advantages are most visible in the fitted quantile paths and transfer-function components, rather than as a uniformly dominant model under every diagnostic criterion.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

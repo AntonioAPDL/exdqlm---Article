@@ -5,23 +5,12 @@ expected_targets <- data.frame(
     "fig_ex1mcmc",
     "fig_ex1quants",
     "fig_ex2quant",
-    "fig_ex2quant_ldvb",
     "fig_ex2checks",
-    "fig_ex2checks_ldvb",
-    "fig_ex2_isvb_ldvb_compare",
-    "fig_ex2_gamma_posteriors",
-    "fig_ex2_ldvb_diagnostics",
-    "tab_ex2_diagnostics",
-    "tab_ex2_diagnostics_ldvb",
     "fig_ex3data",
     "fig_ex3quantcomps",
-    "fig_ex3quantcomps_ldvb",
     "fig_ex3zetapsi",
-    "fig_ex3zetapsi_ldvb",
     "fig_ex3forecast",
-    "fig_ex3forecast_ldvb",
     "tab_ex3_diagnostics",
-    "tab_ex3_diagnostics_ldvb",
     "fig_ex4static",
     "tab_ex4static_summary"
   ),
@@ -29,23 +18,12 @@ expected_targets <- data.frame(
     "fig:ex1mcmc",
     "fig:ex1quants",
     "fig:ex2quant",
-    "new: fig ex2quant LDVB counterpart",
     "fig:ex2checks",
-    "new: fig ex2checks LDVB counterpart",
-    "new: ISVB vs LDVB dynamic comparison",
-    "new: ISVB and LDVB gamma posteriors (side-by-side)",
-    "new: LDVB convergence diagnostics",
-    "Example 2 diagnostic narrative",
-    "new: Example 2 diagnostic narrative (LDVB)",
     "fig:ex3data",
     "fig:ex3quant",
-    "new: fig ex3quant LDVB counterpart",
     "fig:ex3tftheta",
-    "new: fig ex3tftheta LDVB counterpart",
     "fig:ex3forecast",
-    "new: fig ex3forecast LDVB counterpart",
     "tab:ex3",
-    "new: tab ex3 LDVB counterpart",
     "fig:ex4static",
     "new: Example 4 static simulation summary"
   ),
@@ -208,7 +186,7 @@ save_table_csv(
 if (targeted_run) {
   register_note("coverage", sprintf("Targeted run; requested targets: %s.", paste(targets, collapse = ", ")))
 } else {
-  register_note("coverage", "All main manuscript example figures were targeted in this pipeline.")
+  register_note("coverage", "All publication-set manuscript artifacts were targeted in this pipeline.")
 }
 register_note("timing", "Exact runtime printouts in manuscript are historical and expected to differ.")
 register_note("timing", "Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.")

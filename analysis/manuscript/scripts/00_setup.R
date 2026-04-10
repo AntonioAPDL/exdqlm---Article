@@ -615,14 +615,28 @@ promote_publication_figures <- function() {
   target_dir <- file.path(repo_root, "Figures")
   ensure_dir(target_dir)
 
+  copy_binary_file <- function(src, dst) {
+    if (file.exists(dst)) unlink(dst, force = TRUE)
+    in_con <- file(src, open = "rb")
+    out_con <- file(dst, open = "wb")
+    on.exit(try(close(out_con), silent = TRUE), add = TRUE)
+    on.exit(try(close(in_con), silent = TRUE), add = TRUE)
+
+    repeat {
+      buf <- readBin(in_con, what = "raw", n = 1024L * 1024L)
+      if (length(buf) == 0L) break
+      writeBin(buf, out_con)
+    }
+    invisible(dst)
+  }
+
   for (f in promote) {
     src <- file.path(figures_dir, f)
     dst <- file.path(target_dir, f)
     if (!file.exists(src)) {
       stop(sprintf("Promotion source figure missing: %s", src), call. = FALSE)
     }
-    ok <- file.copy(src, dst, overwrite = TRUE)
-    if (!ok) stop(sprintf("Failed to copy %s to Figures/", f), call. = FALSE)
+    copy_binary_file(src, dst)
   }
 
   log_msg(sprintf("Promoted %d manuscript figure(s) to Figures/", length(promote)))

@@ -65,9 +65,9 @@ profiles:
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
       n_is: 500
-      n_samp: 200
+      n_samp: 140
       tol: 0.05
-      lambda_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
+      lambda_grid: [0.10, 0.30, 0.50, 0.70, 0.85]
     ex4:
       n_train: 160
       holdout_n: 800
@@ -148,21 +148,9 @@ promotion:
     - ex1mcmc.png
     - ex1quants.png
     - ex2quant.png
-    - ex2quant_p099.png
-    - ex2quant_p005.png
-    - ex2quant_ldvb.png
-    - ex2quant_ldvb_p099.png
-    - ex2quant_ldvb_p005.png
     - ex2checks.png
-    - ex2checks_ldvb.png
-    - ex2_isvb_ldvb_compare.png
-    - ex2_gamma_posteriors.png
-    - ex2_ldvb_diagnostics.png
     - ex3data.png
     - ex3quantcomps.png
-    - ex3quantcomps_ldvb.png
     - ex3zetapsi.png
-    - ex3zetapsi_ldvb.png
     - ex3forecast.png
-    - ex3forecast_ldvb.png
     - ex4static.png
