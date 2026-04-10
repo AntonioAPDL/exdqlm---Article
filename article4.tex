@@ -387,7 +387,7 @@ $GG
 \end{CodeOutput}
 \end{CodeChunk}
 
-To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. %We use the parameter \code{fix.sigma = TRUE} to place a point-mass prior on $\sigma$ to facilitate convergence, with point-mass at $0.07$ for $p_0=0.95,0.05$ and $0.4$ for $p_0=0.5$. A discussion on how to choose the location of the point-masses can be found in Section \ref{sec:ex2}. Further,
+To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. Further,
 We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. Lastly, we limit the number of iterations with \code{n.burn = 700} and \code{n.mcmc = 300}. The \proglang{R} output is shown for only the last quantile using the input \code{verbose = TRUE}.
 
 \begin{CodeChunk}
@@ -413,27 +413,37 @@ GIG backend: C++ Devroye (required)
 MCMC start | model=exDQLM | T=98.000 | p=2.000 | burn=700.00 | keep=300.00 | kernel=slice | warm_start=ldvb
 MCMC progress | model=exDQLM | phase=burn | iter=500/1000 | sigma=0.223 | gamma=3.727 | kernel=slice
 MCMC progress | model=exDQLM | phase=keep | iter=1000/1000 | sigma=0.199 | gamma=4.921 | kernel=slice
-MCMC done | model=exDQLM | status=complete | iter=1000.00 | runtime_sec=25.456 | sigma=0.198 | gamma=4.930 | kernel=slice
+MCMC done | model=exDQLM | status=complete | iter=1000.00 | runtime_sec=16.751 | sigma=0.198 | gamma=4.930 | kernel=slice
 \end{CodeOutput}
 \end{CodeChunk}
 
-For this time series of length 98 it takes approximately 25.456 seconds for the MCMC algorithm to sample 1000 iterations, as seen in the output above. By default \code{exdqlmMCMC()} uses the LDVB routine to warm-start the chain, and this warm-start choice can be changed independently of the subsequent MCMC kernel. Under the default setting \code{mh.proposal = "slice"}, the console output reports compact burn-in and retained-sample progress lines for the current values of $\sigma$ and $\gamma$. For the joint random-walk kernels, the proposal covariance used to sample $\sigma$ and $\gamma$ can be supplied manually through \code{Sig.mh}; alternatively, with the setting \code{joint.sample = TRUE}, the covariance matrix can be recalculated from the burned sample.
+For this time series of length 98, the tracked standard-profile free-\(\sigma\) run takes about 16.8 seconds to sample 1000 iterations, as seen in the output above. By default \code{exdqlmMCMC()} uses the LDVB routine to warm-start the chain, and this warm-start choice can be changed independently of the subsequent MCMC kernel. Under the default setting \code{mh.proposal = "slice"}, the console output reports compact burn-in and retained-sample progress lines for the current values of $\sigma$ and $\gamma$. For the joint random-walk kernels, the proposal covariance used to sample $\sigma$ and $\gamma$ can be supplied manually through \code{Sig.mh}; alternatively, with the setting \code{joint.sample = TRUE}, the covariance matrix can be recalculated from the burned sample.
 
-For joint random-walk kernels, the same progress format also reports the current acceptance rate, but this is not applicable under the default slice update. In the targeted support comparison we use to assess this kernel choice for the Lake Huron median fit, we fix $\sigma = 0.4$ and run four LDVB-warm-started chains under both \code{slice} and \code{laplace\_rw}. Both kernels produce similar posterior summaries for $\gamma$; the \code{slice} update gives the larger pooled effective sample size, whereas \code{laplace\_rw} is somewhat faster, so we retain \code{slice} as the default update in the current package. The data are relatively symmetric, therefore we do not expect the skewness parameter $\gamma$ to be far from zero for $p_0=0.5$. We can examine this with the samples from the posterior distribution of $\gamma$. All MCMC samples in the output of \code{exdqlmMCMC} are \code{mcmc} objects. Thus we can use the package \pkg{coda} to examine the trace plot and density of $\gamma$, seen in Figure \ref{fig:ex1mcmc}.
+For joint random-walk kernels, the same progress format also reports the current acceptance rate, but this is not applicable under the default slice update. In the targeted support comparison we use to assess this kernel choice for the free-\(\sigma\) Lake Huron median fit, four LDVB-warm-started chains show that the default \code{slice} update is more stable than \code{laplace\_rw}: the pooled multichain summaries give \(\hat{R}\) values of about 1.00 for \(\sigma\) and 1.04 for \(\gamma\) under \code{slice}, versus about 1.16 and 1.33 under \code{laplace\_rw}, although \code{laplace\_rw} is somewhat faster. We therefore retain \code{slice} as the default update in this example. The data are relatively symmetric, therefore we do not expect the skewness parameter $\gamma$ to be far from zero for $p_0=0.5$. To examine this, we use a dedicated longer median run with free \(\sigma\) under the default \code{slice} update. In that run, the posterior mean of \(\sigma\) is about \(0.371\) with a 95\% credible interval \((0.289, 0.466)\), while the posterior mean of \(\gamma\) is \(-0.071\) with a 95\% credible interval \((-0.516, 0.344)\). All MCMC samples in the output of \code{exdqlmMCMC} are \code{mcmc} objects. Thus we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\), seen in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.7\textwidth]{ex1mcmc.png}
-\caption{Example 1: Lake Huron. Trace plot (left) and density (right) of the MCMC samples of the skewness parameter $\gamma$ estimated at the median. }
+\caption{Example 1: Lake Huron. Trace and density plots from the dedicated longer free-\(\sigma\) median run. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities.}
 \label{fig:ex1mcmc}
 \end{figure}
 
-% fig:ex1mcmc w750h375
-% R> par(mfcol=c(1,2))
+% fig:ex1mcmc w750h750
+% R> M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
+% +                  df = 0.9, dim.df = 2,
+% +                  PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
+% +                  n.burn = 3000, n.mcmc = 1500, verbose = FALSE)
+% R> par(mfcol=c(2,2))
 \begin{CodeChunk}
 \begin{CodeInput}
-R> coda::traceplot(M50$samp.gamma, main = "")
-R> coda::densplot(M50$samp.gamma, main = "")
+R> M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
++                  df = 0.9, dim.df = 2,
++                  PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
++                  n.burn = 3000, n.mcmc = 1500, verbose = FALSE)
+R> coda::traceplot(M50.trace$samp.sigma, main = "sigma trace")
+R> coda::densplot(M50.trace$samp.sigma, main = "sigma density")
+R> coda::traceplot(M50.trace$samp.gamma, main = "gamma trace")
+R> coda::densplot(M50.trace$samp.gamma, main = "gamma density")
 \end{CodeInput}
 \end{CodeChunk}
 
