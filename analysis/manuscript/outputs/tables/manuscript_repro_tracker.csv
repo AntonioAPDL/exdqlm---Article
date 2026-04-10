@@ -1,7 +1,7 @@
 "artifact_id","artifact_type","relative_path","manuscript_target","status","notes"
 "ex1_model_output","log","analysis/manuscript/outputs/logs/ex1_model_output.txt","Example 1 model block","reproduced","polytrend model object output."
 "ex1_run_summary","log","analysis/manuscript/outputs/logs/ex1_run_summary.txt","Example 1 textual outputs","reproduced","Includes backend metadata and high-iteration trace diagnostics."
-"fig_ex1mcmc","figure","analysis/manuscript/outputs/figures/ex1mcmc.png","fig:ex1mcmc","reproduced","Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=5."
+"fig_ex1mcmc","figure","analysis/manuscript/outputs/figures/ex1mcmc.png","fig:ex1mcmc","reproduced","Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=10."
 "fig_ex1quants","figure","analysis/manuscript/outputs/figures/ex1quants.png","fig:ex1quants","reproduced","Two-panel quantile and forecast figure with index-window fix."
 "log_ex1_kernel_compare","log","analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt","support: Example 1 kernel comparison summary","reproduced","Four-chain Lake Huron median comparison of slice and laplace_rw."
 "tab_ex1_kernel_summary","table","analysis/manuscript/outputs/tables/ex1_kernel_summary.csv","support: Example 1 kernel summary","reproduced","Pooled sigma/gamma posterior, runtime, Rhat, and ESS summaries for free-sigma slice and laplace_rw fits."

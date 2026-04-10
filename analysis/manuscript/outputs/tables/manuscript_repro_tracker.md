@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-09 20:46:25
+Generated: 2026-04-09 21:36:00
 Profile: standard
 Seed: 20260302
 
@@ -8,7 +8,7 @@ Seed: 20260302
 
 - [reproduced] `ex1_model_output` -> `analysis/manuscript/outputs/logs/ex1_model_output.txt` (Example 1 model block). polytrend model object output.
 - [reproduced] `ex1_run_summary` -> `analysis/manuscript/outputs/logs/ex1_run_summary.txt` (Example 1 textual outputs). Includes backend metadata and high-iteration trace diagnostics.
-- [reproduced] `fig_ex1mcmc` -> `analysis/manuscript/outputs/figures/ex1mcmc.png` (fig:ex1mcmc). Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=5.
+- [reproduced] `fig_ex1mcmc` -> `analysis/manuscript/outputs/figures/ex1mcmc.png` (fig:ex1mcmc). Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=10.
 - [reproduced] `fig_ex1quants` -> `analysis/manuscript/outputs/figures/ex1quants.png` (fig:ex1quants). Two-panel quantile and forecast figure with index-window fix.
 - [reproduced] `log_ex1_kernel_compare` -> `analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt` (support: Example 1 kernel comparison summary). Four-chain Lake Huron median comparison of slice and laplace_rw.
 - [reproduced] `tab_ex1_kernel_summary` -> `analysis/manuscript/outputs/tables/ex1_kernel_summary.csv` (support: Example 1 kernel summary). Pooled sigma/gamma posterior, runtime, Rhat, and ESS summaries for free-sigma slice and laplace_rw fits.
@@ -23,7 +23,7 @@ Seed: 20260302
 - api_update: Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.
 - ldvb_note: Added ISVB vs LDVB comparison figure for dynamic Sunspots example.
 - backend: MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
-- ex1_kernel: Lake Huron median kernel comparison: slice vs laplace_rw. Mean runtime ratio (laplace_rw / slice) = 0.758. sigma Rhat: slice=1.004, laplace_rw=1.156. gamma Rhat: slice=1.044, laplace_rw=1.332. sigma ESS: slice=505.8, laplace_rw=132.5. gamma ESS: slice=77.8, laplace_rw=25.4.
+- ex1_kernel: Lake Huron median kernel comparison: slice vs laplace_rw. Mean runtime ratio (laplace_rw / slice) = 0.506. sigma Rhat: slice=1.009, laplace_rw=1.091. gamma Rhat: slice=1.041, laplace_rw=1.159. sigma ESS: slice=940.2, laplace_rw=128.9. gamma ESS: slice=164.6, laplace_rw=38.1.
 - ex1: Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain.
 - coverage: Targeted run; requested targets: ex1mcmc, ex1quants, ex1kernel.
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.

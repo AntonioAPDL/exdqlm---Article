@@ -3,15 +3,15 @@ seed: 20260302
 profiles:
   quick:
     ex1:
-      n_burn: 220
-      n_mcmc: 140
-      n_burn_trace: 1000
-      n_mcmc_trace: 500
-      thin_trace: 2
+      n_burn: 350
+      n_mcmc: 180
+      n_burn_trace: 1500
+      n_mcmc_trace: 800
+      thin_trace: 4
       n_chains_kernel: 4
-      n_burn_kernel: 600
-      n_mcmc_kernel: 300
-      thin_kernel_plot: 2
+      n_burn_kernel: 800
+      n_mcmc_kernel: 400
+      thin_kernel_plot: 4
     ex2:
       n_is: 180
       n_samp: 140
@@ -46,15 +46,15 @@ profiles:
 
   standard:
     ex1:
-      n_burn: 700
-      n_mcmc: 300
-      n_burn_trace: 3000
-      n_mcmc_trace: 1500
-      thin_trace: 5
+      n_burn: 1200
+      n_mcmc: 600
+      n_burn_trace: 5000
+      n_mcmc_trace: 2500
+      thin_trace: 10
       n_chains_kernel: 4
-      n_burn_kernel: 1000
-      n_mcmc_kernel: 500
-      thin_kernel_plot: 5
+      n_burn_kernel: 2000
+      n_mcmc_kernel: 1000
+      thin_kernel_plot: 10
     ex2:
       n_is: 500
       n_samp: 200
@@ -89,15 +89,15 @@ profiles:
 
   full:
     ex1:
-      n_burn: 1000
-      n_mcmc: 800
-      n_burn_trace: 4000
-      n_mcmc_trace: 2000
-      thin_trace: 5
+      n_burn: 1800
+      n_mcmc: 1000
+      n_burn_trace: 7000
+      n_mcmc_trace: 3500
+      thin_trace: 10
       n_chains_kernel: 4
-      n_burn_kernel: 1500
-      n_mcmc_kernel: 800
-      thin_kernel_plot: 5
+      n_burn_kernel: 3000
+      n_mcmc_kernel: 1500
+      thin_kernel_plot: 10
     ex2:
       n_is: 700
       n_samp: 300

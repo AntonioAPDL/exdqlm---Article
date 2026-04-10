@@ -3,7 +3,7 @@
 "api_update","Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls."
 "ldvb_note","Added ISVB vs LDVB comparison figure for dynamic Sunspots example."
 "backend","MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'."
-"ex1_kernel","Lake Huron median kernel comparison: slice vs laplace_rw. Mean runtime ratio (laplace_rw / slice) = 0.758. sigma Rhat: slice=1.004, laplace_rw=1.156. gamma Rhat: slice=1.044, laplace_rw=1.332. sigma ESS: slice=505.8, laplace_rw=132.5. gamma ESS: slice=77.8, laplace_rw=25.4."
+"ex1_kernel","Lake Huron median kernel comparison: slice vs laplace_rw. Mean runtime ratio (laplace_rw / slice) = 0.506. sigma Rhat: slice=1.009, laplace_rw=1.091. gamma Rhat: slice=1.041, laplace_rw=1.159. sigma ESS: slice=940.2, laplace_rw=128.9. gamma ESS: slice=164.6, laplace_rw=38.1."
 "ex1","Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain."
 "coverage","Targeted run; requested targets: ex1mcmc, ex1quants, ex1kernel."
 "timing","Exact runtime printouts in manuscript are historical and expected to differ."
