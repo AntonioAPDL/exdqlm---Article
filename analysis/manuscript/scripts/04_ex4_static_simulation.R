@@ -1,8 +1,8 @@
 need_ex4 <- target_enabled("ex4", c("ex4figure", "ex4table"))
 if (!need_ex4) {
-  log_msg("Example 4 (static rhs_ns sparse simulation): skipped (target filter)")
+  log_msg("Example 4 (static RHS sparse simulation): skipped (target filter)")
 } else {
-  log_msg("Example 4 (static rhs_ns sparse simulation): start")
+  log_msg("Example 4 (static RHS sparse simulation): start")
 
   source(file.path(repo_root, "analysis", "manuscript", "scripts", "04_ex4_helpers.R"), local = TRUE)
 
@@ -77,7 +77,7 @@ if (!need_ex4) {
     relative_path = "analysis/manuscript/outputs/logs/ex4_run_summary.txt",
     manuscript_target = "Example 4 textual outputs",
     status = "reproduced",
-    notes = "Sparse rhs_ns static simulation settings and recovery metrics for Example 4."
+    notes = "Sparse RHS static simulation settings and recovery metrics for Example 4."
   )
 
   summary_rows <- ex4_summary_rows(ex4_obj)
@@ -89,7 +89,7 @@ if (!need_ex4) {
       artifact_id = "tab_ex4static_summary",
       manuscript_target = "new: Example 4 static simulation summary",
       status = "reproduced",
-      notes = "Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior."
+      notes = "Runtime and sparse-signal recovery metrics for LDVB and MCMC under the RHS prior."
     )
   }
 
@@ -163,7 +163,7 @@ if (!need_ex4) {
       relative_path = "analysis/manuscript/outputs/figures/ex4static.png",
       manuscript_target = "fig:ex4static",
       status = "reproduced",
-      notes = "Sparse rhs_ns static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50."
+      notes = "Sparse RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50."
     )
   }
 
@@ -173,7 +173,7 @@ if (!need_ex4) {
   )
   register_note(
     "ex4",
-    "The static sparse benchmark uses the rhs_ns prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept."
+    "The static sparse benchmark uses the regularized horseshoe (RHS) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept."
   )
   register_note(
     "ex4",
@@ -184,5 +184,5 @@ if (!need_ex4) {
     "Example 4 focuses on the general static exAL model; the AL special case remains available via dqlm.ind = TRUE."
   )
 
-  log_msg("Example 4 (static rhs_ns sparse simulation): complete")
+  log_msg("Example 4 (static RHS sparse simulation): complete")
 }

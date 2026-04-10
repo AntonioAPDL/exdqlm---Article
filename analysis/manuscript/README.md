@@ -9,7 +9,7 @@ without modifying `article4.tex`.
 - Rebuilds Example 1 (Lake Huron) figures.
 - Rebuilds Example 2 (Sunspots) figures + diagnostics with `exdqlmDiagnostics`.
 - Rebuilds Example 3 (Big Tree) figures + diagnostics table.
-- Rebuilds Example 4 sparse static exAL simulation figure + summary table under the `rhs_ns` prior.
+- Rebuilds Example 4 sparse static exAL simulation figure + summary table under the regularized horseshoe (RHS) prior.
 - Adds one extra dynamic comparison figure: ISVB vs LDVB (`ex2_isvb_ldvb_compare.png`).
 - Adds side-by-side gamma posterior comparison for Example 2 with 95% CrIs (`ex2_gamma_posteriors.png` + `ex2_gamma_credible_intervals.csv`).
 - Adds LDVB-only counterparts for ISVB artifacts in Example 2 and Example 3 (figures + diagnostics/scan tables).

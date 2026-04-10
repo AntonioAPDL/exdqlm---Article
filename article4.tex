@@ -915,7 +915,7 @@ Then
 \[
 Q_Y(p_0 \mid {\bf x}_i) = {\bf x}_i^\top \boldsymbol{\beta}^\star,
 \]
-so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the regularized horseshoe prior of \cite{nishimura2023shrunken} via \code{beta_prior = "rhs_ns"} with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit \code{exal_static_LDVB()} and \code{exal_static_mcmc()}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the LDVB fit. The lower-tail LDVB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. To keep the worked example reproducible while still using a representative data set, the tracked workflow fixes dataset seed \code{20260714}, chosen from a predefined support-only seed screen that required both methods to recover the active signals, LDVB to remain faster than MCMC at each fitted quantile, and the LDVB holdout-loss and coefficient-recovery metrics to stay close to the MCMC baseline. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model with sparse shrinkage.
+so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit \code{exal_static_LDVB()} and \code{exal_static_mcmc()}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the LDVB fit. The lower-tail LDVB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. For reproducibility, we fix the dataset seed at \code{20260714}, selected in a preliminary screening exercise that required both methods to recover the active signals, LDVB to remain faster than MCMC at each fitted quantile, and the LDVB holdout-loss and coefficient-recovery metrics to stay close to the MCMC baseline. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -964,11 +964,11 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth]{ex4static.png}
-\caption{Example 4: sparse static exAL regression under the correlated Gaussian benchmark with the rhs\_ns prior. Black diamonds denote the true non-intercept coefficients, orange intervals denote LDVB 95\% posterior intervals, and blue intervals denote MCMC 95\% posterior intervals. Panels correspond to p0 = 0.05, 0.25, and 0.50.}
+\caption{Example 4: sparse static exAL regression under the correlated Gaussian benchmark with the RHS prior. Black diamonds denote the true non-intercept coefficients, orange intervals denote LDVB 95\% posterior intervals, and blue intervals denote MCMC 95\% posterior intervals. Panels correspond to p0 = 0.05, 0.25, and 0.50.}
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; on this screened run, LDVB is slightly sharper on the active coefficients while MCMC is slightly better on the holdout quantile RMSE and null shrinkage. At \(p_0 = 0.25\), the two fits remain qualitatively aligned, with MCMC modestly closer to the true sparse signal on the active and holdout metrics, while LDVB shrinks the null coefficients more aggressively. At \(p_0 = 0.50\), both fits again track the true sparse pattern closely, with LDVB slightly sharper on the active coefficients and holdout quantile recovery while MCMC again shrinks the null coefficients more aggressively.
+Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; on this screened run, LDVB is slightly sharper on the active coefficients, whereas MCMC is slightly better on the holdout quantile RMSE and null shrinkage. At \(p_0 = 0.25\), the two fits remain closely aligned, with LDVB marginally better on the active-signal metric and MCMC slightly better on the holdout and null-shrinkage metrics. At \(p_0 = 0.50\), both fits again track the true sparse pattern, but MCMC is modestly stronger on the active-signal and holdout metrics, while the null-shrinkage results are nearly indistinguishable.
 
 \begin{table}
 \centering
@@ -976,21 +976,21 @@ Figure \ref{fig:ex4static} shows that both methods recover the active coefficien
  \hline
  \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \hline
- 0.05 & LDVB & 19.92 & 0.152 & 0.069 & 0.473 \\
- 0.05 & MCMC & 38.15 & 0.178 & 0.070 & 0.434 \\
+ 0.05 & LDVB & 18.99 & 0.152 & 0.069 & 0.473 \\
+ 0.05 & MCMC & 39.46 & 0.163 & 0.048 & 0.452 \\
  \hline
- 0.25 & LDVB & 10.16 & 0.211 & 0.063 & 0.427 \\
- 0.25 & MCMC & 38.58 & 0.184 & 0.084 & 0.365 \\
+ 0.25 & LDVB & 15.46 & 0.231 & 0.070 & 0.374 \\
+ 0.25 & MCMC & 40.25 & 0.235 & 0.060 & 0.370 \\
  \hline
- 0.50 & LDVB & 8.60 & 0.146 & 0.060 & 0.261 \\
- 0.50 & MCMC & 36.08 & 0.167 & 0.055 & 0.275 \\
+ 0.50 & LDVB & 6.68 & 0.414 & 0.046 & 0.504 \\
+ 0.50 & MCMC & 40.42 & 0.349 & 0.046 & 0.445 \\
  \hline
 \end{tabular}
-\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the rhs\_ns prior. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
+\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} reinforces the visual comparison. The two methods are competitive across all three quantile levels, but the relative advantage is not uniform: MCMC remains modestly stronger on the active-signal and holdout-recovery metrics at \(p_0 = 0.25\), and it also shrinks the null coefficients slightly more aggressively at \(p_0 = 0.05\) and \(p_0 = 0.50\). LDVB, however, is now faster in all three fits under the promoted seed, with runtime reductions of about 1.9-fold at \(p_0 = 0.05\), 3.8-fold at \(p_0 = 0.25\), and 4.2-fold at \(p_0 = 0.50\). The main message is that static LDVB can deliver substantial computational savings as a first-pass approximation while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static \code{rhs_ns} workflow supports both roles cleanly: LDVB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} reinforces the visual comparison. The two methods are competitive across all three quantile levels, but the relative advantage is not uniform: MCMC is modestly stronger on the holdout-recovery and null-shrinkage metrics at \(p_0 = 0.05\), the two methods are nearly tied at \(p_0 = 0.25\), and MCMC is modestly stronger on the active-signal and holdout metrics at \(p_0 = 0.50\). LDVB, however, is faster in all three fits for the selected data set, with runtime reductions of about 2.1-fold at \(p_0 = 0.05\), 2.6-fold at \(p_0 = 0.25\), and 6.1-fold at \(p_0 = 0.50\). In this benchmark, static LDVB offers meaningful computational savings as a first-pass approximation while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: LDVB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}
