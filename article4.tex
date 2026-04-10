@@ -24,7 +24,7 @@
 
 
 \Abstract{ We present the \proglang{R} package \pkg{exdqlm} as a tool for dynamic
-quantile regression. The main focus of the package is to provide a framework for Bayesian inference and forecasting of flexible dynamic quantile linear models (exDQLMs). exDQLMs utilize a new family of error distributions for parametric quantile regression, the extended asymmetric Laplace (exAL), a generalization of the asymmetric Laplace (AL) which is commonly used in parametric quantile regression. Estimation of a dynamic quantile linear model, which utilizes the AL, is included in the package as a special case. Non-time-varying quantile regression models are also a special case of our methods. Further, routines for estimation of a nonlinear relationship between the response and a given input variable at a specified quantile via a transfer function model are available. The software provides exact posterior inference via Markov chain Monte Carlo (MCMC) and fast approximate posterior inference via Laplace delta variational Bayes (LDVB). While MCMC provides sample-based exploration of the posterior distribution, the approximations obtained using the LDVB algorithm enable fast inference for long time series at a fraction of the memory and computational costs of the MCMC. A routine for forecasting the dynamic quantile is available in the package, as well as several quantitative and visual diagnostics for model evaluation. We illustrate the implementation of the functions and algorithms in the \pkg{exdqlm} package with a step-by-step guide for the analysis of several real data sets. }
+quantile regression. The main focus of the package is to provide a framework for Bayesian inference and forecasting of flexible dynamic quantile linear models (exDQLMs). exDQLMs utilize a new family of error distributions for parametric quantile regression, the extended asymmetric Laplace (exAL), a generalization of the asymmetric Laplace (AL) which is commonly used in parametric quantile regression. Estimation of a dynamic quantile linear model, which utilizes the AL, is included in the package as a special case. Non-time-varying quantile regression models are also a special case of our methods. Further, routines for estimation of a nonlinear relationship between the response and a given input variable at a specified quantile via a transfer function model are available. \aA{The software provides exact posterior inference via Markov chain Monte Carlo (MCMC) and fast approximate posterior inference via Laplace delta variational Bayes (LDVB). While MCMC provides sample-based exploration of the posterior distribution, the approximations obtained using the LDVB algorithm enable fast inference for long time series at a fraction of the memory and computational costs of the MCMC.} A routine for forecasting the dynamic quantile is available in the package, as well as several quantitative and visual diagnostics for model evaluation. We illustrate the implementation of the functions and algorithms in the \pkg{exdqlm} package with a step-by-step guide for the analysis of several real data sets. }
 
 \Keywords{dynamic quantile regression, dynamic models, asymmetric Laplace, variational Bayes, coordinate ascent variational inference, quantile regression}
 
@@ -62,7 +62,7 @@ quantile regression. The main focus of the package is to provide a framework for
 
 The purpose of the \proglang{R} \citep{R} package \pkg{exdqlm} is to provide an accessible and comprehensive tool for flexible Bayesian estimation of a single dynamic quantile. Quantile regression is an area that has gained popularity in the non-time-varying setting as a robust alternative to traditional mean-centric approaches. However, time-varying methods and software implementations remain limited. In a Bayesian setting, parametric quantile regression models are almost exclusively based on the asymmetric Laplace (AL) likelihood, as it corresponds to the check loss function that is minimized in traditional quantile regression problems \citep{yu2001bayesian,koenkerquantile}. A mixture representation of the AL provides computational advantages for the exploration of the posterior distribution of the model parameters. This has contributed to its popularity. However the AL is known to have several shortcomings in terms of flexibility. Very general error distributions for quantile regression have been considered extensively in the Bayesian non-parametric literature \citep{kottas2009bayesian,reich2009flexible,taddy2010bayesian}, but the computational cost of these methods do not scale well to dynamic models for long times series. \cite{yan2017new} present a parametric extension of the AL, the extended asymmetric Laplace (exAL), which overcomes the restrictive aspects of the distribution while preserving its computational advantages. \cite{me} utilize the new family of error distributions presented in \cite{yan2017new} to develop a flexible dynamic quantile linear model (exDQLM). This is the model implemented in the package \pkg{exdqlm}.
 
-Dynamic quantile models typically consist of a set of variables that summarize the properties of the quantile of interest and a structure that defines the evolution of these variables, which together represent the behavior of a quantile over time. Our package \pkg{exdqlm} is a powerful and versatile tool for dynamic quantile modeling. The model form is robust enough to estimate any quantile regardless of non-standard features in the data distribution (i.e., skewness or extreme observations). Further, relevant features such as long-term trends or seasonality are easily incorporated into the evolution of the quantile. The package includes both a Markov chain Monte Carlo (MCMC) algorithm for exact posterior inference and a Laplace delta variational Bayes (LDVB) algorithm for fast, yet accurate approximate estimation. A legacy importance sampling variational Bayes (ISVB) routine is retained in the package for backward compatibility, however in this paper we focus on LDVB as the primary approximation. The LDVB routine makes our methods accessible to applications with very large datasets and supports quick model exploration and selection. The exDQLM framework facilitates $k$-step-ahead forecasting for the estimated quantile, also implemented in the package. Further, a transfer function extension is included in the software as a straightforward method to quantify a nonlinear relationship between a response and a given input variable at a specified quantile. Several visual and quantitative model diagnostics are provided to support model examination. Finally, MCMC and LDVB algorithms for static quantile regression using the exAL error distribution are also included in the package. The package is protected under the MIT License, and is available from the Comprehensive R Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=exdqlm}.
+Dynamic quantile models typically consist of a set of variables that summarize the properties of the quantile of interest and a structure that defines the evolution of these variables, which together represent the behavior of a quantile over time. Our package \pkg{exdqlm} is a powerful and versatile tool for dynamic quantile modeling. The model form is robust enough to estimate any quantile regardless of non-standard features in the data distribution (i.e., skewness or extreme observations). Further, relevant features such as long-term trends or seasonality are easily incorporated into the evolution of the quantile. \aA{The package includes both a Markov chain Monte Carlo (MCMC) algorithm for exact posterior inference and a Laplace delta variational Bayes (LDVB) algorithm for fast, yet accurate approximate estimation. A legacy importance sampling variational Bayes (ISVB) routine is retained in the package for backward compatibility, however in this paper we focus on LDVB as the primary approximation. The LDVB routine makes our methods accessible to applications with very large datasets and supports quick model exploration and selection.} The exDQLM framework facilitates $k$-step-ahead forecasting for the estimated quantile, also implemented in the package. Further, a transfer function extension is included in the software as a straightforward method to quantify a nonlinear relationship between a response and a given input variable at a specified quantile. Several visual and quantitative model diagnostics are provided to support model examination. \aA{Finally, MCMC and LDVB algorithms for static quantile regression using the exAL error distribution are also included in the package.} The package is protected under the MIT License, and is available from the Comprehensive R Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=exdqlm}.
 
 Well-developed software implementations of non-time-varying quantile regression models which utilize the AL are available in the Bayesian \proglang{R} package \pkg{bayesQR} \citep{bayesQR} and, equivalently, a classical version, which utilizes the check-loss function \citep{koenkerquantile}, is available in the package \pkg{quantreg} \citep{quantreg}. As a result of the AL being a special case of the exAL, the methods used in the Bayesian package \pkg{bayesQR} are also a special case of our exDQLM implemented in \pkg{exdqlm}. Further, there are many established packages for dynamic modeling including \pkg{dlm} \citep{dlm} and \pkg{dynr} \citep{dynr}, however, implementations of dynamic quantile modeling are much more limited. To our knowledge, the package \pkg{quantreg} includes a routine which allows for a time-evolving structure in the regression coefficients (a special case of the routines in our package), but this is the extent of the software available for dynamic quantile regression.
 
@@ -137,9 +137,9 @@ Under a Bayesian formulation and given $p_0$, we specify priors for the initial 
 
 \subsection{Posterior estimation}
 
-The hierarchical representation of the exDQLM facilitates posterior simulation using Markov Chain Monte Carlo (MCMC) algorithms. This is implemented in the function \code{exdqlmMCMC()}. Gibbs sampling steps are used to update the sets of latent variables $s_t$ and $v_t$ for $t=1,\dots,T$. The dynamic regression coefficients are sampled using a forward filtering backwards sampling algorithm \citep{carter1994gibbs,fruhwirth1994data}. The scale and skewness parameters are then updated separately from the latent-state blocks. By default, the package uses a slice-sampling update for the $(\sigma,\gamma)$ block, drawing $\sigma$ from its full conditional distribution and updating $\gamma$ with a bounded univariate slice sampler. Alternatively, the package also provides joint random-walk Metropolis-Hastings (MH) kernels on transformed coordinates, including a Laplace-informed proposal covariance that can be refreshed during burn-in. When desired, the chain can be warm-started from either the LDVB or legacy ISVB approximation; this initialization is separate from the subsequent MCMC proposal kernel. An example of this functionality can be found in Section \ref{sec:ex1}. We perform a total of $N_{BURN} + N_{MCMC}$ MCMC iterations, discarding the first $N_{BURN}$ and retaining the remaining $N_{MCMC}$ posterior samples. The object created by \code{exdqlmMCMC()} includes posterior samples of all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$), filtered and smoothed summaries for the state vector $\boldsymbol{\theta}_{1:T}$, and diagnostics for the proposal kernel used in the $(\sigma,\gamma)$ update.
+The hierarchical representation of the exDQLM facilitates posterior simulation using Markov Chain Monte Carlo (MCMC) algorithms. This is implemented in the function \code{exdqlmMCMC()}. Gibbs sampling steps are used to update the sets of latent variables $s_t$ and $v_t$ for $t=1,\dots,T$. The dynamic regression coefficients are sampled using a forward filtering backwards sampling algorithm \citep{carter1994gibbs,fruhwirth1994data}. \aA{The scale and skewness parameters are then updated separately from the latent-state blocks. By default, the package uses a slice-sampling update for the $(\sigma,\gamma)$ block, drawing $\sigma$ from its full conditional distribution and updating $\gamma$ with a bounded univariate slice sampler. Alternatively, the package also provides joint random-walk Metropolis-Hastings (MH) kernels on transformed coordinates, including a Laplace-informed proposal covariance that can be refreshed during burn-in. When desired, the chain can be warm-started from either the LDVB or legacy ISVB approximation; this initialization is separate from the subsequent MCMC proposal kernel.} An example of this functionality can be found in Section \ref{sec:ex1}. We perform a total of $N_{BURN} + N_{MCMC}$ MCMC iterations, discarding the first $N_{BURN}$ and retaining the remaining $N_{MCMC}$ posterior samples. The object created by \code{exdqlmMCMC()} includes posterior samples of all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$), filtered and smoothed summaries for the state vector $\boldsymbol{\theta}_{1:T}$, and diagnostics for the proposal kernel used in the $(\sigma,\gamma)$ update.
 
-For purposes of model selection or large time series data sets, posterior sampling with the MCMC algorithm can be computationally demanding. To this end, we include in the package a Laplace delta variational Bayes (LDVB) routine, \code{exdqlmLDVB()}, for fast and accurate approximate posterior estimation. The variational Bayes (VB) framework approximates the posterior distribution with partitioned variational distributions \citep{ostwald2014tutorial,beal2003variational}. Under a mean-field factorization, this induces a blockwise coordinate-ascent variational inference scheme. For the exDQLM, the blocks associated with the dynamic coefficients and latent variables admit recognizable closed-form updates, while the joint variational distribution of $\sigma$ and $\gamma$ is non-conjugate. Following the non-conjugate VB strategy of \cite{wang2013nonconjugatevb}, we approximate this block with a Laplace approximation on transformed coordinates and then use a second-order Delta method to evaluate the expectations of functions of $(\sigma,\gamma)$ needed by the remaining variational updates. Thus, the mean-field factorization induces the blockwise CAVI updates, while the non-conjugate $(\sigma,\gamma)$ block is handled through the Laplace-Delta approximation. The dynamic regression coefficients are updated within each iteration using a forward filtering backwards smoothing algorithm. Convergence is assessed jointly through the state, scale, skewness, and ELBO diagnostics. After the algorithm reaches convergence with tolerance $\epsilon_{tol}$, $N_{SAMP}$ samples are drawn from the variational distributions, resulting in an approximate sample of the posterior distribution. The output of \code{exdqlmLDVB()} includes the approximate posterior samples as well as the parameters of the variational distributions for all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$). For the $(\gamma,\sigma)$ block, the return also contains the transformed mode, approximate covariance matrix, derived moments, and ELBO terms associated with the Laplace-Delta approximation. The package also retains a legacy importance-sampling VB routine, \code{exdqlmISVB()}, but in this paper we restrict attention to MCMC and LDVB as the primary inferential tools.
+For purposes of model selection or large time series data sets, posterior sampling with the MCMC algorithm can be computationally demanding. To this end, we include in the package a Laplace delta variational Bayes (LDVB) routine, \code{exdqlmLDVB()}, for fast and accurate approximate posterior estimation. The variational Bayes (VB) framework approximates the posterior distribution with partitioned variational distributions \citep{ostwald2014tutorial,beal2003variational}. Under a mean-field factorization, this induces a blockwise coordinate-ascent variational inference scheme. For the exDQLM, the blocks associated with the dynamic coefficients and latent variables admit recognizable closed-form updates, while the joint variational distribution of $\sigma$ and $\gamma$ is non-conjugate. \aA{Following the non-conjugate VB strategy of \cite{wang2013nonconjugatevb}, we approximate this block with a Laplace approximation on transformed coordinates and then use a second-order Delta method to evaluate the expectations of functions of $(\sigma,\gamma)$ needed by the remaining variational updates. Thus, the mean-field factorization induces the blockwise CAVI updates, while the non-conjugate $(\sigma,\gamma)$ block is handled through the Laplace-Delta approximation.} The dynamic regression coefficients are updated within each iteration using a forward filtering backwards smoothing algorithm. Convergence is assessed jointly through the state, scale, skewness, and ELBO diagnostics. After the algorithm reaches convergence with tolerance $\epsilon_{tol}$, $N_{SAMP}$ samples are drawn from the variational distributions, resulting in an approximate sample of the posterior distribution. The output of \code{exdqlmLDVB()} includes the approximate posterior samples as well as the parameters of the variational distributions for all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$). For the $(\gamma,\sigma)$ block, the return also contains the transformed mode, approximate covariance matrix, derived moments, and ELBO terms associated with the Laplace-Delta approximation. \aA{The package also retains a legacy importance-sampling VB routine, \code{exdqlmISVB()}, but in this paper we restrict attention to MCMC and LDVB as the primary inferential tools.}
 
 Table \ref{table:post} shows the input parameters of the fitting functions \code{exdqlmMCMC} and \code{exdqlmLDVB}, their mathematical symbols, and their default values.
 
@@ -159,7 +159,7 @@ Table \ref{table:post} shows the input parameters of the fitting functions \code
 \label{table:post}
 \end{table}
 
-The argument \code{Sig.mh} is only used when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default slice-sampling update.
+\aA{The argument \code{Sig.mh} is only used when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default slice-sampling update.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -168,7 +168,7 @@ The argument \code{Sig.mh} is only used when \code{mh.proposal} selects a joint 
 \subsection{Specification of the evolution covariance via discount factors}
 \label{sec:dfs}
 
-Both estimation algorithms, \code{exdqlmMCMC} and \code{exdqlmLDVB}, utilize discount factors to specify the time-evolving covariance matrices ${\bf W}_t$ introduced in Equation \eqref{EQ:exDLMevo} \citep{west1985dynamic}. More precisely, we define the evolution variance matrix ${\bf W}_t = \frac{1-\delta}{\delta} {\bf G}_t {\bf C}_{t-1} {\bf G}_t'$ where ${\bf C}_{t-1}$ denotes the posterior variance of the state vector ${\boldsymbol\theta_{t-1}}$ at time $t-1$ and $\delta$ is a discount factor such that $0 < \delta \leq 1$. The discount factor $\delta$ can be specified by the user via function parameter \code{df}. Selection of discount factors is typically done by optimizing a model-checking criterion. We suggest using the KL divergence or posterior predictive loss criterion discussed in Section \ref{sec:diags}. A brief example of this method for discount factor selection can be found in Section \ref{sec:ex2}.
+Both estimation algorithms, \code{exdqlmMCMC} and \code{exdqlmLDVB}, utilize discount factors to specify the time-evolving covariance matrices ${\bf W}_t$ introduced in Equation \eqref{EQ:exDLMevo} \citep{west1985dynamic}. More precisely, we define the evolution variance matrix ${\bf W}_t = \frac{1-\delta}{\delta} {\bf G}_t {\bf C}_{t-1} {\bf G}_t'$ where ${\bf C}_{t-1}$ denotes the posterior variance of the state vector ${\boldsymbol\theta_{t-1}}$ at time $t-1$ and $\delta$ is a discount factor such that $0 < \delta \leq 1$. The discount factor $\delta$ can be specified by the user via function parameter \code{df}. \aA{Selection of discount factors is typically done by optimizing a model-checking criterion. We suggest using the KL divergence or posterior predictive loss criterion discussed in Section \ref{sec:diags}.} A brief example of this method for discount factor selection can be found in Section \ref{sec:ex2}.
 
 Discounting by component of the state-space model is also a functionality of our estimation algorithms. Suppose the state vector is comprised of $h$ components $\boldsymbol{\theta}_{it}$ of dimension $q_i$ for $i=1,\dots,h$ such that $\boldsymbol{\theta}_{t}' = (\boldsymbol{\theta}_{1t}',\dots,\boldsymbol{\theta}_{ht})'$ and $\sum_{i=1}^{h} q_i = q$. If ${\bf W}_{it}$ denotes the $i^{th}$ component of the evolution covariance matrix such that ${\bf W}_t = \text{blockdiag}\{ {\bf W}_{1t},\dots,{\bf W}_{ht}\}$ and $\delta_i$ denotes a discount factor for the $i^{th}$ component, we can define the evolution variance matrix by component as ${\bf W}_{it} = \frac{1-\delta_i}{\delta_i} {\bf G}_{it} {\bf C}_{i,t-1} {\bf G}_{it}'$. Here ${\bf G}_{it}$ and ${\bf C}_{i,t-1}$ denote the $i^{th}$ components of ${\bf G}_t$ and ${\bf C}_{t-1}$, respectively. The function parameters \code{df} and \code{dim.df} allow users to specify a set of component discount factors $(\delta_1,\dots,\delta_h)$ and their dimensions $(q_1,\dots,q_h)$, respectively, within the state-space model. Examples of this feature can be found in Section \ref{sec:exs}. For a full review of discount factors including discounting by component, see \cite{west1985dynamic}.
 
@@ -327,7 +327,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 \label{table:flow}
 \end{table}
 
-Legacy ISVB routines remain available in the package for backward compatibility, but they are omitted from the primary workflow summary in Table \ref{table:flow}.
+\aA{Legacy ISVB routines remain available in the package for backward compatibility, but they are omitted from the primary workflow summary in Table \ref{table:flow}.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -393,8 +393,8 @@ $GG
 \end{CodeOutput}
 \end{CodeChunk}
 
-To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. Further,
-We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. For the tracked standard-profile run, we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. The \proglang{R} output is shown for only the last quantile using the input \code{verbose = TRUE}.
+\aA{To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. Further,
+We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. For the tracked standard-profile run, we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. The \proglang{R} output is shown for only the last quantile using the input \code{verbose = TRUE}.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -412,7 +412,7 @@ R> M5 = exdqlmMCMC(y = LakeHuron, p0 = 0.05, model = model,
 +                 n.burn = 2000, n.mcmc = 3000, verbose = TRUE)
 \end{CodeInput}
 
-\noindent\emph{Representative console excerpt, abridged to the fields most relevant for the progress format:}
+\aA{\noindent\emph{Representative console excerpt, abridged to the fields most relevant for the progress format:}}
 \begin{CodeOutput}
 MCMC backend: C++ (mode=fast)
 MCMC init: running LDVB warm start
@@ -422,9 +422,9 @@ MCMC done | runtime_sec=122.179 | sigma=0.220 | gamma=5.013 | kernel=slice
 \end{CodeOutput}
 \end{CodeChunk}
 
-For this time series of length 98, the tracked standard-profile free-\(\sigma\) run takes about 122.2 seconds to sample 5000 iterations, as seen in the output above. By default \code{exdqlmMCMC()} uses the LDVB routine to warm-start the chain, and this warm-start choice can be changed independently of the subsequent MCMC kernel. Under the default setting \code{mh.proposal = "slice"}, the console output reports compact burn-in and retained-sample progress lines for the current values of $\sigma$ and $\gamma$. For the joint random-walk kernels, the proposal covariance used to sample $\sigma$ and $\gamma$ can be supplied manually through \code{Sig.mh}; alternatively, with the setting \code{joint.sample = TRUE}, the covariance matrix can be recalculated from the burned sample.
+\aA{For this time series of length 98, the tracked standard-profile free-\(\sigma\) run takes about 122.2 seconds to sample 5000 iterations, as seen in the output above. By default \code{exdqlmMCMC()} uses the LDVB routine to warm-start the chain, and this warm-start choice can be changed independently of the subsequent MCMC kernel. Under the default setting \code{mh.proposal = "slice"}, the console output reports compact burn-in and retained-sample progress lines for the current values of $\sigma$ and $\gamma$. For the joint random-walk kernels, the proposal covariance used to sample $\sigma$ and $\gamma$ can be supplied manually through \code{Sig.mh}; alternatively, with the setting \code{joint.sample = TRUE}, the covariance matrix can be recalculated from the burned sample.}
 
-For joint random-walk kernels, the same progress format also reports the current acceptance rate, but this is not applicable under the default slice update. In the targeted support comparison we use to assess this kernel choice for the free-\(\sigma\) Lake Huron median fit, four LDVB-warm-started chains show that the default \code{slice} update is more stable than \code{laplace\_rw}: the pooled multichain summaries give \(\hat{R}\) values of about 1.01 for \(\sigma\) and 1.04 for \(\gamma\) under \code{slice}, versus about 1.09 and 1.16 under \code{laplace\_rw}. The corresponding effective sample sizes are about 940 and 165 under \code{slice}, compared with about 129 and 38 under \code{laplace\_rw}, although \code{laplace\_rw} is roughly twice as fast in this support run. We therefore retain \code{slice} as the default update in this example. The data are relatively symmetric, therefore we do not expect the skewness parameter $\gamma$ to be far from zero for $p_0=0.5$. To examine this, we use a dedicated median run with free \(\sigma\) under the default \code{slice} update and thin the retained samples by 10 only for plotting. In that run, the posterior mean of \(\sigma\) is about \(0.375\) with a 95\% credible interval \((0.298, 0.473)\), while the posterior mean of \(\gamma\) is \(-0.044\) with a 95\% credible interval \((-0.375, 0.321)\). All MCMC samples in the output of \code{exdqlmMCMC} are \code{mcmc} objects. Thus we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\), seen in Figure \ref{fig:ex1mcmc}.
+\aA{For joint random-walk kernels, the same progress format also reports the current acceptance rate, but this is not applicable under the default slice update. In the targeted support comparison we use to assess this kernel choice for the free-\(\sigma\) Lake Huron median fit, four LDVB-warm-started chains show that the default \code{slice} update is more stable than \code{laplace\_rw}: the pooled multichain summaries give \(\hat{R}\) values of about 1.01 for \(\sigma\) and 1.04 for \(\gamma\) under \code{slice}, versus about 1.09 and 1.16 under \code{laplace\_rw}. The corresponding effective sample sizes are about 940 and 165 under \code{slice}, compared with about 129 and 38 under \code{laplace\_rw}, although \code{laplace\_rw} is roughly twice as fast in this support run. We therefore retain \code{slice} as the default update in this example. The data are relatively symmetric, therefore we do not expect the skewness parameter $\gamma$ to be far from zero for $p_0=0.5$. To examine this, we use a dedicated median run with free \(\sigma\) under the default \code{slice} update and thin the retained samples by 10 only for plotting. In that run, the posterior mean of \(\sigma\) is about \(0.375\) with a 95\% credible interval \((0.298, 0.473)\), while the posterior mean of \(\gamma\) is \(-0.044\) with a 95\% credible interval \((-0.375, 0.321)\). All MCMC samples in the output of \code{exdqlmMCMC} are \code{mcmc} objects. Thus we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\), seen in Figure \ref{fig:ex1mcmc}.}
 
 \begin{figure}[t]
 \centering
@@ -459,7 +459,7 @@ R> coda::densplot(gamma.trace, main = "gamma density")
 \end{CodeChunk}
 
 
-Clearly $\gamma$ is indistinct from zero, thus the added flexibility of the skewness parameter is not necessary for the median. We re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.
+\aA{Clearly $\gamma$ is indistinct from zero, thus the added flexibility of the skewness parameter is not necessary for the median. We re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -582,7 +582,9 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \label{fig:ex2quant}
 \end{figure}
 
-We call the function \code{exdqlmLDVB()} to apply the LDVB algorithm. We use the algorithm with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the LDVB DQLM fit completes in about 9 seconds. The corresponding exDQLM fit is more computationally demanding and takes about 113 seconds.
+\aA{We call the function \code{exdqlmLDVB()} to apply the LDVB algorithm. We use the algorithm with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the LDVB DQLM fit completes in about 9 seconds. The corresponding exDQLM fit is more computationally demanding and takes about 113 seconds.}
+
+\aA{Updated code/output below to use the current LDVB workflow and current summary output.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -603,9 +605,8 @@ State Dimension: 9
 Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
 
 DQLM fitted using VB
-Variational Parameters: sigma
-Iterations until convergence: 146
-Run-time: 4.315 seconds
+Iterations until convergence: 67
+Run-time: 9.128 seconds
 \end{CodeOutput}
 \begin{CodeInput}
 R> summary(M2)
@@ -617,9 +618,9 @@ State Dimension: 9
 Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
 
 exDQLM fitted using LDVB
-Variational Parameters: gamma sigma
+Parameters estimated with LD: gamma sigma
 Iterations until convergence: 200
-Run-time: 30.571 seconds
+Run-time: 113.952 seconds
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -651,7 +652,7 @@ R> hist(M2$samp.gamma,xlab=expression(gamma),main="")
 \end{CodeChunk}
 The approximate distribution is clearly distinct from zero, thus we expect a better model fit from the exDQLM.
 
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. The QQ-plot and the ACF of the standard forecast errors both favor the exDQLM.
+\aA{To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. The QQ-plot and the ACF of the standard forecast errors both favor the exDQLM.}
 % fig:ex2checks
 % R> par(mfrow=c(2,3))
 \begin{CodeChunk}
@@ -660,7 +661,7 @@ R> exdqlmDiagnostics(M1, M2, cols = c("red","blue"))
 \end{CodeInput}
 \end{CodeChunk}
 
-Finally, the function \code{exdqlmDiagnostics} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component was optimal with respect to the KL divergence of the one-step-ahead predictive distributions. We can create a list of possible discount factors, quickly run the LDVB for each possible model, and select the set of discount factors which results in the lowest KL divergence. A simple example is seen below, which takes approximately 6 minutes to run.
+\aA{Finally, the function \code{exdqlmDiagnostics} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component was optimal with respect to the KL divergence of the one-step-ahead predictive distributions. We can create a list of possible discount factors, quickly run the LDVB for each possible model, and select the set of discount factors which results in the lowest KL divergence. A simple example is seen below, which takes approximately 6 minutes to run.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -731,7 +732,7 @@ R> model.w.reg = model + reg.comp
 
 To allow the Ni\~no 3.4 input components of both models to vary over time, we set the respective discount factors to be $0.95$ (this is done via the parameter \code{df} in \code{exdqlmLDVB()} and the parameter \code{tf.df} in \code{transfn_exdqlmLDVB()}). Alternatively, we set the discount factors to 1 and 0.9 for the trend and seasonal components, respectively. This allows the seasonal amplitudes to evolve over time, while any further variation in the $0.15$ quantile from year to year will solely be attributed to the effects of the Ni\~no 3.4 input in our models.
 
-The transfer function model is created within the function \code{transfn_exdqlmLDVB()} and follows the structure detailed in Section \ref{sec:tf}. On the coarse candidate grid used in this illustration, optimization using the KL divergence suggests the effects of the Ni\~no 3.4 index decay at an optimal transfer function rate of $\lambda = 0.85$.
+\aA{Updated paragraph.} The transfer function model is created within the function \code{transfn_exdqlmLDVB()} and follows the structure detailed in Section \ref{sec:tf}. On the coarse candidate grid used in this illustration, optimization using the KL divergence suggests the effects of the Ni\~no 3.4 index decay at an optimal transfer function rate of $\lambda = 0.85$.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> possible.lams = c(0.1,0.3,0.5,0.7,0.85)
@@ -833,7 +834,7 @@ R> title(expression(psi[t]))
 \end{CodeInput}
 \end{CodeChunk}
 
-To further understand these transfer function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the $0.15$ quantile is less than or equal to $1\mathrm{e}{-3}$, as discussed in Section \ref{sec:tf}. A median value $22.47$ suggests the effect of the Ni\~no 3.4 index value at time $t$ lasts for around $22$ months.
+\aA{To further understand these transfer function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the $0.15$ quantile is less than or equal to $1\mathrm{e}{-3}$, as discussed in Section \ref{sec:tf}. A median value $22.47$ suggests the effect of the Ni\~no 3.4 index value at time $t$ lasts for around $22$ months.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
@@ -889,7 +890,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2,
 +                              cols = c("purple","orange"), plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-The refreshed diagnostics are not unanimous. The KL divergence favors the nonlinear relationship captured by the transfer function model, whereas the pplc is slightly smaller for the regression model. In this example we therefore treat the transfer function specification as a useful alternative whose advantages are most visible in the fitted quantile paths and transfer-function components, rather than as a uniformly dominant model under every diagnostic criterion.
+\aA{The refreshed diagnostics are not unanimous. The KL divergence favors the nonlinear relationship captured by the transfer function model, whereas the pplc is slightly smaller for the regression model. In this example we therefore treat the transfer function specification as a useful alternative whose advantages are most visible in the fitted quantile paths and transfer-function components, rather than as a uniformly dominant model under every diagnostic criterion.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -897,6 +898,8 @@ The refreshed diagnostics are not unanimous. The KL divergence favors the nonlin
 
 \subsection{Static exAL regression on a simulated heteroskedastic example}
 \label{sec:ex4static}
+
+\aA{This subsection is new.}
 
 To illustrate the static routines under sparse shrinkage, we consider a correlated Gaussian regression benchmark for which the target conditional quantile is known exactly. Let
 \[
@@ -906,6 +909,7 @@ with sparse signal
 \[
 \boldsymbol{\beta}^\star = (3,\,1.5,\,0,\,0,\,2,\,0,\,0,\,0)^\top.
 \]
+\aA{New benchmark setup.}
 For each target quantile level \(p_0\), we generate
 \[
 Y_i^{(p_0)} = {\bf x}_i^\top \boldsymbol{\beta}^\star + \sigma_\varepsilon \{Z_i - \Phi^{-1}(p_0)\},
@@ -916,7 +920,7 @@ Then
 Q_Y(p_0 \mid {\bf x}_i) = {\bf x}_i^\top \boldsymbol{\beta}^\star,
 \]
 so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit \code{exal_static_LDVB()} and \code{exal_static_mcmc()}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the LDVB fit. The lower-tail LDVB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. For reproducibility, we fix the dataset seed at \code{20260714}, selected in a preliminary screening exercise that required both methods to recover the active signals, LDVB to remain faster than MCMC at each fitted quantile, and the LDVB holdout-loss and coefficient-recovery metrics to stay close to the MCMC baseline. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
-
+\aA{Updated code block below to add the new static sparse benchmark.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> Sigma.x = 0.5 ^ as.matrix(dist(1:8))
@@ -947,6 +951,7 @@ R> M.mcmc = lapply(p.grid, function(p0) exal_static_mcmc(
 \end{CodeInput}
 \end{CodeChunk}
 
+\aA{New static diagnostics paragraph.}
 For static fits, the helper function \code{exalDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on an independent holdout design:
 
 \begin{CodeChunk}
@@ -968,6 +973,7 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \label{fig:ex4static}
 \end{figure}
 
+\aA{Updated figure interpretation.}
 Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; on this screened run, LDVB is slightly sharper on the active coefficients, whereas MCMC is slightly better on the holdout quantile RMSE and null shrinkage. At \(p_0 = 0.25\), the two fits remain closely aligned, with LDVB marginally better on the active-signal metric and MCMC slightly better on the holdout and null-shrinkage metrics. At \(p_0 = 0.50\), both fits again track the true sparse pattern, but MCMC is modestly stronger on the active-signal and holdout metrics, while the null-shrinkage results are nearly indistinguishable.
 
 \begin{table}
@@ -990,12 +996,13 @@ Figure \ref{fig:ex4static} shows that both methods recover the active coefficien
 \label{tab:ex4static}
 \end{table}
 
+\aA{Updated table discussion.}
 Table \ref{tab:ex4static} reinforces the visual comparison. The two methods are competitive across all three quantile levels, but the relative advantage is not uniform: MCMC is modestly stronger on the holdout-recovery and null-shrinkage metrics at \(p_0 = 0.05\), the two methods are nearly tied at \(p_0 = 0.25\), and MCMC is modestly stronger on the active-signal and holdout metrics at \(p_0 = 0.50\). LDVB, however, is faster in all three fits for the selected data set, with runtime reductions of about 2.1-fold at \(p_0 = 0.05\), 2.6-fold at \(p_0 = 0.25\), and 6.1-fold at \(p_0 = 0.50\). In this benchmark, static LDVB offers meaningful computational savings as a first-pass approximation while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: LDVB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}
 
-Our exDQLM framework provides a robust and versatile tool for dynamic quantile modeling, implemented in the presented \pkg{exdqlm} package. Relevant features of the data can easily be incorporated in the evolution of the quantile. The MCMC algorithm provides a method for exact posterior inference. Alternatively, the LDVB algorithm provides a method for fast approximate inference enabling estimation for large data sets, quick examination of relevant model features, and model selection. Further, our transfer function model provides a straightforward method for quantifying a nonlinear relationship between a quantile and response. Finally, our forecast and diagnostic routines facilitate further model exploration. These capabilities have been discussed in detail and demonstrated with a set of examples. The \pkg{exdqlm} package makes these methods, and more generally, dynamic quantile modeling, accessible to all levels of users.
+\aA{Our exDQLM framework provides a robust and versatile tool for dynamic quantile modeling, implemented in the presented \pkg{exdqlm} package. Relevant features of the data can easily be incorporated in the evolution of the quantile. The MCMC algorithm provides a method for exact posterior inference. Alternatively, the LDVB algorithm provides a method for fast approximate inference enabling estimation for large data sets, quick examination of relevant model features, and model selection. Further, our transfer function model provides a straightforward method for quantifying a nonlinear relationship between a quantile and response. Finally, our forecast and diagnostic routines facilitate further model exploration. These capabilities have been discussed in detail and demonstrated with a set of examples. The \pkg{exdqlm} package makes these methods, and more generally, dynamic quantile modeling, accessible to all levels of users.}
 
 
 %\section{Acknowledgments}
