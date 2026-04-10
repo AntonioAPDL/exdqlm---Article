@@ -46,10 +46,10 @@ profiles:
 
   standard:
     ex1:
-      n_burn: 1200
-      n_mcmc: 600
-      n_burn_trace: 5000
-      n_mcmc_trace: 2500
+      n_burn: 2000
+      n_mcmc: 3000
+      n_burn_trace: 2000
+      n_mcmc_trace: 3000
       thin_trace: 10
       n_chains_kernel: 4
       n_burn_kernel: 2000

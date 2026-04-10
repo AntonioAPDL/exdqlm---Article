@@ -52,7 +52,7 @@ if (!need_ex1) {
   gamma_trace_thin <- NULL
 
   if (need_ex1_quants_models) {
-    ex1_quants <- load_or_fit_cache("ex1_quants_models_v2_longer", {
+    ex1_quants <- load_or_fit_cache("ex1_quants_models_v3_main_2000_3000", {
       M95 <- exdqlm::exdqlmMCMC(
         y = y, p0 = 0.95, model = model,
         df = 0.9, dim.df = 2,
@@ -75,7 +75,7 @@ if (!need_ex1) {
         verbose = FALSE
       )
       list(model = model, M95 = M95, M50_dqlm = M50_dqlm, M5 = M5)
-    }, note = "ex1_quants_models_v2_longer")
+    }, note = "ex1_quants_models_v3_main_2000_3000")
 
     M95 <- ex1_quants$M95
     M50_dqlm <- ex1_quants$M50_dqlm
@@ -83,7 +83,7 @@ if (!need_ex1) {
   }
 
   if (need_ex1_trace_model) {
-    ex1_trace <- load_or_fit_cache("ex1_trace_model_v4_free_sigma_longer", {
+    ex1_trace <- load_or_fit_cache("ex1_trace_model_v5_slice_2000_3000", {
       M50_trace <- exdqlm::exdqlmMCMC(
         y = y, p0 = 0.50, model = model,
         df = 0.9, dim.df = 2,
@@ -92,7 +92,7 @@ if (!need_ex1) {
         verbose = FALSE
       )
       list(M50_trace = M50_trace)
-    }, note = "ex1_trace_model_v4_free_sigma_longer")
+    }, note = "ex1_trace_model_v5_slice_2000_3000")
 
     M50_trace <- ex1_trace$M50_trace
     sigma_trace <- as.numeric(M50_trace$samp.sigma)
