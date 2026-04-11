@@ -125,27 +125,54 @@ if (!need_ex1) {
     graphics::polygon(c(x, rev(x)), c(lower95, rev(upper95)), col = fill95, border = NA)
   }
 
+  summarize_smoothed_quantile <- function(mfit, cr.percent = 0.95) {
+    y_ref <- mfit$y
+    half.alpha <- (1 - cr.percent) / 2
+    p_state <- dim(mfit$samp.theta)[1]
+    n_samp <- dim(mfit$samp.theta)[3]
+    TT_local <- length(y_ref)
+    big_FF <- array(mfit$model$FF, c(p_state, TT_local, n_samp))
+    quant_samps <- colSums(big_FF * mfit$samp.theta)
+    list(
+      x = grDevices::xy.coords(y_ref)$x,
+      qmap = rowMeans(quant_samps),
+      qlb = matrixStats::rowQuantiles(quant_samps, probs = half.alpha),
+      qub = matrixStats::rowQuantiles(quant_samps, probs = cr.percent + half.alpha)
+    )
+  }
+
   add_forecast_overlay <- function(fc, cols = c("purple", "magenta"), lwd_main = 1.8, lwd_ci = 1,
-                                   halo_col = "white", halo_main = 3.8, halo_ci = 2.2) {
+                                   halo_col = "white", halo_main = 3.8, halo_ci = 2.2,
+                                   observed_mode = c("filtered", "smoothed")) {
+    observed_mode <- match.arg(observed_mode)
     y_ref <- fc$m1$y
     ts_xy <- grDevices::xy.coords(y_ref)
     half.alpha <- (1 - fc$cr.percent) / 2
-    p <- dim(fc$m1$model$GG)[1]
 
-    FF.start.t <- matrix(fc$m1$model$FF[, 1:fc$start.t], p, fc$start.t)
-    fm.start.t <- matrix(fc$m1$theta.out$fm[, 1:fc$start.t], p, fc$start.t)
-    qmap <- colSums(matrix(FF.start.t * fm.start.t, p, fc$start.t))
-    fC.start.t <- array(fc$m1$theta.out$fC[, , 1:fc$start.t], c(p, p, fc$start.t))
-    temp.var <- matrix(NA_real_, p, fc$start.t)
-    for (t in seq_len(fc$start.t)) {
-      temp.var[, t] <- fC.start.t[, , t] %*% FF.start.t[, t]
+    if (identical(observed_mode, "smoothed")) {
+      smooth_quant <- summarize_smoothed_quantile(fc$m1, cr.percent = fc$cr.percent)
+      qmap <- smooth_quant$qmap[seq_len(fc$start.t)]
+      qlb <- smooth_quant$qlb[seq_len(fc$start.t)]
+      qub <- smooth_quant$qub[seq_len(fc$start.t)]
+    } else {
+      p <- dim(fc$m1$model$GG)[1]
+      FF.start.t <- matrix(fc$m1$model$FF[, 1:fc$start.t], p, fc$start.t)
+      fm.start.t <- matrix(fc$m1$theta.out$fm[, 1:fc$start.t], p, fc$start.t)
+      qmap <- colSums(matrix(FF.start.t * fm.start.t, p, fc$start.t))
+      fC.start.t <- array(fc$m1$theta.out$fC[, , 1:fc$start.t], c(p, p, fc$start.t))
+      temp.var <- matrix(NA_real_, p, fc$start.t)
+      for (t in seq_len(fc$start.t)) {
+        temp.var[, t] <- fC.start.t[, , t] %*% FF.start.t[, t]
+      }
+      qvar <- colSums(FF.start.t * temp.var)
+      qsd <- sqrt(pmax(qvar, 0))
+      zlb <- stats::qnorm(half.alpha)
+      zub <- stats::qnorm(fc$cr.percent + half.alpha)
+      qlb <- qmap + zlb * qsd
+      qub <- qmap + zub * qsd
     }
-    qvar <- colSums(FF.start.t * temp.var)
-    qsd <- sqrt(pmax(qvar, 0))
     zlb <- stats::qnorm(half.alpha)
     zub <- stats::qnorm(fc$cr.percent + half.alpha)
-    qlb <- qmap + zlb * qsd
-    qub <- qmap + zub * qsd
     fqlb <- fc$ff + zlb * sqrt(pmax(fc$fQ, 0))
     fqub <- fc$ff + zub * sqrt(pmax(fc$fQ, 0))
     x_future <- seq(from = ts_xy$x[fc$start.t], by = diff(ts_xy$x)[1], length.out = fc$k + 1L)
@@ -412,9 +439,12 @@ if (!need_ex1) {
       graphics::lines(x_future, fut_q500, col = "grey15", lwd = 1.5)
       graphics::abline(v = t_end, lty = 3, col = "grey45")
 
-      add_forecast_overlay(fc95, cols = c("#7B3294", "#7B3294"), lwd_main = 2.2, lwd_ci = 1.2)
-      add_forecast_overlay(fc50, cols = c("#2166AC", "#2166AC"), lwd_main = 2.2, lwd_ci = 1.2)
-      add_forecast_overlay(fc05, cols = c("#1B7837", "#1B7837"), lwd_main = 2.2, lwd_ci = 1.2)
+      add_forecast_overlay(fc95, cols = c("#7B3294", "#7B3294"), lwd_main = 2.2, lwd_ci = 1.2,
+                           observed_mode = "smoothed")
+      add_forecast_overlay(fc50, cols = c("#2166AC", "#2166AC"), lwd_main = 2.2, lwd_ci = 1.2,
+                           observed_mode = "smoothed")
+      add_forecast_overlay(fc05, cols = c("#1B7837", "#1B7837"), lwd_main = 2.2, lwd_ci = 1.2,
+                           observed_mode = "smoothed")
 
       graphics::legend(
         "bottomleft",

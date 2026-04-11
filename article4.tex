@@ -529,7 +529,7 @@ This generates a plot of the data with the forecasted quantile estimates and 95\
 
 \aA{\noindent\emph{Added predictive-synthesis paragraph for Example 1.}}
 
-When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{exdqlm_synthesize_from_draws()}. For the Lake Huron example, we apply this routine to the posterior predictive samples stored in \code{M5}, \code{M50}, and \code{M95} over the observed period. For the eight-step forecast horizon, we first generate future predictive draws from each fitted model using the corresponding forecasted quantile distributions together with posterior draws of $\sigma$ and $\gamma$, and then apply the same synthesis step. This provides a single predictive envelope while preserving the separate quantile-specific fits.
+When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{exdqlm_synthesize_from_draws()}. For the Lake Huron example, we apply this routine to the posterior predictive samples stored in \code{M5}, \code{M50}, and \code{M95} over the observed period. \aA{Since these posterior predictive draws are produced from the smoothed state draws, we display the corresponding smoothed quantile summaries over the observed period when comparing the individual models with the synthesized distribution.} For the eight-step forecast horizon, we first generate future predictive draws from each fitted model using the corresponding forecasted quantile distributions together with posterior draws of $\sigma$ and $\gamma$, and then apply the same synthesis step. This provides a single predictive envelope while preserving the separate quantile-specific fits.
 
 \aA{\noindent\emph{Core synthesis call for the observed posterior predictive draws:}}
 \begin{CodeChunk}
@@ -558,7 +558,7 @@ R> syn.fore = exdqlm_synthesize_from_draws(
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.8\textwidth]{ex1synth.png}
-\caption{Example 1: Lake Huron. Synthesized posterior predictive distribution obtained from the fitted $0.05$, $0.50$, and $0.95$ quantile models. The shaded ribbon denotes the synthesized 95\% predictive interval over the late observed window and the eight-step forecast horizon. Colored lines and dotted intervals show the corresponding filtered and forecast quantile estimates from the individual fitted models.}
+\caption{Example 1: Lake Huron. Synthesized posterior predictive distribution obtained from the fitted $0.05$, $0.50$, and $0.95$ quantile models. The shaded ribbon denotes the synthesized 95\% predictive interval over the late observed window and the eight-step forecast horizon. \aA{Colored lines and dotted intervals show the corresponding smoothed quantile estimates over the observed period and forecast quantile estimates over the future horizon from the individual fitted models.}}
 \label{fig:ex1synth}
 \end{figure}
 
