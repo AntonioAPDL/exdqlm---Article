@@ -542,11 +542,23 @@ R> syn.obs = exdqlm_synthesize_from_draws(
 \end{CodeInput}
 \end{CodeChunk}
 
+\aA{\noindent\emph{Added compact forecast-synthesis note for Example 1.}}
+
+For the forecast horizon, future observation draws are generated with \code{rexal()} by combining the forecast summaries from each fitted quantile model with matched posterior draws of $\sigma$ and $\gamma$, and the resulting draw matrices are synthesized in the same way:
+\begin{CodeChunk}
+\begin{CodeInput}
+R> syn.fore = exdqlm_synthesize_from_draws(
++               draws_list = future.draws,
++               p = c(0.05, 0.50, 0.95),
++               T_expected = 8)
+\end{CodeInput}
+\end{CodeChunk}
+
 \aA{\noindent\emph{Added synthesis figure for Example 1.}}
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.8\textwidth]{ex1synth.png}
-\caption{Example 1: Lake Huron. Synthesized posterior predictive distribution obtained from the fitted $0.05$, $0.50$, and $0.95$ quantile models. Grey ribbons denote the synthesized 95\% and 50\% predictive intervals over the late observed window and the eight-step forecast horizon. Colored lines and dotted intervals show the corresponding filtered and forecast quantile estimates from the individual fitted models.}
+\caption{Example 1: Lake Huron. Synthesized posterior predictive distribution obtained from the fitted $0.05$, $0.50$, and $0.95$ quantile models. Shaded ribbons denote the synthesized 95\% and 50\% predictive intervals over the late observed window and the eight-step forecast horizon. Colored lines and dotted intervals show the corresponding filtered and forecast quantile estimates from the individual fitted models.}
 \label{fig:ex1synth}
 \end{figure}
 

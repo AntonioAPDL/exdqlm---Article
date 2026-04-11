@@ -12,8 +12,8 @@ profiles:
       n_burn_kernel: 800
       n_mcmc_kernel: 400
       thin_kernel_plot: 4
-      synth_source_draws: 300
-      synth_n_samp: 300
+      synth_source_draws: 500
+      synth_n_samp: 1200
       synth_window_start: 1952
     ex2:
       n_is: 180
@@ -59,8 +59,8 @@ profiles:
       n_burn_kernel: 2000
       n_mcmc_kernel: 1000
       thin_kernel_plot: 10
-      synth_source_draws: 1000
-      synth_n_samp: 1000
+      synth_source_draws: 2000
+      synth_n_samp: 5000
       synth_window_start: 1952
     ex2:
       n_is: 500
@@ -110,8 +110,8 @@ profiles:
       n_burn_kernel: 3000
       n_mcmc_kernel: 1500
       thin_kernel_plot: 10
-      synth_source_draws: 1500
-      synth_n_samp: 1500
+      synth_source_draws: 3000
+      synth_n_samp: 8000
       synth_window_start: 1952
     ex2:
       n_is: 700

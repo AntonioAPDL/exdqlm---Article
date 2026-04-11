@@ -121,8 +121,8 @@ if (!need_ex1) {
   }
 
   add_predictive_band <- function(x, lower95, upper95, lower50, upper50,
-                                  fill95 = grDevices::adjustcolor("grey72", alpha.f = 0.14),
-                                  fill50 = grDevices::adjustcolor("grey55", alpha.f = 0.24)) {
+                                  fill95 = grDevices::adjustcolor("#E8DDC7", alpha.f = 0.72),
+                                  fill50 = grDevices::adjustcolor("#C7AB8B", alpha.f = 0.72)) {
     graphics::polygon(c(x, rev(x)), c(lower95, rev(upper95)), col = fill95, border = NA)
     graphics::polygon(c(x, rev(x)), c(lower50, rev(upper50)), col = fill50, border = NA)
   }
@@ -325,7 +325,7 @@ if (!need_ex1) {
   }
 
   if (need_ex1synth) {
-    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v2_main_window", {
+    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v3_main_window", {
       obs_draws <- list(
         subset_draw_matrix(M5$samp.post.pred, synth_source_draws),
         subset_draw_matrix(M50_dqlm$samp.post.pred, synth_source_draws),
@@ -358,7 +358,7 @@ if (!need_ex1) {
         syn_obs = syn_obs,
         syn_future = syn_future
       )
-    }, note = "ex1_synthesis_v2_main_window")
+    }, note = "ex1_synthesis_v3_main_window")
 
     capture_output_file("ex1_synthesis_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
@@ -405,7 +405,13 @@ if (!need_ex1) {
         na.rm = TRUE
       )
 
-      stats::plot.ts(y_ts, xlim = xlim_fore, ylim = y_lim, col = "dark grey", ylab = "predictive synthesis")
+      stats::plot.ts(
+        y_ts,
+        xlim = xlim_fore,
+        ylim = y_lim,
+        col = grDevices::adjustcolor("grey35", alpha.f = 0.45),
+        ylab = "predictive synthesis"
+      )
       add_predictive_band(x_obs, obs_q025, obs_q975, obs_q250, obs_q750)
       graphics::lines(x_obs, obs_q500, col = "grey15", lwd = 1.5)
       add_predictive_band(x_future, fut_q025, fut_q975, fut_q250, fut_q750)
@@ -417,15 +423,19 @@ if (!need_ex1) {
       add_forecast_overlay(fc05, cols = c("#1B7837", "#1B7837"), lwd_main = 2.2, lwd_ci = 1.2)
 
       graphics::legend(
-        "topright",
+        "bottomleft",
         legend = c("Synthesized 95% PI", "Synthesized 50% PI", "Synthesized median", expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
-        fill = c(grDevices::adjustcolor("grey72", alpha.f = 0.14), grDevices::adjustcolor("grey55", alpha.f = 0.24), NA, NA, NA, NA),
+        fill = c(grDevices::adjustcolor("#E8DDC7", alpha.f = 0.72), grDevices::adjustcolor("#C7AB8B", alpha.f = 0.72), NA, NA, NA, NA),
         border = c(NA, NA, NA, NA, NA, NA),
         lty = c(NA, NA, 1, 1, 1, 1),
         lwd = c(NA, NA, 1.5, 2.1, 2.1, 2.1),
         col = c(NA, NA, "grey15", "#7B3294", "#2166AC", "#1B7837"),
         bty = "n",
-        cex = 0.9
+        bg = grDevices::adjustcolor("white", alpha.f = 0.82),
+        cex = 0.75,
+        y.intersp = 0.85,
+        x.intersp = 0.9,
+        inset = c(0.015, 0.02)
       )
     })
     register_artifact(
