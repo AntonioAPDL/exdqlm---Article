@@ -140,17 +140,6 @@ if (!need_ex1) {
     )
   }
 
-  add_smoothed_quantile_overlay <- function(mfit, col = "purple", lwd_main = 2.1, lwd_ci = 1.1,
-                                            halo_col = "white", halo_main = 3.8, halo_ci = 2.2) {
-    smooth_quant <- summarize_smoothed_quantile(mfit)
-    graphics::lines(smooth_quant$x, smooth_quant$qlb, col = halo_col, lty = 3, lwd = halo_ci)
-    graphics::lines(smooth_quant$x, smooth_quant$qub, col = halo_col, lty = 3, lwd = halo_ci)
-    graphics::lines(smooth_quant$x, smooth_quant$qmap, col = halo_col, lwd = halo_main)
-    graphics::lines(smooth_quant$x, smooth_quant$qlb, col = col, lty = 3, lwd = lwd_ci)
-    graphics::lines(smooth_quant$x, smooth_quant$qub, col = col, lty = 3, lwd = lwd_ci)
-    graphics::lines(smooth_quant$x, smooth_quant$qmap, col = col, lwd = lwd_main)
-  }
-
   add_forecast_overlay <- function(fc, cols = c("purple", "magenta"), lwd_main = 1.8, lwd_ci = 1,
                                    halo_col = "white", halo_main = 3.8, halo_ci = 2.2,
                                    observed_mode = c("filtered", "smoothed")) {
@@ -392,7 +381,6 @@ if (!need_ex1) {
         obs_q025_full[time_window_to_index(y_ts, forecast_window_start, t_end)[1]:length(y)],
         obs_q975_full[time_window_to_index(y_ts, forecast_window_start, t_end)[1]:length(y)],
         fut_q025, fut_q975,
-        fc95$ff, fc50$ff, fc05$ff,
         na.rm = TRUE
       )
 
@@ -422,20 +410,17 @@ if (!need_ex1) {
         ylab = "predictive synthesis"
       )
       add_predictive_band(x_obs_full, obs_q025_full, obs_q975_full)
-      add_smoothed_quantile_overlay(M95_plot, col = "#7B3294")
-      add_smoothed_quantile_overlay(M50_dqlm_plot, col = "#2166AC")
-      add_smoothed_quantile_overlay(M5_plot, col = "#1B7837")
       graphics::legend(
         "bottomleft",
-        legend = c("Synthesized 95% PI", expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
-        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42), NA, NA, NA),
-        border = c(NA, NA, NA, NA),
-        lty = c(NA, 1, 1, 1),
-        lwd = c(NA, 2.1, 2.1, 2.1),
-        col = c(NA, "#7B3294", "#2166AC", "#1B7837"),
+        legend = c("Synthesized posterior predictive interval (95%)"),
+        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)),
+        border = c(NA),
+        lty = c(NA),
+        lwd = c(NA),
+        col = c(NA),
         bty = "n",
         bg = grDevices::adjustcolor("white", alpha.f = 0.82),
-        cex = 0.72,
+        cex = 0.68,
         y.intersp = 0.82,
         x.intersp = 0.9,
         inset = c(0.015, 0.015)
@@ -452,12 +437,21 @@ if (!need_ex1) {
       add_predictive_band(x_obs_full, obs_q025_full, obs_q975_full)
       add_predictive_band(x_future, fut_q025, fut_q975)
       graphics::abline(v = t_end, lty = 3, col = "grey45")
-      add_forecast_overlay(fc95, cols = c("#7B3294", "#7B3294"), lwd_main = 2.2, lwd_ci = 1.2,
-                           observed_mode = "smoothed")
-      add_forecast_overlay(fc50, cols = c("#2166AC", "#2166AC"), lwd_main = 2.2, lwd_ci = 1.2,
-                           observed_mode = "smoothed")
-      add_forecast_overlay(fc05, cols = c("#1B7837", "#1B7837"), lwd_main = 2.2, lwd_ci = 1.2,
-                           observed_mode = "smoothed")
+      graphics::legend(
+        "bottomleft",
+        legend = c("Synthesized posterior predictive interval (95%)"),
+        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)),
+        border = c(NA),
+        lty = c(NA),
+        lwd = c(NA),
+        col = c(NA),
+        bty = "n",
+        bg = grDevices::adjustcolor("white", alpha.f = 0.82),
+        cex = 0.68,
+        y.intersp = 0.82,
+        x.intersp = 0.9,
+        inset = c(0.015, 0.015)
+      )
       graphics::title(main = "(d) Forecast synthesis", cex.main = 0.95)
     })
     register_artifact(
@@ -506,7 +500,6 @@ if (!need_ex1) {
         y[idx_obs],
         obs_q025_full[idx_obs], obs_q975_full[idx_obs],
         fut_q025, fut_q975,
-        fc95$ff, fc50$ff, fc05$ff,
         na.rm = TRUE
       )
 
@@ -521,24 +514,17 @@ if (!need_ex1) {
       add_predictive_band(x_future, fut_q025, fut_q975)
       graphics::abline(v = t_end, lty = 3, col = "grey45")
 
-      add_forecast_overlay(fc95, cols = c("#7B3294", "#7B3294"), lwd_main = 2.2, lwd_ci = 1.2,
-                           observed_mode = "smoothed")
-      add_forecast_overlay(fc50, cols = c("#2166AC", "#2166AC"), lwd_main = 2.2, lwd_ci = 1.2,
-                           observed_mode = "smoothed")
-      add_forecast_overlay(fc05, cols = c("#1B7837", "#1B7837"), lwd_main = 2.2, lwd_ci = 1.2,
-                           observed_mode = "smoothed")
-
       graphics::legend(
         "bottomleft",
-        legend = c("Synthesized 95% PI", expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
-        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42), NA, NA, NA),
-        border = c(NA, NA, NA, NA),
-        lty = c(NA, 1, 1, 1),
-        lwd = c(NA, 2.1, 2.1, 2.1),
-        col = c(NA, "#7B3294", "#2166AC", "#1B7837"),
+        legend = c("Synthesized posterior predictive interval (95%)"),
+        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)),
+        border = c(NA),
+        lty = c(NA),
+        lwd = c(NA),
+        col = c(NA),
         bty = "n",
         bg = grDevices::adjustcolor("white", alpha.f = 0.82),
-        cex = 0.75,
+        cex = 0.7,
         y.intersp = 0.85,
         x.intersp = 0.9,
         inset = c(0.015, 0.02)
