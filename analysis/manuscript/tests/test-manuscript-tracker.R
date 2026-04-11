@@ -13,6 +13,7 @@ testthat::test_that("core manuscript figure targets are reproduced", {
   core <- c(
     "fig_ex1mcmc",
     "fig_ex1quants",
+    "fig_ex1synth",
     "fig_ex2quant",
     "fig_ex2checks",
     "fig_ex3data",

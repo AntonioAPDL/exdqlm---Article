@@ -29,6 +29,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex2_gamma_posteriors --s
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
 ```
 
 By default, the analysis workflow loads local `exdqlm` source from

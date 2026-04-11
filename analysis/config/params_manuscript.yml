@@ -12,6 +12,9 @@ profiles:
       n_burn_kernel: 800
       n_mcmc_kernel: 400
       thin_kernel_plot: 4
+      synth_source_draws: 300
+      synth_n_samp: 300
+      synth_window_start: 1952
     ex2:
       n_is: 180
       n_samp: 140
@@ -56,6 +59,9 @@ profiles:
       n_burn_kernel: 2000
       n_mcmc_kernel: 1000
       thin_kernel_plot: 10
+      synth_source_draws: 1000
+      synth_n_samp: 1000
+      synth_window_start: 1952
     ex2:
       n_is: 500
       n_samp: 200
@@ -104,6 +110,9 @@ profiles:
       n_burn_kernel: 3000
       n_mcmc_kernel: 1500
       thin_kernel_plot: 10
+      synth_source_draws: 1500
+      synth_n_samp: 1500
+      synth_window_start: 1952
     ex2:
       n_is: 700
       n_samp: 300
@@ -147,6 +156,7 @@ promotion:
   figures:
     - ex1mcmc.png
     - ex1quants.png
+    - ex1synth.png
     - ex2quant.png
     - ex2checks.png
     - ex3data.png

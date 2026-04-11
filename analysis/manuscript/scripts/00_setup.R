@@ -201,7 +201,8 @@ required_fns <- c(
   "exdqlmMCMC", "exdqlmISVB", "exdqlmLDVB",
   "transfn_exdqlmISVB", "exdqlmDiagnostics",
   "exdqlmPlot", "compPlot", "exdqlmForecast",
-  "exal_static_LDVB", "exal_static_mcmc", "exalDiagnostics"
+  "exal_static_LDVB", "exal_static_mcmc", "exalDiagnostics",
+  "exdqlm_synthesize_from_draws"
 )
 missing_fns <- required_fns[!vapply(required_fns, function(f) {
   exists(f, where = asNamespace("exdqlm"), mode = "function", inherits = FALSE)
@@ -395,8 +396,9 @@ plot_component_summary <- function(csum, add = TRUE, col = "purple", lwd = 1.5) 
 }
 
 forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRUE, add = FALSE, cols = c("purple", "magenta"), cr.percent = 0.95, y_data = NULL) {
-  y <- if (!is.null(y_data)) as.numeric(y_data) else as.numeric(m1$y)
-  if (length(y) == 0L) stop("y_data must be provided when fitted object has no y series.", call. = FALSE)
+  y_series <- if (!is.null(y_data)) y_data else m1$y
+  y_numeric <- as.numeric(y_series)
+  if (length(y_numeric) == 0L) stop("y_data must be provided when fitted object has no y series.", call. = FALSE)
   p <- dim(m1$model$GG)[1]
   TT <- dim(m1$model$GG)[3]
   if (cr.percent <= 0 || cr.percent >= 1) {
@@ -442,7 +444,7 @@ forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRU
     }
   }
   m1_plot <- m1
-  m1_plot$y <- y
+  m1_plot$y <- y_series
   retlist <- list(start.t = start.t, k = k, cr.percent = cr.percent, m1 = m1_plot, fa = fa, fR = fR, ff = ff, fQ = fQ)
   class(retlist) <- "exdqlmForecast"
   if (plot) plot(retlist, cols = cols, add = add)

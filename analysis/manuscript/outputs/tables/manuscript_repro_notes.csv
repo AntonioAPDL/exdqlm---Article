@@ -10,7 +10,7 @@
 "ex4","The static sparse benchmark uses the regularized horseshoe (RHS) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept."
 "ex4","The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget."
 "ex4","Example 4 focuses on the general static exAL model; the AL special case remains available via dqlm.ind = TRUE."
-"coverage","Targeted run; requested targets: ex1mcmc, ex1quants, ex2quant, ex2checks, ex3data, ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables, ex4figure, ex4table."
+"coverage","Targeted run; requested targets: ex1mcmc, ex1quants, ex1synth, ex2quant, ex2checks, ex3data, ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables, ex4figure, ex4table."
 "timing","Exact runtime printouts in manuscript are historical and expected to differ."
 "timing","Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here."
 "scope","Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in article4.tex."

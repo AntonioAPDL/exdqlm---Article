@@ -1,4 +1,4 @@
-need_ex1 <- target_enabled("ex1", c("ex1mcmc", "ex1quants", "ex1kernel"))
+need_ex1 <- target_enabled("ex1", c("ex1mcmc", "ex1quants", "ex1synth", "ex1kernel"))
 if (!need_ex1) {
   log_msg("Example 1 (Lake Huron): skipped (target filter)")
 } else {
@@ -6,9 +6,10 @@ if (!need_ex1) {
 
   need_ex1mcmc <- target_enabled("ex1mcmc", "ex1")
   need_ex1quants <- target_enabled("ex1quants", "ex1")
+  need_ex1synth <- target_enabled("ex1synth", "ex1")
   need_ex1kernel <- isTRUE(targeted_run) && target_enabled("ex1kernel")
   need_ex1_runtime <- need_ex1mcmc || need_ex1quants
-  need_ex1_quants_models <- need_ex1quants || need_ex1_runtime
+  need_ex1_quants_models <- need_ex1quants || need_ex1_runtime || need_ex1synth
   need_ex1_trace_model <- need_ex1mcmc || need_ex1_runtime
 
   y_ts <- datasets::LakeHuron
@@ -36,6 +37,9 @@ if (!need_ex1) {
   nburn_kernel <- as.integer(cfg_profile$ex1$n_burn_kernel %||% nburn)
   nmcmc_kernel <- as.integer(cfg_profile$ex1$n_mcmc_kernel %||% nmcmc)
   thin_kernel_plot <- max(1L, as.integer(cfg_profile$ex1$thin_kernel_plot %||% 1L))
+  synth_source_draws <- max(50L, as.integer(cfg_profile$ex1$synth_source_draws %||% 1000L))
+  synth_n_samp <- max(100L, as.integer(cfg_profile$ex1$synth_n_samp %||% 1000L))
+  synth_window_start <- as.numeric(cfg_profile$ex1$synth_window_start %||% 1952)
 
   if (!is.finite(n_chains_kernel) || n_chains_kernel < 2L) {
     stop("Example 1 kernel comparison requires n_chains_kernel >= 2.", call. = FALSE)
@@ -45,11 +49,123 @@ if (!need_ex1) {
   M50_dqlm <- NULL
   M5 <- NULL
   M50_trace <- NULL
+  M95_plot <- NULL
+  M50_dqlm_plot <- NULL
+  M5_plot <- NULL
+  fc95 <- NULL
+  fc50 <- NULL
+  fc05 <- NULL
   sigma_trace <- NULL
   gamma_trace <- NULL
   thin_idx <- integer(0)
   sigma_trace_thin <- NULL
   gamma_trace_thin <- NULL
+
+  with_local_seed <- function(seed, expr) {
+    has_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    old_seed <- if (has_seed) get(".Random.seed", envir = .GlobalEnv, inherits = FALSE) else NULL
+    on.exit({
+      if (has_seed) {
+        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+      } else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+        rm(".Random.seed", envir = .GlobalEnv)
+      }
+    }, add = TRUE)
+    set.seed(as.integer(seed))
+    eval.parent(substitute(expr))
+  }
+
+  evenly_spaced_idx <- function(n, target_n) {
+    target_n <- min(as.integer(target_n), as.integer(n))
+    unique(pmax(1L, pmin(as.integer(n), round(seq.int(1L, n, length.out = target_n)))))
+  }
+
+  subset_draw_matrix <- function(M, target_n) {
+    M <- as.matrix(M)
+    idx <- evenly_spaced_idx(ncol(M), target_n)
+    M[, idx, drop = FALSE]
+  }
+
+  subset_draw_vector <- function(x, target_n, fill = 0) {
+    x <- as.numeric(x)
+    if (!length(x)) return(rep(fill, target_n))
+    idx <- evenly_spaced_idx(length(x), target_n)
+    x[idx]
+  }
+
+  sample_forecast_predictive_draws <- function(mfit, fc, target_n, seed) {
+    target_n <- min(as.integer(target_n), max(1L, ncol(as.matrix(mfit$samp.post.pred))))
+    sigma_draws <- subset_draw_vector(mfit$samp.sigma, target_n)
+    gamma_draws <- if (length(mfit$samp.gamma)) subset_draw_vector(mfit$samp.gamma, target_n) else rep(0, target_n)
+    qdraw <- with_local_seed(seed, {
+      Z <- matrix(stats::rnorm(length(fc$ff) * target_n), nrow = length(fc$ff), ncol = target_n)
+      sweep(Z, 1L, sqrt(pmax(fc$fQ, 0)), `*`) + fc$ff
+    })
+    ydraw <- matrix(NA_real_, nrow = nrow(qdraw), ncol = ncol(qdraw))
+    for (j in seq_len(ncol(qdraw))) {
+      ydraw[, j] <- with_local_seed(seed + j, {
+        vapply(
+          seq_len(nrow(qdraw)),
+          function(h) exdqlm::rexal(
+            1,
+            p0 = mfit$p0,
+            mu = qdraw[h, j],
+            sigma = sigma_draws[j],
+            gamma = gamma_draws[j]
+          ),
+          numeric(1)
+        )
+      })
+    }
+    list(qdraw = qdraw, ydraw = ydraw, sigma = sigma_draws, gamma = gamma_draws)
+  }
+
+  add_predictive_band <- function(x, lower95, upper95, lower50, upper50,
+                                  fill95 = grDevices::adjustcolor("grey72", alpha.f = 0.14),
+                                  fill50 = grDevices::adjustcolor("grey55", alpha.f = 0.24)) {
+    graphics::polygon(c(x, rev(x)), c(lower95, rev(upper95)), col = fill95, border = NA)
+    graphics::polygon(c(x, rev(x)), c(lower50, rev(upper50)), col = fill50, border = NA)
+  }
+
+  add_forecast_overlay <- function(fc, cols = c("purple", "magenta"), lwd_main = 1.8, lwd_ci = 1,
+                                   halo_col = "white", halo_main = 3.8, halo_ci = 2.2) {
+    y_ref <- fc$m1$y
+    ts_xy <- grDevices::xy.coords(y_ref)
+    half.alpha <- (1 - fc$cr.percent) / 2
+    p <- dim(fc$m1$model$GG)[1]
+
+    FF.start.t <- matrix(fc$m1$model$FF[, 1:fc$start.t], p, fc$start.t)
+    fm.start.t <- matrix(fc$m1$theta.out$fm[, 1:fc$start.t], p, fc$start.t)
+    qmap <- colSums(matrix(FF.start.t * fm.start.t, p, fc$start.t))
+    fC.start.t <- array(fc$m1$theta.out$fC[, , 1:fc$start.t], c(p, p, fc$start.t))
+    temp.var <- matrix(NA_real_, p, fc$start.t)
+    for (t in seq_len(fc$start.t)) {
+      temp.var[, t] <- fC.start.t[, , t] %*% FF.start.t[, t]
+    }
+    qvar <- colSums(FF.start.t * temp.var)
+    qsd <- sqrt(pmax(qvar, 0))
+    zlb <- stats::qnorm(half.alpha)
+    zub <- stats::qnorm(fc$cr.percent + half.alpha)
+    qlb <- qmap + zlb * qsd
+    qub <- qmap + zub * qsd
+    fqlb <- fc$ff + zlb * sqrt(pmax(fc$fQ, 0))
+    fqub <- fc$ff + zub * sqrt(pmax(fc$fQ, 0))
+    x_future <- seq(from = ts_xy$x[fc$start.t], by = diff(ts_xy$x)[1], length.out = fc$k + 1L)
+
+    graphics::lines(ts_xy$x[1:fc$start.t], qlb, col = halo_col, lty = 3, lwd = halo_ci)
+    graphics::lines(ts_xy$x[1:fc$start.t], qub, col = halo_col, lty = 3, lwd = halo_ci)
+    graphics::lines(ts_xy$x[1:fc$start.t], qmap, col = halo_col, lwd = halo_main)
+    graphics::lines(x_future, c(qmap[fc$start.t], fc$ff), col = halo_col, lwd = halo_main)
+    graphics::lines(x_future, c(qub[fc$start.t], fqub), col = halo_col, lty = 3, lwd = halo_ci)
+    graphics::lines(x_future, c(qlb[fc$start.t], fqlb), col = halo_col, lty = 3, lwd = halo_ci)
+
+    graphics::lines(ts_xy$x[1:fc$start.t], qlb, col = cols[1], lty = 3, lwd = lwd_ci)
+    graphics::lines(ts_xy$x[1:fc$start.t], qub, col = cols[1], lty = 3, lwd = lwd_ci)
+    graphics::lines(ts_xy$x[1:fc$start.t], qmap, col = cols[1], lwd = lwd_main)
+    graphics::lines(x_future, c(qmap[fc$start.t], fc$ff), col = cols[2], lwd = lwd_main)
+    graphics::lines(x_future, c(qub[fc$start.t], fqub), col = cols[2], lty = 3, lwd = lwd_ci)
+    graphics::lines(x_future, c(qlb[fc$start.t], fqlb), col = cols[2], lty = 3, lwd = lwd_ci)
+  }
 
   if (need_ex1_quants_models) {
     ex1_quants <- load_or_fit_cache("ex1_quants_models_v3_main_2000_3000", {
@@ -80,6 +196,13 @@ if (!need_ex1) {
     M95 <- ex1_quants$M95
     M50_dqlm <- ex1_quants$M50_dqlm
     M5 <- ex1_quants$M5
+
+    M95_plot <- M95
+    M50_dqlm_plot <- M50_dqlm
+    M5_plot <- M5
+    M95_plot$y <- y_ts
+    M50_dqlm_plot$y <- y_ts
+    M5_plot$y <- y_ts
   }
 
   if (need_ex1_trace_model) {
@@ -100,6 +223,19 @@ if (!need_ex1) {
     thin_idx <- seq.int(1L, length(sigma_trace), by = thin_trace)
     sigma_trace_thin <- coda::mcmc(sigma_trace[thin_idx], thin = thin_trace)
     gamma_trace_thin <- coda::mcmc(gamma_trace[thin_idx], thin = thin_trace)
+  }
+
+  fFF <- model$FF
+  fGG <- model$GG
+  k_fore <- 8L
+  t_end <- tail(grDevices::xy.coords(y_ts)$x, 1L)
+  dt <- 1 / stats::frequency(y_ts)
+  xlim_fore <- c(synth_window_start, t_end + k_fore * dt)
+
+  if (need_ex1_quants_models) {
+    fc95 <- forecast_from_fit(start.t = length(y), k = k_fore, m1 = M95_plot, fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts)
+    fc50 <- forecast_from_fit(start.t = length(y), k = k_fore, m1 = M50_dqlm_plot, fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts)
+    fc05 <- forecast_from_fit(start.t = length(y), k = k_fore, m1 = M5_plot, fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts)
   }
 
   if (need_ex1_runtime) {
@@ -164,14 +300,6 @@ if (!need_ex1) {
     save_png_plot("ex1quants.png", {
       graphics::par(mfcol = c(1, 2))
 
-      # Use time-aware copies so x-axis is labeled in years (not raw index).
-      M95_plot <- M95
-      M50_dqlm_plot <- M50_dqlm
-      M5_plot <- M5
-      M95_plot$y <- y_ts
-      M50_dqlm_plot$y <- y_ts
-      M5_plot$y <- y_ts
-
       exdqlm::exdqlmPlot(M95_plot)
       exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = "blue")
       exdqlm::exdqlmPlot(M5_plot, add = TRUE, col = "forestgreen")
@@ -181,20 +309,10 @@ if (!need_ex1) {
         legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05))
       )
 
-      fFF <- model$FF
-      fGG <- model$GG
-      k_fore <- 8L
-      t_end <- tail(grDevices::xy.coords(y_ts)$x, 1L)
-      dt <- 1 / stats::frequency(y_ts)
-      xlim_fore <- c(1952, t_end + k_fore * dt)
       stats::plot.ts(y_ts, xlim = xlim_fore, ylim = c(575, 581), col = "dark grey", ylab = "quantile forecast")
-
-      fc95 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M95_plot, fFF = fFF, fGG = fGG, plot = FALSE)
-      plot(fc95, add = TRUE, cols = c("purple", "magenta"))
-      fc50 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M50_dqlm_plot, fFF = fFF, fGG = fGG, plot = FALSE)
-      plot(fc50, add = TRUE, cols = c("blue", "lightblue"))
-      fc05 <- exdqlm::exdqlmForecast(start.t = length(y), k = k_fore, m1 = M5_plot, fFF = fFF, fGG = fGG, plot = FALSE)
-      plot(fc05, add = TRUE, cols = c("forestgreen", "green"))
+      add_forecast_overlay(fc95, cols = c("purple", "magenta"))
+      add_forecast_overlay(fc50, cols = c("blue", "lightblue"))
+      add_forecast_overlay(fc05, cols = c("forestgreen", "green"))
     })
     register_artifact(
       artifact_id = "fig_ex1quants",
@@ -203,6 +321,120 @@ if (!need_ex1) {
       manuscript_target = "fig:ex1quants",
       status = "reproduced",
       notes = "Two-panel quantile and forecast figure with index-window fix."
+    )
+  }
+
+  if (need_ex1synth) {
+    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v2_main_window", {
+      obs_draws <- list(
+        subset_draw_matrix(M5$samp.post.pred, synth_source_draws),
+        subset_draw_matrix(M50_dqlm$samp.post.pred, synth_source_draws),
+        subset_draw_matrix(M95$samp.post.pred, synth_source_draws)
+      )
+      syn_obs <- with_local_seed(seed_value + 111L, {
+        exdqlm::exdqlm_synthesize_from_draws(
+          draws_list = obs_draws,
+          p = c(0.05, 0.50, 0.95),
+          T_expected = length(y),
+          n_samp = synth_n_samp,
+          seed = seed_value + 111L
+        )
+      })
+
+      future_M5 <- sample_forecast_predictive_draws(M5, fc05, synth_source_draws, seed_value + 205L)
+      future_M50 <- sample_forecast_predictive_draws(M50_dqlm, fc50, synth_source_draws, seed_value + 250L)
+      future_M95 <- sample_forecast_predictive_draws(M95, fc95, synth_source_draws, seed_value + 295L)
+      syn_future <- with_local_seed(seed_value + 333L, {
+        exdqlm::exdqlm_synthesize_from_draws(
+          draws_list = list(future_M5$ydraw, future_M50$ydraw, future_M95$ydraw),
+          p = c(0.05, 0.50, 0.95),
+          T_expected = k_fore,
+          n_samp = synth_n_samp,
+          seed = seed_value + 333L
+        )
+      })
+
+      list(
+        syn_obs = syn_obs,
+        syn_future = syn_future
+      )
+    }, note = "ex1_synthesis_v2_main_window")
+
+    capture_output_file("ex1_synthesis_summary.txt", {
+      cat(sprintf("profile=%s\n", selected_profile))
+      cat(sprintf("source_draws=%d | synthesized_draws=%d\n", synth_source_draws, synth_n_samp))
+      cat(sprintf("window_start=%s | forecast_horizon=%d\n\n", format(synth_window_start), k_fore))
+      cat("Observed-period synthesis summary:\n")
+      print(summary(ex1_synthesis$syn_obs$summary$q500))
+      cat("\nForecast-period synthesis summary:\n")
+      print(summary(ex1_synthesis$syn_future$summary$q500))
+    })
+    register_artifact(
+      artifact_id = "log_ex1_synthesis_summary",
+      artifact_type = "log",
+      relative_path = "analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt",
+      manuscript_target = "support: Example 1 synthesis summary",
+      status = "reproduced",
+      notes = "Synthesis settings and compact summaries for the Lake Huron predictive synthesis figure."
+    )
+
+    save_png_plot("ex1synth.png", {
+      ts_xy <- grDevices::xy.coords(y_ts)
+      idx_window <- time_window_to_index(y_ts, synth_window_start, t_end)
+      idx_obs <- idx_window[1]:idx_window[2]
+      x_obs <- ts_xy$x[idx_obs]
+      x_future <- seq(from = t_end, by = dt, length.out = k_fore + 1L)
+
+      obs_q025 <- ex1_synthesis$syn_obs$summary$q025[idx_obs]
+      obs_q250 <- ex1_synthesis$syn_obs$summary$q250[idx_obs]
+      obs_q500 <- ex1_synthesis$syn_obs$summary$q500[idx_obs]
+      obs_q750 <- ex1_synthesis$syn_obs$summary$q750[idx_obs]
+      obs_q975 <- ex1_synthesis$syn_obs$summary$q975[idx_obs]
+
+      fut_q025 <- c(ex1_synthesis$syn_obs$summary$q025[length(y)], ex1_synthesis$syn_future$summary$q025)
+      fut_q250 <- c(ex1_synthesis$syn_obs$summary$q250[length(y)], ex1_synthesis$syn_future$summary$q250)
+      fut_q500 <- c(ex1_synthesis$syn_obs$summary$q500[length(y)], ex1_synthesis$syn_future$summary$q500)
+      fut_q750 <- c(ex1_synthesis$syn_obs$summary$q750[length(y)], ex1_synthesis$syn_future$summary$q750)
+      fut_q975 <- c(ex1_synthesis$syn_obs$summary$q975[length(y)], ex1_synthesis$syn_future$summary$q975)
+
+      y_lim <- range(
+        y[idx_obs],
+        obs_q025, obs_q975,
+        fut_q025, fut_q975,
+        fc95$ff, fc50$ff, fc05$ff,
+        na.rm = TRUE
+      )
+
+      stats::plot.ts(y_ts, xlim = xlim_fore, ylim = y_lim, col = "dark grey", ylab = "predictive synthesis")
+      add_predictive_band(x_obs, obs_q025, obs_q975, obs_q250, obs_q750)
+      graphics::lines(x_obs, obs_q500, col = "grey15", lwd = 1.5)
+      add_predictive_band(x_future, fut_q025, fut_q975, fut_q250, fut_q750)
+      graphics::lines(x_future, fut_q500, col = "grey15", lwd = 1.5)
+      graphics::abline(v = t_end, lty = 3, col = "grey45")
+
+      add_forecast_overlay(fc95, cols = c("#7B3294", "#7B3294"), lwd_main = 2.2, lwd_ci = 1.2)
+      add_forecast_overlay(fc50, cols = c("#2166AC", "#2166AC"), lwd_main = 2.2, lwd_ci = 1.2)
+      add_forecast_overlay(fc05, cols = c("#1B7837", "#1B7837"), lwd_main = 2.2, lwd_ci = 1.2)
+
+      graphics::legend(
+        "topright",
+        legend = c("Synthesized 95% PI", "Synthesized 50% PI", "Synthesized median", expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
+        fill = c(grDevices::adjustcolor("grey72", alpha.f = 0.14), grDevices::adjustcolor("grey55", alpha.f = 0.24), NA, NA, NA, NA),
+        border = c(NA, NA, NA, NA, NA, NA),
+        lty = c(NA, NA, 1, 1, 1, 1),
+        lwd = c(NA, NA, 1.5, 2.1, 2.1, 2.1),
+        col = c(NA, NA, "grey15", "#7B3294", "#2166AC", "#1B7837"),
+        bty = "n",
+        cex = 0.9
+      )
+    })
+    register_artifact(
+      artifact_id = "fig_ex1synth",
+      artifact_type = "figure",
+      relative_path = "analysis/manuscript/outputs/figures/ex1synth.png",
+      manuscript_target = "fig:ex1synth",
+      status = "reproduced",
+      notes = "Lake Huron predictive synthesis figure combining the 0.05, 0.50, and 0.95 fitted models over the late observed window and the eight-step forecast horizon."
     )
   }
 

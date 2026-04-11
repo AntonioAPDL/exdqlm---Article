@@ -7,6 +7,7 @@ without modifying `article4.tex`.
 ## Scope
 
 - Rebuilds Example 1 (Lake Huron) figures.
+- Rebuilds Example 1 predictive-synthesis figure from the tracked 0.05, 0.50, and 0.95 fits.
 - Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with support-only ISVB/LDVB comparison artifacts available when requested.
 - Rebuilds Example 3 (Big Tree) primary figures + diagnostics table from the LDVB workflow.
 - Rebuilds Example 4 sparse static exAL simulation figure + summary table under the regularized horseshoe (RHS) prior.
@@ -44,6 +45,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecas
 Rscript analysis/run_all.R --stage manuscript --targets ex4screen --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit --skip-tests
 ```
 
