@@ -90,12 +90,12 @@ profiles:
       synth_window_start: 1880
     ex2:
       n_is: 500
-      n_samp: 200
+      n_samp: 3000
       tol: 0.05
       ldvb_diag_tol: 0.01
-      ldvb_diag_n_samp: 400
-      benchmark_n_burn: 1000
-      benchmark_n_mcmc: 300
+      ldvb_diag_n_samp: 3000
+      benchmark_n_burn: 2000
+      benchmark_n_mcmc: 3000
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
       n_is: 500
@@ -144,12 +144,12 @@ profiles:
       synth_window_start: 1880
     ex2:
       n_is: 700
-      n_samp: 300
+      n_samp: 3000
       tol: 0.03
       ldvb_diag_tol: 0.005
-      ldvb_diag_n_samp: 600
-      benchmark_n_burn: 1500
-      benchmark_n_mcmc: 500
+      ldvb_diag_n_samp: 3000
+      benchmark_n_burn: 2000
+      benchmark_n_mcmc: 3000
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
       n_is: 700

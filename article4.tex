@@ -634,7 +634,7 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \label{fig:ex2quant}
 \end{figure}
 
-\aA{We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 9 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 113 seconds.}
+\aA{We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. For the tracked standard-profile run we set \code{n.samp = 3000}. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 10 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 114 seconds.}
 
 \aA{Updated code/output below to use the current VB workflow and current summary output.}
 
@@ -643,10 +643,12 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 R> M1 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = c(0.9,0.85), dim.df = c(1,8),
 +                  dqlm.ind = TRUE, fix.sigma = FALSE,
++                  n.samp = 3000,
 +                  verbose = FALSE)
 R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = c(0.9,0.85), dim.df = c(1,8),
 +                  fix.sigma = FALSE,
++                  n.samp = 3000,
 +                  verbose = FALSE)
 R> summary(M1)
 \end{CodeInput}
@@ -658,7 +660,7 @@ Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
 
 DQLM fitted using VB
 Iterations until convergence: 67
-Run-time: 9.128 seconds
+Run-time: 9.522 seconds
 \end{CodeOutput}
 \begin{CodeInput}
 R> summary(M2)
@@ -672,7 +674,7 @@ Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
 exDQLM fitted using LDVB
 Parameters estimated with LD: gamma sigma
 Iterations until convergence: 200
-Run-time: 113.952 seconds
+Run-time: 113.551 seconds
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -734,7 +736,7 @@ R> ref.samp = rnorm(length(sunspot.year))
 R> for(i in 1:nrow(possible.dfs)){
 +   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = possible.dfs[i,], dim.df = c(1,8),
-+                  sig.init = 2, verbose = FALSE)
++                  sig.init = 2, n.samp = 3000, verbose = FALSE)
 +   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
 +                              ref = ref.samp)
 +   metrics[i,] = c(temp.check$m1.CRPS, temp.check$m1.KL)
@@ -756,17 +758,17 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
  \hline
  model & method & runtime (s) & KL & CRPS & pplc \\
  \hline
- DQLM & \aA{VB} & 8.86 & 0.151 & 8.709 & 3925.8 \\
- exDQLM & \aA{VB} & 114.10 & 0.107 & 6.456 & 2359.5 \\
- DQLM & MCMC & 73.60 & 0.123 & 7.751 & 3011.8 \\
- exDQLM & MCMC & 93.17 & 0.144 & 4.973 & 2126.9 \\
+ DQLM & \aA{VB} & 9.52 & 0.144 & 8.588 & 3909.4 \\
+ exDQLM & \aA{VB} & 113.55 & 0.078 & 6.424 & 2346.5 \\
+ DQLM & MCMC & 266.16 & 0.136 & 7.664 & 3048.1 \\
+ exDQLM & MCMC & 330.91 & 0.111 & 5.069 & 2186.7 \\
  \hline
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\) under backend Profile B. Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The MCMC rows use 1000 burn-in iterations and 300 retained draws.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\) under backend Profile B. Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws.}
 \label{tab:ex2bench}
 \end{table}
 
-\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison. For the simpler DQLM, the VB fit is much faster than MCMC, while for the more flexible exDQLM the VB fit is slightly slower than the manuscript-profile MCMC run. The exDQLM improves the predictive scores relative to the DQLM under both inferential methods, and the MCMC exDQLM fit is strongest on the predictive scoring rules in this benchmark, whereas the VB exDQLM fit yields the smaller KL divergence. These results reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the backend profile used for the comparison.}
+\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched final-draw settings. For the simpler DQLM, the VB fit remains much faster than MCMC. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run under the larger 2000/3000 benchmark budget, although the predictive scoring rules still favor the MCMC fit. In both inferential methods the exDQLM improves the predictive scores relative to the DQLM, while the VB exDQLM fit yields the smallest KL divergence in this benchmark. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the backend profile used for the comparison.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
