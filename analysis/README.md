@@ -6,6 +6,10 @@ This folder contains reproducible analysis stages for the article.
 - `manuscript`: end-to-end regeneration of main manuscript example artifacts.
   This includes the sparse `rhs_ns` static benchmark used in Example 4.
 
+For a reader-facing map of the manuscript artifacts, support-only outputs, and
+rerun entry points, see
+`/home/jaguir26/local/src/exdqlm---Article/SUPPLEMENTARY_INDEX.md`.
+
 ## Run
 
 From repository root:

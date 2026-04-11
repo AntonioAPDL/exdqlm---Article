@@ -4,6 +4,10 @@ This stage reproduces the main manuscript example artifacts (figures, key tables
 and compact console-output equivalents) using the current `exdqlm` package API,
 without modifying `article4.tex`.
 
+For a reader-facing index of the publication artifacts, support-only outputs,
+and recommended rerun entry points, see
+`/home/jaguir26/local/src/exdqlm---Article/SUPPLEMENTARY_INDEX.md`.
+
 ## Scope
 
 - Rebuilds Example 1 (Lake Huron) figures.
