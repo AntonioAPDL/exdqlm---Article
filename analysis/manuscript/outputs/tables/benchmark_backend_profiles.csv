@@ -1,0 +1,3 @@
+"profile","label","use_cpp_kf","use_cpp_builders","use_cpp_samplers","use_cpp_postpred","use_cpp_mcmc","cpp_mcmc_mode","cpp_threads"
+"A","pure-R baseline",FALSE,FALSE,FALSE,FALSE,FALSE,"strict",1
+"B","manuscript-matched backend",TRUE,FALSE,FALSE,FALSE,TRUE,"fast",1

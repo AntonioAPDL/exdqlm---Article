@@ -166,7 +166,7 @@ Table \ref{table:post} shows the input parameters of the fitting functions \code
 \subsection{Specification of the evolution covariance via discount factors}
 \label{sec:dfs}
 
-Both estimation algorithms, \code{exdqlmMCMC} and \code{exdqlmLDVB}, utilize discount factors to specify the time-evolving covariance matrices ${\bf W}_t$ introduced in Equation \eqref{EQ:exDLMevo} \citep{west1985dynamic}. More precisely, we define the evolution variance matrix ${\bf W}_t = \frac{1-\delta}{\delta} {\bf G}_t {\bf C}_{t-1} {\bf G}_t'$ where ${\bf C}_{t-1}$ denotes the posterior variance of the state vector ${\boldsymbol\theta_{t-1}}$ at time $t-1$ and $\delta$ is a discount factor such that $0 < \delta \leq 1$. The discount factor $\delta$ can be specified by the user via function parameter \code{df}. \aA{Selection of discount factors is typically done by optimizing a model-checking criterion. We suggest using the KL divergence or posterior predictive loss criterion discussed in Section \ref{sec:diags}.} A brief example of this method for discount factor selection can be found in Section \ref{sec:ex2}.
+Both estimation algorithms, \code{exdqlmMCMC} and \code{exdqlmLDVB}, utilize discount factors to specify the time-evolving covariance matrices ${\bf W}_t$ introduced in Equation \eqref{EQ:exDLMevo} \citep{west1985dynamic}. More precisely, we define the evolution variance matrix ${\bf W}_t = \frac{1-\delta}{\delta} {\bf G}_t {\bf C}_{t-1} {\bf G}_t'$ where ${\bf C}_{t-1}$ denotes the posterior variance of the state vector ${\boldsymbol\theta_{t-1}}$ at time $t-1$ and $\delta$ is a discount factor such that $0 < \delta \leq 1$. The discount factor $\delta$ can be specified by the user via function parameter \code{df}. \aA{Selection of discount factors is typically done by optimizing a model-checking criterion. In practice we recommend predictive criteria such as the CRPS or pplc discussed in Section \ref{sec:diags}, with the KL divergence retained as a complementary calibration diagnostic.} A brief example of this method for discount factor selection can be found in Section \ref{sec:ex2}.
 
 Discounting by component of the state-space model is also a functionality of our estimation algorithms. Suppose the state vector is comprised of $h$ components $\boldsymbol{\theta}_{it}$ of dimension $q_i$ for $i=1,\dots,h$ such that $\boldsymbol{\theta}_{t}' = (\boldsymbol{\theta}_{1t}',\dots,\boldsymbol{\theta}_{ht})'$ and $\sum_{i=1}^{h} q_i = q$. If ${\bf W}_{it}$ denotes the $i^{th}$ component of the evolution covariance matrix such that ${\bf W}_t = \text{blockdiag}\{ {\bf W}_{1t},\dots,{\bf W}_{ht}\}$ and $\delta_i$ denotes a discount factor for the $i^{th}$ component, we can define the evolution variance matrix by component as ${\bf W}_{it} = \frac{1-\delta_i}{\delta_i} {\bf G}_{it} {\bf C}_{i,t-1} {\bf G}_{it}'$. Here ${\bf G}_{it}$ and ${\bf C}_{i,t-1}$ denote the $i^{th}$ components of ${\bf G}_t$ and ${\bf C}_{t-1}$, respectively. The function parameters \code{df} and \code{dim.df} allow users to specify a set of component discount factors $(\delta_1,\dots,\delta_h)$ and their dimensions $(q_1,\dots,q_h)$, respectively, within the state-space model. Examples of this feature can be found in Section \ref{sec:exs}. For a full review of discount factors including discounting by component, see \cite{west1985dynamic}.
 
@@ -253,13 +253,15 @@ Using this estimated sequence $\{\hat u_t\}$, we can assess the model performanc
 \end{align}
 can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC} and \code{exdqlmLDVB} functions.
 
+\aA{In addition to these calibration-based diagnostics, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws. The CRPS rewards sharp and well-calibrated predictive distributions, with smaller values indicating better predictive performance.}
+
 For a final diagnostic, we include \cite{gelfand1998model} posterior predictive loss criterion (pplc) with check loss function $\rho_{p_0}(x) = x[p_0-I(x<0)]$. That is,
 \begin{align}
 \text{pplc} = \sum_t \E[\rho_{p_0} (y_t^{obs}-y^{rep}_t)|y_{1:T}],
 \end{align}
 where the expectation is with respect to the posterior predictive distribution of $y_t$, $p(y^{rep}_t| y_{1:T})$. This distribution is used to generate a replicate dataset and is the expected value of the observation equation \eqref{EQ:exDLM} with respect to the posterior distributions of the parameters. Again, a smaller pplc value suggest a superior model fit. Samples from the posterior replicate distributions are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-The function \code{exdqlmDiagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} and \code{exdqlmLDVB()} is passed to \code{exdqlmDiagnostics()}, the resulting object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence, pplc, the ordered pairs of the QQ-plot, and autocorrelations by lag. By default, the function also produces the QQ-plot, ACF plot and MAP standard forecast error plot.  Examples of the utility of \code{exdqlmDiagnostics()} can be found in the following Section \ref{sec:exs}.
+The function \code{exdqlmDiagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} and \code{exdqlmLDVB()} is passed to \code{exdqlmDiagnostics()}, the resulting object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence, the mean CRPS, pplc, the ordered pairs of the QQ-plot, and autocorrelations by lag. By default, the function also produces the QQ-plot, ACF plot and MAP standard forecast error plot.  Examples of the utility of \code{exdqlmDiagnostics()} can be found in the following Section \ref{sec:exs}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -711,7 +713,7 @@ R> exdqlmDiagnostics(M1, M2, cols = c("red","blue"))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{Finally, the function \code{exdqlmDiagnostics} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component was optimal with respect to the KL divergence of the one-step-ahead predictive distributions. We can create a list of possible discount factors, quickly run the VB approximation for each possible model, and select the set of discount factors which results in the lowest KL divergence. A simple example is seen below, which takes approximately 6 minutes to run.}
+\aA{Finally, the function \code{exdqlmDiagnostics} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the VB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. A simple example is seen below.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -726,7 +728,8 @@ R> possible.dfs
 [4,]  0.9 1.00
 \end{CodeOutput}
 \begin{CodeInput}
-R> KLs <- vector("numeric")
+R> metrics <- matrix(NA_real_, nrow(possible.dfs), 2,
++                    dimnames = list(NULL, c("CRPS","KL")))
 R> ref.samp = rnorm(length(sunspot.year))
 R> for(i in 1:nrow(possible.dfs)){
 +   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
@@ -734,16 +737,36 @@ R> for(i in 1:nrow(possible.dfs)){
 +                  sig.init = 2, verbose = FALSE)
 +   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
 +                              ref = ref.samp)
-+   KLs = c(KLs,temp.check$m1.KL)
++   metrics[i,] = c(temp.check$m1.CRPS, temp.check$m1.KL)
 + }
-R> # optimal dfs based off KL divergence
-R> possible.dfs[which.min(KLs),]
+R> # optimal dfs based off CRPS
+R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \end{CodeInput}
 \begin{CodeOutput}
 [1] 0.90 0.85
 \end{CodeOutput}
 \end{CodeChunk}
-The results suggest the discount factor we used for the seasonal component is optimal.
+\aA{On this coarse grid, the CRPS and KL criteria agree and both select the seasonal discount factor \(0.85\), so the choice used above is retained.}
+
+\aA{To make the runtime comparisons reproducible, we distinguish two backend profiles. Profile A is a pure-\proglang{R} baseline with the optional C++ paths disabled. Profile B matches the manuscript defaults: it retains the C++ dynamic MCMC backend with \code{exdqlm.cpp\_mcmc\_mode = "fast"} while leaving the other optional accelerators off. Unless noted otherwise, the benchmark tables below use Profile B. The exact CPU, \proglang{R} version, package state, seeds, and dataset sizes for the tracked benchmark run are recorded in the manuscript reproducibility artifacts.}
+
+\begin{table}[t]
+\centering
+\begin{tabular}{cc|cccc}
+ \hline
+ model & method & runtime (s) & KL & CRPS & pplc \\
+ \hline
+ DQLM & \aA{VB} & 8.86 & 0.151 & 8.709 & 3925.8 \\
+ exDQLM & \aA{VB} & 114.10 & 0.107 & 6.456 & 2359.5 \\
+ DQLM & MCMC & 73.60 & 0.123 & 7.751 & 3011.8 \\
+ exDQLM & MCMC & 93.17 & 0.144 & 4.973 & 2126.9 \\
+ \hline
+\end{tabular}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\) under backend Profile B. Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The MCMC rows use 1000 burn-in iterations and 300 retained draws.}
+\label{tab:ex2bench}
+\end{table}
+
+\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison. For the simpler DQLM, the VB fit is much faster than MCMC, while for the more flexible exDQLM the VB fit is slightly slower than the manuscript-profile MCMC run. The exDQLM improves the predictive scores relative to the DQLM under both inferential methods, and the MCMC exDQLM fit is strongest on the predictive scoring rules in this benchmark, whereas the VB exDQLM fit yields the smaller KL divergence. These results reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the backend profile used for the comparison.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1024,7 +1047,7 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \end{figure}
 
 \aA{Updated figure interpretation.}
-\aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; on this screened run, the VB fit is slightly sharper on the active coefficients, whereas MCMC is slightly better on the holdout quantile RMSE and null shrinkage. At \(p_0 = 0.25\), the two fits remain closely aligned, with the VB fit marginally better on the active-signal metric and MCMC slightly better on the holdout and null-shrinkage metrics. At \(p_0 = 0.50\), both fits again track the true sparse pattern, but MCMC is modestly stronger on the active-signal and holdout metrics, while the null-shrinkage results are nearly indistinguishable.}
+\aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; on this screened run, the VB fit is slightly sharper on the active coefficients, whereas MCMC is slightly better on the holdout quantile RMSE and null shrinkage. At \(p_0 = 0.25\), the two fits remain closely aligned, with MCMC somewhat stronger on the active-signal and null-shrinkage metrics while the holdout quantile RMSE is essentially tied. At \(p_0 = 0.50\), both fits again track the true sparse pattern, but the VB fit is modestly stronger on the active-signal and holdout metrics, while the null-shrinkage results remain nearly indistinguishable.}
 
 \begin{table}
 \centering
@@ -1032,14 +1055,14 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
  \hline
  \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \hline
- 0.05 & \aA{VB} & 18.99 & 0.152 & 0.069 & 0.473 \\
- 0.05 & MCMC & 39.46 & 0.163 & 0.048 & 0.452 \\
+ 0.05 & \aA{VB} & 18.98 & 0.152 & 0.069 & 0.473 \\
+ 0.05 & MCMC & 38.34 & 0.173 & 0.066 & 0.466 \\
  \hline
- 0.25 & \aA{VB} & 15.46 & 0.231 & 0.070 & 0.374 \\
- 0.25 & MCMC & 40.25 & 0.235 & 0.060 & 0.370 \\
+ 0.25 & \aA{VB} & 13.76 & 0.179 & 0.049 & 0.369 \\
+ 0.25 & MCMC & 35.74 & 0.146 & 0.042 & 0.370 \\
  \hline
- 0.50 & \aA{VB} & 6.68 & 0.414 & 0.046 & 0.504 \\
- 0.50 & MCMC & 40.42 & 0.349 & 0.046 & 0.445 \\
+ 0.50 & \aA{VB} & 5.60 & 0.182 & 0.055 & 0.383 \\
+ 0.50 & MCMC & 35.49 & 0.206 & 0.056 & 0.467 \\
  \hline
 \end{tabular}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
@@ -1047,7 +1070,7 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \end{table}
 
 \aA{Updated table discussion.}
-\aA{Table \ref{tab:ex4static} reinforces the visual comparison. The two methods are competitive across all three quantile levels, but the relative advantage is not uniform: MCMC is modestly stronger on the holdout-recovery and null-shrinkage metrics at \(p_0 = 0.05\), the two methods are nearly tied at \(p_0 = 0.25\), and MCMC is modestly stronger on the active-signal and holdout metrics at \(p_0 = 0.50\). The VB fit, however, is faster in all three cases for the selected data set, with runtime reductions of about 2.1-fold at \(p_0 = 0.05\), 2.6-fold at \(p_0 = 0.25\), and 6.1-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation offers meaningful computational savings as a first-pass analysis while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: VB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
+\aA{Table \ref{tab:ex4static} reinforces the visual comparison. The two methods are competitive across all three quantile levels, but the relative advantage depends on the metric: MCMC is slightly stronger on null shrinkage and holdout quantile RMSE at \(p_0 = 0.05\), MCMC is somewhat stronger on the active-signal and null-shrinkage metrics at \(p_0 = 0.25\) while the holdout quantile RMSE is essentially tied, and the VB fit is modestly stronger on the active-signal and holdout metrics at \(p_0 = 0.50\). The tracked holdout check-loss values, omitted from the table for compactness, slightly favor the VB fit at all three quantiles. The VB fit is faster in all three cases for the selected data set, with runtime reductions of about 2.0-fold at \(p_0 = 0.05\), 2.6-fold at \(p_0 = 0.25\), and 6.3-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation offers meaningful computational savings as a first-pass analysis while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: VB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
 
 \section{Conclusion}
 \label{sec:summary}

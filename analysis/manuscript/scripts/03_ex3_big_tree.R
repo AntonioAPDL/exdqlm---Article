@@ -431,6 +431,7 @@ if (!need_ex3) {
       diag_table <- data.frame(
         model = c("M1_regression", "M2_transfer_function"),
         KL = c(diag_3$m1.KL, diag_3$m2.KL),
+        CRPS = c(diag_3$m1.CRPS, diag_3$m2.CRPS),
         pplc = c(diag_3$m1.pplc, diag_3$m2.pplc),
         run_time_seconds = c(diag_3$m1.rt, diag_3$m2.rt)
       )
@@ -477,6 +478,7 @@ if (!need_ex3) {
         diag_table_ldvb <- data.frame(
           model = c("M1_regression_ldvb", "M2_transfer_function_ldvb"),
           KL = c(diag_3_m1_ldvb$m1.KL, diag_3_m2_ldvb$m1.KL),
+          CRPS = c(diag_3_m1_ldvb$m1.CRPS, diag_3_m2_ldvb$m1.CRPS),
           pplc = c(diag_3_m1_ldvb$m1.pplc, diag_3_m2_ldvb$m1.pplc),
           run_time_seconds = c(diag_3_m1_ldvb$m1.rt, diag_3_m2_ldvb$m1.rt)
         )

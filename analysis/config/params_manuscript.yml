@@ -1,5 +1,27 @@
 seed: 20260302
 
+manuscript_benchmark_profile: B
+
+benchmark_profiles:
+  A:
+    label: pure-R baseline
+    use_cpp_kf: false
+    use_cpp_builders: false
+    use_cpp_samplers: false
+    use_cpp_postpred: false
+    use_cpp_mcmc: false
+    cpp_mcmc_mode: strict
+    cpp_threads: 1
+  B:
+    label: manuscript-matched backend
+    use_cpp_kf: true
+    use_cpp_builders: false
+    use_cpp_samplers: false
+    use_cpp_postpred: false
+    use_cpp_mcmc: true
+    cpp_mcmc_mode: fast
+    cpp_threads: 1
+
 profiles:
   quick:
     ex1:
@@ -22,6 +44,8 @@ profiles:
       tol: 0.08
       ldvb_diag_tol: 0.02
       ldvb_diag_n_samp: 250
+      benchmark_n_burn: 400
+      benchmark_n_mcmc: 150
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
       n_is: 200
@@ -70,6 +94,8 @@ profiles:
       tol: 0.05
       ldvb_diag_tol: 0.01
       ldvb_diag_n_samp: 400
+      benchmark_n_burn: 1000
+      benchmark_n_mcmc: 300
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
       n_is: 500
@@ -122,6 +148,8 @@ profiles:
       tol: 0.03
       ldvb_diag_tol: 0.005
       ldvb_diag_n_samp: 600
+      benchmark_n_burn: 1500
+      benchmark_n_mcmc: 500
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
       n_is: 700

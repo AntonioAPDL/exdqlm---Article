@@ -42,6 +42,18 @@ if (!selected_profile %in% names(cfg_params$profiles)) {
   )
 }
 cfg_profile <- cfg_params$profiles[[selected_profile]]
+cfg_benchmark_profiles <- cfg_params$benchmark_profiles %||% list()
+selected_benchmark_profile <- cfg_params$manuscript_benchmark_profile %||% "B"
+if (!selected_benchmark_profile %in% names(cfg_benchmark_profiles)) {
+  stop(
+    sprintf(
+      "Unknown benchmark backend profile '%s'. Valid: %s",
+      selected_benchmark_profile,
+      paste(names(cfg_benchmark_profiles), collapse = ", ")
+    ),
+    call. = FALSE
+  )
+}
 
 seed_value <- seed_override %||% cfg_params$seed
 set.seed(seed_value)
@@ -211,11 +223,163 @@ if (length(missing_fns) > 0L) {
   stop(sprintf("Missing required exdqlm functions: %s", paste(missing_fns, collapse = ", ")), call. = FALSE)
 }
 
-options(
-  exdqlm.use_cpp_mcmc = TRUE,
-  exdqlm.cpp_mcmc_mode = "fast",
-  exdqlm.cpp_threads = 1L
-)
+apply_backend_profile <- function(profile_name = selected_benchmark_profile) {
+  prof <- cfg_benchmark_profiles[[profile_name]]
+  if (is.null(prof)) {
+    stop(sprintf("Unknown benchmark backend profile '%s'.", profile_name), call. = FALSE)
+  }
+  options(
+    exdqlm.use_cpp_kf = isTRUE(prof$use_cpp_kf),
+    exdqlm.use_cpp_builders = isTRUE(prof$use_cpp_builders),
+    exdqlm.use_cpp_samplers = isTRUE(prof$use_cpp_samplers),
+    exdqlm.use_cpp_postpred = isTRUE(prof$use_cpp_postpred),
+    exdqlm.use_cpp_mcmc = isTRUE(prof$use_cpp_mcmc),
+    exdqlm.cpp_mcmc_mode = as.character(prof$cpp_mcmc_mode %||% "fast"),
+    exdqlm.cpp_threads = as.integer(prof$cpp_threads %||% 1L)
+  )
+  invisible(prof)
+}
+
+with_backend_profile <- function(profile_name, expr) {
+  old <- options(
+    exdqlm.use_cpp_kf = getOption("exdqlm.use_cpp_kf"),
+    exdqlm.use_cpp_builders = getOption("exdqlm.use_cpp_builders"),
+    exdqlm.use_cpp_samplers = getOption("exdqlm.use_cpp_samplers"),
+    exdqlm.use_cpp_postpred = getOption("exdqlm.use_cpp_postpred"),
+    exdqlm.use_cpp_mcmc = getOption("exdqlm.use_cpp_mcmc"),
+    exdqlm.cpp_mcmc_mode = getOption("exdqlm.cpp_mcmc_mode"),
+    exdqlm.cpp_threads = getOption("exdqlm.cpp_threads")
+  )
+  on.exit(options(old), add = TRUE)
+  apply_backend_profile(profile_name)
+  eval.parent(substitute(expr))
+}
+
+safe_system_output <- function(cmd, args = character()) {
+  out <- tryCatch(
+    system2(cmd, args = args, stdout = TRUE, stderr = FALSE),
+    error = function(e) character()
+  )
+  trimws(out[nzchar(trimws(out))])
+}
+
+git_short_head <- function(path) {
+  out <- safe_system_output("git", c("-C", path, "rev-parse", "--short", "HEAD"))
+  if (length(out)) out[[1]] else NA_character_
+}
+
+git_dirty_state <- function(path) {
+  nzchar(paste(
+    safe_system_output("git", c("-C", path, "status", "--porcelain", "--untracked-files=no")),
+    collapse = ""
+  ))
+}
+
+detect_cpu_model <- function() {
+  if (.Platform$OS.type == "unix" && file.exists("/proc/cpuinfo")) {
+    cpuinfo <- tryCatch(readLines("/proc/cpuinfo", warn = FALSE), error = function(e) character())
+    hit <- grep("^model name\\s*:", cpuinfo, value = TRUE)
+    if (length(hit)) {
+      return(trimws(sub("^model name\\s*:\\s*", "", hit[[1]])))
+    }
+  }
+  if (Sys.info()[["sysname"]] == "Darwin") {
+    cpu_line <- safe_system_output("sysctl", c("-n", "machdep.cpu.brand_string"))
+    if (length(cpu_line)) return(cpu_line[[1]])
+  }
+  as.character(Sys.info()[["machine"]] %||% NA_character_)
+}
+
+benchmark_profiles_table <- function() {
+  rows <- lapply(names(cfg_benchmark_profiles), function(name) {
+    prof <- cfg_benchmark_profiles[[name]]
+    data.frame(
+      profile = name,
+      label = as.character(prof$label %||% ""),
+      use_cpp_kf = isTRUE(prof$use_cpp_kf),
+      use_cpp_builders = isTRUE(prof$use_cpp_builders),
+      use_cpp_samplers = isTRUE(prof$use_cpp_samplers),
+      use_cpp_postpred = isTRUE(prof$use_cpp_postpred),
+      use_cpp_mcmc = isTRUE(prof$use_cpp_mcmc),
+      cpp_mcmc_mode = as.character(prof$cpp_mcmc_mode %||% NA_character_),
+      cpp_threads = as.integer(prof$cpp_threads %||% NA_integer_),
+      stringsAsFactors = FALSE
+    )
+  })
+  do.call(rbind, rows)
+}
+
+benchmark_environment_table <- function() {
+  cpu_model <- detect_cpu_model()
+  pkg_version <- tryCatch(as.character(utils::packageVersion("exdqlm")), error = function(e) NA_character_)
+  ex1_len <- tryCatch({
+    utils::data("LakeHuron", package = "datasets", envir = environment())
+    length(datasets::LakeHuron)
+  }, error = function(e) NA_integer_)
+  ex2_len <- tryCatch(length(datasets::sunspot.year), error = function(e) NA_integer_)
+  ex3_len <- tryCatch({
+    utils::data("BTflow", package = "exdqlm", envir = environment())
+    length(BTflow)
+  }, error = function(e) NA_integer_)
+
+  data.frame(
+    field = c(
+      "selected_profile",
+      "benchmark_profile",
+      "seed",
+      "cpu_model",
+      "os",
+      "r_version",
+      "exdqlm_version",
+      "exdqlm_commit",
+      "exdqlm_dirty",
+      "article_commit",
+      "article_dirty",
+      "exdqlm.use_cpp_kf",
+      "exdqlm.use_cpp_builders",
+      "exdqlm.use_cpp_samplers",
+      "exdqlm.use_cpp_postpred",
+      "exdqlm.use_cpp_mcmc",
+      "exdqlm.cpp_mcmc_mode",
+      "exdqlm.cpp_threads",
+      "ex1_length",
+      "ex2_length",
+      "ex3_length",
+      "ex4_train_n",
+      "ex4_holdout_n",
+      "ex4_dataset_seed"
+    ),
+    value = c(
+      selected_profile,
+      selected_benchmark_profile,
+      as.character(seed_value),
+      cpu_model,
+      paste(Sys.info()[c("sysname", "release", "machine")], collapse = " | "),
+      paste(R.version$major, R.version$minor, sep = "."),
+      pkg_version,
+      git_short_head(resolve_pkg_path()$path),
+      as.character(git_dirty_state(resolve_pkg_path()$path)),
+      git_short_head(repo_root),
+      as.character(git_dirty_state(repo_root)),
+      as.character(isTRUE(getOption("exdqlm.use_cpp_kf"))),
+      as.character(isTRUE(getOption("exdqlm.use_cpp_builders"))),
+      as.character(isTRUE(getOption("exdqlm.use_cpp_samplers"))),
+      as.character(isTRUE(getOption("exdqlm.use_cpp_postpred"))),
+      as.character(isTRUE(getOption("exdqlm.use_cpp_mcmc"))),
+      as.character(getOption("exdqlm.cpp_mcmc_mode")),
+      as.character(getOption("exdqlm.cpp_threads")),
+      as.character(ex1_len),
+      as.character(ex2_len),
+      as.character(ex3_len),
+      as.character(cfg_profile$ex4$n_train %||% NA_integer_),
+      as.character(cfg_profile$ex4$holdout_n %||% NA_integer_),
+      as.character(cfg_profile$ex4$dataset_seed %||% NA_integer_)
+    ),
+    stringsAsFactors = FALSE
+  )
+}
+
+apply_backend_profile(selected_benchmark_profile)
 
 # High-contrast LDVB palette used across LD-only counterpart artifacts.
 ldvb_cols <- list(
@@ -452,6 +616,11 @@ forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRU
 }
 
 diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "blue"), ref = NULL, y_data = NULL) {
+  safe_metric_mean <- function(x) {
+    x <- as.numeric(x)
+    x <- x[is.finite(x)]
+    if (!length(x)) NA_real_ else mean(x)
+  }
   y_full <- if (!is.null(y_data)) as.numeric(y_data) else as.numeric(m1$y)
   has_y <- length(y_full) > 0L
   nrow_or_len <- function(x) if (is.null(dim(x))) length(x) else nrow(x)
@@ -483,20 +652,23 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
     if (length(ref) != TT) stop("ref must have size equal to diagnostics span", call. = FALSE)
   }
   m1.KL <- mean(FNN::KL.divergence(ref, m1_msfe))
+  m1.KL.flip <- mean(FNN::KL.divergence(m1_msfe, ref))
   if (has_y) {
     m1.loss <- matrix(NA_real_, TT, dim(m1_post_pred)[2])
     for (t in seq_len(TT)) {
       m1.loss[t, ] <- exdqlm:::CheckLossFn(m1$p0, y[t] - m1_post_pred[t, ])
     }
     m1.pplc <- sum(rowMeans(m1.loss))
+    m1.CRPS <- safe_metric_mean(exdqlm:::.exdqlm_crps_vec(y, m1_post_pred))
   } else {
     m1.pplc <- NA_real_
+    m1.CRPS <- NA_real_
   }
   m1.qq <- stats::qqnorm(m1_msfe, plot = FALSE)
   m1.acf <- stats::acf(m1.uts, plot = FALSE)
 
   retlist <- list(
-    m1.uts = m1.uts, m1.KL = m1.KL, m1.pplc = m1.pplc,
+    m1.uts = m1.uts, m1.KL = m1.KL, m1.KL.flip = m1.KL.flip, m1.CRPS = m1.CRPS, m1.pplc = m1.pplc,
     m1.qq = m1.qq, m1.acf = m1.acf, m1.rt = m1$run.time,
     m1.msfe = m1_msfe, y = y
   )
@@ -520,7 +692,9 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
     retlist$m2.msfe <- m2_msfe
     retlist$m2.uts <- m2.uts
     retlist$m2.KL <- mean(FNN::KL.divergence(ref, m2_msfe))
+    retlist$m2.KL.flip <- mean(FNN::KL.divergence(m2_msfe, ref))
     retlist$m2.pplc <- m2.pplc
+    retlist$m2.CRPS <- if (has_y) safe_metric_mean(exdqlm:::.exdqlm_crps_vec(y, m2_post_pred)) else NA_real_
     retlist$m2.qq <- stats::qqnorm(m2_msfe, plot = FALSE)
     retlist$m2.acf <- stats::acf(m2.uts, plot = FALSE)
     retlist$m2.rt <- m2$run.time
@@ -647,6 +821,15 @@ promote_publication_figures <- function() {
 register_note("api_update", "Deprecated exdqlmChecks replaced with exdqlmDiagnostics.")
 register_note("api_update", "Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.")
 register_note("ldvb_note", "Added ISVB vs LDVB comparison figure for dynamic Sunspots example.")
-register_note("backend", "MCMC runs use C++ backend options exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.")
+register_note(
+  "backend",
+  sprintf(
+    "Benchmark Profile %s (%s) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=%s and exdqlm.cpp_mcmc_mode='%s'.",
+    selected_benchmark_profile,
+    cfg_benchmark_profiles[[selected_benchmark_profile]]$label %||% "backend profile",
+    as.character(isTRUE(getOption("exdqlm.use_cpp_mcmc"))),
+    as.character(getOption("exdqlm.cpp_mcmc_mode"))
+  )
+)
 
 log_msg(sprintf("00_setup complete (profile=%s)", selected_profile))

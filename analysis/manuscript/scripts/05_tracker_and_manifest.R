@@ -6,6 +6,7 @@ expected_targets <- data.frame(
     "fig_ex1quants",
     "fig_ex2quant",
     "fig_ex2checks",
+    "tab_ex2_dynamic_benchmark",
     "fig_ex3data",
     "fig_ex3quantcomps",
     "fig_ex3zetapsi",
@@ -19,6 +20,7 @@ expected_targets <- data.frame(
     "fig:ex1quants",
     "fig:ex2quant",
     "fig:ex2checks",
+    "tab:ex2bench",
     "fig:ex3data",
     "fig:ex3quant",
     "fig:ex3tftheta",
@@ -40,14 +42,16 @@ if (targeted_run) {
     ex2 = c(
       "fig_ex2quant", "fig_ex2quant_ldvb",
       "fig_ex2checks", "fig_ex2checks_ldvb",
+      "tab_ex2_dynamic_benchmark",
       "fig_ex2_isvb_ldvb_compare", "fig_ex2_gamma_posteriors", "fig_ex2_ldvb_diagnostics",
       "tab_ex2_gamma_credible_intervals", "tab_ex2_diagnostics", "tab_ex2_diagnostics_ldvb",
       "tab_ex2_df_scan", "tab_ex2_df_scan_ldvb"
     ),
     ex2quant = c("fig_ex2quant"),
     ex2quant_ldvb = c("fig_ex2quant_ldvb"),
-    ex2checks = c("fig_ex2checks"),
+    ex2checks = c("fig_ex2checks", "tab_ex2_dynamic_benchmark"),
     ex2checks_ldvb = c("fig_ex2checks_ldvb"),
+    ex2bench = c("tab_ex2_dynamic_benchmark"),
     ex2_isvb_ldvb_compare = c("fig_ex2_isvb_ldvb_compare"),
     ex2_gamma_posteriors = c("fig_ex2_gamma_posteriors", "tab_ex2_gamma_credible_intervals"),
     ex2_ldvb_diagnostics = c("fig_ex2_ldvb_diagnostics"),
@@ -184,6 +188,24 @@ save_table_csv(
   notes = "Maps deprecated manuscript calls to current package API."
 )
 
+save_table_csv(
+  benchmark_profiles_table(),
+  filename = "benchmark_backend_profiles.csv",
+  artifact_id = "tab_benchmark_backend_profiles",
+  manuscript_target = "support: benchmark backend profiles",
+  status = "reproduced",
+  notes = "Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend)."
+)
+
+save_table_csv(
+  benchmark_environment_table(),
+  filename = "benchmark_environment.csv",
+  artifact_id = "tab_benchmark_environment",
+  manuscript_target = "support: benchmark environment details",
+  status = "reproduced",
+  notes = "CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run."
+)
+
 if (targeted_run) {
   register_note("coverage", sprintf("Targeted run; requested targets: %s.", paste(targets, collapse = ", ")))
 } else {
@@ -191,6 +213,8 @@ if (targeted_run) {
 }
 register_note("timing", "Exact runtime printouts in manuscript are historical and expected to differ.")
 register_note("timing", "Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.")
+register_note("benchmark", sprintf("Benchmark tables reported in the manuscript use backend Profile %s; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.", selected_benchmark_profile))
+register_note("benchmark", "benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.")
 register_note("scope", "Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in article4.tex.")
 
 write_tracker()

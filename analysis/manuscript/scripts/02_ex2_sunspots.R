@@ -1,6 +1,7 @@
 need_ex2 <- target_enabled(
   "ex2",
   c(
+    "ex2bench",
     "ex2quant", "ex2quant_ldvb",
     "ex2checks", "ex2checks_ldvb",
     "ex2_isvb_ldvb_compare", "ex2_ldvb_diagnostics", "ex2_gamma_posteriors",
@@ -16,6 +17,7 @@ if (!need_ex2) {
   need_ex2quant_ldvb <- target_enabled("ex2quant_ldvb", "ex2")
   need_ex2checks <- target_enabled("ex2checks", "ex2")
   need_ex2checks_ldvb <- target_enabled("ex2checks_ldvb", "ex2")
+  need_ex2benchmark <- target_enabled("ex2bench", "ex2") || need_ex2checks
   need_ex2_ldvb <- target_enabled("ex2_isvb_ldvb_compare", "ex2")
   need_ex2_ldvb_diag <- target_enabled("ex2_ldvb_diagnostics", "ex2")
   need_ex2_gamma <- target_enabled("ex2_gamma_posteriors", "ex2")
@@ -65,6 +67,8 @@ if (!need_ex2) {
   tol <- as.numeric(cfg_profile$ex2$tol)
   ldvb_diag_tol <- as.numeric(cfg_profile$ex2$ldvb_diag_tol %||% tol)
   ldvb_diag_n_samp <- as.integer(cfg_profile$ex2$ldvb_diag_n_samp %||% n_samp)
+  benchmark_n_burn <- as.integer(cfg_profile$ex2$benchmark_n_burn %||% 1000L)
+  benchmark_n_mcmc <- as.integer(cfg_profile$ex2$benchmark_n_mcmc %||% 300L)
   df_grid <- as.numeric(cfg_profile$ex2$df_grid)
 
   fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
@@ -193,6 +197,131 @@ if (!need_ex2) {
     status = if (fit_ok(M_sigma_ldvb) && fit_ok(M1_ldvb) && fit_ok(M2_ldvb)) "reproduced" else "approximate",
     notes = "Includes sigma summary and ISVB/LDVB runtime diagnostics."
   )
+
+  if (need_ex2benchmark && ex2_ldvb_pair_ok) {
+    benchmark_cache_key <- sprintf(
+      "ex2_dynamic_benchmark_%s_b%d_k%d_v1",
+      selected_benchmark_profile,
+      benchmark_n_burn,
+      benchmark_n_mcmc
+    )
+    ex2_benchmark <- load_or_fit_cache(benchmark_cache_key, {
+      M1_mcmc <- with_backend_profile(selected_benchmark_profile, {
+        exdqlm::exdqlmMCMC(
+          y = y_ts, p0 = 0.85, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          dqlm.ind = TRUE, fix.sigma = FALSE,
+          n.burn = benchmark_n_burn, n.mcmc = benchmark_n_mcmc,
+          verbose = FALSE
+        )
+      })
+
+      M2_mcmc <- with_backend_profile(selected_benchmark_profile, {
+        exdqlm::exdqlmMCMC(
+          y = y_ts, p0 = 0.85, model = model,
+          df = c(0.9, 0.85), dim.df = c(1, 8),
+          fix.sigma = FALSE,
+          n.burn = benchmark_n_burn, n.mcmc = benchmark_n_mcmc,
+          verbose = FALSE
+        )
+      })
+
+      diag_vb <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, y_data = y)
+      diag_mcmc <- diagnostics_from_fit(M1_mcmc, M2_mcmc, plot = FALSE, y_data = y)
+
+      list(
+        M1_mcmc = M1_mcmc,
+        M2_mcmc = M2_mcmc,
+        diag_vb = diag_vb,
+        diag_mcmc = diag_mcmc
+      )
+    }, note = benchmark_cache_key)
+
+    capture_output_file("ex2_benchmark_run_summary.txt", {
+      cat(sprintf("profile=%s\n", selected_profile))
+      cat(sprintf("backend_profile=%s\n", selected_benchmark_profile))
+      cat(sprintf("benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", benchmark_n_burn, benchmark_n_mcmc))
+      cat("VB benchmark diagnostics:\n")
+      print(data.frame(
+        model = c("DQLM", "exDQLM"),
+        runtime_sec = c(ex2_benchmark$diag_vb$m1.rt, ex2_benchmark$diag_vb$m2.rt),
+        KL = c(ex2_benchmark$diag_vb$m1.KL, ex2_benchmark$diag_vb$m2.KL),
+        CRPS = c(ex2_benchmark$diag_vb$m1.CRPS, ex2_benchmark$diag_vb$m2.CRPS),
+        pplc = c(ex2_benchmark$diag_vb$m1.pplc, ex2_benchmark$diag_vb$m2.pplc)
+      ))
+      cat("\nMCMC benchmark diagnostics:\n")
+      print(data.frame(
+        model = c("DQLM", "exDQLM"),
+        runtime_sec = c(ex2_benchmark$diag_mcmc$m1.rt, ex2_benchmark$diag_mcmc$m2.rt),
+        KL = c(ex2_benchmark$diag_mcmc$m1.KL, ex2_benchmark$diag_mcmc$m2.KL),
+        CRPS = c(ex2_benchmark$diag_mcmc$m1.CRPS, ex2_benchmark$diag_mcmc$m2.CRPS),
+        pplc = c(ex2_benchmark$diag_mcmc$m1.pplc, ex2_benchmark$diag_mcmc$m2.pplc)
+      ))
+      cat("\nMCMC backend metadata:\n")
+      print(ex2_benchmark$M2_mcmc$backend)
+    })
+    register_artifact(
+      artifact_id = "log_ex2_benchmark_run_summary",
+      artifact_type = "log",
+      relative_path = "analysis/manuscript/outputs/logs/ex2_benchmark_run_summary.txt",
+      manuscript_target = "support: Example 2 dynamic benchmark summary",
+      status = "reproduced",
+      notes = "Runtime and diagnostics summary for the dynamic VB versus MCMC benchmark under the disclosed backend profile."
+    )
+
+    ex2_benchmark_table <- data.frame(
+      model = c("DQLM", "exDQLM", "DQLM", "exDQLM"),
+      method = c("VB", "VB", "MCMC", "MCMC"),
+      runtime_sec = c(
+        ex2_benchmark$diag_vb$m1.rt,
+        ex2_benchmark$diag_vb$m2.rt,
+        ex2_benchmark$diag_mcmc$m1.rt,
+        ex2_benchmark$diag_mcmc$m2.rt
+      ),
+      KL = c(
+        ex2_benchmark$diag_vb$m1.KL,
+        ex2_benchmark$diag_vb$m2.KL,
+        ex2_benchmark$diag_mcmc$m1.KL,
+        ex2_benchmark$diag_mcmc$m2.KL
+      ),
+      CRPS = c(
+        ex2_benchmark$diag_vb$m1.CRPS,
+        ex2_benchmark$diag_vb$m2.CRPS,
+        ex2_benchmark$diag_mcmc$m1.CRPS,
+        ex2_benchmark$diag_mcmc$m2.CRPS
+      ),
+      pplc = c(
+        ex2_benchmark$diag_vb$m1.pplc,
+        ex2_benchmark$diag_vb$m2.pplc,
+        ex2_benchmark$diag_mcmc$m1.pplc,
+        ex2_benchmark$diag_mcmc$m2.pplc
+      ),
+      backend_profile = rep(selected_benchmark_profile, 4),
+      n_burn = rep(benchmark_n_burn, 4),
+      n_mcmc = rep(benchmark_n_mcmc, 4),
+      stringsAsFactors = FALSE
+    )
+    save_table_csv(
+      ex2_benchmark_table,
+      filename = "ex2_dynamic_benchmark.csv",
+      artifact_id = "tab_ex2_dynamic_benchmark",
+      manuscript_target = "tab:ex2bench",
+      status = "reproduced",
+      notes = sprintf(
+        "Representative dynamic VB versus MCMC benchmark for Example 2 under backend Profile %s.",
+        selected_benchmark_profile
+      )
+    )
+  } else if (need_ex2benchmark) {
+    register_artifact(
+      artifact_id = "tab_ex2_dynamic_benchmark",
+      artifact_type = "table",
+      relative_path = "analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv",
+      manuscript_target = "tab:ex2bench",
+      status = "not_reproduced",
+      notes = "Missing LDVB fits required to seed the Example 2 dynamic benchmark."
+    )
+  }
 
   xlim_idx <- time_window_to_index(y_ts, 1750, 1850)
   xlim_time <- c(1750, 1850)
@@ -672,6 +801,7 @@ if (!need_ex2) {
       possible_dfs <- cbind(0.9, df_grid)
       ref_samp <- stats::rnorm(length(y_ts))
       KLs <- rep(NA_real_, nrow(possible_dfs))
+      CRPSs <- rep(NA_real_, nrow(possible_dfs))
       for (i in seq_len(nrow(possible_dfs))) {
         temp_M <- tryCatch(
           exdqlm::exdqlmLDVB(
@@ -686,42 +816,57 @@ if (!need_ex2) {
         if (!inherits(temp_M, "error")) {
           temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp, y_data = y)
           KLs[i] <- temp_check$m1.KL
+          CRPSs[i] <- temp_check$m1.CRPS
         }
       }
-      list(possible_dfs = possible_dfs, KLs = KLs)
+      list(possible_dfs = possible_dfs, KLs = KLs, CRPSs = CRPSs)
     }, note = "ex2_df_scan_ldvb_primary_v1")
 
     possible_dfs <- ex2_df_scan$possible_dfs
     KLs <- ex2_df_scan$KLs
+    CRPSs <- ex2_df_scan$CRPSs
+    finite_crps <- is.finite(CRPSs)
     finite_kl <- is.finite(KLs)
     df_scan <- data.frame(
       trend_df = possible_dfs[, 1],
       seasonal_df = possible_dfs[, 2],
-      KL = KLs
+      CRPS = CRPSs,
+      KL = KLs,
+      rank_CRPS = rank(CRPSs, ties.method = "min", na.last = "keep"),
+      rank_KL = rank(KLs, ties.method = "min", na.last = "keep")
     )
-    if (any(finite_kl)) {
-      best_df <- possible_dfs[which.min(KLs), ]
-      save_table_csv(
+    if (any(finite_crps)) {
+      best_df <- possible_dfs[which.min(CRPSs), ]
+      best_df_kl <- if (any(finite_kl)) possible_dfs[which.min(KLs), ] else c(NA_real_, NA_real_)
+        save_table_csv(
         df_scan,
         filename = "ex2_df_scan_kl.csv",
         artifact_id = "tab_ex2_df_scan",
-        manuscript_target = "Example 2 discount-factor KL selection",
+        manuscript_target = "Example 2 discount-factor CRPS/KL selection",
         status = "reproduced",
-        notes = sprintf("Best pair in this run: (%0.2f, %0.2f)", best_df[1], best_df[2])
+        notes = sprintf(
+          "Best pair by CRPS in this run: (%0.2f, %0.2f). Best pair by KL: (%s, %s).",
+          best_df[1], best_df[2],
+          format(best_df_kl[1], trim = TRUE, digits = 2),
+          format(best_df_kl[2], trim = TRUE, digits = 2)
+        )
       )
 
       register_note(
         "ex2",
-        sprintf("Sunspots LDVB KL search best seasonal discount factor=%0.2f for this run profile.", best_df[2])
+        sprintf(
+          "Sunspots LDVB discount-factor screen selects seasonal discount factor=%0.2f by CRPS for this run profile; KL is reported alongside it.",
+          best_df[2]
+        )
       )
     } else {
       save_table_csv(
         df_scan,
         filename = "ex2_df_scan_kl.csv",
         artifact_id = "tab_ex2_df_scan",
-        manuscript_target = "Example 2 discount-factor KL selection",
+        manuscript_target = "Example 2 discount-factor CRPS/KL selection",
         status = "not_reproduced",
-        notes = "No finite KL values were obtained in the primary LDVB discount-factor scan."
+        notes = "No finite CRPS values were obtained in the primary LDVB discount-factor scan."
       )
     }
 
@@ -730,6 +875,7 @@ if (!need_ex2) {
       diag_table <- data.frame(
         model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
         KL = c(diag_2$m1.KL, diag_2$m2.KL),
+        CRPS = c(diag_2$m1.CRPS, diag_2$m2.CRPS),
         pplc = c(diag_2$m1.pplc, diag_2$m2.pplc),
         run_time_seconds = c(diag_2$m1.rt, diag_2$m2.rt)
       )
@@ -758,6 +904,7 @@ if (!need_ex2) {
       possible_dfs <- cbind(0.9, df_grid)
       ref_samp <- stats::rnorm(length(y_ts))
       KLs <- rep(NA_real_, nrow(possible_dfs))
+      CRPSs <- rep(NA_real_, nrow(possible_dfs))
       for (i in seq_len(nrow(possible_dfs))) {
         temp_M <- tryCatch(
           exdqlm::exdqlmLDVB(
@@ -772,41 +919,56 @@ if (!need_ex2) {
         if (!inherits(temp_M, "error")) {
           temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp, y_data = y)
           KLs[i] <- temp_check$m1.KL
+          CRPSs[i] <- temp_check$m1.CRPS
         }
       }
-      list(possible_dfs = possible_dfs, KLs = KLs)
+      list(possible_dfs = possible_dfs, KLs = KLs, CRPSs = CRPSs)
     }, note = "ex2_df_scan_ldvb")
 
     possible_dfs_ld <- ex2_df_scan_ldvb$possible_dfs
     KLs_ld <- ex2_df_scan_ldvb$KLs
+    CRPSs_ld <- ex2_df_scan_ldvb$CRPSs
     df_scan_ld <- data.frame(
       trend_df = possible_dfs_ld[, 1],
       seasonal_df = possible_dfs_ld[, 2],
-      KL = KLs_ld
+      CRPS = CRPSs_ld,
+      KL = KLs_ld,
+      rank_CRPS = rank(CRPSs_ld, ties.method = "min", na.last = "keep"),
+      rank_KL = rank(KLs_ld, ties.method = "min", na.last = "keep")
     )
-    finite_ld <- is.finite(KLs_ld)
-    if (any(finite_ld)) {
-      best_df_ld <- possible_dfs_ld[which.min(KLs_ld), ]
+    finite_crps_ld <- is.finite(CRPSs_ld)
+    finite_kl_ld <- is.finite(KLs_ld)
+    if (any(finite_crps_ld)) {
+      best_df_ld <- possible_dfs_ld[which.min(CRPSs_ld), ]
+      best_df_kl_ld <- if (any(finite_kl_ld)) possible_dfs_ld[which.min(KLs_ld), ] else c(NA_real_, NA_real_)
       save_table_csv(
         df_scan_ld,
         filename = "ex2_df_scan_kl_ldvb.csv",
         artifact_id = "tab_ex2_df_scan_ldvb",
-        manuscript_target = "new: Example 2 discount-factor KL selection (LDVB)",
+        manuscript_target = "new: Example 2 discount-factor CRPS/KL selection (LDVB)",
         status = "reproduced",
-        notes = sprintf("Best pair in this run: (%0.2f, %0.2f)", best_df_ld[1], best_df_ld[2])
+        notes = sprintf(
+          "Best pair by CRPS in this run: (%0.2f, %0.2f). Best pair by KL: (%s, %s).",
+          best_df_ld[1], best_df_ld[2],
+          format(best_df_kl_ld[1], trim = TRUE, digits = 2),
+          format(best_df_kl_ld[2], trim = TRUE, digits = 2)
+        )
       )
       register_note(
         "ex2_ldvb",
-        sprintf("Sunspots LDVB KL search best seasonal discount factor=%0.2f for this run profile.", best_df_ld[2])
+        sprintf(
+          "Sunspots LDVB discount-factor screen selects seasonal discount factor=%0.2f by CRPS for this run profile; KL is reported alongside it.",
+          best_df_ld[2]
+        )
       )
     } else {
       save_table_csv(
         df_scan_ld,
         filename = "ex2_df_scan_kl_ldvb.csv",
         artifact_id = "tab_ex2_df_scan_ldvb",
-        manuscript_target = "new: Example 2 discount-factor KL selection (LDVB)",
+        manuscript_target = "new: Example 2 discount-factor CRPS/KL selection (LDVB)",
         status = "not_reproduced",
-        notes = "No finite KL values were obtained in LDVB discount-factor scan."
+        notes = "No finite CRPS values were obtained in LDVB discount-factor scan."
       )
     }
 
@@ -816,6 +978,7 @@ if (!need_ex2) {
       diag_table_ld <- data.frame(
         model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
         KL = c(diag_m1_ld$m1.KL, diag_m2_ld$m1.KL),
+        CRPS = c(diag_m1_ld$m1.CRPS, diag_m2_ld$m1.CRPS),
         pplc = c(diag_m1_ld$m1.pplc, diag_m2_ld$m1.pplc),
         run_time_seconds = c(diag_m1_ld$m1.rt, diag_m2_ld$m1.rt)
       )

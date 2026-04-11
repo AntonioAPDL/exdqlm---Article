@@ -9,6 +9,7 @@ without modifying `article4.tex`.
 - Rebuilds Example 1 (Lake Huron) figures.
 - Rebuilds Example 1 predictive-synthesis figure from the tracked 0.05, 0.50, and 0.95 fits.
 - Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with support-only ISVB/LDVB comparison artifacts available when requested.
+- Rebuilds a representative dynamic Example 2 runtime-and-quality benchmark table (`tab:ex2bench`) pairing runtime with KL, CRPS, and pplc under the disclosed backend profile.
 - Rebuilds Example 3 (Big Tree) primary figures + diagnostics table from the LDVB workflow.
 - Rebuilds Example 4 sparse static exAL simulation figure + summary table under the regularized horseshoe (RHS) prior.
 - Adds one extra dynamic comparison figure: ISVB vs LDVB (`ex2_isvb_ldvb_compare.png`).
@@ -17,6 +18,7 @@ without modifying `article4.tex`.
 - Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.
 - Adds an optional support-only Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds before promoting one seed into the tracked static example.
 - Writes a reproducibility tracker with per-artifact status notes.
+- Writes support tables describing the disclosed benchmark backend profiles and tracked benchmark environment.
 
 ## Run
 
@@ -36,6 +38,7 @@ Rscript analysis/run_all.R --stage manuscript --promote
 Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant,ex2checks --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex2bench --profile standard --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2_gamma_posteriors --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
@@ -70,3 +73,5 @@ Main tracker files:
 - `manuscript_repro_tracker.csv`
 - `manuscript_repro_tracker.md`
 - `manuscript_api_migration_map.csv`
+- `benchmark_backend_profiles.csv`
+- `benchmark_environment.csv`
