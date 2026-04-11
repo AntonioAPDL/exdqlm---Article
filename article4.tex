@@ -952,9 +952,9 @@ Finally, we use the function \code{exdqlmDiagnostics} to compute the KL divergen
        \hline
 	     &  output & value &  output & value \\
 	\hline
-	pplc & \code{m1.pplc}       & 306.41 & \code{m2.pplc}       & 312.04 \\
+		pplc & \code{m1.pplc}       & 308.91 & \code{m2.pplc}       & 309.78 \\
 	\hline
-	KL   & \code{m1.kl}         & 0.262   & \code{m2.kl}         & 0.204 \\
+		KL   & \code{m1.kl}         & 0.262   & \code{m2.kl}         & 0.204 \\
 	\hline
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Model diagnostic output from exdqlmDiagnostics() and resulting values.}
@@ -975,8 +975,6 @@ R> checks.out = exdqlmDiagnostics(M1, M2,
 
 \subsection{Static exAL regression on a simulated heteroskedastic example}
 \label{sec:ex4static}
-
-\aA{This subsection is new.}
 
 To illustrate the static routines under sparse shrinkage, we consider a correlated Gaussian regression benchmark for which the target conditional quantile is known exactly. Let
 \[
@@ -1028,7 +1026,6 @@ R> M.mcmc = lapply(p.grid, function(p0) exal_static_mcmc(
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{New static diagnostics paragraph.}
 For static fits, the helper function \code{exalDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on an independent holdout design:
 
 \begin{CodeChunk}
@@ -1050,7 +1047,6 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \label{fig:ex4static}
 \end{figure}
 
-\aA{Updated figure interpretation.}
 \aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; the VB intervals remain centered on the active coefficients, while the MCMC fit is slightly stronger on the null coefficients and on the holdout quantile target. At \(p_0 = 0.25\), the two fits remain closely aligned, with the VB fit slightly sharper on the active coefficients and holdout quantile target, and the null-coefficient shrinkage nearly unchanged. At \(p_0 = 0.50\), the two methods again recover the sparse pattern well, with MCMC holding a small advantage on the active coefficients and holdout target while the null-coefficient summaries are essentially indistinguishable.}
 
 \begin{table}
@@ -1073,7 +1069,6 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \label{tab:ex4static}
 \end{table}
 
-\aA{Updated table discussion.}
 \aA{Table \ref{tab:ex4static} reinforces the visual comparison. The two methods remain competitive across all three quantile levels, but the relative advantage depends on the metric. At \(p_0 = 0.05\), the VB fit is slightly better on the active coefficients, whereas MCMC is better on the null coefficients, the holdout quantile RMSE, and the omitted holdout check loss. At \(p_0 = 0.25\), the VB fit is slightly better on the active-signal and holdout metrics, while the null-coefficient summaries are effectively tied. At \(p_0 = 0.50\), MCMC again holds a small advantage on the active-signal and holdout metrics, and the null-coefficient summaries are nearly indistinguishable. The VB fit is nevertheless much faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 11-fold at \(p_0 = 0.25\), and 14-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation offers meaningful computational savings as a first-pass analysis while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: VB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
 
 \section{Conclusion}

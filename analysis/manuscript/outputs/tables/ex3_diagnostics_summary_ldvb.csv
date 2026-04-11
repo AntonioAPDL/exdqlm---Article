@@ -1,3 +1,3 @@
-"model","KL","pplc","run_time_seconds"
-"M1_regression_ldvb",0.668499295722991,NA,6.19399999999996
-"M2_transfer_function_ldvb",0.329276471011783,NA,8.39799999999991
+"model","KL","CRPS","pplc","run_time_seconds"
+"M1_regression_ldvb",0.262260762964179,0.473287220646955,308.912465610795,137.573
+"M2_transfer_function_ldvb",0.203881515893092,0.426276866865352,309.780692750396,169.154
