@@ -10,6 +10,7 @@ if (!need_ex1) {
   need_ex1kernel <- isTRUE(targeted_run) && target_enabled("ex1kernel")
   need_ex1_runtime <- need_ex1mcmc || need_ex1quants
   need_ex1_quants_models <- need_ex1quants || need_ex1_runtime || need_ex1synth
+  need_ex1_synthesis <- need_ex1quants || need_ex1synth
   need_ex1_trace_model <- need_ex1mcmc || need_ex1_runtime
 
   y_ts <- datasets::LakeHuron
@@ -39,6 +40,7 @@ if (!need_ex1) {
   thin_kernel_plot <- max(1L, as.integer(cfg_profile$ex1$thin_kernel_plot %||% 1L))
   synth_source_draws <- max(50L, as.integer(cfg_profile$ex1$synth_source_draws %||% 1000L))
   synth_n_samp <- max(100L, as.integer(cfg_profile$ex1$synth_n_samp %||% 1000L))
+  forecast_window_start <- as.numeric(cfg_profile$ex1$forecast_window_start %||% 1952)
   synth_window_start <- as.numeric(cfg_profile$ex1$synth_window_start %||% 1952)
 
   if (!is.finite(n_chains_kernel) || n_chains_kernel < 2L) {
@@ -55,6 +57,7 @@ if (!need_ex1) {
   fc95 <- NULL
   fc50 <- NULL
   fc05 <- NULL
+  ex1_synthesis <- NULL
   sigma_trace <- NULL
   gamma_trace <- NULL
   thin_idx <- integer(0)
@@ -104,16 +107,12 @@ if (!need_ex1) {
     ydraw <- matrix(NA_real_, nrow = nrow(qdraw), ncol = ncol(qdraw))
     for (j in seq_len(ncol(qdraw))) {
       ydraw[, j] <- with_local_seed(seed + j, {
-        vapply(
-          seq_len(nrow(qdraw)),
-          function(h) exdqlm::rexal(
-            1,
-            p0 = mfit$p0,
-            mu = qdraw[h, j],
-            sigma = sigma_draws[j],
-            gamma = gamma_draws[j]
-          ),
-          numeric(1)
+        exdqlm::rexal(
+          nrow(qdraw),
+          p0 = mfit$p0,
+          mu = qdraw[, j],
+          sigma = sigma_draws[j],
+          gamma = gamma_draws[j]
         )
       })
     }
@@ -139,6 +138,17 @@ if (!need_ex1) {
       qlb = matrixStats::rowQuantiles(quant_samps, probs = half.alpha),
       qub = matrixStats::rowQuantiles(quant_samps, probs = cr.percent + half.alpha)
     )
+  }
+
+  add_smoothed_quantile_overlay <- function(mfit, col = "purple", lwd_main = 2.1, lwd_ci = 1.1,
+                                            halo_col = "white", halo_main = 3.8, halo_ci = 2.2) {
+    smooth_quant <- summarize_smoothed_quantile(mfit)
+    graphics::lines(smooth_quant$x, smooth_quant$qlb, col = halo_col, lty = 3, lwd = halo_ci)
+    graphics::lines(smooth_quant$x, smooth_quant$qub, col = halo_col, lty = 3, lwd = halo_ci)
+    graphics::lines(smooth_quant$x, smooth_quant$qmap, col = halo_col, lwd = halo_main)
+    graphics::lines(smooth_quant$x, smooth_quant$qlb, col = col, lty = 3, lwd = lwd_ci)
+    graphics::lines(smooth_quant$x, smooth_quant$qub, col = col, lty = 3, lwd = lwd_ci)
+    graphics::lines(smooth_quant$x, smooth_quant$qmap, col = col, lwd = lwd_main)
   }
 
   add_forecast_overlay <- function(fc, cols = c("purple", "magenta"), lwd_main = 1.8, lwd_ci = 1,
@@ -255,7 +265,8 @@ if (!need_ex1) {
   k_fore <- 8L
   t_end <- tail(grDevices::xy.coords(y_ts)$x, 1L)
   dt <- 1 / stats::frequency(y_ts)
-  xlim_fore <- c(synth_window_start, t_end + k_fore * dt)
+  xlim_fore <- c(forecast_window_start, t_end + k_fore * dt)
+  xlim_synth_obs <- c(synth_window_start, t_end)
 
   if (need_ex1_quants_models) {
     fc95 <- forecast_from_fit(start.t = length(y), k = k_fore, m1 = M95_plot, fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts)
@@ -321,35 +332,7 @@ if (!need_ex1) {
     )
   }
 
-  if (need_ex1quants) {
-    save_png_plot("ex1quants.png", {
-      graphics::par(mfcol = c(1, 2))
-
-      exdqlm::exdqlmPlot(M95_plot)
-      exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = "blue")
-      exdqlm::exdqlmPlot(M5_plot, add = TRUE, col = "forestgreen")
-      graphics::legend(
-        "topright",
-        lty = 1, col = c("purple", "blue", "forestgreen"),
-        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05))
-      )
-
-      stats::plot.ts(y_ts, xlim = xlim_fore, ylim = c(575, 581), col = "dark grey", ylab = "quantile forecast")
-      add_forecast_overlay(fc95, cols = c("purple", "magenta"))
-      add_forecast_overlay(fc50, cols = c("blue", "lightblue"))
-      add_forecast_overlay(fc05, cols = c("forestgreen", "green"))
-    })
-    register_artifact(
-      artifact_id = "fig_ex1quants",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex1quants.png",
-      manuscript_target = "fig:ex1quants",
-      status = "reproduced",
-      notes = "Two-panel quantile and forecast figure with index-window fix."
-    )
-  }
-
-  if (need_ex1synth) {
+  if (need_ex1_synthesis) {
     ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v3_main_window", {
       obs_draws <- list(
         subset_draw_matrix(M5$samp.post.pred, synth_source_draws),
@@ -384,7 +367,110 @@ if (!need_ex1) {
         syn_future = syn_future
       )
     }, note = "ex1_synthesis_v3_main_window")
+  }
 
+  if (need_ex1quants) {
+    save_png_plot("ex1quants.png", {
+      ts_xy <- grDevices::xy.coords(y_ts)
+      idx_obs_synth <- time_window_to_index(y_ts, synth_window_start, t_end)
+      idx_obs <- idx_obs_synth[1]:idx_obs_synth[2]
+      x_obs_full <- ts_xy$x
+      x_future <- seq(from = t_end, by = dt, length.out = k_fore + 1L)
+
+      obs_q025_full <- ex1_synthesis$syn_obs$summary$q025
+      obs_q975_full <- ex1_synthesis$syn_obs$summary$q975
+      fut_q025 <- c(ex1_synthesis$syn_obs$summary$q025[length(y)], ex1_synthesis$syn_future$summary$q025)
+      fut_q975 <- c(ex1_synthesis$syn_obs$summary$q975[length(y)], ex1_synthesis$syn_future$summary$q975)
+
+      y_lim_obs_synth <- range(
+        y[idx_obs],
+        obs_q025_full[idx_obs], obs_q975_full[idx_obs],
+        na.rm = TRUE
+      )
+      y_lim_zoom_synth <- range(
+        y[time_window_to_index(y_ts, forecast_window_start, t_end)[1]:length(y)],
+        obs_q025_full[time_window_to_index(y_ts, forecast_window_start, t_end)[1]:length(y)],
+        obs_q975_full[time_window_to_index(y_ts, forecast_window_start, t_end)[1]:length(y)],
+        fut_q025, fut_q975,
+        fc95$ff, fc50$ff, fc05$ff,
+        na.rm = TRUE
+      )
+
+      graphics::par(mfrow = c(2, 2), mar = c(3.6, 4.1, 2.2, 1.2), oma = c(0, 0, 0.8, 0))
+
+      exdqlm::exdqlmPlot(M95_plot)
+      exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = "blue")
+      exdqlm::exdqlmPlot(M5_plot, add = TRUE, col = "forestgreen")
+      graphics::legend(
+        "topright",
+        lty = 1, col = c("purple", "blue", "forestgreen"),
+        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05))
+      )
+      graphics::title(main = "(a) Dynamic quantiles", cex.main = 0.95)
+
+      stats::plot.ts(y_ts, xlim = xlim_fore, ylim = c(575, 581), col = "dark grey", ylab = "quantile forecast")
+      add_forecast_overlay(fc95, cols = c("purple", "magenta"))
+      add_forecast_overlay(fc50, cols = c("blue", "lightblue"))
+      add_forecast_overlay(fc05, cols = c("forestgreen", "green"))
+      graphics::title(main = "(b) Forecasted quantiles", cex.main = 0.95)
+
+      stats::plot.ts(
+        y_ts,
+        xlim = xlim_synth_obs,
+        ylim = y_lim_obs_synth,
+        col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
+        ylab = "predictive synthesis"
+      )
+      add_predictive_band(x_obs_full, obs_q025_full, obs_q975_full)
+      add_smoothed_quantile_overlay(M95_plot, col = "#7B3294")
+      add_smoothed_quantile_overlay(M50_dqlm_plot, col = "#2166AC")
+      add_smoothed_quantile_overlay(M5_plot, col = "#1B7837")
+      graphics::legend(
+        "bottomleft",
+        legend = c("Synthesized 95% PI", expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
+        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42), NA, NA, NA),
+        border = c(NA, NA, NA, NA),
+        lty = c(NA, 1, 1, 1),
+        lwd = c(NA, 2.1, 2.1, 2.1),
+        col = c(NA, "#7B3294", "#2166AC", "#1B7837"),
+        bty = "n",
+        bg = grDevices::adjustcolor("white", alpha.f = 0.82),
+        cex = 0.72,
+        y.intersp = 0.82,
+        x.intersp = 0.9,
+        inset = c(0.015, 0.015)
+      )
+      graphics::title(main = "(c) Observed-period synthesis", cex.main = 0.95)
+
+      stats::plot.ts(
+        y_ts,
+        xlim = xlim_fore,
+        ylim = y_lim_zoom_synth,
+        col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
+        ylab = "predictive synthesis"
+      )
+      add_predictive_band(x_obs_full, obs_q025_full, obs_q975_full)
+      add_predictive_band(x_future, fut_q025, fut_q975)
+      graphics::abline(v = t_end, lty = 3, col = "grey45")
+      add_forecast_overlay(fc95, cols = c("#7B3294", "#7B3294"), lwd_main = 2.2, lwd_ci = 1.2,
+                           observed_mode = "smoothed")
+      add_forecast_overlay(fc50, cols = c("#2166AC", "#2166AC"), lwd_main = 2.2, lwd_ci = 1.2,
+                           observed_mode = "smoothed")
+      add_forecast_overlay(fc05, cols = c("#1B7837", "#1B7837"), lwd_main = 2.2, lwd_ci = 1.2,
+                           observed_mode = "smoothed")
+      graphics::title(main = "(d) Forecast synthesis", cex.main = 0.95)
+    })
+    register_artifact(
+      artifact_id = "fig_ex1quants",
+      artifact_type = "figure",
+      relative_path = "analysis/manuscript/outputs/figures/ex1quants.png",
+      manuscript_target = "fig:ex1quants",
+      status = "reproduced",
+      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row."
+    )
+  }
+
+  if (need_ex1synth) {
     capture_output_file("ex1_synthesis_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("source_draws=%d | synthesized_draws=%d\n", synth_source_draws, synth_n_samp))
@@ -462,9 +548,9 @@ if (!need_ex1) {
       artifact_id = "fig_ex1synth",
       artifact_type = "figure",
       relative_path = "analysis/manuscript/outputs/figures/ex1synth.png",
-      manuscript_target = "fig:ex1synth",
+      manuscript_target = "support: Example 1 standalone synthesis figure",
       status = "reproduced",
-      notes = "Lake Huron predictive synthesis figure combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon."
+      notes = "Standalone support figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon."
     )
   }
 

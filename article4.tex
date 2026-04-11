@@ -478,7 +478,7 @@ MCMC done | runtime_sec=51.838 | sigma=0.430 | kernel=conjugate
 \end{CodeOutput}
 \end{CodeChunk}
 
-The results are \code{exdqlmMCMC} objects that can be used for analysis and forecasting. First we examine the estimated quantiles with the plot method for \code{exdqlmMCMC} objects, seen in Figure \ref{fig:ex1quants}. This generates a plot of the data with the MAP estimates and the 95\% CrIs of the dynamic quantile. Subsequent quantiles (i.e. $p_0 = 0.50, 0.05$ in this example) can be added to the plot using the function \code{exdqlmPlot()} with the argument \code{add = TRUE}.
+The results are \code{exdqlmMCMC} objects that can be used for analysis and forecasting. First we examine the estimated quantiles with the plot method for \code{exdqlmMCMC} objects, seen in the top-left panel of Figure \ref{fig:ex1quants}. This generates a plot of the data with the MAP estimates and the 95\% CrIs of the dynamic quantile. Subsequent quantiles (i.e. $p_0 = 0.50, 0.05$ in this example) can be added to the plot using the function \code{exdqlmPlot()} with the argument \code{add = TRUE}.
 
 % fig:ex1quant 1000 225
 % R> par(mfcol=c(1,2))
@@ -492,10 +492,11 @@ R> legend("topright", lty = 1, col = c("purple","blue","forest green"),
 +                   expression('p'[0]*'=0.05')))
 \end{CodeInput}
 \end{CodeChunk}
+\aA{\noindent\emph{Updated Example 1 figure layout to a single four-panel display combining the original quantile/forecast views with the synthesis views.}}
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.9\textwidth]{ex1quants.png}
-\caption{Example 1: Lake Huron. Left: MAP estimates and 95\% CrIs of the estimated quantiles, plotted with the data (grey). Right: Forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (seen from 1952 to 1972).}
+\caption{Example 1: Lake Huron. Top-left: MAP estimates and 95\% CrIs of the estimated quantiles, plotted with the data (grey). Top-right: forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (seen from 1952 to 1972). Bottom-left: synthesized 95\% predictive interval over the observed period together with the smoothed quantile estimates from the fitted models. Bottom-right: synthesized 95\% predictive interval over the forecast window together with the corresponding smoothed and forecast quantile estimates.}
 \label{fig:ex1quants}
 \end{figure}
 
@@ -525,11 +526,11 @@ R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M5,
 \end{CodeInput}
 \end{CodeChunk}
 
-This generates a plot of the data with the forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (before 1972), for reference. Results can be seen in Figure \ref{fig:ex1quants}. The percentage in the CrIs can be modified with the parameter \code{cr.percent}.
+This generates a plot of the data with the forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (before 1972), for reference. Results can be seen in the top-right panel of Figure \ref{fig:ex1quants}. The percentage in the CrIs can be modified with the parameter \code{cr.percent}.
 
 \aA{\noindent\emph{Added predictive-synthesis paragraph for Example 1.}}
 
-When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{exdqlm_synthesize_from_draws()}. For the Lake Huron example, we apply this routine to the posterior predictive samples stored in \code{M5}, \code{M50}, and \code{M95} over the observed period. \aA{Since these posterior predictive draws are produced from the smoothed state draws, we display the corresponding smoothed quantile summaries over the observed period when comparing the individual models with the synthesized distribution.} For the eight-step forecast horizon, we first generate future predictive draws from each fitted model using the corresponding forecasted quantile distributions together with posterior draws of $\sigma$ and $\gamma$, and then apply the same synthesis step. This provides a single predictive envelope while preserving the separate quantile-specific fits.
+When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{exdqlm_synthesize_from_draws()}. For the Lake Huron example, we apply this routine to the posterior predictive samples stored in \code{M5}, \code{M50}, and \code{M95} over the observed period. \aA{Since these posterior predictive draws are produced from the smoothed state draws, we display the corresponding smoothed quantile summaries over the observed period when comparing the individual models with the synthesized distribution.} For the eight-step forecast horizon, we first generate future predictive draws from each fitted model using the corresponding forecasted quantile distributions together with posterior draws of $\sigma$ and $\gamma$, and then apply the same synthesis step. This provides a single predictive envelope while preserving the separate quantile-specific fits. The resulting synthesis summaries are displayed in the bottom row of Figure \ref{fig:ex1quants}.
 
 \aA{\noindent\emph{Core synthesis call for the observed posterior predictive draws:}}
 \begin{CodeChunk}
@@ -544,15 +545,27 @@ R> syn.obs = exdqlm_synthesize_from_draws(
 
 \aA{\noindent\emph{Added compact forecast-synthesis note for Example 1.}}
 
-For the forecast horizon, we first construct \code{future.draws} as a list of matrices of future observation draws, one matrix for each fitted quantile model. Each matrix is obtained by combining the forecast summaries from that model with matched posterior draws of $\sigma$ and $\gamma$ inside \code{rexal()}, and the resulting draw matrices are then synthesized in the same way:
+The function \code{exdqlmForecast()} returns the forecast summaries, but not matrices of future observations. To construct those, we first sample future quantile values from the forecast distribution and then map them through \code{rexal()} using matched posterior draws of $\sigma$ and $\gamma$. For example, for the $p_0 = 0.05$ fit:
+\begin{CodeChunk}
+\begin{CodeInput}
+R> q.fore = sweep(matrix(rnorm(8 * n.samp), 8, n.samp), 1,
++                 sqrt(fc05$fQ), "*") + fc05$ff
+R> future.M5$ydraw = vapply(1:n.samp, function(j)
++                 rexal(8, p0 = M5$p0, mu = q.fore[, j],
++                       sigma = sigma.draws[j], gamma = gamma.draws[j]),
++                 numeric(8))
+\end{CodeInput}
+\end{CodeChunk}
+
+\aA{Here \code{sigma.draws} and \code{gamma.draws} denote matched retained posterior draws from the fitted model. Analogous matrices are generated for \code{M50} and \code{M95}.}
+
+We then collect these matrices into \code{future.draws} and synthesize them in the same way:
 \begin{CodeChunk}
 \begin{CodeInput}
 R> future.draws = list(future.M5$ydraw, future.M50$ydraw,
 +                      future.M95$ydraw)
 \end{CodeInput}
 \end{CodeChunk}
-
-\aA{Here \code{future.M5\$ydraw}, \code{future.M50\$ydraw}, and \code{future.M95\$ydraw} denote matrices of simulated future observations obtained from the corresponding forecast summaries and posterior draws of $\sigma$ and $\gamma$.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -562,14 +575,6 @@ R> syn.fore = exdqlm_synthesize_from_draws(
 +               T_expected = 8)
 \end{CodeInput}
 \end{CodeChunk}
-
-\aA{\noindent\emph{Added synthesis figure for Example 1.}}
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.8\textwidth]{ex1synth.png}
-\caption{Example 1: Lake Huron. Synthesized posterior predictive distribution obtained from the fitted $0.05$, $0.50$, and $0.95$ quantile models. The shaded ribbon denotes the synthesized 95\% predictive interval over the observed period and the eight-step forecast horizon. \aA{Colored lines and dotted intervals show the corresponding smoothed quantile estimates over the observed period and forecast quantile estimates over the future horizon from the individual fitted models.}}
-\label{fig:ex1synth}
-\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

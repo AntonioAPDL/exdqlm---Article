@@ -4,7 +4,6 @@ expected_targets <- data.frame(
   artifact_id = c(
     "fig_ex1mcmc",
     "fig_ex1quants",
-    "fig_ex1synth",
     "fig_ex2quant",
     "fig_ex2checks",
     "fig_ex3data",
@@ -18,7 +17,6 @@ expected_targets <- data.frame(
   manuscript_target = c(
     "fig:ex1mcmc",
     "fig:ex1quants",
-    "fig:ex1synth",
     "fig:ex2quant",
     "fig:ex2checks",
     "fig:ex3data",
@@ -34,7 +32,7 @@ expected_targets <- data.frame(
 
 if (targeted_run) {
   target_map <- list(
-    ex1 = c("fig_ex1mcmc", "fig_ex1quants", "fig_ex1synth", "tab_ex1_runtime"),
+    ex1 = c("fig_ex1mcmc", "fig_ex1quants", "tab_ex1_runtime"),
     ex1mcmc = c("fig_ex1mcmc"),
     ex1quants = c("fig_ex1quants"),
     ex1synth = c("fig_ex1synth", "log_ex1_synthesis_summary"),
