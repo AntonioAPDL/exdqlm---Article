@@ -544,7 +544,16 @@ R> syn.obs = exdqlm_synthesize_from_draws(
 
 \aA{\noindent\emph{Added compact forecast-synthesis note for Example 1.}}
 
-For the forecast horizon, future observation draws are generated with \code{rexal()} by combining the forecast summaries from each fitted quantile model with matched posterior draws of $\sigma$ and $\gamma$, and the resulting draw matrices are synthesized in the same way:
+For the forecast horizon, we first construct \code{future.draws} as a list of matrices of future observation draws, one matrix for each fitted quantile model. Each matrix is obtained by combining the forecast summaries from that model with matched posterior draws of $\sigma$ and $\gamma$ inside \code{rexal()}, and the resulting draw matrices are then synthesized in the same way:
+\begin{CodeChunk}
+\begin{CodeInput}
+R> future.draws = list(future.M5$ydraw, future.M50$ydraw,
++                      future.M95$ydraw)
+\end{CodeInput}
+\end{CodeChunk}
+
+\aA{Here \code{future.M5\$ydraw}, \code{future.M50\$ydraw}, and \code{future.M95\$ydraw} denote matrices of simulated future observations obtained from the corresponding forecast summaries and posterior draws of $\sigma$ and $\gamma$.}
+
 \begin{CodeChunk}
 \begin{CodeInput}
 R> syn.fore = exdqlm_synthesize_from_draws(
