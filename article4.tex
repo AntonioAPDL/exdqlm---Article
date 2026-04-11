@@ -11,6 +11,7 @@
 \newcommand{\aA}[1]{\textcolor{magenta}{#1}}
 \newcommand{\RP}[1]{\textcolor{teal}{#1}}
 \newcommand{\BS}[1]{\textcolor{orange}{#1}}
+\newcommand{\tworowcell}[1]{\smash{\raisebox{-0.9\normalbaselineskip}{#1}}}
 
 \author{Antonio Aguirre \\ University of California Santa Cruz \And
         Raquel Barata \\ University of California Santa Cruz \AND
@@ -756,17 +757,19 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 
 \begin{table}[t]
 \centering
+\footnotesize
 \begin{tabular}{cc|cccc}
  \hline
  model & method & runtime (s) & KL & CRPS & pplc \\
  \hline
- DQLM & \aA{VB} & 9.52 & 0.144 & 8.588 & 3909.4 \\
- exDQLM & \aA{VB} & 113.55 & 0.078 & 6.424 & 2346.5 \\
- DQLM & MCMC & 266.16 & 0.136 & 7.664 & 3048.1 \\
- exDQLM & MCMC & 330.91 & 0.111 & 5.069 & 2186.7 \\
+ DQLM & \aA{VB} & \textbf{9.52} & 0.144 & 8.588 & 3909.4 \\
+ DQLM & MCMC & 266.16 & \textbf{0.136} & \textbf{7.664} & \textbf{3048.1} \\
+ \hline
+ exDQLM & \aA{VB} & \textbf{113.55} & \textbf{0.078} & 6.424 & 2346.5 \\
+ exDQLM & MCMC & 330.91 & 0.111 & \textbf{5.069} & \textbf{2186.7} \\
  \hline
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\) under backend Profile B. Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\) under backend Profile B. Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Within each model block, bold entries indicate the smaller value for that metric.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -947,18 +950,19 @@ Finally, we use the function \code{exdqlmDiagnostics} to compute the KL divergen
 
 \begin{table}
 \centering
+\footnotesize
 \begin{tabular}{c|cc|cc}
  \hline
-       & \multicolumn{2}{c|}{\code{M1}}  & \multicolumn{2}{c}{\code{M2}}  \\
-       \hline
-	     &  output & value &  output & value \\
-	\hline
-		pplc & \code{m1.pplc}       & 308.91 & \code{m2.pplc}       & 309.78 \\
-	\hline
-		KL   & \code{m1.kl}         & 0.262   & \code{m2.kl}         & 0.204 \\
-	\hline
+	       & \multicolumn{2}{c|}{\code{M1}}  & \multicolumn{2}{c}{\code{M2}}  \\
+	       \hline
+		     &  output & value &  output & value \\
+		\hline
+			pplc & \code{m1.pplc}       & \textbf{308.91} & \code{m2.pplc}       & 309.78 \\
+		\hline
+			KL   & \code{m1.kl}         & 0.262   & \code{m2.kl}         & \textbf{0.204} \\
+		\hline
 \end{tabular}
-\caption{Example 3: Big Tree water flow. Model diagnostic output from exdqlmDiagnostics() and resulting values.}
+\caption{Example 3: Big Tree water flow. Model diagnostic output from exdqlmDiagnostics() and resulting values. Bold entries indicate the smaller value for each diagnostic.}
 \label{tab:ex3}
 \end{table}
 
@@ -1052,21 +1056,22 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 
 \begin{table}
 \centering
+\footnotesize
 \begin{tabular}{c|c|cccc}
  \hline
  \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \hline
- 0.05 & \aA{VB} & 19.11 & 0.153 & 0.069 & 0.471 \\
- 0.05 & MCMC & 136.99 & 0.162 & 0.057 & 0.419 \\
+ \tworowcell{0.05} & \aA{VB} & \textbf{19.11} & \textbf{0.153} & 0.069 & 0.471 \\
+ & MCMC & 136.99 & 0.162 & \textbf{0.057} & \textbf{0.419} \\
  \hline
- 0.25 & \aA{VB} & 11.45 & 0.148 & 0.115 & 0.401 \\
- 0.25 & MCMC & 125.99 & 0.166 & 0.114 & 0.417 \\
+ \tworowcell{0.25} & \aA{VB} & \textbf{11.45} & \textbf{0.148} & 0.115 & \textbf{0.401} \\
+ & MCMC & 125.99 & 0.166 & \textbf{0.114} & 0.417 \\
  \hline
- 0.50 & \aA{VB} & 9.37 & 0.166 & 0.045 & 0.247 \\
- 0.50 & MCMC & 127.27 & 0.159 & 0.045 & 0.238 \\
+ \tworowcell{0.50} & \aA{VB} & \textbf{9.37} & 0.166 & \textbf{0.045} & 0.247 \\
+ & MCMC & 127.27 & \textbf{0.159} & \textbf{0.045} & \textbf{0.238} \\
  \hline
 \end{tabular}
-\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The VB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
+\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The VB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Within each quantile block, bold entries indicate the smaller value for that metric; ties are bolded in both rows.}
 \label{tab:ex4static}
 \end{table}
 
