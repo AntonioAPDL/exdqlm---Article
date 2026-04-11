@@ -333,6 +333,13 @@ if (!need_ex2) {
 
   xlim_idx <- time_window_to_index(y_ts, 1750, 1850)
   xlim_time <- c(1750, 1850)
+  ex2_cols <- list(
+    dqlm = "#C44E52",
+    exdqlm = "#4C72B0",
+    obs = "#6F6F6F",
+    hist_fill = grDevices::adjustcolor("#4C72B0", alpha.f = 0.22),
+    hist_border = "#4C72B0"
+  )
 
   if (need_ex2quant || need_ex2quant_ldvb) {
     plot_quant_triplet_ldvb <- function(filename, m_dqlm, m_exdqlm, p0_label) {
@@ -341,20 +348,37 @@ if (!need_ex2) {
       m_dqlm_plot$y <- y_ts
       m_exdqlm_plot$y <- y_ts
       save_png_plot(filename, {
-        graphics::par(mfrow = c(1, 3))
-        stats::plot.ts(y_ts, col = "darkgrey", ylab = "sunspot count")
-        graphics::title(main = sprintf("Sunspots data"))
+        graphics::layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE), heights = c(0.9, 1.1))
+        graphics::par(mar = c(3.1, 4.1, 2.6, 1.2) + 0.1)
+        stats::plot.ts(y_ts, col = ex2_cols$obs, ylab = "sunspot count", xlab = "year")
+        graphics::title(main = "Sunspot time series")
 
-        stats::plot.ts(y_ts, xlim = xlim_time, col = "darkgrey", ylab = "quantile 95% CrIs")
+        graphics::par(mar = c(3.6, 4.1, 2.6, 1.2) + 0.1)
+        stats::plot.ts(y_ts, xlim = xlim_time, col = ex2_cols$obs, ylab = "quantile and 95% CrI", xlab = "year")
         q_d <- quantile_summary_from_fit(m_dqlm_plot, cr.percent = 0.95)
         q_e <- quantile_summary_from_fit(m_exdqlm_plot, cr.percent = 0.95)
-        plot_quantile_summary(q_d, col = ldvb_cols$m1, add = TRUE)
-        plot_quantile_summary(q_e, col = ldvb_cols$m2, add = TRUE)
-        graphics::legend("topleft", legend = c("DQLM (LDVB)", "exDQLM (LDVB)"), col = c(ldvb_cols$m1, ldvb_cols$m2), lty = 1, bty = "n")
-        graphics::title(main = sprintf("LDVB fit (p0 = %s)", p0_label))
+        plot_quantile_summary(q_d, col = ex2_cols$dqlm, add = TRUE)
+        plot_quantile_summary(q_e, col = ex2_cols$exdqlm, add = TRUE)
+        graphics::legend(
+          "topleft",
+          legend = c("DQLM", "exDQLM"),
+          col = c(ex2_cols$dqlm, ex2_cols$exdqlm),
+          lty = 1,
+          lwd = c(1.5, 1.5),
+          bty = "n"
+        )
+        graphics::title(main = sprintf("LDVB fit for p0 = %s", p0_label))
 
-        graphics::hist(as.numeric(m_exdqlm_plot$samp.gamma), xlab = expression(gamma), main = sprintf("LDVB exDQLM gamma (p0 = %s)", p0_label))
-      })
+        graphics::par(mar = c(3.6, 4.1, 2.6, 1.2) + 0.1)
+        graphics::hist(
+          as.numeric(m_exdqlm_plot$samp.gamma),
+          xlab = expression(gamma),
+          main = sprintf("exDQLM posterior draws of gamma (p0 = %s)", p0_label),
+          col = ex2_cols$hist_fill,
+          border = ex2_cols$hist_border
+        )
+        graphics::abline(v = stats::median(as.numeric(m_exdqlm_plot$samp.gamma), na.rm = TRUE), col = ex2_cols$exdqlm, lwd = 2)
+      }, height = 7)
     }
 
     if (ex2_ldvb_pair_ok && need_ex2quant) {
@@ -365,7 +389,7 @@ if (!need_ex2) {
         relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
         manuscript_target = "fig:ex2quant",
         status = "reproduced",
-        notes = "Three-panel LDVB figure for original p0=0.85 comparing DQLM and exDQLM."
+        notes = "Composite Sunspots figure with full-series panel, quantile-comparison panel, and gamma histogram."
       )
     } else if (need_ex2quant) {
       register_artifact(
@@ -386,7 +410,7 @@ if (!need_ex2) {
         relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb.png",
         manuscript_target = "new: fig ex2quant LDVB counterpart",
         status = "reproduced",
-        notes = "Three-panel LDVB figure for original p0=0.85 comparing DQLM and exDQLM."
+        notes = "Composite Sunspots figure with full-series panel, quantile-comparison panel, and gamma histogram."
       )
     } else {
       register_artifact(
@@ -501,7 +525,7 @@ if (!need_ex2) {
     if (ex2_ldvb_pair_ok) {
       save_png_plot("ex2checks.png", {
         graphics::par(mfrow = c(2, 3))
-        diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m2), ref = diag_ref_samp, y_data = y)
+        diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ex2_cols$dqlm, ex2_cols$exdqlm), ref = diag_ref_samp, y_data = y)
       })
       register_artifact(
         artifact_id = "fig_ex2checks",
