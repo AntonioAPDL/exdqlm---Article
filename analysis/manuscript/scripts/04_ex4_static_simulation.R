@@ -20,6 +20,7 @@ if (!need_ex4) {
   ldvb_max_iter <- as.integer(cfg_ex4$ldvb_max_iter)
   ldvb_max_iter_tail <- as.integer(cfg_ex4$ldvb_max_iter_tail)
   ldvb_tol <- as.numeric(cfg_ex4$ldvb_tol)
+  n_samp <- as.integer(cfg_ex4$n_samp %||% 200L)
   ldvb_n_samp_xi <- as.integer(cfg_ex4$ldvb_n_samp_xi)
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
@@ -27,8 +28,9 @@ if (!need_ex4) {
   ex4_seed <- as.integer(cfg_ex4$dataset_seed %||% (seed_value + 404L))
   rhs_ctrl <- ex4_build_rhs_ctrl(cfg_ex4)
   cache_key <- sprintf(
-    "ex4_static_rhsns_sparse_seed_%d_b%d_k%d_v2",
+    "ex4_static_rhsns_sparse_seed_%d_ns%d_b%d_k%d_v3",
     ex4_seed,
+    n_samp,
     n_burn,
     n_mcmc
   )
@@ -42,6 +44,7 @@ if (!need_ex4) {
     cat(sprintf("profile=%s\n", selected_profile))
     cat(sprintf("seed=%d\n", ex4_obj$seed))
     cat(sprintf("train_n=%d, holdout_n=%d, predictors=%d\n", train_n, holdout_n, predictor_n))
+    cat(sprintf("ldvb_n.samp=%d, n.burn=%d, n.mcmc=%d\n", n_samp, n_burn, n_mcmc))
     cat(sprintf("cov_rho=%0.2f, sigma_eps=%0.2f\n", cov_rho, sigma_eps))
     cat(sprintf("beta_slopes=%s\n", paste(format(ex4_obj$beta_slopes, trim = TRUE), collapse = ", ")))
     cat(sprintf(
@@ -80,7 +83,7 @@ if (!need_ex4) {
     notes = "Sparse RHS static simulation settings and recovery metrics for Example 4."
   )
 
-  summary_rows <- ex4_summary_rows(ex4_obj)
+  summary_rows <- ex4_summary_rows(ex4_obj, cfg_ex4 = cfg_ex4)
 
   if (need_ex4table) {
     save_table_csv(
@@ -145,7 +148,7 @@ if (!need_ex4) {
         if (i == 1L) {
           graphics::legend(
             "topleft",
-            legend = c("truth", "LDVB 95% interval", "MCMC 95% interval"),
+            legend = c("truth", "VB 95% interval", "MCMC 95% interval"),
             col = c("black", ldvb_cols$m1, ldvb_cols$m2),
             pch = c(18, 16, 16),
             lty = c(0, 1, 1),

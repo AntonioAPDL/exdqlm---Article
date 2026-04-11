@@ -397,7 +397,7 @@ $GG
 \end{CodeChunk}
 
 \aA{To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. Further,
-We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. For the tracked standard-profile run, we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. The \proglang{R} output is shown for only the last quantile using the input \code{verbose = TRUE}.}
+We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. The \proglang{R} output is shown for only the last quantile using the input \code{verbose = TRUE}.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -425,7 +425,7 @@ MCMC done | runtime_sec=122.179 | sigma=0.220 | gamma=5.013 | kernel=slice
 \end{CodeOutput}
 \end{CodeChunk}
 
-\aA{For this time series of length 98, the tracked standard-profile free-\(\sigma\) run takes about 122.2 seconds to sample 5000 iterations, as seen in the output above. By default \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain, and this warm-start choice can be changed independently of the subsequent MCMC kernel. Under the default setting \code{mh.proposal = "slice"}, the console output reports compact burn-in and retained-sample progress lines for the current values of $\sigma$ and $\gamma$. For the joint random-walk kernels, the proposal covariance used to sample $\sigma$ and $\gamma$ can be supplied manually through \code{Sig.mh}; alternatively, with the setting \code{joint.sample = TRUE}, the covariance matrix can be recalculated from the burned sample.}
+\aA{For this time series of length 98, the free-\(\sigma\) run shown above takes about 122.2 seconds to sample 5000 iterations. By default \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain, and this warm-start choice can be changed independently of the subsequent MCMC kernel. Under the default setting \code{mh.proposal = "slice"}, the console output reports compact burn-in and retained-sample progress lines for the current values of $\sigma$ and $\gamma$. For the joint random-walk kernels, the proposal covariance used to sample $\sigma$ and $\gamma$ can be supplied manually through \code{Sig.mh}; alternatively, with the setting \code{joint.sample = TRUE}, the covariance matrix can be recalculated from the burned sample.}
 
 \aA{For joint random-walk kernels, the same progress format also reports the current acceptance rate, but this is not applicable under the default slice update. In the targeted support comparison we use to assess this kernel choice for the free-\(\sigma\) Lake Huron median fit, four VB-warm-started chains show that the default \code{slice} update is more stable than \code{laplace\_rw}: the pooled multichain summaries give \(\hat{R}\) values of about 1.01 for \(\sigma\) and 1.04 for \(\gamma\) under \code{slice}, versus about 1.09 and 1.16 under \code{laplace\_rw}. The corresponding effective sample sizes are about 940 and 165 under \code{slice}, compared with about 129 and 38 under \code{laplace\_rw}, although \code{laplace\_rw} is roughly twice as fast in this support run. We therefore retain \code{slice} as the default update in this example. The data are relatively symmetric, therefore we do not expect the skewness parameter $\gamma$ to be far from zero for $p_0=0.5$. To examine this, we use a dedicated median run with free \(\sigma\) under the default \code{slice} update and thin the retained samples by 10 only for plotting. In that run, the posterior mean of \(\sigma\) is about \(0.375\) with a 95\% credible interval \((0.298, 0.473)\), while the posterior mean of \(\gamma\) is \(-0.044\) with a 95\% credible interval \((-0.375, 0.321)\). All MCMC samples in the output of \code{exdqlmMCMC} are \code{mcmc} objects. Thus we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\), seen in Figure \ref{fig:ex1mcmc}.}
 
@@ -634,7 +634,7 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \label{fig:ex2quant}
 \end{figure}
 
-\aA{We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. For the tracked standard-profile run we set \code{n.samp = 3000}. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 10 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 114 seconds.}
+\aA{We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. In this example we set \code{n.samp = 3000}. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 10 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 114 seconds.}
 
 \aA{Updated code/output below to use the current VB workflow and current summary output.}
 
@@ -750,7 +750,7 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \end{CodeChunk}
 \aA{On this coarse grid, the CRPS and KL criteria agree and both select the seasonal discount factor \(0.85\), so the choice used above is retained.}
 
-\aA{To make the runtime comparisons reproducible, we distinguish two backend profiles. Profile A is a pure-\proglang{R} baseline with the optional C++ paths disabled. Profile B matches the manuscript defaults: it retains the C++ dynamic MCMC backend with \code{exdqlm.cpp\_mcmc\_mode = "fast"} while leaving the other optional accelerators off. Unless noted otherwise, the benchmark tables below use Profile B. The exact CPU, \proglang{R} version, package state, seeds, and dataset sizes for the tracked benchmark run are recorded in the manuscript reproducibility artifacts.}
+\aA{To make the runtime comparisons reproducible, we distinguish two backend profiles. Profile A is a pure-\proglang{R} baseline with the optional C++ paths disabled. Profile B retains the C++ dynamic MCMC backend with \code{exdqlm.cpp\_mcmc\_mode = "fast"} while leaving the other optional accelerators off. Unless noted otherwise, the benchmark tables below use Profile B. The exact CPU, \proglang{R} version, package state, seeds, and dataset sizes used for these comparisons are recorded in the accompanying reproducibility files.}
 
 \begin{table}[t]
 \centering
@@ -768,7 +768,7 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \label{tab:ex2bench}
 \end{table}
 
-\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched final-draw settings. For the simpler DQLM, the VB fit remains much faster than MCMC, whereas the MCMC fit achieves smaller values for all three reported diagnostics. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run under the larger 2000/3000 benchmark budget, but the comparison is mixed: the VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the backend profile used for the comparison.}
+\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched 3000-draw summaries. For the simpler DQLM, the VB fit remains much faster than MCMC, whereas the MCMC fit achieves smaller values for all three reported diagnostics. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is mixed: the VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the backend profile used for the comparison.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -994,7 +994,7 @@ Then
 \[
 Q_Y(p_0 \mid {\bf x}_i) = {\bf x}_i^\top \boldsymbol{\beta}^\star,
 \]
-so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). \aA{Updated benchmark description.} Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit a VB approximation with \code{exal_static_LDVB()} and an MCMC fit with \code{exal_static_mcmc()}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the VB fit. The lower-tail VB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger VB iteration budget there. For reproducibility, we fix the dataset seed at \code{20260714}, selected in a preliminary screening exercise that required both methods to recover the active signals, the VB fit to remain faster than MCMC at each fitted quantile, and the VB holdout-loss and coefficient-recovery metrics to stay close to the MCMC baseline. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
+so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). \aA{Updated benchmark description.} Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit a VB approximation with \code{exal_static_LDVB()} using \code{n.samp = 3000}, and an MCMC fit with \code{exal_static_mcmc()} using \code{n.burn = 2000} and \code{n.mcmc = 3000}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the VB fit. The lower-tail VB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger VB iteration budget there. For reproducibility, we fix the dataset seed at \code{20260714}. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
 \aA{Updated code block below to add the new static sparse benchmark.}
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1015,12 +1015,13 @@ R> M.ldvb = lapply(p.grid, function(p0) exal_static_LDVB(
 +                    beta_prior = "rhs_ns",
 +                    beta_prior_controls = rhs.ctrl,
 +                    max_iter = ifelse(p0 == 0.05, 420, 260),
++                    n.samp = 3000,
 +                    tol = 1e-4, verbose = FALSE))
 R> M.mcmc = lapply(p.grid, function(p0) exal_static_mcmc(
 +                    y = y.train[[which(p.grid == p0)]], X = X, p0 = p0,
 +                    beta_prior = "rhs_ns",
 +                    beta_prior_controls = rhs.ctrl,
-+                    n.burn = 1000, n.mcmc = 300,
++                    n.burn = 2000, n.mcmc = 3000,
 +                    init.from.vb = TRUE,
 +                    verbose = FALSE))
 \end{CodeInput}
@@ -1049,7 +1050,7 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \end{figure}
 
 \aA{Updated figure interpretation.}
-\aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; on this screened run, the VB fit is slightly sharper on the active coefficients, whereas MCMC is slightly better on the holdout quantile RMSE and null shrinkage. At \(p_0 = 0.25\), the two fits remain closely aligned, with MCMC somewhat stronger on the active-signal and null-shrinkage metrics while the holdout quantile RMSE is essentially tied. At \(p_0 = 0.50\), both fits again track the true sparse pattern, but the VB fit is modestly stronger on the active-signal and holdout metrics, while the null-shrinkage results remain nearly indistinguishable.}
+\aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) is the most demanding case, yet both methods recover the sparse signal cleanly; the VB intervals remain centered on the active coefficients, while the MCMC fit is slightly stronger on the null coefficients and on the holdout quantile target. At \(p_0 = 0.25\), the two fits remain closely aligned, with the VB fit slightly sharper on the active coefficients and holdout quantile target, and the null-coefficient shrinkage nearly unchanged. At \(p_0 = 0.50\), the two methods again recover the sparse pattern well, with MCMC holding a small advantage on the active coefficients and holdout target while the null-coefficient summaries are essentially indistinguishable.}
 
 \begin{table}
 \centering
@@ -1057,22 +1058,22 @@ R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
  \hline
  \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \hline
- 0.05 & \aA{VB} & 18.98 & 0.152 & 0.069 & 0.473 \\
- 0.05 & MCMC & 38.34 & 0.173 & 0.066 & 0.466 \\
+ 0.05 & \aA{VB} & 19.11 & 0.153 & 0.069 & 0.471 \\
+ 0.05 & MCMC & 136.99 & 0.162 & 0.057 & 0.419 \\
  \hline
- 0.25 & \aA{VB} & 13.76 & 0.179 & 0.049 & 0.369 \\
- 0.25 & MCMC & 35.74 & 0.146 & 0.042 & 0.370 \\
+ 0.25 & \aA{VB} & 11.45 & 0.148 & 0.115 & 0.401 \\
+ 0.25 & MCMC & 125.99 & 0.166 & 0.114 & 0.417 \\
  \hline
- 0.50 & \aA{VB} & 5.60 & 0.182 & 0.055 & 0.383 \\
- 0.50 & MCMC & 35.49 & 0.206 & 0.056 & 0.467 \\
+ 0.50 & \aA{VB} & 9.37 & 0.166 & 0.045 & 0.247 \\
+ 0.50 & MCMC & 127.27 & 0.159 & 0.045 & 0.238 \\
  \hline
 \end{tabular}
-\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
+\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The VB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800.}
 \label{tab:ex4static}
 \end{table}
 
 \aA{Updated table discussion.}
-\aA{Table \ref{tab:ex4static} reinforces the visual comparison. The two methods are competitive across all three quantile levels, but the relative advantage depends on the metric: MCMC is slightly stronger on null shrinkage and holdout quantile RMSE at \(p_0 = 0.05\), MCMC is somewhat stronger on the active-signal and null-shrinkage metrics at \(p_0 = 0.25\) while the holdout quantile RMSE is essentially tied, and the VB fit is modestly stronger on the active-signal and holdout metrics at \(p_0 = 0.50\). The tracked holdout check-loss values, omitted from the table for compactness, slightly favor the VB fit at all three quantiles. The VB fit is faster in all three cases for the selected data set, with runtime reductions of about 2.0-fold at \(p_0 = 0.05\), 2.6-fold at \(p_0 = 0.25\), and 6.3-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation offers meaningful computational savings as a first-pass analysis while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: VB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
+\aA{Table \ref{tab:ex4static} reinforces the visual comparison. The two methods remain competitive across all three quantile levels, but the relative advantage depends on the metric. At \(p_0 = 0.05\), the VB fit is slightly better on the active coefficients, whereas MCMC is better on the null coefficients, the holdout quantile RMSE, and the omitted holdout check loss. At \(p_0 = 0.25\), the VB fit is slightly better on the active-signal and holdout metrics, while the null-coefficient summaries are effectively tied. At \(p_0 = 0.50\), MCMC again holds a small advantage on the active-signal and holdout metrics, and the null-coefficient summaries are nearly indistinguishable. The VB fit is nevertheless much faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 11-fold at \(p_0 = 0.25\), and 14-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation offers meaningful computational savings as a first-pass analysis while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: VB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
 
 \section{Conclusion}
 \label{sec:summary}

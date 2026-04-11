@@ -8,6 +8,7 @@ if (!need_ex4screen) {
 
   cfg_ex4 <- cfg_profile$ex4
   screen_seeds <- as.integer(unlist(cfg_ex4$screen_seeds %||% (seed_value + 500L + seq_len(8L))))
+  n_samp <- as.integer(cfg_ex4$n_samp %||% 200L)
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
   holdout_ratio_max <- as.numeric(cfg_ex4$screen_holdout_ratio_max %||% 1.25)
@@ -20,8 +21,9 @@ if (!need_ex4screen) {
 
   seed_results <- lapply(screen_seeds, function(dataset_seed) {
     cache_key <- sprintf(
-      "ex4_seed_screen_seed_%d_b%d_k%d_v1",
+      "ex4_seed_screen_seed_%d_ns%d_b%d_k%d_v2",
       as.integer(dataset_seed),
+      n_samp,
       n_burn,
       n_mcmc
     )
@@ -194,7 +196,7 @@ if (!need_ex4screen) {
   capture_output_file("ex4_seed_screen_summary.txt", {
     cat(sprintf("profile=%s\n", selected_profile))
     cat(sprintf("candidate_seeds=%s\n", paste(screen_seeds, collapse = ", ")))
-    cat(sprintf("n.burn=%d, n.mcmc=%d\n", n_burn, n_mcmc))
+    cat(sprintf("n.samp=%d, n.burn=%d, n.mcmc=%d\n", n_samp, n_burn, n_mcmc))
     cat(sprintf(
       paste(
         "selection criteria:",

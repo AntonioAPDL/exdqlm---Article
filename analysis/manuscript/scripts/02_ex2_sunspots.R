@@ -246,7 +246,7 @@ if (!need_ex2) {
     capture_output_file("ex2_benchmark_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("backend_profile=%s\n", selected_benchmark_profile))
-      cat(sprintf("benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", benchmark_n_burn, benchmark_n_mcmc))
+      cat(sprintf("vb_n.samp=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", n_samp, benchmark_n_burn, benchmark_n_mcmc))
       cat("VB benchmark diagnostics:\n")
       print(data.frame(
         model = c("DQLM", "exDQLM"),
@@ -303,6 +303,8 @@ if (!need_ex2) {
         ex2_benchmark$diag_mcmc$m2.pplc
       ),
       backend_profile = rep(selected_benchmark_profile, 4),
+      posterior_draws = rep(n_samp, 4),
+      burn_in = c(NA_integer_, NA_integer_, benchmark_n_burn, benchmark_n_burn),
       n_burn = rep(benchmark_n_burn, 4),
       n_mcmc = rep(benchmark_n_mcmc, 4),
       stringsAsFactors = FALSE

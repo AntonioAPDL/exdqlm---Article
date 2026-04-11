@@ -72,6 +72,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
   ldvb_max_iter <- as.integer(cfg_ex4$ldvb_max_iter)
   ldvb_max_iter_tail <- as.integer(cfg_ex4$ldvb_max_iter_tail)
   ldvb_tol <- as.numeric(cfg_ex4$ldvb_tol)
+  n_samp <- as.integer(cfg_ex4$n_samp %||% 200L)
   ldvb_n_samp_xi <- as.integer(cfg_ex4$ldvb_n_samp_xi)
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
@@ -114,6 +115,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
           beta_prior_controls = rhs_ctrl,
           max_iter = ldvb_budget,
           tol = ldvb_tol,
+          n.samp = n_samp,
           n_samp_xi = ldvb_n_samp_xi,
           verbose = FALSE
         ),
@@ -207,10 +209,17 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
       )
 
       z_crit <- stats::qnorm(0.975)
-      ldvb_beta_full <- as.numeric(fit_ldvb$qbeta$m)
-      ldvb_sd_full <- sqrt(pmax(diag(as.matrix(fit_ldvb$qbeta$V)), 0))
-      ldvb_lb_full <- ldvb_beta_full - z_crit * ldvb_sd_full
-      ldvb_ub_full <- ldvb_beta_full + z_crit * ldvb_sd_full
+      if (!is.null(fit_ldvb$samp.beta)) {
+        ldvb_draws <- as.matrix(fit_ldvb$samp.beta)
+        ldvb_beta_full <- as.numeric(colMeans(ldvb_draws))
+        ldvb_lb_full <- as.numeric(apply(ldvb_draws, 2, stats::quantile, probs = 0.025))
+        ldvb_ub_full <- as.numeric(apply(ldvb_draws, 2, stats::quantile, probs = 0.975))
+      } else {
+        ldvb_beta_full <- as.numeric(fit_ldvb$qbeta$m)
+        ldvb_sd_full <- sqrt(pmax(diag(as.matrix(fit_ldvb$qbeta$V)), 0))
+        ldvb_lb_full <- ldvb_beta_full - z_crit * ldvb_sd_full
+        ldvb_ub_full <- ldvb_beta_full + z_crit * ldvb_sd_full
+      }
 
       mcmc_draws <- as.matrix(fit_mcmc$samp.beta)
       mcmc_beta_full <- as.numeric(colMeans(mcmc_draws))
@@ -294,14 +303,17 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
   )
 }
 
-ex4_summary_rows <- function(ex4_obj) {
+ex4_summary_rows <- function(ex4_obj, cfg_ex4 = NULL) {
+  vb_n_samp <- if (!is.null(cfg_ex4)) as.integer(cfg_ex4$n_samp %||% NA_integer_) else NA_integer_
+  mcmc_n_burn <- if (!is.null(cfg_ex4)) as.integer(cfg_ex4$n_burn %||% NA_integer_) else NA_integer_
+  mcmc_n_mcmc <- if (!is.null(cfg_ex4)) as.integer(cfg_ex4$n_mcmc %||% NA_integer_) else NA_integer_
   do.call(
     rbind,
     lapply(names(ex4_obj$fits), function(nm) {
       res <- ex4_obj$fits[[nm]]
       data.frame(
         p0 = rep(res$p0, 2L),
-        method = c("LDVB", "MCMC"),
+        method = c("VB", "MCMC"),
         runtime_sec = c(res$ldvb$runtime, res$mcmc$runtime),
         active_signal_rmse = c(res$ldvb$active_rmse, res$mcmc$active_rmse),
         inactive_signal_mae = c(res$ldvb$inactive_mae, res$mcmc$inactive_mae),
@@ -309,6 +321,8 @@ ex4_summary_rows <- function(ex4_obj) {
         holdout_check_loss = c(res$ldvb$holdout_check_loss, res$mcmc$holdout_check_loss),
         rhs_tau = c(res$ldvb$tau, res$mcmc$tau),
         rhs_zeta2 = c(res$ldvb$zeta2, res$mcmc$zeta2),
+        posterior_draws = c(vb_n_samp, mcmc_n_mcmc),
+        burn_in = c(NA_integer_, mcmc_n_burn),
         ldvb_iter = c(res$ldvb$iter, NA_integer_),
         ldvb_stop = c(res$ldvb$stop, NA_character_),
         stringsAsFactors = FALSE

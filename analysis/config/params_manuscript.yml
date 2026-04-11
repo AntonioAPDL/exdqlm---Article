@@ -64,6 +64,7 @@ profiles:
       ldvb_max_iter: 260
       ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001
+      n_samp: 300
       ldvb_n_samp_xi: 160
       rhs_tau0: 0.15
       rhs_a_zeta: 2.0
@@ -123,9 +124,10 @@ profiles:
       screen_holdout_ratio_max: 1.25
       screen_active_ratio_max: 1.35
       screen_check_ratio_max: 1.05
-      n_burn: 1000
-      n_mcmc: 300
+      n_burn: 2000
+      n_mcmc: 3000
       thin: 1
+      n_samp: 3000
 
   full:
     ex1:
@@ -168,13 +170,14 @@ profiles:
       ldvb_max_iter: 260
       ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001
+      n_samp: 3000
       ldvb_n_samp_xi: 160
       rhs_tau0: 0.15
       rhs_a_zeta: 2.0
       rhs_b_zeta: 9.0
       rhs_zeta2_fixed: 9.0
-      n_burn: 1000
-      n_mcmc: 500
+      n_burn: 2000
+      n_mcmc: 3000
       thin: 1
 
 figures:
