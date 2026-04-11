@@ -299,9 +299,10 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{table}[t]
-\small
+\footnotesize
 \centering
-\begin{tabular}{lll}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.42\textwidth}@{}}
 	\hline
 	Function & Output & Description \\
 	\hline
@@ -309,12 +310,12 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \rule{0pt}{3ex}\code{polytrendMod()} & \code{exdqlm} & Create $n$-th order polynomial component.\\
     \code{seasMod()} & \code{exdqlm} & Create Fourier form periodic component.\\
     \code{regMod()} & \code{exdqlm} & Create standard regression component. \\
-    \code{as.exdqlm()} & \code{exdqlm} & Manipulates \code{list} into \code{exdqlm} object.\\
+    \code{as.exdqlm()} & \code{exdqlm} & Coerce a \code{list} into an \code{exdqlm} object.\\
 	\hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Model fitting} -- Input \code{exdqlm} objects} \\
     \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Estimate the posterior with MCMC algorithm.\\
     \code{exdqlmLDVB()} & \code{exdqlmLDVB} & \aA{Estimate the posterior with a VB approximation.}\\
-    \code{transfn_exdqlmLDVB()} & \code{exdqlmLDVB} & \aA{Estimate transfer function exDQLM with a VB approximation.}\\
+    \code{transfn_exdqlmLDVB()} & \code{exdqlmLDVB} & \aA{Estimate the transfer-function exDQLM with a VB approximation.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Static fitting} -- Input design matrix and response} \\
     \rule{0pt}{3ex}\code{exal_static_LDVB()} & \code{exal\_ldvb} & \aA{Estimate static exAL regression with a VB approximation.}\\
@@ -328,16 +329,16 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \code{exalDiagnostics()} & \code{exalDiagnostic} & \aA{Compute static fit diagnostics and comparisons.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Predictive synthesis} -- Input posterior predictive draw lists} \\
-    \rule{0pt}{3ex}\code{exdqlm_synthesize_from_draws()} & \code{list} & \aA{Synthesize predictive draws across fitted quantiles.}\\
+    \rule{0pt}{3ex}\shortstack[l]{\code{exdqlm\_synthesize\_}\\\code{from\_draws()}} & \code{list} & \aA{Synthesize predictive draws across fitted quantiles.}\\
     \hline
 \end{tabular}
 \caption{\aA{Overview of the core workflow functions used in this paper.} Generic S3 methods defined for the fitted objects listed in the table include \code{plot()}, \code{print()}, and \code{summary()}.}
 \label{table:flow}
 \end{table}
 
-\aA{Legacy ISVB routines remain available in the package for backward compatibility, but they are omitted from the primary workflow summary in Table \ref{table:flow}.}
+\aA{Legacy ISVB routines remain available in the package for backward compatibility, but they are omitted from the primary workflow summary in Table \ref{table:flow}. There is also no transfer-function MCMC routine in the current package; the transfer-function workflow is currently implemented through the VB interface.}
 
-\aA{The manuscript figures and tables are generated from tracked scripts distributed with the article repository.} A dedicated manuscript-reproduction stage, orchestrated through \code{analysis/run\_all.R}, rebuilds the example artifacts from the current \pkg{exdqlm} API and writes a reproducibility tracker recording the profile, backend settings, and artifact status used for the manuscript build.
+\aA{The manuscript figures and tables are generated from tracked scripts distributed with the article repository.} A dedicated manuscript workflow, orchestrated through \code{analysis/run\_all.R}, rebuilds the example artifacts from the current \pkg{exdqlm} API. The resulting reproducibility tracker records the build profile, backend settings, and artifact status used for the manuscript build.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
