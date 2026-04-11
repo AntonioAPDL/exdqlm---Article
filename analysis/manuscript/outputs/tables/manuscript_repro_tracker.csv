@@ -11,6 +11,8 @@
 "fig_ex2quant","figure","analysis/manuscript/outputs/figures/ex2quant.png","fig:ex2quant","reproduced","Three-panel LDVB figure for original p0=0.85 comparing DQLM and exDQLM."
 "fig_ex2quant_ldvb","figure","analysis/manuscript/outputs/figures/ex2quant_ldvb.png","new: fig ex2quant LDVB counterpart","not_reproduced","Missing LDVB DQLM/exDQLM fits required for p0=0.85 quantile panel."
 "fig_ex2checks","figure","analysis/manuscript/outputs/figures/ex2checks.png","fig:ex2checks","reproduced","Primary Example 2 diagnostics figure generated from the LDVB fits."
+"tab_ex2_df_scan","table","analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv","Example 2 discount-factor CRPS/KL selection","reproduced","Best pair by CRPS in this run: (0.90, 0.85). Best pair by KL: (0.9, 0.85)."
+"tab_ex2_diagnostics","table","analysis/manuscript/outputs/tables/ex2_diagnostics_summary.csv","Example 2 diagnostic narrative","reproduced","Primary Example 2 diagnostics summary computed from the LDVB fits."
 "fig_ex3data","figure","analysis/manuscript/outputs/figures/ex3data.png","fig:ex3data","reproduced","Top: log BTflow. Bottom: nino34."
 "ex3_run_summary","log","analysis/manuscript/outputs/logs/ex3_run_summary.txt","Example 3 textual outputs","reproduced","Includes lambda optimization table and median.kt."
 "ex3_run_summary_ldvb","log","analysis/manuscript/outputs/logs/ex3_run_summary_ldvb.txt","new: Example 3 LDVB textual outputs","reproduced","LDVB counterpart including lambda scan and runtime summaries."

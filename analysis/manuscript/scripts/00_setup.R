@@ -290,6 +290,22 @@ detect_cpu_model <- function() {
   as.character(Sys.info()[["machine"]] %||% NA_character_)
 }
 
+seeded_rnorm <- function(n, seed) {
+  old_exists <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  if (old_exists) {
+    old_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  }
+  on.exit({
+    if (old_exists) {
+      assign(".Random.seed", old_seed, envir = .GlobalEnv)
+    } else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+      rm(".Random.seed", envir = .GlobalEnv)
+    }
+  }, add = TRUE)
+  set.seed(as.integer(seed))
+  stats::rnorm(n)
+}
+
 benchmark_profiles_table <- function() {
   rows <- lapply(names(cfg_benchmark_profiles), function(name) {
     prof <- cfg_benchmark_profiles[[name]]

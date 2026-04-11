@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-11 00:14:02
+Generated: 2026-04-11 00:26:48
 Profile: standard
 Seed: 20260302
 
@@ -18,6 +18,8 @@ Seed: 20260302
 - [reproduced] `fig_ex2quant` -> `analysis/manuscript/outputs/figures/ex2quant.png` (fig:ex2quant). Three-panel LDVB figure for original p0=0.85 comparing DQLM and exDQLM.
 - [not_reproduced] `fig_ex2quant_ldvb` -> `analysis/manuscript/outputs/figures/ex2quant_ldvb.png` (new: fig ex2quant LDVB counterpart). Missing LDVB DQLM/exDQLM fits required for p0=0.85 quantile panel.
 - [reproduced] `fig_ex2checks` -> `analysis/manuscript/outputs/figures/ex2checks.png` (fig:ex2checks). Primary Example 2 diagnostics figure generated from the LDVB fits.
+- [reproduced] `tab_ex2_df_scan` -> `analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv` (Example 2 discount-factor CRPS/KL selection). Best pair by CRPS in this run: (0.90, 0.85). Best pair by KL: (0.9, 0.85).
+- [reproduced] `tab_ex2_diagnostics` -> `analysis/manuscript/outputs/tables/ex2_diagnostics_summary.csv` (Example 2 diagnostic narrative). Primary Example 2 diagnostics summary computed from the LDVB fits.
 - [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log BTflow. Bottom: nino34.
 - [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Includes lambda optimization table and median.kt.
 - [reproduced] `ex3_run_summary_ldvb` -> `analysis/manuscript/outputs/logs/ex3_run_summary_ldvb.txt` (new: Example 3 LDVB textual outputs). LDVB counterpart including lambda scan and runtime summaries.
@@ -41,12 +43,13 @@ Seed: 20260302
 - backend: Benchmark Profile B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
 - ex1: Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain.
 - ex2: Used explicit dlm->exdqlm conversion because as.exdqlm(dlm) errors in current package.
+- ex2: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
 - ex3: Best LDVB lambda by KL in this run profile: 0.850.
 - ex4: Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0.
 - ex4: The static sparse benchmark uses the regularized horseshoe (RHS) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept.
 - ex4: The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget.
 - ex4: Example 4 focuses on the general static exAL model; the AL special case remains available via dqlm.ind = TRUE.
-- coverage: Targeted run; requested targets: ex1mcmc, ex1quants, ex2quant, ex2checks, ex3data, ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables, ex4figure, ex4table.
+- coverage: Targeted run; requested targets: ex1mcmc, ex1quants, ex2quant, ex2checks, ex2tables, ex3data, ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables, ex4figure, ex4table.
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.
 - timing: Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.
 - benchmark: Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.

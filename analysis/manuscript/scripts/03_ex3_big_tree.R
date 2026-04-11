@@ -125,9 +125,9 @@ if (!need_ex3) {
     n_samp <- as.integer(cfg_profile$ex3$n_samp)
     tol <- as.numeric(cfg_profile$ex3$tol)
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
+    diag_ref_samp <- seeded_rnorm(length(y_log), seed_value + 301L)
 
     ex3_models <- load_or_fit_cache("ex3_models_ldvb_v1", {
-      ref_samp <- stats::rnorm(length(y_log))
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
@@ -143,7 +143,7 @@ if (!need_ex3) {
           error = function(e) e
         )
         if (!inherits(temp_M2_ldvb, "error")) {
-          temp_check_ldvb <- diagnostics_from_fit(temp_M2_ldvb, plot = FALSE, ref = ref_samp, y_data = y_log)
+          temp_check_ldvb <- diagnostics_from_fit(temp_M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y_log)
           KLs_ldvb[i] <- temp_check_ldvb$m1.KL
         }
       }
@@ -427,7 +427,7 @@ if (!need_ex3) {
     }
 
     if (need_ex3tables) {
-      diag_3 <- diagnostics_from_fit(M1, M2, plot = FALSE, y_data = y_log)
+      diag_3 <- diagnostics_from_fit(M1, M2, plot = FALSE, ref = diag_ref_samp, y_data = y_log)
       diag_table <- data.frame(
         model = c("M1_regression", "M2_transfer_function"),
         KL = c(diag_3$m1.KL, diag_3$m2.KL),
@@ -473,8 +473,8 @@ if (!need_ex3) {
       )
 
       if (ex3_ldvb_pair_ok) {
-        diag_3_m1_ldvb <- diagnostics_from_fit(M1_ldvb, plot = FALSE, y_data = y_log)
-        diag_3_m2_ldvb <- diagnostics_from_fit(M2_ldvb, plot = FALSE, y_data = y_log)
+        diag_3_m1_ldvb <- diagnostics_from_fit(M1_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y_log)
+        diag_3_m2_ldvb <- diagnostics_from_fit(M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y_log)
         diag_table_ldvb <- data.frame(
           model = c("M1_regression_ldvb", "M2_transfer_function_ldvb"),
           KL = c(diag_3_m1_ldvb$m1.KL, diag_3_m2_ldvb$m1.KL),

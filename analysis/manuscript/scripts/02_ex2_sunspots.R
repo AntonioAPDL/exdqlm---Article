@@ -36,6 +36,7 @@ if (!need_ex2) {
 
   y_ts <- datasets::sunspot.year
   y <- as.numeric(y_ts)
+  diag_ref_samp <- seeded_rnorm(length(y_ts), seed_value + 201L)
 
   dlm_trend_comp <- dlm::dlmModPoly(1, m0 = mean(y), C0 = 10)
   # Explicit conversion avoids a known as.exdqlm(dlm) bug in current package state.
@@ -226,8 +227,8 @@ if (!need_ex2) {
         )
       })
 
-      diag_vb <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, y_data = y)
-      diag_mcmc <- diagnostics_from_fit(M1_mcmc, M2_mcmc, plot = FALSE, y_data = y)
+      diag_vb <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
+      diag_mcmc <- diagnostics_from_fit(M1_mcmc, M2_mcmc, plot = FALSE, ref = diag_ref_samp, y_data = y)
 
       list(
         M1_mcmc = M1_mcmc,
@@ -491,7 +492,7 @@ if (!need_ex2) {
     if (ex2_ldvb_pair_ok) {
       save_png_plot("ex2checks.png", {
         graphics::par(mfrow = c(2, 3))
-        diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m2), y_data = y)
+        diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m2), ref = diag_ref_samp, y_data = y)
       })
       register_artifact(
         artifact_id = "fig_ex2checks",
@@ -517,8 +518,8 @@ if (!need_ex2) {
     if (ex2_ldvb_pair_ok) {
       save_png_plot("ex2checks_ldvb.png", {
         graphics::par(mfrow = c(2, 3))
-        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1), y_data = y)
-        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2), y_data = y)
+        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1), ref = diag_ref_samp, y_data = y)
+        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2), ref = diag_ref_samp, y_data = y)
       })
       register_artifact(
         artifact_id = "fig_ex2checks_ldvb",
@@ -799,7 +800,6 @@ if (!need_ex2) {
   if (need_ex2_tables) {
     ex2_df_scan <- load_or_fit_cache("ex2_df_scan_ldvb_primary_v1", {
       possible_dfs <- cbind(0.9, df_grid)
-      ref_samp <- stats::rnorm(length(y_ts))
       KLs <- rep(NA_real_, nrow(possible_dfs))
       CRPSs <- rep(NA_real_, nrow(possible_dfs))
       for (i in seq_len(nrow(possible_dfs))) {
@@ -814,7 +814,7 @@ if (!need_ex2) {
           error = function(e) e
         )
         if (!inherits(temp_M, "error")) {
-          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp, y_data = y)
+          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = diag_ref_samp, y_data = y)
           KLs[i] <- temp_check$m1.KL
           CRPSs[i] <- temp_check$m1.CRPS
         }
@@ -871,7 +871,7 @@ if (!need_ex2) {
     }
 
     if (ex2_ldvb_pair_ok) {
-      diag_2 <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, y_data = y)
+      diag_2 <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
       diag_table <- data.frame(
         model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
         KL = c(diag_2$m1.KL, diag_2$m2.KL),
@@ -902,7 +902,6 @@ if (!need_ex2) {
   if (need_ex2_tables_ldvb) {
     ex2_df_scan_ldvb <- load_or_fit_cache("ex2_df_scan_ldvb", {
       possible_dfs <- cbind(0.9, df_grid)
-      ref_samp <- stats::rnorm(length(y_ts))
       KLs <- rep(NA_real_, nrow(possible_dfs))
       CRPSs <- rep(NA_real_, nrow(possible_dfs))
       for (i in seq_len(nrow(possible_dfs))) {
@@ -917,7 +916,7 @@ if (!need_ex2) {
           error = function(e) e
         )
         if (!inherits(temp_M, "error")) {
-          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = ref_samp, y_data = y)
+          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = diag_ref_samp, y_data = y)
           KLs[i] <- temp_check$m1.KL
           CRPSs[i] <- temp_check$m1.CRPS
         }
@@ -973,8 +972,8 @@ if (!need_ex2) {
     }
 
     if (ex2_ldvb_pair_ok) {
-      diag_m1_ld <- diagnostics_from_fit(M1_ldvb, plot = FALSE, y_data = y)
-      diag_m2_ld <- diagnostics_from_fit(M2_ldvb, plot = FALSE, y_data = y)
+      diag_m1_ld <- diagnostics_from_fit(M1_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
+      diag_m2_ld <- diagnostics_from_fit(M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
       diag_table_ld <- data.frame(
         model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
         KL = c(diag_m1_ld$m1.KL, diag_m2_ld$m1.KL),
