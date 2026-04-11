@@ -8,7 +8,10 @@
 \RequirePackage{amsthm,amsmath,amsfonts,amssymb}
 
 \newcommand{\RB}[1]{\textcolor{cyan}{#1}}
+% \aA marks revised manuscript text that is intended to remain if approved.
 \newcommand{\aA}[1]{\textcolor{magenta}{#1}}
+% \aANote marks reviewer-facing notes for Raquel only; remove before submission.
+\newcommand{\aANote}[1]{\textcolor{blue}{\textbf{[AA note for RB:} #1\textbf{]}}}
 \newcommand{\RP}[1]{\textcolor{teal}{#1}}
 \newcommand{\BS}[1]{\textcolor{orange}{#1}}
 \newcommand{\tworowcell}[1]{\smash{\raisebox{-0.5\normalbaselineskip}{#1}}}
@@ -812,7 +815,7 @@ R> model.w.reg = model + reg.comp
 
 To allow the Ni\~no 3.4 input components of both models to vary over time, we set the respective discount factors to be $0.95$ (this is done via the parameter \code{df} in the regression fit and the parameter \code{tf.df} in the transfer-function fit). Alternatively, we set the discount factors to 1 and 0.9 for the trend and seasonal components, respectively. This allows the seasonal amplitudes to evolve over time, while any further variation in the $0.15$ quantile from year to year will solely be attributed to the effects of the Ni\~no 3.4 input in our models.
 
-\aA{Updated to clarify that Example 3 uses LDVB for illustration, while the package also provides the corresponding MCMC workflow, and to explain that the KL scan below is used only as a coarse screening step for the transfer-function decay rate.}
+\aANote{Updated to clarify that Example 3 uses LDVB for illustration, while the package also provides the corresponding MCMC workflow, and to explain that the KL scan below is used only as a coarse screening step for the transfer-function decay rate.}
 The transfer function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{transfn_exdqlmLDVB()} to obtain a fast approximate fit on the monthly series, although the corresponding exact posterior workflow is also available through \code{transfn_exdqlmMCMC()}. On the coarse candidate grid used here, we use the KL divergence as a calibration-oriented screening criterion to select the transfer-function decay rate, and then assess the resulting fitted models with the broader diagnostic comparison reported below. This screen selects a decay rate of 0.85.
 \begin{CodeChunk}
 \begin{CodeInput}
