@@ -468,7 +468,7 @@ if (!need_ex1) {
       relative_path = "analysis/manuscript/outputs/figures/ex1synth.png",
       manuscript_target = "fig:ex1synth",
       status = "reproduced",
-      notes = "Lake Huron predictive synthesis figure combining the 0.05, 0.50, and 0.95 fitted models over the late observed window and the eight-step forecast horizon."
+      notes = "Lake Huron predictive synthesis figure combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon."
     )
   }
 

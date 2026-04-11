@@ -14,7 +14,7 @@ profiles:
       thin_kernel_plot: 4
       synth_source_draws: 500
       synth_n_samp: 1200
-      synth_window_start: 1952
+      synth_window_start: 1880
     ex2:
       n_is: 180
       n_samp: 140
@@ -61,7 +61,7 @@ profiles:
       thin_kernel_plot: 10
       synth_source_draws: 2000
       synth_n_samp: 5000
-      synth_window_start: 1952
+      synth_window_start: 1880
     ex2:
       n_is: 500
       n_samp: 200
@@ -112,7 +112,7 @@ profiles:
       thin_kernel_plot: 10
       synth_source_draws: 3000
       synth_n_samp: 8000
-      synth_window_start: 1952
+      synth_window_start: 1880
     ex2:
       n_is: 700
       n_samp: 300
