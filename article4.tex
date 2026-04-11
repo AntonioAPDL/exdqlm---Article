@@ -343,7 +343,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 
 \aA{Legacy ISVB routines remain available in the package for backward compatibility, but they are omitted from the primary workflow summary in Table \ref{table:flow}.}
 
-\aA{The manuscript figures and tables are generated from tracked scripts distributed with the article repository.} A dedicated manuscript workflow, orchestrated through \code{analysis/run\_all.R}, rebuilds the example artifacts from the current \pkg{exdqlm} API. The resulting reproducibility tracker records the build profile, backend settings, and artifact status used for the manuscript build.
+\aA{The manuscript figures and tables are generated from scripts distributed with the article repository.} These scripts rebuild the example artifacts directly from the current \pkg{exdqlm} API, and the accompanying reproducibility materials record the computing environment and manuscript outputs used in the paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -756,7 +756,7 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \end{CodeChunk}
 \aA{On this coarse grid, the CRPS and KL criteria agree and both select the seasonal discount factor \(0.85\), so the choice used above is retained.}
 
-\aA{To make the runtime comparisons reproducible, we distinguish two backend profiles. Profile A is a pure-\proglang{R} baseline with the optional \proglang{C++} paths disabled. Profile B retains the default \proglang{C++} state-space accelerators used in the dynamic routines, namely the Kalman filtering and smoothing bridge and, for dynamic MCMC, the \code{fast} forward-filtering backward-sampling state-update path, while leaving the other optional accelerators off. Unless noted otherwise, the benchmark tables below use Profile B. The exact CPU, \proglang{R} version, package state, seeds, and dataset sizes used for these comparisons are recorded in the accompanying reproducibility files.}
+\aA{The runtime comparisons below were obtained under the default implementation used by the dynamic routines. Exact hardware, software, seed, and dataset details are recorded in the accompanying reproducibility materials.}
 
 \begin{table}[t]
 \centering
@@ -772,11 +772,11 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
  exDQLM & MCMC & 330.91 & 0.111 & \textbf{5.069} & \textbf{2186.7} \\
  \hline
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\) under backend Profile B. Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Within each model block, bold entries indicate the smaller value for that metric.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Within each model block, bold entries indicate the smaller value for that metric.}
 \label{tab:ex2bench}
 \end{table}
 
-\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched 3000-draw summaries. For the simpler DQLM, the VB fit remains much faster than MCMC, whereas the MCMC fit achieves smaller values for all three reported diagnostics. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is mixed: the VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the backend profile used for the comparison.}
+\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched 3000-draw summaries. For the simpler DQLM, the VB fit remains much faster than MCMC, whereas the MCMC fit achieves smaller values for all three reported diagnostics. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is mixed: the VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the inferential method being compared.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
