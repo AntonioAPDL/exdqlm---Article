@@ -120,11 +120,9 @@ if (!need_ex1) {
     list(qdraw = qdraw, ydraw = ydraw, sigma = sigma_draws, gamma = gamma_draws)
   }
 
-  add_predictive_band <- function(x, lower95, upper95, lower50, upper50,
-                                  fill95 = grDevices::adjustcolor("#E8DDC7", alpha.f = 0.72),
-                                  fill50 = grDevices::adjustcolor("#C7AB8B", alpha.f = 0.72)) {
+  add_predictive_band <- function(x, lower95, upper95,
+                                  fill95 = grDevices::adjustcolor("#F3D9E6", alpha.f = 0.68)) {
     graphics::polygon(c(x, rev(x)), c(lower95, rev(upper95)), col = fill95, border = NA)
-    graphics::polygon(c(x, rev(x)), c(lower50, rev(upper50)), col = fill50, border = NA)
   }
 
   add_forecast_overlay <- function(fc, cols = c("purple", "magenta"), lwd_main = 1.8, lwd_ci = 1,
@@ -386,15 +384,11 @@ if (!need_ex1) {
       x_future <- seq(from = t_end, by = dt, length.out = k_fore + 1L)
 
       obs_q025 <- ex1_synthesis$syn_obs$summary$q025[idx_obs]
-      obs_q250 <- ex1_synthesis$syn_obs$summary$q250[idx_obs]
       obs_q500 <- ex1_synthesis$syn_obs$summary$q500[idx_obs]
-      obs_q750 <- ex1_synthesis$syn_obs$summary$q750[idx_obs]
       obs_q975 <- ex1_synthesis$syn_obs$summary$q975[idx_obs]
 
       fut_q025 <- c(ex1_synthesis$syn_obs$summary$q025[length(y)], ex1_synthesis$syn_future$summary$q025)
-      fut_q250 <- c(ex1_synthesis$syn_obs$summary$q250[length(y)], ex1_synthesis$syn_future$summary$q250)
       fut_q500 <- c(ex1_synthesis$syn_obs$summary$q500[length(y)], ex1_synthesis$syn_future$summary$q500)
-      fut_q750 <- c(ex1_synthesis$syn_obs$summary$q750[length(y)], ex1_synthesis$syn_future$summary$q750)
       fut_q975 <- c(ex1_synthesis$syn_obs$summary$q975[length(y)], ex1_synthesis$syn_future$summary$q975)
 
       y_lim <- range(
@@ -412,9 +406,9 @@ if (!need_ex1) {
         col = grDevices::adjustcolor("grey35", alpha.f = 0.45),
         ylab = "predictive synthesis"
       )
-      add_predictive_band(x_obs, obs_q025, obs_q975, obs_q250, obs_q750)
+      add_predictive_band(x_obs, obs_q025, obs_q975)
       graphics::lines(x_obs, obs_q500, col = "grey15", lwd = 1.5)
-      add_predictive_band(x_future, fut_q025, fut_q975, fut_q250, fut_q750)
+      add_predictive_band(x_future, fut_q025, fut_q975)
       graphics::lines(x_future, fut_q500, col = "grey15", lwd = 1.5)
       graphics::abline(v = t_end, lty = 3, col = "grey45")
 
@@ -424,12 +418,12 @@ if (!need_ex1) {
 
       graphics::legend(
         "bottomleft",
-        legend = c("Synthesized 95% PI", "Synthesized 50% PI", "Synthesized median", expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
-        fill = c(grDevices::adjustcolor("#E8DDC7", alpha.f = 0.72), grDevices::adjustcolor("#C7AB8B", alpha.f = 0.72), NA, NA, NA, NA),
-        border = c(NA, NA, NA, NA, NA, NA),
-        lty = c(NA, NA, 1, 1, 1, 1),
-        lwd = c(NA, NA, 1.5, 2.1, 2.1, 2.1),
-        col = c(NA, NA, "grey15", "#7B3294", "#2166AC", "#1B7837"),
+        legend = c("Synthesized 95% PI", "Synthesized median", expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
+        fill = c(grDevices::adjustcolor("#F3D9E6", alpha.f = 0.68), NA, NA, NA, NA),
+        border = c(NA, NA, NA, NA, NA),
+        lty = c(NA, 1, 1, 1, 1),
+        lwd = c(NA, 1.5, 2.1, 2.1, 2.1),
+        col = c(NA, "grey15", "#7B3294", "#2166AC", "#1B7837"),
         bty = "n",
         bg = grDevices::adjustcolor("white", alpha.f = 0.82),
         cex = 0.75,
