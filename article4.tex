@@ -191,10 +191,10 @@ y_t | \boldsymbol{\theta}_t,\gamma,\sigma  & \sim \text{exAL}_{p_0}({\bf F}'_t \
 \end{align}
 Here $\zeta_{t}$ captures the effect of the current and past regression effects on the quantile at time $t$. Alternatively, the parameter $\psi_{t}$ determines the instantaneous effect $X_t$ has on the quantile. The parameter $\lambda\in[0,1]$ represents the memory of the regression effect up to time $t$. This effect decays at an exponential rate, reducing by a factor of $\lambda$ at every time step. More explicitly, the effect of $X_t$ on the quantile at time $t+k$ is $\lambda^k \psi_{t-1}X_t$. Thus, the series $k_t \geq \frac{\log(\epsilon) - \log(|\psi_{t-1}X_t|)}{\log(\lambda)}$ represents a lower bound for the number of time steps until the effect of $X_t$ is less than or equal to a fixed $\epsilon$. The median value of $k_t$ corresponding to $\epsilon = 1\mathrm{e}{-3}$ is included as an output of our transfer function routine.
 
-Conditional on a fixed $\lambda$, say $\tilde\lambda$, \aA{we augment the VB routine} to incorporate the transfer function structure by simply replacing ${\bf F}_t, {\boldsymbol{\theta}}_t, {\bf G}_t,$ and ${\bf W}_t$ in Equations \eqref{EQ:exDLM}-\eqref{EQ:exDLMevo} with $\tilde{\bf F}'_t = ({\bf F}'_t, 1,0)$, $\tilde{\boldsymbol{\theta}}'_t = ({\boldsymbol{\theta}}'_t,\zeta_{t},\psi_{t})$, $\tilde{\bf G}_t = \text{blockdiag}\left\{{\bf G}_t,\left(\begin{smallmatrix}
-\tilde\lambda & X_{t} \\ 0 & 1 \end{smallmatrix} \right)\right\}$, and  $\tilde{\bf W}_t = \text{blockdiag}\left\{{\bf W}_t,\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)\right\}$, respectively. This augmentation is implemented in the function \code{transfn_exdqlmLDVB()}, an extension of the routine found in \code{exdqlmLDVB()}.
+Conditional on a fixed $\lambda$, say $\tilde\lambda$, \aA{we augment the dynamic fitting routines} to incorporate the transfer function structure by simply replacing ${\bf F}_t, {\boldsymbol{\theta}}_t, {\bf G}_t,$ and ${\bf W}_t$ in Equations \eqref{EQ:exDLM}-\eqref{EQ:exDLMevo} with $\tilde{\bf F}'_t = ({\bf F}'_t, 1,0)$, $\tilde{\boldsymbol{\theta}}'_t = ({\boldsymbol{\theta}}'_t,\zeta_{t},\psi_{t})$, $\tilde{\bf G}_t = \text{blockdiag}\left\{{\bf G}_t,\left(\begin{smallmatrix}
+\tilde\lambda & X_{t} \\ 0 & 1 \end{smallmatrix} \right)\right\}$, and  $\tilde{\bf W}_t = \text{blockdiag}\left\{{\bf W}_t,\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)\right\}$, respectively. This augmentation is implemented in the functions \code{transfn_exdqlmLDVB()} and \code{transfn_exdqlmMCMC()}, which extend the routines found in \code{exdqlmLDVB()} and \code{exdqlmMCMC()}.
 
-Similar to the specification of $\bf{W}_t$ discussed in Section \ref{sec:dfs}, discount factors $(\delta_\zeta,\delta_\psi)$ are utilized to specify $\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)$. A bivariate normal conjugate prior on $(\zeta_{0},\psi_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$ completes the transfer function model extension. Table \ref{table:tf} shows the additional parameters used in \code{transfn_exdqlmLDVB()}, as well as their mathematical symbols discussed in this section.
+Similar to the specification of $\bf{W}_t$ discussed in Section \ref{sec:dfs}, discount factors $(\delta_\zeta,\delta_\psi)$ are utilized to specify $\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)$. A bivariate normal conjugate prior on $(\zeta_{0},\psi_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$ completes the transfer function model extension. Table \ref{table:tf} shows the additional parameters used in the transfer-function fitting routines, as well as their mathematical symbols discussed in this section.
 
 \begin{table}[t]
 \centering
@@ -202,10 +202,10 @@ Similar to the specification of $\bf{W}_t$ discussed in Section \ref{sec:dfs}, d
 	\hline
 	Symbol & $X_t$ & $\tilde\lambda$ & $(\delta_\zeta,\delta_\psi)$ & ${\bf m}_0^{tf}$ & ${\bf C}_0^{tf}$ \\
 	\hline
-	\code{transfn_exdqlmLDVB()} input & \code{X} & \code{lam} & \code{tf.df} & \code{tf.m0} & \code{tf.C0} \\
+		transfer-function input & \code{X} & \code{lam} & \code{tf.df} & \code{tf.m0} & \code{tf.C0} \\
 	\hline
 \end{tabular}
-\caption{Translation from mathematical symbols to parameters used in function \code{transfn\_exdqlmLDVB()}.}
+\caption{Translation from mathematical symbols to parameters used in the transfer-function fitting routines.}
 \label{table:tf}
 \end{table}
 
@@ -316,6 +316,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Estimate the posterior with MCMC algorithm.\\
     \code{exdqlmLDVB()} & \code{exdqlmLDVB} & \aA{Estimate the posterior with a VB approximation.}\\
     \code{transfn_exdqlmLDVB()} & \code{exdqlmLDVB} & \aA{Estimate the transfer-function exDQLM with a VB approximation.}\\
+    \code{transfn_exdqlmMCMC()} & \code{exdqlmMCMC} & \aA{Estimate the transfer-function exDQLM with MCMC.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Static fitting} -- Input design matrix and response} \\
     \rule{0pt}{3ex}\code{exal_static_LDVB()} & \code{exal\_ldvb} & \aA{Estimate static exAL regression with a VB approximation.}\\
@@ -336,7 +337,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 \label{table:flow}
 \end{table}
 
-\aA{Legacy ISVB routines remain available in the package for backward compatibility, but they are omitted from the primary workflow summary in Table \ref{table:flow}. There is also no transfer-function MCMC routine in the current package; the transfer-function workflow is currently implemented through the VB interface.}
+\aA{Legacy ISVB routines remain available in the package for backward compatibility, but they are omitted from the primary workflow summary in Table \ref{table:flow}.}
 
 \aA{The manuscript figures and tables are generated from tracked scripts distributed with the article repository.} A dedicated manuscript workflow, orchestrated through \code{analysis/run\_all.R}, rebuilds the example artifacts from the current \pkg{exdqlm} API. The resulting reproducibility tracker records the build profile, backend settings, and artifact status used for the manuscript build.
 
