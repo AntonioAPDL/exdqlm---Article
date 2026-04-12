@@ -1,5 +1,0 @@
-"p0","model","status","runtime","median_kt"
-0.05,"direct_regression","ok",56.535,NA
-0.05,"transfer_function","ok",61.447,45.3310108377348
-0.5,"direct_regression","ok",53.704,NA
-0.5,"transfer_function","ok",60.236,34.6745060104383

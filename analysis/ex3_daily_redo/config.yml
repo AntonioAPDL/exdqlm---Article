@@ -1,6 +1,7 @@
 runtime:
   seed: 20260411
   pkg_path: /home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
+  output_tag: smoke
   parallel: true
   workers: 2
 

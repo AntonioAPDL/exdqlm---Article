@@ -1,0 +1,8 @@
+p0 = 0.05
+  direct_regression | iter=25 | converged=FALSE | hit_iter_cap=TRUE | runtime=56.155
+  transfer_function | iter=25 | converged=FALSE | hit_iter_cap=TRUE | runtime=60.989 | median.kt=45.33101
+
+p0 = 0.50
+  direct_regression | iter=25 | converged=FALSE | hit_iter_cap=TRUE | runtime=56.595
+  transfer_function | iter=25 | converged=FALSE | hit_iter_cap=TRUE | runtime=60.994 | median.kt=34.67451
+

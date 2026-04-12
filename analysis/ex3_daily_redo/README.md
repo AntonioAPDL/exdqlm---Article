@@ -53,6 +53,20 @@ full seven-quantile / long-history run. Once the workflow is behaving well,
 the config can be widened back out to the longer 2010-to-2022 window or the
 full 1987-to-2022 history.
 
+Three tracked config tiers are available:
+
+- `config_smoke.yml`
+  - shortest validation run
+  - outputs written to `outputs/smoke/`
+- `config_mid.yml`
+  - widened validation run with 3 quantiles
+  - outputs written to `outputs/mid/`
+- `config_long.yml`
+  - longer validation config for the 2010-to-2022 window
+  - outputs written to `outputs/long/`
+
+The default `config.yml` currently mirrors the smoke profile.
+
 Both models share:
 
 - transformed response `log(log(usgs_cfs + 1))`
@@ -81,6 +95,8 @@ Useful variants:
 ```bash
 Rscript analysis/ex3_daily_redo/run_all.R --targets prep,fit
 Rscript analysis/ex3_daily_redo/run_all.R --targets forecast,figures,manifest
+Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_smoke.yml
+Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_mid.yml
 Rscript analysis/ex3_daily_redo/run_all.R --config /path/to/config.yml
 EX3_DAILY_PKG_PATH=/path/to/exdqlm Rscript analysis/ex3_daily_redo/run_all.R
 EX3_DAILY_DATA_PATH=/path/to/big_trees_daily_usgs_ppt_soil.csv \
@@ -97,22 +113,23 @@ Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
 
 ## Outputs
 
-- `outputs/figures/`
+- `outputs/<profile>/figures/`
   - `ex3_daily_data_overview.png`
   - `ex3_daily_fit_recent.png`
   - `ex3_daily_forecast_30d.png`
   - `ex3_daily_transfer_components_p05.png`
   - `ex3_daily_transfer_components_p50.png`
-- `outputs/tables/`
+- `outputs/<profile>/tables/`
   - `ex3_daily_data_window_summary.csv`
   - `ex3_daily_covariate_scaling.csv`
   - `ex3_daily_fit_summary.csv`
   - `ex3_daily_fit_diagnostics.csv`
   - `ex3_daily_forecast_summary.csv`
-- `outputs/logs/`
+- `outputs/<profile>/logs/`
   - `ex3_daily_manifest.md`
   - `ex3_daily_fit_notes.txt`
-- `outputs/cache/`
+- `outputs/<profile>/cache/`
   - cached `.rds` objects used to speed up repeated tuning runs
 
-The `outputs/cache/` directory is intentionally ignored by git.
+Each profile keeps its own cache directory, and those cache directories are
+intentionally ignored by git.

@@ -3,7 +3,14 @@
 args <- commandArgs(trailingOnly = TRUE)
 arg_get <- function(name, default = NULL) {
   hit <- grep(paste0("^--", name, "="), args, value = TRUE)
-  if (length(hit)) sub(paste0("^--", name, "="), "", hit[1]) else default
+  if (length(hit)) {
+    return(sub(paste0("^--", name, "="), "", hit[1]))
+  }
+  hit_idx <- match(paste0("--", name), args)
+  if (!is.na(hit_idx) && hit_idx < length(args)) {
+    return(args[hit_idx + 1L])
+  }
+  default
 }
 
 file_arg <- grep("^--file=", commandArgs(), value = TRUE)

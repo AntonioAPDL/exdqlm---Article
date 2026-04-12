@@ -15,7 +15,13 @@ if (!exists("config_path", inherits = FALSE)) {
 }
 
 config <- yaml::read_yaml(config_path)
-output_root <- file.path(redo_root, "outputs")
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+config_tag <- config$runtime$output_tag %||%
+  tools::file_path_sans_ext(basename(config_path))
+config_tag <- gsub("[^A-Za-z0-9_-]+", "_", config_tag)
+
+output_root <- file.path(redo_root, "outputs", config_tag)
 figure_dir <- file.path(output_root, "figures")
 table_dir <- file.path(output_root, "tables")
 log_dir <- file.path(output_root, "logs")
@@ -23,6 +29,10 @@ cache_dir <- file.path(output_root, "cache")
 
 for (dir_path in c(output_root, figure_dir, table_dir, log_dir, cache_dir)) {
   dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
+}
+cache_gitignore <- file.path(cache_dir, ".gitignore")
+if (!file.exists(cache_gitignore)) {
+  writeLines(c("*", "!.gitignore"), con = cache_gitignore)
 }
 
 pkg_path <- Sys.getenv("EX3_DAILY_PKG_PATH", unset = config$runtime$pkg_path)
@@ -46,8 +56,6 @@ options(
 
 seed_base <- as.integer(config$runtime$seed)
 set.seed(seed_base)
-
-`%||%` <- function(x, y) if (is.null(x)) y else x
 
 save_png_plot <- function(filename, expr, width = config$plots$width,
                           height = config$plots$height, res = config$plots$res,
@@ -268,6 +276,44 @@ fit_model_pair <- function(p0, prep, fit_seed) {
 }
 
 fit_ok <- function(x) !inherits(x, "error")
+
+fit_hit_iter_cap <- function(fit) {
+  max_iter <- as.integer(config$model$ldvb$max_iter %||% NA_integer_)
+  if (!fit_ok(fit) || !is.finite(max_iter) || is.null(fit$iter)) {
+    return(NA)
+  }
+  isFALSE(fit$converged) && as.integer(fit$iter) >= max_iter
+}
+
+fit_status_row <- function(p0, label, fit, median_kt = NA_real_) {
+  if (!fit_ok(fit)) {
+    return(data.frame(
+      p0 = p0,
+      model = label,
+      status = "error",
+      runtime = NA_real_,
+      iter = NA_integer_,
+      converged = NA,
+      hit_iter_cap = NA,
+      median_kt = median_kt,
+      error_message = conditionMessage(fit),
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  data.frame(
+    p0 = p0,
+    model = label,
+    status = "ok",
+    runtime = as.numeric(fit$run.time),
+    iter = as.integer(fit$iter %||% NA_integer_),
+    converged = isTRUE(fit$converged),
+    hit_iter_cap = fit_hit_iter_cap(fit),
+    median_kt = as.numeric(median_kt),
+    error_message = "",
+    stringsAsFactors = FALSE
+  )
+}
 
 diagnostics_summary <- function(fit, ref) {
   di <- exdqlm::exdqlmDiagnostics(fit, plot = FALSE, ref = ref)
