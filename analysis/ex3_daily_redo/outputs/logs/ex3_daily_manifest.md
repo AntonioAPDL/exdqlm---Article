@@ -1,6 +1,6 @@
 # Example 3 Daily Redo Manifest
 
-- article repo: `dba8cbd`
+- article repo: `8e65111`
 - package repo: `668685f`
 - staged data path: `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
 - staged data sha256: `1ee2854398a8ed93fb171fa04e2a81c824dc7ab933e37bb80068a25cdbc4a69a`
