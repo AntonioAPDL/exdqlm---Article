@@ -2,8 +2,8 @@
 
 - config path: `/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_daily_redo/config_mid.yml`
 - output tag: `mid`
-- article repo: `fda47b6`
-- package repo: `668685f`
+- article repo snapshot at rerun: `2dc1cd4`
+- package repo snapshot at rerun: `668685f`
 - staged data path: `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
 - staged data sha256: `1ee2854398a8ed93fb171fa04e2a81c824dc7ab933e37bb80068a25cdbc4a69a`
 - fit window: `2017-01-01` to `2022-12-25` (2185 rows)
