@@ -34,6 +34,15 @@ fit_rows <- do.call(rbind, lapply(fit_results, function(res) {
 
 write_csv(fit_rows, "ex3_daily_fit_summary.csv")
 
+conv_rows <- do.call(rbind, lapply(fit_results, function(res) {
+  rbind(
+    ldvb_convergence_row(res$p0, "direct_regression", res$direct),
+    ldvb_convergence_row(res$p0, "transfer_function", res$transfer)
+  )
+}))
+
+write_csv(conv_rows, "ex3_daily_ldvb_convergence.csv")
+
 fit_notes <- unlist(lapply(fit_results, function(res) {
   lines <- sprintf("p0 = %.2f", res$p0)
   if (fit_ok(res$direct)) {

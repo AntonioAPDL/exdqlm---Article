@@ -315,6 +315,55 @@ fit_status_row <- function(p0, label, fit, median_kt = NA_real_) {
   )
 }
 
+ldvb_convergence_row <- function(p0, label, fit) {
+  if (!fit_ok(fit)) {
+    return(data.frame(
+      p0 = p0,
+      model = label,
+      iter = NA_integer_,
+      converged = NA,
+      stop_reason = "error",
+      delta_state = NA_real_,
+      delta_sigma = NA_real_,
+      delta_gamma = NA_real_,
+      delta_s = NA_real_,
+      delta_elbo = NA_real_,
+      committed_local_pass = NA,
+      committed_grad_inf = NA_real_,
+      committed_min_eig = NA_real_,
+      candidate_local_pass = NA,
+      candidate_grad_inf = NA_real_,
+      candidate_min_eig = NA_real_,
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  conv <- fit$diagnostics$convergence %||% list()
+  final <- conv$final %||% list()
+  mode_quality <- fit$diagnostics$ld_block$mode_quality %||% list()
+  ld_final <- fit$diagnostics$ld_block$final %||% list()
+
+  data.frame(
+    p0 = p0,
+    model = label,
+    iter = as.integer(fit$iter %||% NA_integer_),
+    converged = isTRUE(fit$converged),
+    stop_reason = as.character(conv$stop_reason %||% NA_character_),
+    delta_state = as.numeric(final$delta_state %||% NA_real_),
+    delta_sigma = as.numeric(final$delta_sigma %||% NA_real_),
+    delta_gamma = as.numeric(final$delta_gamma %||% NA_real_),
+    delta_s = as.numeric(final$delta_s %||% NA_real_),
+    delta_elbo = as.numeric(final$delta_elbo %||% NA_real_),
+    committed_local_pass = as.logical(mode_quality$local_mode_pass %||% NA),
+    committed_grad_inf = as.numeric(mode_quality$grad_inf_norm %||% NA_real_),
+    committed_min_eig = as.numeric(mode_quality$neg_hess_min_eig %||% NA_real_),
+    candidate_local_pass = as.logical(ld_final$ld_mode_local_pass_candidate %||% NA),
+    candidate_grad_inf = as.numeric(ld_final$ld_mode_grad_inf_norm_candidate %||% NA_real_),
+    candidate_min_eig = as.numeric(ld_final$ld_mode_neg_hess_min_eig_candidate %||% NA_real_),
+    stringsAsFactors = FALSE
+  )
+}
+
 diagnostics_summary <- function(fit, ref) {
   di <- exdqlm::exdqlmDiagnostics(fit, plot = FALSE, ref = ref)
   list(

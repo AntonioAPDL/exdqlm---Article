@@ -1,0 +1,5 @@
+"p0","model","status","runtime","iter","converged","hit_iter_cap","median_kt","error_message"
+0.05,"direct_regression","ok",845.382,400,FALSE,TRUE,NA,""
+0.05,"transfer_function","ok",936.551,400,FALSE,TRUE,50.0915067311419,""
+0.5,"direct_regression","ok",589.836,257,TRUE,FALSE,NA,""
+0.5,"transfer_function","ok",1014.222,400,FALSE,TRUE,34.0644809420805,""
