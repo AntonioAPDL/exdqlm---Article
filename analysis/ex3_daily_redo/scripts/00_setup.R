@@ -26,6 +26,7 @@ figure_dir <- file.path(output_root, "figures")
 table_dir <- file.path(output_root, "tables")
 log_dir <- file.path(output_root, "logs")
 cache_dir <- file.path(output_root, "cache")
+progress_log_path <- file.path(log_dir, "ex3_daily_progress.log")
 
 for (dir_path in c(output_root, figure_dir, table_dir, log_dir, cache_dir)) {
   dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
@@ -74,6 +75,21 @@ write_csv <- function(x, filename, row.names = FALSE) {
 
 write_text <- function(lines, filename) {
   writeLines(lines, con = file.path(log_dir, filename))
+}
+
+reset_progress_log <- function() {
+  writeLines(character(), con = progress_log_path)
+}
+
+log_progress <- function(msg, console = TRUE) {
+  stamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  line <- sprintf("[%s] pid=%s | %s", stamp, Sys.getpid(), msg)
+  cat(line, "\n", file = progress_log_path, append = TRUE, sep = "")
+  if (isTRUE(console)) {
+    cat(line, "\n", sep = "")
+    flush(stdout())
+  }
+  invisible(line)
 }
 
 sha256_file <- function(path) {
@@ -234,6 +250,7 @@ fit_model_pair <- function(p0, prep, fit_seed) {
   set.seed(fit_seed)
   direct_spec <- make_direct_spec(prep$y_train, p0, prep$X_train_scaled)
   transfer_spec <- make_transfer_spec(prep$y_train, p0, prep$X_train_scaled)
+  fit_verbose <- isTRUE(config$model$ldvb$verbose %||% FALSE)
 
   ldvb_args <- list(
     fix.gamma = FALSE,
@@ -242,9 +259,10 @@ fit_model_pair <- function(p0, prep, fit_seed) {
     sig.init = as.numeric(config$model$ldvb$sig_init),
     tol = as.numeric(config$model$ldvb$tol),
     n.samp = as.integer(config$model$ldvb$n_samp),
-    verbose = FALSE
+    verbose = fit_verbose
   )
 
+  log_progress(sprintf("fit_start | p0=%.2f | model=direct_regression | seed=%s", p0, fit_seed))
   direct_fit <- tryCatch(
     do.call(exdqlm::exdqlmLDVB, c(list(
       y = prep$y_train, p0 = p0,
@@ -253,7 +271,22 @@ fit_model_pair <- function(p0, prep, fit_seed) {
     ), ldvb_args)),
     error = function(e) e
   )
+  if (fit_ok(direct_fit)) {
+    log_progress(sprintf(
+      "fit_done | p0=%.2f | model=direct_regression | iter=%s | converged=%s | runtime=%.3f",
+      p0,
+      direct_fit$iter %||% NA_integer_,
+      isTRUE(direct_fit$converged),
+      as.numeric(direct_fit$run.time)
+    ))
+  } else {
+    log_progress(sprintf(
+      "fit_error | p0=%.2f | model=direct_regression | message=%s",
+      p0, conditionMessage(direct_fit)
+    ))
+  }
 
+  log_progress(sprintf("fit_start | p0=%.2f | model=transfer_function | seed=%s", p0, fit_seed))
   transfer_fit <- tryCatch(
     do.call(exdqlm::transfn_exdqlmLDVB, c(list(
       y = prep$y_train, p0 = p0,
@@ -265,6 +298,21 @@ fit_model_pair <- function(p0, prep, fit_seed) {
     ), ldvb_args)),
     error = function(e) e
   )
+  if (fit_ok(transfer_fit)) {
+    log_progress(sprintf(
+      "fit_done | p0=%.2f | model=transfer_function | iter=%s | converged=%s | runtime=%.3f | median.kt=%.5f",
+      p0,
+      transfer_fit$iter %||% NA_integer_,
+      isTRUE(transfer_fit$converged),
+      as.numeric(transfer_fit$run.time),
+      as.numeric(transfer_fit$median.kt)
+    ))
+  } else {
+    log_progress(sprintf(
+      "fit_error | p0=%.2f | model=transfer_function | message=%s",
+      p0, conditionMessage(transfer_fit)
+    ))
+  }
 
   list(
     p0 = p0,

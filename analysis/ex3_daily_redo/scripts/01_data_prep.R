@@ -49,6 +49,10 @@ prep <- list(
 )
 
 cache_write(prep, "ex3_daily_prep.rds")
+log_progress(sprintf(
+  "prep_summary | fit_n=%d | forecast_n=%d | fit_window=%s:%s | forecast_window=%s:%s",
+  nrow(fit_df), nrow(future_df), fit_start, fit_end, forecast_start, forecast_end
+))
 
 write_csv(
   data.frame(

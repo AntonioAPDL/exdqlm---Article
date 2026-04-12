@@ -42,6 +42,10 @@ conv_rows <- do.call(rbind, lapply(fit_results, function(res) {
 }))
 
 write_csv(conv_rows, "ex3_daily_ldvb_convergence.csv")
+log_progress(sprintf(
+  "fit_summary_written | rows=%d | convergence_rows=%d",
+  nrow(fit_rows), nrow(conv_rows)
+))
 
 fit_notes <- unlist(lapply(fit_results, function(res) {
   lines <- sprintf("p0 = %.2f", res$p0)
@@ -77,3 +81,4 @@ fit_notes <- unlist(lapply(fit_results, function(res) {
   c(lines, "")
 }))
 write_text(fit_notes, "ex3_daily_fit_notes.txt")
+log_progress("fit_notes_written | ex3_daily_fit_notes.txt")

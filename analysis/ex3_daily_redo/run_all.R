@@ -25,6 +25,11 @@ config_path <- arg_get("config", Sys.getenv("EX3_DAILY_CONFIG_PATH", unset = fil
 config_path <- normalizePath(config_path, mustWork = TRUE)
 
 source(file.path(redo_root, "scripts", "00_setup.R"))
+reset_progress_log()
+log_progress(sprintf(
+  "run_start | config=%s | output_tag=%s | targets=%s",
+  config_path, config_tag, paste(targets, collapse = ",")
+))
 
 step_map <- c(
   prep = "01_data_prep.R",
@@ -37,6 +42,9 @@ step_map <- c(
 for (step in names(step_map)) {
   if (step %in% targets) {
     message(sprintf("[ex3_daily_redo] running step: %s", step))
+    log_progress(sprintf("step_start | step=%s", step))
     source(file.path(redo_root, "scripts", step_map[[step]]), local = FALSE)
+    log_progress(sprintf("step_done | step=%s", step))
   }
 }
+log_progress("run_done | all requested steps completed")

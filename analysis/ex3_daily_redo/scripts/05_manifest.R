@@ -57,3 +57,4 @@ forecast_lines <- c(
 )
 
 write_text(c(manifest_lines, status_lines, diagnostic_lines, forecast_lines), "ex3_daily_manifest.md")
+log_progress("manifest_written | ex3_daily_manifest.md")

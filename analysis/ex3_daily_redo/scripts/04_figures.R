@@ -104,3 +104,4 @@ plot_transfer_components <- function(p0, filename) {
 
 plot_transfer_components(0.05, "ex3_daily_transfer_components_p05.png")
 plot_transfer_components(0.50, "ex3_daily_transfer_components_p50.png")
+log_progress("figures_written | core daily redo figures completed")

@@ -83,3 +83,7 @@ forecast_df <- do.call(rbind, forecast_rows)
 write_csv(diagnostic_df, "ex3_daily_fit_diagnostics.csv")
 write_csv(forecast_df, "ex3_daily_forecast_summary.csv")
 cache_write(forecast_objects, "ex3_daily_forecasts_ldvb.rds")
+log_progress(sprintf(
+  "forecast_summary_written | diagnostics_rows=%d | forecast_rows=%d",
+  nrow(diagnostic_df), nrow(forecast_df)
+))
