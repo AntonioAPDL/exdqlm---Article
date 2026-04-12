@@ -78,6 +78,11 @@ Additional stabilization configs are available for the short and mid windows:
   - same widened validation window as mid
   - first serious widened-window stabilization pass
   - outputs written to `outputs/mid_stable/`
+- `config_long_nightly_1000.yml`
+  - dedicated overnight long-window run
+  - keeps the 2010-to-2022 window and the three-quantile grid
+  - raises the LDVB budget to `max_iter = 1000`
+  - outputs written to `outputs/long_nightly_1000/`
 
 The default `config.yml` currently mirrors the smoke profile.
 
@@ -114,6 +119,8 @@ Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/confi
 Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_smoke_stable.yml
 Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_smoke_stable_400.yml
 Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_mid_stable.yml
+Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_long_nightly_1000.yml
+./analysis/ex3_daily_redo/run_long_nightly.sh
 Rscript analysis/ex3_daily_redo/run_all.R --config /path/to/config.yml
 EX3_DAILY_PKG_PATH=/path/to/exdqlm Rscript analysis/ex3_daily_redo/run_all.R
 EX3_DAILY_DATA_PATH=/path/to/big_trees_daily_usgs_ppt_soil.csv \
@@ -151,3 +158,10 @@ Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
 
 Each profile keeps its own cache directory, and those cache directories are
 intentionally ignored by git.
+
+For the overnight long-window run, the helper launcher writes:
+
+- a PID file to `outputs/long_nightly_1000/logs/long_nightly_1000.pid`
+- a timestamped console log to `outputs/long_nightly_1000/logs/console_<timestamp>.log`
+
+so the background run can be checked without reopening the workflow manually.

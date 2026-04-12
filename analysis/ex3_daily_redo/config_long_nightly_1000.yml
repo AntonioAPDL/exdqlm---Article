@@ -1,0 +1,48 @@
+runtime:
+  seed: 20260411
+  pkg_path: /home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
+  output_tag: long_nightly_1000
+  parallel: true
+  workers: 3
+
+data:
+  input_path: /home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv
+  fit_start: 2010-01-01
+  fit_end: 2022-12-25
+  forecast_start: 2022-12-26
+  forecast_horizon: 30
+  response_col: usgs_cfs
+  ppt_col: ppt_mm
+  soil_col: soil_moisture
+  response_transform: log_log1p
+
+model:
+  p_levels: [0.05, 0.50, 0.95]
+  trend_order: 1
+  seasonal_period: 363.5854
+  seasonal_harmonics: [1.0, 2.0, 0.1469118636]
+  discounts:
+    trend: 0.99999999
+    harmonics: [0.9999, 0.9999, 0.9999]
+    covariates: 0.99999
+  transfer:
+    lam: 0.97
+    tf_df: [0.9999999, 0.99999]
+  ldvb:
+    tol: 0.10
+    n_samp: 120
+    max_iter: 1000
+    gam_init: 0.0
+    sig_init: 0.20
+  priors:
+    trend_c0: 1.0
+    seasonal_c0: 1.0
+    reg_c0: 1.0
+    transfer_c0: 1.0
+
+plots:
+  width: 11
+  height: 7
+  res: 220
+  pointsize: 11
+  recent_window_days: 500
