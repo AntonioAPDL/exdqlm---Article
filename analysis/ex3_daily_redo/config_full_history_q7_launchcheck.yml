@@ -4,13 +4,14 @@ runtime:
   output_tag: full_history_q7_launchcheck
   parallel: true
   workers: 4
+  reuse_fit_cache: true
 
 data:
   input_path: /home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv
   fit_start: 1987-05-29
   fit_end: 2022-12-25
   forecast_start: 2022-12-26
-  forecast_horizon: 30
+  forecast_horizon: 20
   response_col: usgs_cfs
   ppt_col: ppt_mm
   soil_col: soil_moisture
@@ -47,3 +48,14 @@ plots:
   res: 220
   pointsize: 11
   recent_window_days: 500
+  forecast_context_days: 60
+  uncertainty_level: 0.95
+  periods:
+    dry:
+      label: Dry / drought (2012-2016)
+      start: 2012-01-01
+      end: 2016-12-31
+    rainy:
+      label: Rainy period (2017-2019)
+      start: 2017-01-01
+      end: 2019-12-31

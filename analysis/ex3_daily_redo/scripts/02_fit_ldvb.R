@@ -8,13 +8,34 @@ fit_fun <- function(i) {
   fit_model_pair(p0 = p0, prep = prep, fit_seed = seed_base + i)
 }
 
-fit_results <- if (parallel_ok) {
-  parallel::mclapply(seq_along(p_levels), fit_fun, mc.cores = workers)
+cache_status <- fit_cache_status()
+if (isTRUE(cache_status$can_reuse)) {
+  fit_results <- cache_read("ex3_daily_fits_ldvb.rds")
+  write_fit_signature()
+  log_progress(sprintf(
+    "fit_cache_reused | cache=%s | reason=%s",
+    basename(fit_cache_path()),
+    cache_status$reason
+  ))
 } else {
-  lapply(seq_along(p_levels), fit_fun)
+  fit_results <- if (parallel_ok) {
+    parallel::mclapply(seq_along(p_levels), fit_fun, mc.cores = workers)
+  } else {
+    lapply(seq_along(p_levels), fit_fun)
+  }
+  names(fit_results) <- sprintf("p%03d", round(100 * p_levels))
+  cache_write(fit_results, "ex3_daily_fits_ldvb.rds")
+  write_fit_signature()
+  log_progress(sprintf(
+    "fit_cache_written | cache=%s | signature=%s",
+    basename(fit_cache_path()),
+    basename(fit_signature_path())
+  ))
 }
-names(fit_results) <- sprintf("p%03d", round(100 * p_levels))
-cache_write(fit_results, "ex3_daily_fits_ldvb.rds")
+
+if (is.null(names(fit_results)) || any(!nzchar(names(fit_results)))) {
+  names(fit_results) <- sprintf("p%03d", round(100 * p_levels))
+}
 
 fit_rows <- do.call(rbind, lapply(fit_results, function(res) {
   direct_row <- fit_status_row(

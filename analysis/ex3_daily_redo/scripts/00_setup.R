@@ -5,6 +5,15 @@ suppressWarnings(suppressMessages({
   if (!requireNamespace("pkgload", quietly = TRUE)) {
     stop("Package 'pkgload' is required for analysis/ex3_daily_redo.")
   }
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("Package 'ggplot2' is required for analysis/ex3_daily_redo.")
+  }
+  if (!requireNamespace("gridExtra", quietly = TRUE)) {
+    stop("Package 'gridExtra' is required for analysis/ex3_daily_redo.")
+  }
+  if (!requireNamespace("scales", quietly = TRUE)) {
+    stop("Package 'scales' is required for analysis/ex3_daily_redo.")
+  }
 }))
 
 if (!exists("redo_root", inherits = FALSE)) {
@@ -69,6 +78,22 @@ save_png_plot <- function(filename, expr, width = config$plots$width,
   invisible(path)
 }
 
+save_gg_plot <- function(filename, plot_obj, width = config$plots$width,
+                         height = config$plots$height, res = config$plots$res,
+                         bg = "white") {
+  path <- file.path(figure_dir, filename)
+  ggplot2::ggsave(
+    filename = path,
+    plot = plot_obj,
+    width = width,
+    height = height,
+    units = "in",
+    dpi = res,
+    bg = bg
+  )
+  invisible(path)
+}
+
 write_csv <- function(x, filename, row.names = FALSE) {
   utils::write.csv(x, file.path(table_dir, filename), row.names = row.names)
 }
@@ -116,6 +141,79 @@ cache_read <- function(name) {
 cache_write <- function(object, name) {
   saveRDS(object, file = file.path(cache_dir, name))
 }
+
+cache_exists <- function(name) {
+  file.exists(file.path(cache_dir, name))
+}
+
+fit_signature_string <- function() {
+  sig_obj <- list(
+    pkg_ref = git_ref(pkg_path),
+    fit_start = as.character(config$data$fit_start),
+    fit_end = as.character(config$data$fit_end),
+    response_transform = config$data$response_transform,
+    response_col = config$data$response_col,
+    ppt_col = config$data$ppt_col,
+    soil_col = config$data$soil_col,
+    p_levels = as.numeric(config$model$p_levels),
+    trend_order = as.integer(config$model$trend_order),
+    seasonal_period = as.numeric(config$model$seasonal_period),
+    seasonal_harmonics = as.numeric(config$model$seasonal_harmonics),
+    discounts = list(
+      trend = as.numeric(config$model$discounts$trend),
+      harmonics = as.numeric(config$model$discounts$harmonics),
+      covariates = as.numeric(config$model$discounts$covariates)
+    ),
+    transfer = list(
+      lam = as.numeric(config$model$transfer$lam),
+      tf_df = as.numeric(config$model$transfer$tf_df)
+    ),
+    ldvb = list(
+      tol = as.numeric(config$model$ldvb$tol),
+      n_samp = as.integer(config$model$ldvb$n_samp),
+      max_iter = as.integer(config$model$ldvb$max_iter),
+      gam_init = as.numeric(config$model$ldvb$gam_init),
+      sig_init = as.numeric(config$model$ldvb$sig_init)
+    ),
+    priors = list(
+      trend_c0 = as.numeric(config$model$priors$trend_c0),
+      seasonal_c0 = as.numeric(config$model$priors$seasonal_c0),
+      reg_c0 = as.numeric(config$model$priors$reg_c0),
+      transfer_c0 = as.numeric(config$model$priors$transfer_c0)
+    )
+  )
+  paste(yaml::as.yaml(sig_obj), collapse = "")
+}
+
+fit_signature_path <- function() {
+  file.path(cache_dir, "ex3_daily_fit_signature.txt")
+}
+
+write_fit_signature <- function(signature = fit_signature_string()) {
+  writeLines(signature, con = fit_signature_path())
+}
+
+fit_cache_status <- function() {
+  if (!isTRUE(config$runtime$reuse_fit_cache %||% TRUE)) {
+    return(list(can_reuse = FALSE, reason = "reuse_disabled"))
+  }
+  if (!cache_exists("ex3_daily_fits_ldvb.rds")) {
+    return(list(can_reuse = FALSE, reason = "cache_missing"))
+  }
+  sig_path <- fit_signature_path()
+  current_sig <- fit_signature_string()
+  if (!file.exists(sig_path)) {
+    return(list(can_reuse = TRUE, reason = "signature_missing_assumed_match"))
+  }
+  cached_sig <- paste(readLines(sig_path, warn = FALSE), collapse = "")
+  if (identical(cached_sig, current_sig)) {
+    return(list(can_reuse = TRUE, reason = "signature_match"))
+  }
+  list(can_reuse = FALSE, reason = "signature_mismatch")
+}
+
+fit_cache_path <- function() file.path(cache_dir, "ex3_daily_fits_ldvb.rds")
+forecast_cache_path <- function() file.path(cache_dir, "ex3_daily_forecasts_ldvb.rds")
 
 transform_response <- function(x) {
   transform_name <- config$data$response_transform %||% "log_log1p"
@@ -445,4 +543,216 @@ forecast_summary_row <- function(p0, label, forecast_obj, y_future) {
     mean_abs_error = mean(abs(y_future - qhat)),
     stringsAsFactors = FALSE
   )
+}
+
+format_p0_label <- function(p0) {
+  sprintf("tau = %.2f", p0)
+}
+
+model_label <- function(label) {
+  switch(
+    label,
+    direct_regression = "Direct regression",
+    transfer_function = "Transfer function",
+    label
+  )
+}
+
+uncertainty_level <- function() {
+  as.numeric(config$plots$uncertainty_level %||% 0.95)
+}
+
+posterior_ci_probs <- function(level = uncertainty_level()) {
+  c((1 - level) / 2, 1 - (1 - level) / 2)
+}
+
+period_definitions <- function() {
+  periods_cfg <- config$plots$periods %||% list(
+    dry = list(label = "Dry / drought (2012-2016)", start = "2012-01-01", end = "2016-12-31"),
+    rainy = list(label = "Rainy period (2017-2019)", start = "2017-01-01", end = "2019-12-31")
+  )
+  rows <- lapply(names(periods_cfg), function(name) {
+    period <- periods_cfg[[name]]
+    data.frame(
+      period = name,
+      period_label = as.character(period$label %||% name),
+      start = as.Date(period$start),
+      end = as.Date(period$end),
+      stringsAsFactors = FALSE
+    )
+  })
+  do.call(rbind, rows)
+}
+
+forecast_context_days <- function() {
+  as.integer(config$plots$forecast_context_days %||% 60L)
+}
+
+quantile_palette <- function(p_levels = as.numeric(config$model$p_levels)) {
+  labels <- vapply(p_levels, format_p0_label, character(1))
+  cols <- grDevices::hcl.colors(length(labels), palette = "Viridis")
+  stats::setNames(cols, labels)
+}
+
+theme_ex3 <- function(base_size = config$plots$pointsize %||% 11) {
+  ggplot2::theme_minimal(base_size = base_size) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(face = "bold", size = base_size + 1),
+      plot.subtitle = ggplot2::element_text(color = "grey25"),
+      axis.title = ggplot2::element_text(face = "bold"),
+      strip.text = ggplot2::element_text(face = "bold"),
+      legend.position = "bottom",
+      legend.title = ggplot2::element_text(face = "bold"),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_line(color = "grey88"),
+      panel.grid.major.y = ggplot2::element_line(color = "grey90")
+    )
+}
+
+subset_idx <- function(dates, start, end) {
+  which(dates >= as.Date(start) & dates <= as.Date(end))
+}
+
+state_sd_from_sC <- function(sC, index, idx) {
+  vals <- vapply(idx, function(tt) sC[index, index, tt], numeric(1))
+  sqrt(pmax(vals, 0))
+}
+
+posterior_quantile_draw_matrix <- function(fit, idx) {
+  idx <- as.integer(idx)
+  FF <- as.matrix(fit$model$FF)[, idx, drop = FALSE]
+  theta <- fit$samp.theta[, idx, , drop = FALSE]
+  ns <- dim(theta)[3]
+  draws <- vapply(seq_len(ns), function(s) {
+    colSums(FF * theta[, , s])
+  }, numeric(length(idx)))
+  if (is.null(dim(draws))) {
+    draws <- matrix(draws, nrow = length(idx), ncol = 1L)
+  }
+  draws
+}
+
+summarize_draw_matrix <- function(draws, level = uncertainty_level()) {
+  probs <- posterior_ci_probs(level)
+  data.frame(
+    estimate = rowMeans(draws),
+    lower = apply(draws, 1, stats::quantile, probs = probs[1], names = FALSE),
+    upper = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE),
+    stringsAsFactors = FALSE
+  )
+}
+
+fitted_path_summary <- function(fit, dates, idx, p0, model, period_label,
+                                level = uncertainty_level()) {
+  draws <- posterior_quantile_draw_matrix(fit, idx)
+  summary_df <- summarize_draw_matrix(draws, level = level)
+  data.frame(
+    date = dates[idx],
+    period_label = period_label,
+    model = model,
+    model_label = model_label(model),
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    phase = "fit",
+    summary_df,
+    stringsAsFactors = FALSE
+  )
+}
+
+forecast_path_summary <- function(fit, forecast_obj, tail_dates, tail_idx,
+                                  future_dates, p0, model,
+                                  level = uncertainty_level()) {
+  fit_df <- fitted_path_summary(
+    fit = fit,
+    dates = tail_dates,
+    idx = tail_idx,
+    p0 = p0,
+    model = model,
+    period_label = "Forecast context",
+    level = level
+  )
+  fit_df$period_label <- NULL
+
+  zcrit <- stats::qnorm((1 + level) / 2)
+  fc_mean <- as.numeric(forecast_obj$ff[seq_along(future_dates)])
+  fc_sd <- sqrt(pmax(as.numeric(forecast_obj$fQ[seq_along(future_dates)]), 0))
+  fc_df <- data.frame(
+    date = future_dates,
+    model = model,
+    model_label = model_label(model),
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    phase = "forecast",
+    estimate = fc_mean,
+    lower = fc_mean - zcrit * fc_sd,
+    upper = fc_mean + zcrit * fc_sd,
+    stringsAsFactors = FALSE
+  )
+
+  rbind(fit_df, fc_df)
+}
+
+zeta_state_summary <- function(fit, res, prep, dates, idx, p0, period_label,
+                               level = uncertainty_level()) {
+  base_p <- length(res$transfer_spec$base_model$m0)
+  zeta_idx <- base_p + 1L
+  z_mean <- as.numeric(fit$theta.out$sm[zeta_idx, idx])
+  z_sd <- state_sd_from_sC(fit$theta.out$sC, zeta_idx, idx)
+  zcrit <- stats::qnorm((1 + level) / 2)
+  data.frame(
+    date = dates[idx],
+    period_label = period_label,
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    estimate = z_mean,
+    lower = z_mean - zcrit * z_sd,
+    upper = z_mean + zcrit * z_sd,
+    stringsAsFactors = FALSE
+  )
+}
+
+convergence_trace_for_fit <- function(fit, p0, model) {
+  elbo <- as.numeric(fit$diagnostics$elbo %||% fit$misc$elbo %||% numeric())
+  sigma <- as.numeric(fit$seq.sigma %||% numeric())
+  gamma <- as.numeric(fit$seq.gamma %||% rep(NA_real_, length(sigma)))
+  n_iter <- max(length(elbo), length(sigma), length(gamma), 0L)
+  if (n_iter < 1L) {
+    return(data.frame())
+  }
+
+  pad_to <- function(x, n) {
+    x <- as.numeric(x)
+    if (length(x) >= n) return(x[seq_len(n)])
+    c(x, rep(NA_real_, n - length(x)))
+  }
+
+  data.frame(
+    iter = seq_len(n_iter),
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    model = model,
+    model_label = model_label(model),
+    elbo = pad_to(elbo, n_iter),
+    sigma = pad_to(sigma, n_iter),
+    gamma = pad_to(gamma, n_iter),
+    stringsAsFactors = FALSE
+  )
+}
+
+build_convergence_trace_df <- function(fit_results) {
+  traces <- unlist(lapply(fit_results, function(res) {
+    out <- list()
+    if (fit_ok(res$direct)) {
+      out[[length(out) + 1L]] <- convergence_trace_for_fit(res$direct, res$p0, "direct_regression")
+    }
+    if (fit_ok(res$transfer)) {
+      out[[length(out) + 1L]] <- convergence_trace_for_fit(res$transfer, res$p0, "transfer_function")
+    }
+    out
+  }), recursive = FALSE)
+
+  if (!length(traces)) {
+    return(data.frame())
+  }
+  do.call(rbind, traces)
 }
