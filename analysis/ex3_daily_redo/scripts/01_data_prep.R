@@ -23,8 +23,17 @@ y_all <- transform_response(raw_df[[config$data$response_col]])
 y_train <- y_all[fit_idx]
 y_future <- y_all[future_idx]
 
-X_train_raw <- compute_feature_matrix(fit_df)
-X_future_raw <- compute_feature_matrix(future_df)
+X_all_raw <- compute_feature_matrix(raw_df)
+X_train_raw <- X_all_raw[fit_idx, , drop = FALSE]
+X_future_raw <- X_all_raw[future_idx, , drop = FALSE]
+if (anyNA(X_train_raw) || anyNA(X_future_raw)) {
+  max_lag <- max(c(0L, feature_lag_days()))
+  stop(
+    "Lagged feature construction produced missing values inside the fit/forecast windows. ",
+    "Choose a later fit_start or reduce the configured feature lag depth (current max lag = ",
+    max_lag, ")."
+  )
+}
 scaled_features <- scale_feature_matrix(X_train_raw, X_future_raw)
 ref_sample <- stats::rnorm(length(y_train))
 
@@ -65,15 +74,26 @@ write_csv(
     data_start = as.character(min(raw_df$date)),
     data_end = as.character(max(raw_df$date)),
     data_n = nrow(raw_df),
+    n_features = ncol(X_train_raw),
+    base_feature_terms = paste(feature_base_terms(), collapse = ","),
+    feature_lag_days = paste(feature_lag_days(), collapse = ","),
     response_transform = config$data$response_transform,
     stringsAsFactors = FALSE
   ),
   "ex3_daily_data_window_summary.csv"
 )
 
+feature_names <- colnames(prep$X_train_scaled)
+feature_base <- sub("_lag[0-9]+$", "", feature_names)
+feature_lag <- rep.int(0L, length(feature_names))
+lag_mask <- grepl("_lag[0-9]+$", feature_names)
+feature_lag[lag_mask] <- as.integer(sub("^.*_lag", "", feature_names[lag_mask]))
+
 write_csv(
   data.frame(
-    covariate = colnames(prep$X_train_scaled),
+    covariate = feature_names,
+    base_term = feature_base,
+    lag = feature_lag,
     center = as.numeric(prep$X_center),
     scale = as.numeric(prep$X_scale),
     stringsAsFactors = FALSE

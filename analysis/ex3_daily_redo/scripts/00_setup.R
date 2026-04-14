@@ -209,6 +209,10 @@ fit_signature_object <- function() {
     trend_order = as.integer(config$model$trend_order),
     seasonal_period = as.numeric(config$model$seasonal_period),
     seasonal_harmonics = as.numeric(config$model$seasonal_harmonics),
+    features = list(
+      base_terms = feature_base_terms(),
+      lag_days = feature_lag_days()
+    ),
     discounts = list(
       trend = as.numeric(config$model$discounts$trend),
       harmonics = as.numeric(config$model$discounts$harmonics),
@@ -317,15 +321,61 @@ transform_response <- function(x) {
   stop("Unsupported response transform: ", transform_name)
 }
 
+feature_base_terms <- function() {
+  base_terms <- config$model$features$base_terms %||%
+    c("ppt", "soil", "ppt_soil", "ppt2", "soil2")
+  base_terms <- as.character(base_terms)
+  if (!length(base_terms)) {
+    stop("At least one base feature term must be specified.")
+  }
+  unique(base_terms)
+}
+
+feature_lag_days <- function() {
+  lag_days <- config$model$features$lag_days %||% integer()
+  lag_days <- sort(unique(as.integer(lag_days)))
+  lag_days[is.finite(lag_days) & lag_days > 0L]
+}
+
+feature_term_vector <- function(df, term) {
+  switch(
+    term,
+    ppt = as.numeric(df$ppt_mm),
+    soil = as.numeric(df$soil_moisture),
+    ppt_soil = as.numeric(df$ppt_mm) * as.numeric(df$soil_moisture),
+    ppt2 = as.numeric(df$ppt_mm)^2,
+    soil2 = as.numeric(df$soil_moisture)^2,
+    stop("Unsupported feature term: ", term)
+  )
+}
+
 compute_feature_matrix <- function(df) {
-  X <- with(df, cbind(
-    ppt = ppt_mm,
-    soil = soil_moisture,
-    ppt_soil = ppt_mm * soil_moisture,
-    ppt2 = ppt_mm^2,
-    soil2 = soil_moisture^2
-  ))
-  as.matrix(X)
+  base_terms <- feature_base_terms()
+  base_df <- setNames(
+    data.frame(
+      lapply(base_terms, function(term) feature_term_vector(df, term)),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    ),
+    base_terms
+  )
+
+  lag_days <- feature_lag_days()
+  if (!length(lag_days)) {
+    return(as.matrix(base_df))
+  }
+
+  lagged_list <- lapply(lag_days, function(lag_i) {
+    lagged_df <- data.frame(
+      lapply(base_df, function(x) c(rep(NA_real_, lag_i), head(as.numeric(x), -lag_i))),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    )
+    names(lagged_df) <- sprintf("%s_lag%d", names(base_df), lag_i)
+    lagged_df
+  })
+
+  as.matrix(do.call(cbind, c(list(base_df), lagged_list)))
 }
 
 scale_feature_matrix <- function(X_train, X_future) {
@@ -882,6 +932,11 @@ direct_state_indices <- function(res, prep) {
 state_label_map <- function(name) {
   if (length(name) != 1L) {
     return(vapply(name, state_label_map, character(1)))
+  }
+  if (grepl("_lag[0-9]+$", name)) {
+    base_name <- sub("_lag[0-9]+$", "", name)
+    lag_days <- sub("^.*_lag", "", name)
+    return(sprintf("%s (lag %s)", state_label_map(base_name), lag_days))
   }
   switch(
     name,

@@ -302,40 +302,114 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
 
   if (identical(model_type, "transfer")) {
     state_order <- c("Transfer state zeta", state_label_map(colnames(prep$X_train_scaled)))
-    layout_mat <- rbind(c(1, 1), c(2, 3), c(4, 5), c(6, NA))
   } else {
     state_order <- state_label_map(colnames(prep$X_train_scaled))
-    layout_mat <- matrix(c(1, 2, 3, 4, 5, NA), nrow = 3, byrow = TRUE)
   }
 
   state_labels <- intersect(state_order, unique(as.character(period_df$state_label)))
-  plots <- lapply(state_labels, function(state_label_i) {
-    state_panel_plot(
-      df = period_df[period_df$state_label == state_label_i, , drop = FALSE],
-      panel_title = state_label_i,
-      show_legend = FALSE
-    )
-  })
+  period_df$state_label <- factor(period_df$state_label, levels = state_labels)
 
+  dummy_label <- state_labels[1]
   legend_plot <- state_panel_plot(
-    df = period_df[period_df$state_label == state_labels[1], , drop = FALSE],
-    panel_title = state_labels[1],
+    df = period_df[period_df$state_label == dummy_label, , drop = FALSE],
+    panel_title = dummy_label,
     show_legend = TRUE
   )
   leg <- legend_grob(legend_plot)
-  layout_use <- layout_mat[seq_len(ceiling(length(plots) / 2) + if (identical(model_type, "transfer")) 1 else 0), , drop = FALSE]
-  layout_use[layout_use > length(plots)] <- NA
-  core_grob <- gridExtra::arrangeGrob(grobs = plots, layout_matrix = layout_use)
-  full_grob <- gridExtra::arrangeGrob(
-    core_grob,
-    leg,
-    ncol = 1,
-    heights = c(11, 1),
-    top = grid::textGrob(
-      title,
-      gp = grid::gpar(fontsize = 14, fontface = "bold")
+
+  if (identical(model_type, "transfer")) {
+    zeta_df <- period_df[period_df$state_label == "Transfer state zeta", , drop = FALSE]
+    psi_df <- period_df[period_df$state_label != "Transfer state zeta", , drop = FALSE]
+
+    zeta_plot <- state_panel_plot(
+      df = zeta_df,
+      panel_title = "Transfer state zeta",
+      show_legend = FALSE
+    ) +
+      ggplot2::theme(
+        plot.margin = ggplot2::margin(5.5, 5.5, 0, 5.5),
+        axis.title.y = ggplot2::element_text(face = "bold")
+      ) +
+      ggplot2::labs(y = NULL)
+
+    psi_plot <- ggplot2::ggplot(
+      psi_df,
+      ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
+    ) +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = lower, ymax = upper),
+        alpha = quantile_ribbon_alpha(),
+        color = NA,
+        show.legend = FALSE
+      ) +
+      ggplot2::geom_line(
+        linewidth = 0.5,
+        alpha = quantile_line_alpha()
+      ) +
+      ggplot2::facet_wrap(~ state_label, scales = "free_y", ncol = 4) +
+      ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
+      ggplot2::scale_fill_manual(values = quant_cols) +
+      ggplot2::labs(x = NULL, y = NULL) +
+      theme_ex3(base_size = 10) +
+      ggplot2::theme(
+        legend.position = "none",
+        strip.text = ggplot2::element_text(size = 9.5, face = "bold"),
+        axis.text.x = ggplot2::element_text(size = 7.5),
+        axis.text.y = ggplot2::element_text(size = 7.5),
+        plot.margin = ggplot2::margin(0, 5.5, 5.5, 5.5)
+      )
+
+    full_grob <- gridExtra::arrangeGrob(
+      ggplot2::ggplotGrob(zeta_plot),
+      ggplot2::ggplotGrob(psi_plot),
+      leg,
+      ncol = 1,
+      heights = c(2.2, max(4, ceiling(length(state_labels[-1]) / 4)) * 1.6, 0.8),
+      top = grid::textGrob(
+        title,
+        gp = grid::gpar(fontsize = 14, fontface = "bold")
+      )
     )
-  )
+    fig_height <- 12 + 0.8 * max(0, ceiling(length(state_labels[-1]) / 4) - 5)
+  } else {
+    beta_plot <- ggplot2::ggplot(
+      period_df,
+      ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
+    ) +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = lower, ymax = upper),
+        alpha = quantile_ribbon_alpha(),
+        color = NA,
+        show.legend = FALSE
+      ) +
+      ggplot2::geom_line(
+        linewidth = 0.5,
+        alpha = quantile_line_alpha()
+      ) +
+      ggplot2::facet_wrap(~ state_label, scales = "free_y", ncol = 4) +
+      ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
+      ggplot2::scale_fill_manual(values = quant_cols) +
+      ggplot2::labs(x = NULL, y = NULL) +
+      theme_ex3(base_size = 10) +
+      ggplot2::theme(
+        legend.position = "none",
+        strip.text = ggplot2::element_text(size = 9.5, face = "bold"),
+        axis.text.x = ggplot2::element_text(size = 7.5),
+        axis.text.y = ggplot2::element_text(size = 7.5)
+      )
+
+    full_grob <- gridExtra::arrangeGrob(
+      ggplot2::ggplotGrob(beta_plot),
+      leg,
+      ncol = 1,
+      heights = c(max(4, ceiling(length(state_labels) / 4)) * 1.8, 0.8),
+      top = grid::textGrob(
+        title,
+        gp = grid::gpar(fontsize = 14, fontface = "bold")
+      )
+    )
+    fig_height <- 10 + 0.8 * max(0, ceiling(length(state_labels) / 4) - 5)
+  }
 
   save_png_plot(
     filename,
@@ -344,18 +418,50 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
       grid::grid.draw(full_grob)
     },
     width = 13,
-    height = if (identical(model_type, "transfer")) 12 else 10
+    height = fig_height
   )
 }
 
 make_convergence_plot <- function(df, value_col, title, filename) {
   plot_df <- df[!is.na(df[[value_col]]), , drop = FALSE]
-  plot_df$value <- plot_df[[value_col]]
-  max_iter <- max(df$iter, na.rm = TRUE)
   subtitle <- sprintf(
     "Curves are shown from iteration %d onward to suppress early start-up scale distortion; the x-axis still spans the full iteration range.",
     trim_iter
   )
+  if (!nrow(plot_df)) {
+    placeholder <- ggplot2::ggplot() +
+      ggplot2::annotate(
+        "text",
+        x = 0.5,
+        y = 0.5,
+        label = sprintf(
+          "No %s trace values remain after trimming iterations before %d.",
+          value_col,
+          trim_iter
+        ),
+        size = 4.4,
+        color = "grey25"
+      ) +
+      ggplot2::xlim(0, 1) +
+      ggplot2::ylim(0, 1) +
+      ggplot2::labs(
+        title = title,
+        subtitle = subtitle,
+        x = NULL,
+        y = NULL
+      ) +
+      theme_ex3() +
+      ggplot2::theme(
+        axis.text = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        panel.grid = ggplot2::element_blank()
+      )
+    save_gg_plot(filename, placeholder, width = 11.5, height = 8.0)
+    return(invisible(NULL))
+  }
+
+  plot_df$value <- plot_df[[value_col]]
+  max_iter <- max(df$iter, na.rm = TRUE)
   plot_obj <- ggplot2::ggplot(plot_df, ggplot2::aes(x = iter, y = value, color = tau_label)) +
     ggplot2::geom_vline(xintercept = trim_iter, color = "grey55", linetype = 3, linewidth = 0.5) +
     ggplot2::geom_line(linewidth = 0.55, alpha = 0.9) +
