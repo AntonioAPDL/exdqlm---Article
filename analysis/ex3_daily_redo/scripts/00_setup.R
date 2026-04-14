@@ -730,6 +730,91 @@ forecast_summary_row <- function(p0, label, forecast_obj, y_future) {
   )
 }
 
+safe_metric_mean <- function(x) {
+  x <- as.numeric(x)
+  x <- x[is.finite(x)]
+  if (!length(x)) NA_real_ else mean(x)
+}
+
+interval_score_vec <- function(y, lower, upper, level = uncertainty_level()) {
+  alpha <- 1 - as.numeric(level)
+  if (!is.finite(alpha) || alpha <= 0 || alpha >= 1) {
+    stop("level must lie strictly between 0 and 1.")
+  }
+  width <- upper - lower
+  width + (2 / alpha) * pmax(lower - y, 0) + (2 / alpha) * pmax(y - upper, 0)
+}
+
+synthesis_pit_vec <- function(y_true, draws_mat) {
+  draws_mat <- as.matrix(draws_mat)
+  stopifnot(length(y_true) == nrow(draws_mat))
+  n_draws <- ncol(draws_mat)
+  if (n_draws < 2L) {
+    stop("Need at least two synthesis draws to compute PIT values.")
+  }
+  y_true <- as.numeric(y_true)
+  less <- rowSums(draws_mat < y_true)
+  ties <- rowSums(draws_mat == y_true)
+  pit <- (less + 0.5 * ties + 0.5) / (n_draws + 1)
+  lower <- 1 / (n_draws + 1)
+  upper <- n_draws / (n_draws + 1)
+  pmin(pmax(pit, lower), upper)
+}
+
+synthesis_forecast_metrics_df <- function(syn_cache, y_future,
+                                          level = uncertainty_level(),
+                                          ref = NULL) {
+  crps_vec_fun <- get(".exdqlm_crps_vec", envir = asNamespace("exdqlm"), inherits = FALSE)
+  horizon <- length(y_future)
+  y_future <- as.numeric(y_future)
+
+  if (is.null(ref)) {
+    ref <- with_local_seed(seed_base + 4040L, stats::rnorm(horizon))
+  }
+  ref <- as.numeric(ref)
+  if (length(ref) != horizon) {
+    stop("Reference sample length does not match the forecast horizon.")
+  }
+
+  rows <- lapply(names(syn_cache$models), function(model_name) {
+    syn_obj <- syn_cache$models[[model_name]]$forecast
+    draws <- as.matrix(syn_obj$draws)
+    if (nrow(draws) != horizon) {
+      stop(
+        "Synthesis forecast draw matrix row count does not match the held-out horizon for ",
+        model_name
+      )
+    }
+
+    pit <- synthesis_pit_vec(y_true = y_future, draws_mat = draws)
+    pit_z <- stats::qnorm(pit)
+    q500 <- as.numeric(syn_obj$summary$q500)
+    q025 <- as.numeric(syn_obj$summary$q025)
+    q975 <- as.numeric(syn_obj$summary$q975)
+
+    data.frame(
+      model = model_name,
+      model_label = model_label(model_name),
+      phase = "forecast",
+      horizon = horizon,
+      n_draws = ncol(draws),
+      interval_level = as.numeric(level),
+      CRPS = safe_metric_mean(crps_vec_fun(y_future, draws)),
+      KL = safe_metric_mean(FNN::KL.divergence(ref, pit_z)),
+      KL_flip = safe_metric_mean(FNN::KL.divergence(pit_z, ref)),
+      mean_abs_error = mean(abs(y_future - q500)),
+      coverage = mean(y_future >= q025 & y_future <= q975),
+      interval_score = mean(interval_score_vec(y_future, q025, q975, level = level)),
+      mean_interval_width = mean(q975 - q025),
+      pit_mean = mean(pit),
+      pit_sd = stats::sd(pit),
+      stringsAsFactors = FALSE
+    )
+  })
+
+  do.call(rbind, rows)
+}
+
 format_p0_label <- function(p0) {
   sprintf("tau = %.2f", p0)
 }

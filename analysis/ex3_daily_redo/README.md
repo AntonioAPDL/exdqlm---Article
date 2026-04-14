@@ -186,6 +186,13 @@ When `runtime.reuse_fit_cache: true` and a compatible
 the fit step will reuse that cache, rewrite the fit/convergence summaries, and
 continue through forecast, figures, and manifest without refitting.
 
+The post-fit figure layer also writes
+`tables/ex3_daily_forecast_synthesis_metrics.csv`, which scores the synthesized
+forecast distributions on the held-out future values only. CRPS is computed
+with the same internal helper used by the `0.4.0` package diagnostics, while
+`KL` and `KL.flip` are computed from PIT-normalized synthesis forecast errors
+against a reproducible standard-normal reference sample.
+
 When you are ready to replace the current heavy full-history cache with the
 prepared refresh run, use:
 

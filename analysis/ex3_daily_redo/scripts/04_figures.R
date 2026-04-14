@@ -772,6 +772,11 @@ make_convergence_plot <- function(df, value_col, title, filename) {
 fit_plot_data <- build_fit_period_data()
 forecast_plot_data <- build_forecast_plot_data()
 synthesis_plot_data <- build_synthesis_plot_data()
+synthesis_metrics_df <- synthesis_forecast_metrics_df(
+  syn_cache = get_synthesis_cache(),
+  y_future = prep$y_future,
+  level = ci_level
+)
 transfer_state_data <- build_transfer_state_data()
 direct_state_data <- build_direct_state_data()
 convergence_df <- build_convergence_plot_data()
@@ -779,6 +784,7 @@ convergence_df <- build_convergence_plot_data()
 save_csv_if_rows(fit_plot_data$fit, "ex3_daily_fit_periods_summary.csv")
 save_csv_if_rows(forecast_plot_data$forecast, "ex3_daily_forecast_plot_summary.csv")
 save_csv_if_rows(synthesis_plot_data$synthesis, "ex3_daily_forecast_synthesis_summary.csv")
+save_csv_if_rows(synthesis_metrics_df, "ex3_daily_forecast_synthesis_metrics.csv")
 save_csv_if_rows(transfer_state_data, "ex3_daily_transfer_states_summary.csv")
 save_csv_if_rows(direct_state_data, "ex3_daily_direct_states_summary.csv")
 save_csv_if_rows(convergence_df, "ex3_daily_convergence_traces.csv")

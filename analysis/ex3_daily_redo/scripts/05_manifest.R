@@ -2,6 +2,12 @@ prep <- cache_read("ex3_daily_prep.rds")
 fit_summary <- utils::read.csv(file.path(table_dir, "ex3_daily_fit_summary.csv"), stringsAsFactors = FALSE)
 diag_summary <- utils::read.csv(file.path(table_dir, "ex3_daily_fit_diagnostics.csv"), stringsAsFactors = FALSE)
 forecast_summary <- utils::read.csv(file.path(table_dir, "ex3_daily_forecast_summary.csv"), stringsAsFactors = FALSE)
+synthesis_metrics_path <- file.path(table_dir, "ex3_daily_forecast_synthesis_metrics.csv")
+synthesis_metrics <- if (file.exists(synthesis_metrics_path)) {
+  utils::read.csv(synthesis_metrics_path, stringsAsFactors = FALSE)
+} else {
+  NULL
+}
 
 manifest_lines <- c(
   "# Example 3 Daily Redo Manifest",
@@ -56,5 +62,20 @@ forecast_lines <- c(
   })
 )
 
-write_text(c(manifest_lines, status_lines, diagnostic_lines, forecast_lines), "ex3_daily_manifest.md")
+synthesis_lines <- character()
+if (!is.null(synthesis_metrics) && nrow(synthesis_metrics) > 0) {
+  synthesis_lines <- c("", "## Synthesized Forecast Metrics", "")
+  synthesis_lines <- c(
+    synthesis_lines,
+    apply(synthesis_metrics, 1, function(row) {
+      sprintf(
+        "- %s | horizon=%s | CRPS=%s | KL=%s | KL.flip=%s | MAE=%s | coverage=%s | interval.score=%s",
+        row[["model_label"]], row[["horizon"]], row[["CRPS"]], row[["KL"]], row[["KL_flip"]],
+        row[["mean_abs_error"]], row[["coverage"]], row[["interval_score"]]
+      )
+    })
+  )
+}
+
+write_text(c(manifest_lines, status_lines, diagnostic_lines, forecast_lines, synthesis_lines), "ex3_daily_manifest.md")
 log_progress("manifest_written | ex3_daily_manifest.md")
