@@ -1,14 +1,6 @@
 prep <- cache_read("ex3_daily_prep.rds")
-fit_results <- cache_read("ex3_daily_fits_ldvb.rds")
-fc_status <- forecast_cache_status()
-if (!isTRUE(fc_status$valid)) {
-  stop(
-    "Forecast cache is not valid for the current config (",
-    fc_status$reason,
-    "). Rerun the forecast step before regenerating figures."
-  )
-}
-forecast_objects <- cache_read("ex3_daily_forecasts_ldvb.rds")
+fit_results <- NULL
+forecast_objects <- NULL
 
 p_levels <- as.numeric(config$model$p_levels)
 tau_levels <- vapply(p_levels, format_p0_label, character(1))
@@ -33,6 +25,40 @@ unlink(file.path(figure_dir, obsolete_figures))
 obsolete_tables <- c("ex3_daily_transfer_zeta_summary.csv")
 unlink(file.path(table_dir, obsolete_tables))
 
+read_cached_table <- function(filename, date_cols = NULL) {
+  path <- file.path(table_dir, filename)
+  if (!file.exists(path)) {
+    return(NULL)
+  }
+  df <- utils::read.csv(path, stringsAsFactors = FALSE)
+  for (col in intersect(date_cols %||% character(), names(df))) {
+    df[[col]] <- as.Date(df[[col]])
+  }
+  df
+}
+
+get_fit_results <- function() {
+  if (is.null(fit_results)) {
+    fit_results <<- cache_read("ex3_daily_fits_ldvb.rds")
+  }
+  fit_results
+}
+
+get_forecast_objects <- function() {
+  if (is.null(forecast_objects)) {
+    fc_status <- forecast_cache_status()
+    if (!isTRUE(fc_status$valid)) {
+      stop(
+        "Forecast cache is not valid for the current config (",
+        fc_status$reason,
+        "). Rerun the forecast step before regenerating figures."
+      )
+    }
+    forecast_objects <<- cache_read("ex3_daily_forecasts_ldvb.rds")
+  }
+  forecast_objects
+}
+
 replicate_obs_by_model <- function(df) {
   do.call(rbind, lapply(model_levels, function(model_label_i) {
     out <- df
@@ -41,10 +67,8 @@ replicate_obs_by_model <- function(df) {
   }))
 }
 
-build_fit_period_data <- function() {
-  fit_rows <- list()
+build_fit_period_obs <- function() {
   obs_rows <- list()
-  row_id <- 0L
   obs_id <- 0L
 
   for (ii in seq_len(nrow(periods))) {
@@ -59,6 +83,31 @@ build_fit_period_data <- function() {
       period_label = period_i$period_label,
       stringsAsFactors = FALSE
     ))
+  }
+
+  obs_df <- do.call(rbind, obs_rows)
+  obs_df$period_label <- factor(obs_df$period_label, levels = periods$period_label)
+  obs_df$model_label <- factor(obs_df$model_label, levels = model_levels)
+  obs_df
+}
+
+build_fit_period_data <- function() {
+  cached_fit <- read_cached_table("ex3_daily_fit_periods_summary.csv", date_cols = "date")
+  if (!is.null(cached_fit)) {
+    cached_fit$period_label <- factor(cached_fit$period_label, levels = periods$period_label)
+    cached_fit$model_label <- factor(cached_fit$model_label, levels = model_levels)
+    cached_fit$tau_label <- factor(cached_fit$tau_label, levels = tau_levels)
+    return(list(fit = cached_fit, obs = build_fit_period_obs()))
+  }
+
+  fit_results <- get_fit_results()
+  fit_rows <- list()
+  row_id <- 0L
+
+  for (ii in seq_len(nrow(periods))) {
+    period_i <- periods[ii, ]
+    idx <- subset_idx(prep$fit_df$date, period_i$start, period_i$end)
+    if (!length(idx)) next
 
     for (p0 in p_levels) {
       key <- sprintf("p%03d", round(100 * p0))
@@ -93,19 +142,17 @@ build_fit_period_data <- function() {
   }
 
   fit_df <- do.call(rbind, fit_rows)
-  obs_df <- do.call(rbind, obs_rows)
+  obs_df <- build_fit_period_obs()
 
   fit_df$period_label <- factor(fit_df$period_label, levels = periods$period_label)
   fit_df$model_label <- factor(fit_df$model_label, levels = model_levels)
   fit_df$tau_label <- factor(fit_df$tau_label, levels = tau_levels)
 
-  obs_df$period_label <- factor(obs_df$period_label, levels = periods$period_label)
-  obs_df$model_label <- factor(obs_df$model_label, levels = model_levels)
-
   list(fit = fit_df, obs = obs_df)
 }
 
 build_forecast_plot_data <- function() {
+  cached_fc <- read_cached_table("ex3_daily_forecast_plot_summary.csv", date_cols = "date")
   tail_idx <- which(prep$fit_df$date >= forecast_context_start)
 
   obs_hist <- replicate_obs_by_model(data.frame(
@@ -120,7 +167,17 @@ build_forecast_plot_data <- function() {
     obs_phase = "future",
     stringsAsFactors = FALSE
   ))
+  obs_hist$model_label <- factor(obs_hist$model_label, levels = model_levels)
+  obs_future$model_label <- factor(obs_future$model_label, levels = model_levels)
 
+  if (!is.null(cached_fc)) {
+    cached_fc$model_label <- factor(cached_fc$model_label, levels = model_levels)
+    cached_fc$tau_label <- factor(cached_fc$tau_label, levels = tau_levels)
+    return(list(forecast = cached_fc, obs_hist = obs_hist, obs_future = obs_future))
+  }
+
+  fit_results <- get_fit_results()
+  forecast_objects <- get_forecast_objects()
   fc_rows <- list()
   row_id <- 0L
   for (p0 in p_levels) {
@@ -161,13 +218,23 @@ build_forecast_plot_data <- function() {
   fc_df <- do.call(rbind, fc_rows)
   fc_df$model_label <- factor(fc_df$model_label, levels = model_levels)
   fc_df$tau_label <- factor(fc_df$tau_label, levels = tau_levels)
-  obs_hist$model_label <- factor(obs_hist$model_label, levels = model_levels)
-  obs_future$model_label <- factor(obs_future$model_label, levels = model_levels)
 
   list(forecast = fc_df, obs_hist = obs_hist, obs_future = obs_future)
 }
 
 build_transfer_state_data <- function() {
+  cached_df <- read_cached_table("ex3_daily_transfer_states_summary.csv", date_cols = "date")
+  if (!is.null(cached_df)) {
+    cached_df$period_label <- factor(cached_df$period_label, levels = periods$period_label)
+    cached_df$tau_label <- factor(cached_df$tau_label, levels = tau_levels)
+    cached_df$state_label <- factor(
+      cached_df$state_label,
+      levels = c("Transfer state zeta", state_label_map(colnames(prep$X_train_scaled)))
+    )
+    return(cached_df)
+  }
+
+  fit_results <- get_fit_results()
   out <- list()
   row_id <- 0L
 
@@ -223,6 +290,15 @@ build_transfer_state_data <- function() {
 }
 
 build_direct_state_data <- function() {
+  cached_df <- read_cached_table("ex3_daily_direct_states_summary.csv", date_cols = "date")
+  if (!is.null(cached_df)) {
+    cached_df$period_label <- factor(cached_df$period_label, levels = periods$period_label)
+    cached_df$tau_label <- factor(cached_df$tau_label, levels = tau_levels)
+    cached_df$state_label <- factor(cached_df$state_label, levels = state_label_map(colnames(prep$X_train_scaled)))
+    return(cached_df)
+  }
+
+  fit_results <- get_fit_results()
   out <- list()
   row_id <- 0L
 
@@ -262,7 +338,11 @@ build_direct_state_data <- function() {
 }
 
 build_convergence_plot_data <- function() {
-  conv_df <- trim_convergence_trace_df(build_convergence_trace_df(fit_results), trim_start = trim_iter)
+  conv_df <- read_cached_table("ex3_daily_convergence_traces.csv")
+  if (is.null(conv_df)) {
+    fit_results <- get_fit_results()
+    conv_df <- trim_convergence_trace_df(build_convergence_trace_df(fit_results), trim_start = trim_iter)
+  }
   conv_df$model_label <- factor(conv_df$model_label, levels = model_levels)
   conv_df$tau_label <- factor(conv_df$tau_label, levels = tau_levels)
   conv_df
@@ -336,6 +416,12 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
       psi_df,
       ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
     ) +
+      ggplot2::geom_hline(
+        yintercept = 0,
+        color = state_zero_line_color(),
+        linewidth = state_zero_line_linewidth(),
+        linetype = "solid"
+      ) +
       ggplot2::geom_ribbon(
         ggplot2::aes(ymin = lower, ymax = upper),
         alpha = quantile_ribbon_alpha(),
@@ -376,6 +462,12 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
       period_df,
       ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
     ) +
+      ggplot2::geom_hline(
+        yintercept = 0,
+        color = state_zero_line_color(),
+        linewidth = state_zero_line_linewidth(),
+        linetype = "solid"
+      ) +
       ggplot2::geom_ribbon(
         ggplot2::aes(ymin = lower, ymax = upper),
         alpha = quantile_ribbon_alpha(),

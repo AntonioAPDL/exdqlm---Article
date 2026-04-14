@@ -752,6 +752,14 @@ future_obs_point_size <- function() {
   as.numeric(config$plots$future_obs_point_size %||% 1.8)
 }
 
+state_zero_line_color <- function() {
+  as.character(config$plots$state_zero_line_color %||% "#8c6d1f")
+}
+
+state_zero_line_linewidth <- function() {
+  as.numeric(config$plots$state_zero_line_linewidth %||% 0.55)
+}
+
 quantile_line_alpha <- function() {
   as.numeric(config$plots$quantile_line_alpha %||% 0.72)
 }
