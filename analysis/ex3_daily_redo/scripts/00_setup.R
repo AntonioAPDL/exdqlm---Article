@@ -694,6 +694,10 @@ future_obs_color <- function() {
   as.character(config$plots$future_obs_color %||% "#c76f1d")
 }
 
+future_obs_point_size <- function() {
+  as.numeric(config$plots$future_obs_point_size %||% 1.9)
+}
+
 quantile_line_alpha <- function() {
   as.numeric(config$plots$quantile_line_alpha %||% 0.72)
 }

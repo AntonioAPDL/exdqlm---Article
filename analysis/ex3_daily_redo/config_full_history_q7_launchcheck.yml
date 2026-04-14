@@ -53,6 +53,7 @@ plots:
   uncertainty_level: 0.95
   historical_obs_color: "#8e8e8e"
   future_obs_color: "#c96d1f"
+  future_obs_point_size: 1.9
   quantile_line_alpha: 0.72
   quantile_ribbon_alpha: 0.06
   quantile_palette: ["#7f0000", "#b2182b", "#6b3f3f", "#111111", "#3e5f8a", "#2166ac", "#053061"]

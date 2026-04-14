@@ -458,7 +458,17 @@ forecast_plot <- ggplot2::ggplot() +
     data = forecast_plot_data$obs_future,
     ggplot2::aes(x = date, y = y),
     color = future_obs_color(),
-    linewidth = 0.7
+    linewidth = 0.75,
+    linetype = "solid"
+  ) +
+  ggplot2::geom_point(
+    data = forecast_plot_data$obs_future,
+    ggplot2::aes(x = date, y = y),
+    color = future_obs_color(),
+    size = future_obs_point_size(),
+    shape = 16,
+    stroke = 0,
+    alpha = 0.95
   ) +
   ggplot2::geom_line(
     data = forecast_plot_data$forecast,
@@ -482,7 +492,7 @@ forecast_plot <- ggplot2::ggplot() +
   ggplot2::labs(
     title = sprintf("Thirty observed days plus the %d-step-ahead forecast", forecast_h),
     subtitle = sprintf(
-      "Historical observations are shown in gray and holdout observations in orange; shaded bands show %s uncertainty.",
+      "Historical observations are shown in gray; holdout observations are shown in orange with solid lines and circular markers. Shaded bands show %s uncertainty.",
       ci_pct
     ),
     x = NULL,
