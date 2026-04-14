@@ -1,7 +1,7 @@
 runtime:
   seed: 20260414
   pkg_path: /home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
-  output_tag: full_history_q7_discount_refresh_lag3_100
+  output_tag: full_history_q7_discount_refresh_lag3_150
   parallel: true
   workers: 7
   reuse_fit_cache: true
@@ -35,7 +35,7 @@ model:
   ldvb:
     tol: 0.10
     n_samp: 1000
-    max_iter: 100
+    max_iter: 150
     gam_init: 0.0
     sig_init: 0.20
     verbose: false

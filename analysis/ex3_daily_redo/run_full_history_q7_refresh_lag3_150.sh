@@ -3,11 +3,11 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "${script_dir}/../.." && pwd)"
-config_path="${script_dir}/config_full_history_q7_refresh_lag3_100.yml"
+config_path="${script_dir}/config_full_history_q7_refresh_lag3_150.yml"
 
-output_root="${script_dir}/outputs/full_history_q7_discount_refresh_lag3_100"
+output_root="${script_dir}/outputs/full_history_q7_discount_refresh_lag3_150"
 log_dir="${output_root}/logs"
-pid_path="${log_dir}/full_history_q7_discount_refresh_lag3_100.pid"
+pid_path="${log_dir}/full_history_q7_discount_refresh_lag3_150.pid"
 
 cleanup_runtime_dir() {
   local target_dir="$1"
@@ -52,7 +52,7 @@ timestamp="$(date +%Y%m%d_%H%M%S)"
 log_path="${log_dir}/console_${timestamp}.log"
 
 cd "${repo_root}"
-setsid bash -lc "cd '${repo_root}' && exec Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_full_history_q7_refresh_lag3_100.yml" \
+setsid bash -lc "cd '${repo_root}' && exec Rscript analysis/ex3_daily_redo/run_all.R --config analysis/ex3_daily_redo/config_full_history_q7_refresh_lag3_150.yml" \
   > "${log_path}" 2>&1 < /dev/null &
 pid=$!
 echo "${pid}" > "${pid_path}"
