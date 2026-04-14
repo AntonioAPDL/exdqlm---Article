@@ -391,15 +391,27 @@ save_png_plot("ex3_daily_data_overview.png", {
     xlab = "", ylab = "log(log(usgs+1))",
     main = "Daily Big Trees prototype data"
   )
+  graphics::points(
+    prep$raw_df$date, prep$y_all,
+    pch = 16, cex = 0.18, col = grDevices::adjustcolor("grey35", alpha.f = 0.7)
+  )
   graphics::abline(v = prep$forecast_start, col = "firebrick", lty = 2)
   graphics::plot(
     prep$raw_df$date, prep$raw_df$ppt_mm, type = "l", col = "#0b6e99",
     xlab = "", ylab = "ppt_mm"
   )
+  graphics::points(
+    prep$raw_df$date, prep$raw_df$ppt_mm,
+    pch = 16, cex = 0.18, col = grDevices::adjustcolor("#0b6e99", alpha.f = 0.7)
+  )
   graphics::abline(v = prep$forecast_start, col = "firebrick", lty = 2)
   graphics::plot(
     prep$raw_df$date, prep$raw_df$soil_moisture, type = "l", col = "#4b7f52",
     xlab = "date", ylab = "soil_moisture"
+  )
+  graphics::points(
+    prep$raw_df$date, prep$raw_df$soil_moisture,
+    pch = 16, cex = 0.18, col = grDevices::adjustcolor("#4b7f52", alpha.f = 0.7)
   )
   graphics::abline(v = prep$forecast_start, col = "firebrick", lty = 2)
 })
@@ -417,6 +429,15 @@ fit_period_plot <- ggplot2::ggplot() +
     ggplot2::aes(x = date, y = y),
     color = historical_obs_color(),
     linewidth = 0.45
+  ) +
+  ggplot2::geom_point(
+    data = fit_plot_data$obs,
+    ggplot2::aes(x = date, y = y),
+    color = historical_obs_color(),
+    size = historical_obs_point_size(),
+    shape = 16,
+    stroke = 0,
+    alpha = 0.9
   ) +
   ggplot2::geom_line(
     data = fit_plot_data$fit,
@@ -454,6 +475,15 @@ forecast_plot <- ggplot2::ggplot() +
     color = historical_obs_color(),
     linewidth = 0.5
   ) +
+  ggplot2::geom_point(
+    data = forecast_plot_data$obs_hist,
+    ggplot2::aes(x = date, y = y),
+    color = historical_obs_color(),
+    size = historical_obs_point_size(),
+    shape = 16,
+    stroke = 0,
+    alpha = 0.9
+  ) +
   ggplot2::geom_line(
     data = forecast_plot_data$obs_future,
     ggplot2::aes(x = date, y = y),
@@ -466,8 +496,8 @@ forecast_plot <- ggplot2::ggplot() +
     ggplot2::aes(x = date, y = y),
     color = future_obs_color(),
     size = future_obs_point_size(),
-    shape = 16,
-    stroke = 0,
+    shape = 1,
+    stroke = 0.85,
     alpha = 0.95
   ) +
   ggplot2::geom_line(
@@ -492,7 +522,7 @@ forecast_plot <- ggplot2::ggplot() +
   ggplot2::labs(
     title = sprintf("Thirty observed days plus the %d-step-ahead forecast", forecast_h),
     subtitle = sprintf(
-      "Historical observations are shown in gray; holdout observations are shown in orange with solid lines and circular markers. Shaded bands show %s uncertainty.",
+      "Historical observations are shown in gray with solid lines and small filled markers; holdout observations are shown in orange with solid lines and open circles. Shaded bands show %s uncertainty.",
       ci_pct
     ),
     x = NULL,

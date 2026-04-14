@@ -164,6 +164,7 @@ The full-history review config also records:
 - the forecast context window shown before the holdout
 - the convergence-trace trim threshold used only for display
 - the ordered quantile palette and observation colors used across all figures
+- the historical and future observation marker sizes used in the review plots
 
 By default the workflow loads package source from:
 

@@ -2,7 +2,7 @@
 
 - config path: `/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_daily_redo/config_full_history_q7_nightly_1000.yml`
 - output tag: `full_history_q7_nightly_1000`
-- article repo snapshot at rerun: `233f401`
+- article repo snapshot at rerun: `5fc7f0a`
 - package repo snapshot at rerun: `668685f`
 - staged data path: `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
 - staged data sha256: `1ee2854398a8ed93fb171fa04e2a81c824dc7ab933e37bb80068a25cdbc4a69a`

@@ -690,12 +690,16 @@ historical_obs_color <- function() {
   as.character(config$plots$historical_obs_color %||% "grey60")
 }
 
+historical_obs_point_size <- function() {
+  as.numeric(config$plots$historical_obs_point_size %||% 0.65)
+}
+
 future_obs_color <- function() {
   as.character(config$plots$future_obs_color %||% "#c76f1d")
 }
 
 future_obs_point_size <- function() {
-  as.numeric(config$plots$future_obs_point_size %||% 1.9)
+  as.numeric(config$plots$future_obs_point_size %||% 1.8)
 }
 
 quantile_line_alpha <- function() {
