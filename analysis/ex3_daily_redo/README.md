@@ -276,6 +276,11 @@ The synthesis forecast review uses the same pattern:
 - it synthesizes the plotted observed window from posterior predictive draws
 - it synthesizes the forecast window from exAL draws built from the
   `k`-step-ahead forecasted quantiles
+- it calibrates each quantile-specific predictive draw matrix so its empirical
+  `p0` quantile matches the fitted quantile path before synthesis
+- it then samples the displayed synthesis distribution from the resulting
+  monotone quantile grid so the synthesized distribution remains aligned with
+  the fitted quantile scaffold
 - it writes a small synthesis cache plus a synthesis signature so future
   figure-only reruns can stay lightweight and reproducible
 

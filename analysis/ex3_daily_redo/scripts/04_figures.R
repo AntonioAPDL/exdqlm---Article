@@ -269,6 +269,7 @@ build_forecast_plot_data <- function() {
 
 build_synthesis_plot_data <- function() {
   tail_idx <- which(prep$fit_df$date >= forecast_context_start)
+  forecast_line_df <- build_forecast_plot_data()$forecast
 
   obs_hist <- replicate_obs_by_model(data.frame(
     date = prep$fit_df$date[tail_idx],
@@ -329,42 +330,67 @@ build_synthesis_plot_data <- function() {
 
       if (!fit_ok(fit_obj) || is.null(fc_obj)) next
 
-      obs_draws[[length(obs_draws) + 1L]] <- subset_draw_matrix(
-        fit_obj$samp.post.pred[tail_idx, , drop = FALSE],
-        target_draws
+      target_df <- forecast_line_df[
+        forecast_line_df$model == model_name &
+          abs(forecast_line_df$p0 - p0) < 1e-12,
+        ,
+        drop = FALSE
+      ]
+      hist_target <- as.numeric(target_df$estimate[target_df$phase == "fit"])
+      future_target <- as.numeric(target_df$estimate[target_df$phase == "forecast"])
+      if (length(hist_target) != length(tail_idx) || length(future_target) != nrow(prep$future_df)) {
+        stop(
+          "Synthesis alignment targets do not match the observed/forecast window lengths for ",
+          model_name, " at p0=", p0
+        )
+      }
+
+      obs_draws[[length(obs_draws) + 1L]] <- calibrate_draw_matrix_to_quantile(
+        draws = subset_draw_matrix(
+          fit_obj$samp.post.pred[tail_idx, , drop = FALSE],
+          target_draws
+        ),
+        p0 = p0,
+        target_quantile = hist_target
       )
       future_seed <- seed_base + 1000L * match(model_name, names(model_map)) + round(100 * p0)
-      future_draws[[length(future_draws) + 1L]] <- sample_forecast_predictive_draws(
-        mfit = fit_obj,
-        fc = fc_obj,
-        target_n = target_draws,
-        seed = future_seed
-      )$ydraw
+      future_draws[[length(future_draws) + 1L]] <- calibrate_draw_matrix_to_quantile(
+        draws = sample_forecast_predictive_draws(
+          mfit = fit_obj,
+          fc = fc_obj,
+          target_n = target_draws,
+          seed = future_seed
+        )$ydraw,
+        p0 = p0,
+        target_quantile = future_target
+      )
       used_p <- c(used_p, p0)
     }
 
     if (length(used_p) < 2L) next
 
     synth_seed_base <- seed_base + 10000L * match(model_name, names(model_map))
+    obs_anchor <- synthesis_anchor_from_draws(
+      draws_list = obs_draws,
+      p = used_p,
+      T_expected = length(tail_idx)
+    )
+    future_anchor <- synthesis_anchor_from_draws(
+      draws_list = future_draws,
+      p = used_p,
+      T_expected = nrow(prep$future_df)
+    )
     syn_models[[model_name]] <- list(
-      observed = with_local_seed(synth_seed_base + 1L, {
-        exdqlm::exdqlm_synthesize_from_draws(
-          draws_list = obs_draws,
-          p = used_p,
-          T_expected = length(tail_idx),
-          n_samp = synth_n,
-          seed = synth_seed_base + 1L
-        )
-      }),
-      forecast = with_local_seed(synth_seed_base + 2L, {
-        exdqlm::exdqlm_synthesize_from_draws(
-          draws_list = future_draws,
-          p = used_p,
-          T_expected = nrow(prep$future_df),
-          n_samp = synth_n,
-          seed = synth_seed_base + 2L
-        )
-      }),
+      observed = sample_from_quantile_grid(
+        anchor_obj = obs_anchor,
+        n_samp = synth_n,
+        seed = synth_seed_base + 1L
+      ),
+      forecast = sample_from_quantile_grid(
+        anchor_obj = future_anchor,
+        n_samp = synth_n,
+        seed = synth_seed_base + 2L
+      ),
       p_levels = used_p
     )
   }
@@ -969,7 +995,7 @@ synthesis_plot <- ggplot2::ggplot() +
   ggplot2::labs(
     title = sprintf("Thirty observed days plus the %d-step-ahead synthesized predictive distribution", forecast_h),
     subtitle = sprintf(
-      "For each model family, the historical segment is synthesized from posterior predictive samples over the plotted observed window, and the forecast segment is synthesized from exAL draws built from the %d-step forecasted quantiles. Shaded bands show the empirical %s synthesized credible interval and the dark line shows the synthesized posterior median.",
+      "For each model family, the historical segment is synthesized from posterior predictive samples over the plotted observed window, and the forecast segment is synthesized from exAL draws built from the %d-step forecasted quantiles. Each quantile-specific draw matrix is first row-shifted so its empirical p0 quantile matches the fitted quantile path before synthesis. Shaded bands show the empirical %s synthesized credible interval and the dark line shows the synthesized posterior median.",
       forecast_h,
       ci_pct
     ),

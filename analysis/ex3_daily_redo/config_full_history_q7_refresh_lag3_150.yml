@@ -65,7 +65,7 @@ plots:
   quantile_palette: ["#7f0000", "#b2182b", "#6b3f3f", "#111111", "#3e5f8a", "#2166ac", "#053061"]
   synthesis:
     source_draws: 1000
-    n_samp: 1000
+    n_samp: 10000
     line_color: "#1f2733"
     line_width: 0.85
     ribbon_fill: "#9fb7d5"

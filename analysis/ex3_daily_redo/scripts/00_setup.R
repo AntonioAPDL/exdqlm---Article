@@ -316,6 +316,7 @@ forecast_cache_status <- function() {
 
 synthesis_signature_object <- function() {
   normalize_signature_object(list(
+    method = "calibrated_quantile_grid_synthesis_v2",
     forecast_signature = forecast_signature_object(),
     forecast_context_days = forecast_context_days(),
     source_draws = synthesis_source_draws(),
@@ -900,6 +901,25 @@ subset_draw_vector <- function(x, target_n, fill = 0) {
   x[idx]
 }
 
+row_quantile_prob <- function(M, prob) {
+  M <- as.matrix(M)
+  if (requireNamespace("matrixStats", quietly = TRUE)) {
+    as.numeric(matrixStats::rowQuantiles(M, probs = prob, na.rm = TRUE))
+  } else {
+    apply(M, 1L, stats::quantile, probs = prob, na.rm = TRUE, names = FALSE)
+  }
+}
+
+calibrate_draw_matrix_to_quantile <- function(draws, p0, target_quantile) {
+  draws <- as.matrix(draws)
+  target_quantile <- as.numeric(target_quantile)
+  if (nrow(draws) != length(target_quantile)) {
+    stop("Target quantile vector length does not match the draw matrix row count.")
+  }
+  empirical_q <- row_quantile_prob(draws, prob = p0)
+  sweep(draws, 1L, target_quantile - empirical_q, `+`)
+}
+
 state_sd_from_sC <- function(sC, index, idx) {
   vals <- vapply(idx, function(tt) sC[index, index, tt], numeric(1))
   sqrt(pmax(vals, 0))
@@ -926,6 +946,130 @@ summarize_draw_matrix <- function(draws, level = uncertainty_level()) {
     lower = apply(draws, 1, stats::quantile, probs = probs[1], names = FALSE),
     upper = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE),
     stringsAsFactors = FALSE
+  )
+}
+
+synthesis_anchor_from_draws <- function(draws_list, p,
+                                        enforce_isotonic = TRUE,
+                                        T_expected = NULL) {
+  stopifnot(is.list(draws_list), is.numeric(p), length(draws_list) == length(p))
+  L <- length(p)
+  if (L < 2L) stop("Need at least two quantile levels to build synthesis anchors.")
+
+  dims_r <- vapply(draws_list, function(M) nrow(as.matrix(M)), 1L)
+  dims_c <- vapply(draws_list, function(M) ncol(as.matrix(M)), 1L)
+  if (is.null(T_expected)) {
+    cand_tab <- sort(table(c(dims_r, dims_c)), decreasing = TRUE)
+    Tt <- as.integer(names(cand_tab)[1])
+  } else {
+    Tt <- as.integer(T_expected)
+  }
+
+  mats <- lapply(draws_list, function(M) {
+    M <- as.matrix(M)
+    if (nrow(M) == Tt) {
+      M
+    } else if (ncol(M) == Tt) {
+      t(M)
+    } else {
+      stop(
+        sprintf(
+          "A draw matrix has shape %dx%d; neither dimension matches T=%d.",
+          nrow(M), ncol(M), Tt
+        )
+      )
+    }
+  })
+
+  ord <- order(p)
+  taus <- as.numeric(p[ord])
+  mats <- mats[ord]
+
+  if (any(!is.finite(taus)) || any(taus <= 0 | taus >= 1)) {
+    stop("All synthesis quantile levels must lie in (0,1).")
+  }
+  if (any(diff(taus) <= 0)) {
+    stop("Synthesis quantile levels must be strictly increasing.")
+  }
+
+  v_mat <- do.call(cbind, lapply(seq_len(L), function(i) {
+    row_quantile_prob(mats[[i]], prob = taus[i])
+  }))
+
+  if (isTRUE(enforce_isotonic)) {
+    m_adj <- t(apply(v_mat, 1L, function(vrow) stats::isoreg(x = taus, y = vrow)$yf))
+  } else {
+    m_adj <- v_mat
+  }
+
+  list(
+    levels = taus,
+    quantiles = m_adj
+  )
+}
+
+eval_quantile_grid_row <- function(q_row, u, p_levels) {
+  p_levels <- as.numeric(p_levels)
+  q_row <- as.numeric(q_row)
+  u <- as.numeric(u)
+
+  out <- stats::approx(
+    x = p_levels,
+    y = q_row,
+    xout = pmin(pmax(u, min(p_levels)), max(p_levels)),
+    rule = 2,
+    ties = "ordered"
+  )$y
+
+  left_mask <- u < p_levels[1L]
+  if (any(left_mask)) {
+    slope_left <- (q_row[2L] - q_row[1L]) / (p_levels[2L] - p_levels[1L])
+    out[left_mask] <- q_row[1L] + slope_left * (u[left_mask] - p_levels[1L])
+  }
+
+  right_mask <- u > p_levels[length(p_levels)]
+  if (any(right_mask)) {
+    L <- length(p_levels)
+    slope_right <- (q_row[L] - q_row[L - 1L]) / (p_levels[L] - p_levels[L - 1L])
+    out[right_mask] <- q_row[L] + slope_right * (u[right_mask] - p_levels[L])
+  }
+
+  out
+}
+
+sample_from_quantile_grid <- function(anchor_obj, n_samp = synthesis_n_samp(), seed = NULL) {
+  levels <- as.numeric(anchor_obj$levels)
+  q_mat <- as.matrix(anchor_obj$quantiles)
+  TT <- nrow(q_mat)
+  n_samp <- as.integer(n_samp)
+
+  sampler <- function() {
+    U <- matrix(stats::runif(TT * n_samp), nrow = TT, ncol = n_samp)
+    draws <- matrix(NA_real_, nrow = TT, ncol = n_samp)
+    for (tt in seq_len(TT)) {
+      draws[tt, ] <- eval_quantile_grid_row(q_mat[tt, ], U[tt, ], levels)
+    }
+    draws
+  }
+
+  draws <- if (is.null(seed)) sampler() else with_local_seed(seed, sampler())
+
+  list(
+    levels = levels,
+    quantiles = q_mat,
+    draws = draws,
+    summary = list(
+      mean = rowMeans(draws),
+      q025 = row_quantile_prob(draws, 0.025),
+      q250 = row_quantile_prob(draws, 0.250),
+      q500 = row_quantile_prob(draws, 0.500),
+      q750 = row_quantile_prob(draws, 0.750),
+      q975 = row_quantile_prob(draws, 0.975)
+    ),
+    method = list(
+      name = "calibrated-quantile-grid",
+      n_samp = n_samp
+    )
   )
 }
 
