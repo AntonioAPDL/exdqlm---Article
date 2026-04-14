@@ -235,6 +235,7 @@ Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
   - `ex3_daily_data_overview.png`
   - `ex3_daily_fit_periods.png`
   - `ex3_daily_forecast_quantiles.png`
+  - `ex3_daily_forecast_synthesis.png`
   - `ex3_daily_transfer_states_dry.png`
   - `ex3_daily_transfer_states_rainy.png`
   - `ex3_daily_direct_states_dry.png`
@@ -251,6 +252,7 @@ Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
   - `ex3_daily_forecast_summary.csv`
   - `ex3_daily_fit_periods_summary.csv`
   - `ex3_daily_forecast_plot_summary.csv`
+  - `ex3_daily_forecast_synthesis_summary.csv`
   - `ex3_daily_transfer_states_summary.csv`
   - `ex3_daily_direct_states_summary.csv`
   - `ex3_daily_convergence_traces.csv`
@@ -268,6 +270,14 @@ the workflow can distinguish:
 
 - fit caches that can be reused safely for the current model config, and
 - forecast caches that match the current holdout settings and figure layer.
+
+The synthesis forecast review uses the same pattern:
+
+- it synthesizes the plotted observed window from posterior predictive draws
+- it synthesizes the forecast window from exAL draws built from the
+  `k`-step-ahead forecasted quantiles
+- it writes a small synthesis cache plus a synthesis signature so future
+  figure-only reruns can stay lightweight and reproducible
 
 For the overnight long-window run, the helper launcher writes:
 

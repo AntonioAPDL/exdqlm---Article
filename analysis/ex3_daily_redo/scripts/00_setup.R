@@ -274,6 +274,7 @@ fit_cache_status <- function() {
 
 fit_cache_path <- function() file.path(cache_dir, "ex3_daily_fits_ldvb.rds")
 forecast_cache_path <- function() file.path(cache_dir, "ex3_daily_forecasts_ldvb.rds")
+synthesis_cache_path <- function() file.path(cache_dir, "ex3_daily_predictive_synthesis.rds")
 
 forecast_signature_object <- function() {
   normalize_signature_object(list(
@@ -308,6 +309,45 @@ forecast_cache_status <- function() {
   cached_sig_obj <- signature_file_read(sig_path)
   if (!is.null(cached_sig_obj) &&
       signature_objects_equal(forecast_signature_object(), cached_sig_obj)) {
+    return(list(valid = TRUE, reason = "signature_match"))
+  }
+  list(valid = FALSE, reason = "signature_mismatch")
+}
+
+synthesis_signature_object <- function() {
+  normalize_signature_object(list(
+    forecast_signature = forecast_signature_object(),
+    forecast_context_days = forecast_context_days(),
+    source_draws = synthesis_source_draws(),
+    n_samp = synthesis_n_samp(),
+    uncertainty_level = as.numeric(config$plots$uncertainty_level %||% 0.95)
+  ))
+}
+
+synthesis_signature_string <- function() {
+  sig_obj <- synthesis_signature_object()
+  paste(yaml::as.yaml(sig_obj), collapse = "")
+}
+
+synthesis_signature_path <- function() {
+  file.path(cache_dir, "ex3_daily_synthesis_signature.txt")
+}
+
+write_synthesis_signature <- function(signature = synthesis_signature_string()) {
+  writeLines(signature, con = synthesis_signature_path())
+}
+
+synthesis_cache_status <- function() {
+  if (!cache_exists("ex3_daily_predictive_synthesis.rds")) {
+    return(list(valid = FALSE, reason = "cache_missing"))
+  }
+  sig_path <- synthesis_signature_path()
+  if (!file.exists(sig_path)) {
+    return(list(valid = FALSE, reason = "signature_missing"))
+  }
+  cached_sig_obj <- signature_file_read(sig_path)
+  if (!is.null(cached_sig_obj) &&
+      signature_objects_equal(synthesis_signature_object(), cached_sig_obj)) {
     return(list(valid = TRUE, reason = "signature_match"))
   }
   list(valid = FALSE, reason = "signature_mismatch")
@@ -736,6 +776,36 @@ convergence_trim_start_iter <- function() {
   as.integer(config$plots$convergence_trim_start_iter %||% 20L)
 }
 
+synthesis_source_draws <- function() {
+  synth_cfg <- config$plots$synthesis %||% list()
+  as.integer(synth_cfg$source_draws %||% config$model$ldvb$n_samp %||% 1000L)
+}
+
+synthesis_n_samp <- function() {
+  synth_cfg <- config$plots$synthesis %||% list()
+  as.integer(synth_cfg$n_samp %||% 1000L)
+}
+
+synthesis_line_color <- function() {
+  synth_cfg <- config$plots$synthesis %||% list()
+  as.character(synth_cfg$line_color %||% "#1f2733")
+}
+
+synthesis_linewidth <- function() {
+  synth_cfg <- config$plots$synthesis %||% list()
+  as.numeric(synth_cfg$line_width %||% 0.85)
+}
+
+synthesis_ribbon_fill <- function() {
+  synth_cfg <- config$plots$synthesis %||% list()
+  as.character(synth_cfg$ribbon_fill %||% "#9fb7d5")
+}
+
+synthesis_ribbon_alpha <- function() {
+  synth_cfg <- config$plots$synthesis %||% list()
+  as.numeric(synth_cfg$ribbon_alpha %||% 0.28)
+}
+
 historical_obs_color <- function() {
   as.character(config$plots$historical_obs_color %||% "grey60")
 }
@@ -798,6 +868,38 @@ subset_idx <- function(dates, start, end) {
   which(dates >= as.Date(start) & dates <= as.Date(end))
 }
 
+with_local_seed <- function(seed, expr) {
+  has_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  old_seed <- if (has_seed) get(".Random.seed", envir = .GlobalEnv, inherits = FALSE) else NULL
+  on.exit({
+    if (has_seed) {
+      assign(".Random.seed", old_seed, envir = .GlobalEnv)
+    } else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+      rm(".Random.seed", envir = .GlobalEnv)
+    }
+  }, add = TRUE)
+  set.seed(as.integer(seed))
+  eval.parent(substitute(expr))
+}
+
+evenly_spaced_idx <- function(n, target_n) {
+  target_n <- min(as.integer(target_n), as.integer(n))
+  unique(pmax(1L, pmin(as.integer(n), round(seq.int(1L, n, length.out = target_n)))))
+}
+
+subset_draw_matrix <- function(M, target_n) {
+  M <- as.matrix(M)
+  idx <- evenly_spaced_idx(ncol(M), target_n)
+  M[, idx, drop = FALSE]
+}
+
+subset_draw_vector <- function(x, target_n, fill = 0) {
+  x <- as.numeric(x)
+  if (!length(x)) return(rep(fill, target_n))
+  idx <- evenly_spaced_idx(length(x), target_n)
+  x[idx]
+}
+
 state_sd_from_sC <- function(sC, index, idx) {
   vals <- vapply(idx, function(tt) sC[index, index, tt], numeric(1))
   sqrt(pmax(vals, 0))
@@ -825,6 +927,48 @@ summarize_draw_matrix <- function(draws, level = uncertainty_level()) {
     upper = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE),
     stringsAsFactors = FALSE
   )
+}
+
+synthesis_summary_df <- function(syn_obj, dates, model, phase) {
+  data.frame(
+    date = as.Date(dates),
+    model = model,
+    model_label = model_label(model),
+    phase = phase,
+    mean = as.numeric(syn_obj$summary$mean),
+    q025 = as.numeric(syn_obj$summary$q025),
+    q250 = as.numeric(syn_obj$summary$q250),
+    q500 = as.numeric(syn_obj$summary$q500),
+    q750 = as.numeric(syn_obj$summary$q750),
+    q975 = as.numeric(syn_obj$summary$q975),
+    estimate = as.numeric(syn_obj$summary$q500),
+    lower = as.numeric(syn_obj$summary$q025),
+    upper = as.numeric(syn_obj$summary$q975),
+    stringsAsFactors = FALSE
+  )
+}
+
+sample_forecast_predictive_draws <- function(mfit, fc, target_n, seed) {
+  target_n <- min(as.integer(target_n), max(1L, ncol(as.matrix(mfit$samp.post.pred))))
+  sigma_draws <- subset_draw_vector(mfit$samp.sigma, target_n)
+  gamma_draws <- if (length(mfit$samp.gamma)) subset_draw_vector(mfit$samp.gamma, target_n) else rep(0, target_n)
+  qdraw <- with_local_seed(seed, {
+    Z <- matrix(stats::rnorm(length(fc$ff) * target_n), nrow = length(fc$ff), ncol = target_n)
+    sweep(Z, 1L, sqrt(pmax(fc$fQ, 0)), `*`) + fc$ff
+  })
+  ydraw <- matrix(NA_real_, nrow = nrow(qdraw), ncol = ncol(qdraw))
+  for (j in seq_len(ncol(qdraw))) {
+    ydraw[, j] <- with_local_seed(seed + j, {
+      exdqlm::rexal(
+        nrow(qdraw),
+        p0 = mfit$p0,
+        mu = qdraw[, j],
+        sigma = sigma_draws[j],
+        gamma = gamma_draws[j]
+      )
+    })
+  }
+  list(qdraw = qdraw, ydraw = ydraw, sigma = sigma_draws, gamma = gamma_draws)
 }
 
 fitted_path_summary <- function(fit, dates, idx, p0, model, period_label,

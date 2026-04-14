@@ -63,6 +63,13 @@ plots:
   quantile_line_alpha: 0.72
   quantile_ribbon_alpha: 0.06
   quantile_palette: ["#7f0000", "#b2182b", "#6b3f3f", "#111111", "#3e5f8a", "#2166ac", "#053061"]
+  synthesis:
+    source_draws: 1000
+    n_samp: 1000
+    line_color: "#1f2733"
+    line_width: 0.85
+    ribbon_fill: "#9fb7d5"
+    ribbon_alpha: 0.28
   periods:
     dry:
       label: Dry / drought (2012-2016)

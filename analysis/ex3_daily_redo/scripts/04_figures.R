@@ -1,6 +1,7 @@
 prep <- cache_read("ex3_daily_prep.rds")
 fit_results <- NULL
 forecast_objects <- NULL
+synthesis_cache <- NULL
 
 p_levels <- as.numeric(config$model$p_levels)
 tau_levels <- vapply(p_levels, format_p0_label, character(1))
@@ -57,6 +58,50 @@ get_forecast_objects <- function() {
     forecast_objects <<- cache_read("ex3_daily_forecasts_ldvb.rds")
   }
   forecast_objects
+}
+
+get_synthesis_cache <- function() {
+  if (is.null(synthesis_cache)) {
+    syn_status <- synthesis_cache_status()
+    if (!isTRUE(syn_status$valid)) {
+      stop(
+        "Synthesis cache is not valid for the current config (",
+        syn_status$reason,
+        "). Regenerate synthesis from the fit and forecast caches."
+      )
+    }
+    synthesis_cache <<- cache_read("ex3_daily_predictive_synthesis.rds")
+  }
+  synthesis_cache
+}
+
+normalize_synthesis_summary <- function(df) {
+  df$model_label <- factor(df$model_label, levels = model_levels)
+  df$phase <- factor(df$phase, levels = c("history", "forecast"))
+  df
+}
+
+synthesis_summary_from_cache <- function(syn_cache) {
+  rows <- list()
+  row_id <- 0L
+  for (model_name in names(syn_cache$models)) {
+    model_cache <- syn_cache$models[[model_name]]
+    row_id <- row_id + 1L
+    rows[[row_id]] <- synthesis_summary_df(
+      syn_obj = model_cache$observed,
+      dates = syn_cache$observed_dates,
+      model = model_name,
+      phase = "history"
+    )
+    row_id <- row_id + 1L
+    rows[[row_id]] <- synthesis_summary_df(
+      syn_obj = model_cache$forecast,
+      dates = syn_cache$future_dates,
+      model = model_name,
+      phase = "forecast"
+    )
+  }
+  do.call(rbind, rows)
 }
 
 replicate_obs_by_model <- function(df) {
@@ -220,6 +265,134 @@ build_forecast_plot_data <- function() {
   fc_df$tau_label <- factor(fc_df$tau_label, levels = tau_levels)
 
   list(forecast = fc_df, obs_hist = obs_hist, obs_future = obs_future)
+}
+
+build_synthesis_plot_data <- function() {
+  tail_idx <- which(prep$fit_df$date >= forecast_context_start)
+
+  obs_hist <- replicate_obs_by_model(data.frame(
+    date = prep$fit_df$date[tail_idx],
+    y = prep$y_train[tail_idx],
+    obs_phase = "history",
+    stringsAsFactors = FALSE
+  ))
+  obs_future <- replicate_obs_by_model(data.frame(
+    date = prep$future_df$date,
+    y = prep$y_future,
+    obs_phase = "future",
+    stringsAsFactors = FALSE
+  ))
+  obs_hist$model_label <- factor(obs_hist$model_label, levels = model_levels)
+  obs_future$model_label <- factor(obs_future$model_label, levels = model_levels)
+
+  syn_status <- synthesis_cache_status()
+  cached_summary <- read_cached_table("ex3_daily_forecast_synthesis_summary.csv", date_cols = "date")
+  if (isTRUE(syn_status$valid) && !is.null(cached_summary)) {
+    return(list(
+      synthesis = normalize_synthesis_summary(cached_summary),
+      obs_hist = obs_hist,
+      obs_future = obs_future
+    ))
+  }
+
+  if (isTRUE(syn_status$valid) && cache_exists("ex3_daily_predictive_synthesis.rds")) {
+    cached_syn <- synthesis_summary_from_cache(get_synthesis_cache())
+    return(list(
+      synthesis = normalize_synthesis_summary(cached_syn),
+      obs_hist = obs_hist,
+      obs_future = obs_future
+    ))
+  }
+
+  fit_results <- get_fit_results()
+  forecast_objects <- get_forecast_objects()
+
+  target_draws <- synthesis_source_draws()
+  synth_n <- synthesis_n_samp()
+  model_map <- c(
+    direct_regression = "direct",
+    transfer_function = "transfer"
+  )
+
+  syn_models <- list()
+  for (model_name in names(model_map)) {
+    model_suffix <- model_map[[model_name]]
+    obs_draws <- list()
+    future_draws <- list()
+    used_p <- numeric()
+
+    for (p0 in p_levels) {
+      key <- sprintf("p%03d", round(100 * p0))
+      res <- fit_results[[key]]
+      fit_obj <- if (identical(model_name, "direct_regression")) res$direct else res$transfer
+      fc_obj <- forecast_objects[[sprintf("%s_%s", key, model_suffix)]]
+
+      if (!fit_ok(fit_obj) || is.null(fc_obj)) next
+
+      obs_draws[[length(obs_draws) + 1L]] <- subset_draw_matrix(
+        fit_obj$samp.post.pred[tail_idx, , drop = FALSE],
+        target_draws
+      )
+      future_seed <- seed_base + 1000L * match(model_name, names(model_map)) + round(100 * p0)
+      future_draws[[length(future_draws) + 1L]] <- sample_forecast_predictive_draws(
+        mfit = fit_obj,
+        fc = fc_obj,
+        target_n = target_draws,
+        seed = future_seed
+      )$ydraw
+      used_p <- c(used_p, p0)
+    }
+
+    if (length(used_p) < 2L) next
+
+    synth_seed_base <- seed_base + 10000L * match(model_name, names(model_map))
+    syn_models[[model_name]] <- list(
+      observed = with_local_seed(synth_seed_base + 1L, {
+        exdqlm::exdqlm_synthesize_from_draws(
+          draws_list = obs_draws,
+          p = used_p,
+          T_expected = length(tail_idx),
+          n_samp = synth_n,
+          seed = synth_seed_base + 1L
+        )
+      }),
+      forecast = with_local_seed(synth_seed_base + 2L, {
+        exdqlm::exdqlm_synthesize_from_draws(
+          draws_list = future_draws,
+          p = used_p,
+          T_expected = nrow(prep$future_df),
+          n_samp = synth_n,
+          seed = synth_seed_base + 2L
+        )
+      }),
+      p_levels = used_p
+    )
+  }
+
+  if (!length(syn_models)) {
+    stop("Unable to construct synthesis summaries because fewer than two fitted quantile models were available per model family.")
+  }
+
+  syn_cache <- list(
+    settings = list(
+      source_draws = target_draws,
+      n_samp = synth_n,
+      forecast_context_days = forecast_context_days(),
+      forecast_horizon = forecast_h
+    ),
+    observed_dates = prep$fit_df$date[tail_idx],
+    future_dates = prep$future_df$date,
+    models = syn_models
+  )
+  cache_write(syn_cache, "ex3_daily_predictive_synthesis.rds")
+  write_synthesis_signature()
+
+  syn_df <- synthesis_summary_from_cache(syn_cache)
+  list(
+    synthesis = normalize_synthesis_summary(syn_df),
+    obs_hist = obs_hist,
+    obs_future = obs_future
+  )
 }
 
 build_transfer_state_data <- function() {
@@ -572,12 +745,14 @@ make_convergence_plot <- function(df, value_col, title, filename) {
 
 fit_plot_data <- build_fit_period_data()
 forecast_plot_data <- build_forecast_plot_data()
+synthesis_plot_data <- build_synthesis_plot_data()
 transfer_state_data <- build_transfer_state_data()
 direct_state_data <- build_direct_state_data()
 convergence_df <- build_convergence_plot_data()
 
 save_csv_if_rows(fit_plot_data$fit, "ex3_daily_fit_periods_summary.csv")
 save_csv_if_rows(forecast_plot_data$forecast, "ex3_daily_forecast_plot_summary.csv")
+save_csv_if_rows(synthesis_plot_data$synthesis, "ex3_daily_forecast_synthesis_summary.csv")
 save_csv_if_rows(transfer_state_data, "ex3_daily_transfer_states_summary.csv")
 save_csv_if_rows(direct_state_data, "ex3_daily_direct_states_summary.csv")
 save_csv_if_rows(convergence_df, "ex3_daily_convergence_traces.csv")
@@ -729,6 +904,81 @@ forecast_plot <- ggplot2::ggplot() +
   theme_ex3()
 
 save_gg_plot("ex3_daily_forecast_quantiles.png", forecast_plot, width = 13, height = 6.8)
+
+synthesis_plot <- ggplot2::ggplot() +
+  ggplot2::geom_ribbon(
+    data = synthesis_plot_data$synthesis,
+    ggplot2::aes(
+      x = date,
+      ymin = lower,
+      ymax = upper,
+      group = phase
+    ),
+    fill = synthesis_ribbon_fill(),
+    alpha = synthesis_ribbon_alpha(),
+    color = NA
+  ) +
+  ggplot2::geom_line(
+    data = synthesis_plot_data$obs_hist,
+    ggplot2::aes(x = date, y = y),
+    color = historical_obs_color(),
+    linewidth = 0.5
+  ) +
+  ggplot2::geom_point(
+    data = synthesis_plot_data$obs_hist,
+    ggplot2::aes(x = date, y = y),
+    color = historical_obs_color(),
+    size = historical_obs_point_size(),
+    shape = 16,
+    stroke = 0,
+    alpha = 0.9
+  ) +
+  ggplot2::geom_line(
+    data = synthesis_plot_data$obs_future,
+    ggplot2::aes(x = date, y = y),
+    color = future_obs_color(),
+    linewidth = 0.75,
+    linetype = "solid"
+  ) +
+  ggplot2::geom_point(
+    data = synthesis_plot_data$obs_future,
+    ggplot2::aes(x = date, y = y),
+    color = future_obs_color(),
+    size = future_obs_point_size(),
+    shape = 1,
+    stroke = 0.85,
+    alpha = 0.95
+  ) +
+  ggplot2::geom_line(
+    data = synthesis_plot_data$synthesis,
+    ggplot2::aes(x = date, y = estimate, group = phase),
+    color = synthesis_line_color(),
+    linewidth = synthesis_linewidth()
+  ) +
+  ggplot2::annotate(
+    "segment",
+    x = prep$forecast_start,
+    xend = prep$forecast_start,
+    y = -Inf,
+    yend = Inf,
+    color = "firebrick",
+    linetype = 2,
+    linewidth = 0.6
+  ) +
+  ggplot2::facet_wrap(~ model_label, nrow = 1) +
+  ggplot2::labs(
+    title = sprintf("Thirty observed days plus the %d-step-ahead synthesized predictive distribution", forecast_h),
+    subtitle = sprintf(
+      "For each model family, the historical segment is synthesized from posterior predictive samples over the plotted observed window, and the forecast segment is synthesized from exAL draws built from the %d-step forecasted quantiles. Shaded bands show the empirical %s synthesized credible interval and the dark line shows the synthesized posterior median.",
+      forecast_h,
+      ci_pct
+    ),
+    x = NULL,
+    y = "Transformed streamflow"
+  ) +
+  theme_ex3()
+
+save_gg_plot("ex3_daily_forecast_synthesis.png", synthesis_plot, width = 13, height = 6.8)
 
 render_state_figure(
   df = transfer_state_data,

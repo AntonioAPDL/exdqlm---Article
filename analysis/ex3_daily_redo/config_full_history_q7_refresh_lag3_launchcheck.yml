@@ -63,6 +63,13 @@ plots:
   quantile_line_alpha: 0.72
   quantile_ribbon_alpha: 0.06
   quantile_palette: ["#7f0000", "#111111"]
+  synthesis:
+    source_draws: 40
+    n_samp: 250
+    line_color: "#1f2733"
+    line_width: 0.85
+    ribbon_fill: "#9fb7d5"
+    ribbon_alpha: 0.28
   periods:
     dry:
       label: Dry / drought (2020-2021 subset)
