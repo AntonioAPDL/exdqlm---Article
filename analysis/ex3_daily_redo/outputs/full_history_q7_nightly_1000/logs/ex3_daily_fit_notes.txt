@@ -1,0 +1,28 @@
+p0 = 0.05
+  direct_regression | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=25188.492
+  transfer_function | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=27210.705 | median.kt=65.77138
+
+p0 = 0.20
+  direct_regression | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=25074.025
+  transfer_function | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=26924.492 | median.kt=65.72021
+
+p0 = 0.35
+  direct_regression | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=24812.511
+  transfer_function | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=27257.238 | median.kt=64.83573
+
+p0 = 0.50
+  direct_regression | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=24790.360
+  transfer_function | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=27039.515 | median.kt=64.80278
+
+p0 = 0.65
+  direct_regression | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=24389.442
+  transfer_function | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=27235.448 | median.kt=65.36282
+
+p0 = 0.80
+  direct_regression | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=24296.211
+  transfer_function | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=27483.129 | median.kt=64.90444
+
+p0 = 0.95
+  direct_regression | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=24087.986
+  transfer_function | iter=1000 | converged=FALSE | hit_iter_cap=TRUE | runtime=27987.761 | median.kt=66.10271
+

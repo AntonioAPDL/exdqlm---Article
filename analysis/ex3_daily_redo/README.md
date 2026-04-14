@@ -91,7 +91,7 @@ Additional stabilization configs are available for the short and mid windows:
 - `config_full_history_q7_nightly_1000.yml`
   - actual heavy overnight full-history run
   - uses the full `1987-05-29` to `2022-12-25` window and all seven quantiles
-  - now keeps a shorter `20`-day fixed-horizon holdout starting `2022-12-26`
+  - now keeps a `30`-day fixed-horizon holdout starting `2022-12-26`
   - uses `n.samp = 1000` and `max_iter = 1000`
   - outputs written to `outputs/full_history_q7_nightly_1000/`
 
@@ -157,6 +157,14 @@ When `runtime.reuse_fit_cache: true` and a compatible
 the fit step will reuse that cache, rewrite the fit/convergence summaries, and
 continue through forecast, figures, and manifest without refitting.
 
+The full-history review config also records:
+
+- the dry/drought display window (`2012-2016`)
+- the rainy display window (`2017-2019`)
+- the forecast context window shown before the holdout
+- the convergence-trace trim threshold used only for display
+- the ordered quantile palette and observation colors used across all figures
+
 By default the workflow loads package source from:
 
 `/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`
@@ -169,7 +177,10 @@ Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
   - `ex3_daily_data_overview.png`
   - `ex3_daily_fit_periods.png`
   - `ex3_daily_forecast_quantiles.png`
-  - `ex3_daily_transfer_zeta_periods.png`
+  - `ex3_daily_transfer_states_dry.png`
+  - `ex3_daily_transfer_states_rainy.png`
+  - `ex3_daily_direct_states_dry.png`
+  - `ex3_daily_direct_states_rainy.png`
   - `ex3_daily_convergence_elbo.png`
   - `ex3_daily_convergence_sigma.png`
   - `ex3_daily_convergence_gamma.png`
@@ -182,7 +193,8 @@ Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
   - `ex3_daily_forecast_summary.csv`
   - `ex3_daily_fit_periods_summary.csv`
   - `ex3_daily_forecast_plot_summary.csv`
-  - `ex3_daily_transfer_zeta_summary.csv`
+  - `ex3_daily_transfer_states_summary.csv`
+  - `ex3_daily_direct_states_summary.csv`
   - `ex3_daily_convergence_traces.csv`
 - `outputs/<profile>/logs/`
   - `ex3_daily_manifest.md`
@@ -192,6 +204,12 @@ Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
 
 Each profile keeps its own cache directory, and those cache directories are
 intentionally ignored by git.
+
+The post-fit review layer writes signature files into the cache directory so
+the workflow can distinguish:
+
+- fit caches that can be reused safely for the current model config, and
+- forecast caches that match the current holdout settings and figure layer.
 
 For the overnight long-window run, the helper launcher writes:
 

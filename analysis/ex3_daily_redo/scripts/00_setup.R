@@ -37,13 +37,21 @@ log_dir <- file.path(output_root, "logs")
 cache_dir <- file.path(output_root, "cache")
 progress_log_path <- file.path(log_dir, "ex3_daily_progress.log")
 
-for (dir_path in c(output_root, figure_dir, table_dir, log_dir, cache_dir)) {
+ensure_runtime_dir <- function(dir_path, keep_local = FALSE) {
   dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
+  if (isTRUE(keep_local)) {
+    gitignore_path <- file.path(dir_path, ".gitignore")
+    if (!file.exists(gitignore_path)) {
+      writeLines(c("*", "!.gitignore"), con = gitignore_path)
+    }
+  }
 }
-cache_gitignore <- file.path(cache_dir, ".gitignore")
-if (!file.exists(cache_gitignore)) {
-  writeLines(c("*", "!.gitignore"), con = cache_gitignore)
-}
+
+ensure_runtime_dir(output_root)
+ensure_runtime_dir(figure_dir, keep_local = TRUE)
+ensure_runtime_dir(table_dir, keep_local = TRUE)
+ensure_runtime_dir(log_dir, keep_local = TRUE)
+ensure_runtime_dir(cache_dir, keep_local = TRUE)
 
 pkg_path <- Sys.getenv("EX3_DAILY_PKG_PATH", unset = config$runtime$pkg_path)
 data_path <- Sys.getenv("EX3_DAILY_DATA_PATH", unset = config$data$input_path)
@@ -146,8 +154,50 @@ cache_exists <- function(name) {
   file.exists(file.path(cache_dir, name))
 }
 
-fit_signature_string <- function() {
-  sig_obj <- list(
+normalize_signature_object <- function(x) {
+  if (is.null(x)) {
+    return(NULL)
+  }
+  if (is.list(x)) {
+    return(lapply(x, normalize_signature_object))
+  }
+  if (is.integer(x) || is.numeric(x)) {
+    return(unname(as.numeric(x)))
+  }
+  if (is.logical(x)) {
+    return(unname(as.logical(x)))
+  }
+  if (inherits(x, "Date")) {
+    return(as.character(x))
+  }
+  if (is.character(x)) {
+    return(unname(as.character(x)))
+  }
+  x
+}
+
+signature_objects_equal <- function(current_obj, cached_obj) {
+  isTRUE(all.equal(
+    normalize_signature_object(current_obj),
+    normalize_signature_object(cached_obj),
+    check.attributes = FALSE,
+    tolerance = 1e-6
+  ))
+}
+
+signature_file_read <- function(path) {
+  if (!file.exists(path)) {
+    return(NULL)
+  }
+  txt <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  if (!nzchar(trimws(txt))) {
+    return(NULL)
+  }
+  yaml::yaml.load(txt)
+}
+
+fit_signature_object <- function() {
+  normalize_signature_object(list(
     pkg_ref = git_ref(pkg_path),
     fit_start = as.character(config$data$fit_start),
     fit_end = as.character(config$data$fit_end),
@@ -181,7 +231,11 @@ fit_signature_string <- function() {
       reg_c0 = as.numeric(config$model$priors$reg_c0),
       transfer_c0 = as.numeric(config$model$priors$transfer_c0)
     )
-  )
+  ))
+}
+
+fit_signature_string <- function() {
+  sig_obj <- fit_signature_object()
   paste(yaml::as.yaml(sig_obj), collapse = "")
 }
 
@@ -201,12 +255,14 @@ fit_cache_status <- function() {
     return(list(can_reuse = FALSE, reason = "cache_missing"))
   }
   sig_path <- fit_signature_path()
-  current_sig <- fit_signature_string()
   if (!file.exists(sig_path)) {
     return(list(can_reuse = TRUE, reason = "signature_missing_assumed_match"))
   }
-  cached_sig <- paste(readLines(sig_path, warn = FALSE), collapse = "")
-  if (identical(cached_sig, current_sig)) {
+  cached_sig_obj <- signature_file_read(sig_path)
+  if (is.null(cached_sig_obj)) {
+    return(list(can_reuse = TRUE, reason = "signature_missing_assumed_match"))
+  }
+  if (signature_objects_equal(fit_signature_object(), cached_sig_obj)) {
     return(list(can_reuse = TRUE, reason = "signature_match"))
   }
   list(can_reuse = FALSE, reason = "signature_mismatch")
@@ -214,6 +270,44 @@ fit_cache_status <- function() {
 
 fit_cache_path <- function() file.path(cache_dir, "ex3_daily_fits_ldvb.rds")
 forecast_cache_path <- function() file.path(cache_dir, "ex3_daily_forecasts_ldvb.rds")
+
+forecast_signature_object <- function() {
+  normalize_signature_object(list(
+    fit_signature = fit_signature_object(),
+    forecast_start = as.character(config$data$forecast_start),
+    forecast_horizon = as.integer(config$data$forecast_horizon),
+    uncertainty_level = as.numeric(config$plots$uncertainty_level %||% 0.95)
+  ))
+}
+
+forecast_signature_string <- function() {
+  sig_obj <- forecast_signature_object()
+  paste(yaml::as.yaml(sig_obj), collapse = "")
+}
+
+forecast_signature_path <- function() {
+  file.path(cache_dir, "ex3_daily_forecast_signature.txt")
+}
+
+write_forecast_signature <- function(signature = forecast_signature_string()) {
+  writeLines(signature, con = forecast_signature_path())
+}
+
+forecast_cache_status <- function() {
+  if (!cache_exists("ex3_daily_forecasts_ldvb.rds")) {
+    return(list(valid = FALSE, reason = "cache_missing"))
+  }
+  sig_path <- forecast_signature_path()
+  if (!file.exists(sig_path)) {
+    return(list(valid = FALSE, reason = "signature_missing"))
+  }
+  cached_sig_obj <- signature_file_read(sig_path)
+  if (!is.null(cached_sig_obj) &&
+      signature_objects_equal(forecast_signature_object(), cached_sig_obj)) {
+    return(list(valid = TRUE, reason = "signature_match"))
+  }
+  list(valid = FALSE, reason = "signature_mismatch")
+}
 
 transform_response <- function(x) {
   transform_name <- config$data$response_transform %||% "log_log1p"
@@ -585,12 +679,37 @@ period_definitions <- function() {
 }
 
 forecast_context_days <- function() {
-  as.integer(config$plots$forecast_context_days %||% 60L)
+  as.integer(config$plots$forecast_context_days %||% 30L)
+}
+
+convergence_trim_start_iter <- function() {
+  as.integer(config$plots$convergence_trim_start_iter %||% 20L)
+}
+
+historical_obs_color <- function() {
+  as.character(config$plots$historical_obs_color %||% "grey60")
+}
+
+future_obs_color <- function() {
+  as.character(config$plots$future_obs_color %||% "#c76f1d")
+}
+
+quantile_line_alpha <- function() {
+  as.numeric(config$plots$quantile_line_alpha %||% 0.72)
+}
+
+quantile_ribbon_alpha <- function() {
+  as.numeric(config$plots$quantile_ribbon_alpha %||% 0.07)
 }
 
 quantile_palette <- function(p_levels = as.numeric(config$model$p_levels)) {
   labels <- vapply(p_levels, format_p0_label, character(1))
-  cols <- grDevices::hcl.colors(length(labels), palette = "Viridis")
+  cols <- config$plots$quantile_palette %||%
+    c("#7f0000", "#b2182b", "#6b3f3f", "#111111", "#3e5f8a", "#2166ac", "#053061")
+  cols <- as.character(cols)
+  if (length(cols) != length(labels)) {
+    cols <- grDevices::colorRampPalette(cols)(length(labels))
+  }
   stats::setNames(cols, labels)
 }
 
@@ -702,12 +821,69 @@ zeta_state_summary <- function(fit, res, prep, dates, idx, p0, period_label,
   data.frame(
     date = dates[idx],
     period_label = period_label,
+    state = "zeta",
+    state_label = "Transfer state zeta",
     p0 = p0,
     tau_label = format_p0_label(p0),
     estimate = z_mean,
     lower = z_mean - zcrit * z_sd,
     upper = z_mean + zcrit * z_sd,
     stringsAsFactors = FALSE
+  )
+}
+
+state_series_summary <- function(fit, state_index, state_name, state_label,
+                                 dates, idx, p0, period_label,
+                                 level = uncertainty_level()) {
+  mu <- as.numeric(fit$theta.out$sm[state_index, idx])
+  sd <- state_sd_from_sC(fit$theta.out$sC, state_index, idx)
+  zcrit <- stats::qnorm((1 + level) / 2)
+  data.frame(
+    date = dates[idx],
+    period_label = period_label,
+    state = state_name,
+    state_label = state_label,
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    estimate = mu,
+    lower = mu - zcrit * sd,
+    upper = mu + zcrit * sd,
+    stringsAsFactors = FALSE
+  )
+}
+
+transfer_state_indices <- function(res, prep) {
+  base_p <- length(res$transfer_spec$base_model$m0)
+  k <- ncol(prep$X_train_scaled)
+  list(
+    zeta = base_p + 1L,
+    psi = seq.int(base_p + 2L, base_p + k + 1L),
+    psi_names = colnames(prep$X_train_scaled)
+  )
+}
+
+direct_state_indices <- function(res, prep) {
+  base_p <- length(res$direct_spec$base_model$m0)
+  k <- ncol(prep$X_train_scaled)
+  list(
+    beta = seq.int(base_p + 1L, base_p + k),
+    beta_names = colnames(prep$X_train_scaled)
+  )
+}
+
+state_label_map <- function(name) {
+  if (length(name) != 1L) {
+    return(vapply(name, state_label_map, character(1)))
+  }
+  switch(
+    name,
+    ppt = "ppt",
+    soil = "soil",
+    ppt_soil = "ppt × soil",
+    ppt2 = "ppt²",
+    soil2 = "soil²",
+    zeta = "Transfer state zeta",
+    name
   )
 }
 
@@ -755,4 +931,19 @@ build_convergence_trace_df <- function(fit_results) {
     return(data.frame())
   }
   do.call(rbind, traces)
+}
+
+trim_convergence_trace_df <- function(df, trim_start = convergence_trim_start_iter()) {
+  out <- df
+  mask <- out$iter < trim_start
+  out$elbo[mask] <- NA_real_
+  out$sigma[mask] <- NA_real_
+  out$gamma[mask] <- NA_real_
+  out
+}
+
+legend_grob <- function(plot_obj) {
+  g <- ggplot2::ggplotGrob(plot_obj)
+  idx <- which(vapply(g$grobs, function(x) x$name %||% "", character(1)) == "guide-box")
+  if (length(idx)) g$grobs[[idx[1]]] else NULL
 }
