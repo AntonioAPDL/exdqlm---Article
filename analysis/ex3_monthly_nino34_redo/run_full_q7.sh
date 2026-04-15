@@ -16,7 +16,7 @@ stamp="$(date +%Y%m%d_%H%M%S)"
 console_log="${log_dir}/console_${stamp}.log"
 pid_file="${log_dir}/monthly_nino34_q7_full.pid"
 
-setsid Rscript "${script_dir}/run_all.R" \
+nohup Rscript "${script_dir}/run_all.R" \
   --config "${config_path}" \
   > "${console_log}" 2>&1 < /dev/null &
 

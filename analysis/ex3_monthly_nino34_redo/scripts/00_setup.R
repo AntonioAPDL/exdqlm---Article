@@ -76,6 +76,49 @@ options(
 seed_base <- as.integer(config$runtime$seed)
 set.seed(seed_base)
 
+validate_ldvb_gamma_init <- function() {
+  gam_init <- config$model$ldvb$gam_init
+  if (is.null(gam_init) || is.na(gam_init)) {
+    return(invisible(NULL))
+  }
+  p_levels <- as.numeric(config$model$p_levels)
+  bad_rows <- lapply(p_levels, function(p0) {
+    bounds <- exdqlm::get_gamma_bounds(p0)
+    if (gam_init < bounds[["L"]] || gam_init > bounds[["U"]]) {
+      data.frame(
+        p0 = p0,
+        lower = as.numeric(bounds[["L"]]),
+        upper = as.numeric(bounds[["U"]]),
+        stringsAsFactors = FALSE
+      )
+    } else {
+      NULL
+    }
+  })
+  bad_rows <- Filter(Negate(is.null), bad_rows)
+  if (!length(bad_rows)) {
+    return(invisible(NULL))
+  }
+  bad <- do.call(rbind, bad_rows)
+  msg <- paste(
+    sprintf(
+      "  p0=%.2f requires gam.init in [%.6f, %.6f]",
+      bad$p0, bad$lower, bad$upper
+    ),
+    collapse = "\n"
+  )
+  stop(
+    sprintf(
+      "Configured gam.init=%.6f is incompatible with the requested quantile grid.\n%s",
+      as.numeric(gam_init),
+      msg
+    ),
+    call. = FALSE
+  )
+}
+
+validate_ldvb_gamma_init()
+
 save_png_plot <- function(filename, expr, width = config$plots$width,
                           height = config$plots$height, res = config$plots$res,
                           pointsize = config$plots$pointsize) {

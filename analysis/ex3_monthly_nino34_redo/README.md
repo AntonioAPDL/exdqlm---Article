@@ -138,8 +138,11 @@ That helper is intentionally manual. It will:
 - clear cached `.rds`, `.rda`, and `.RData` files under this workflow's output
   tree
 - clear stale runtime files under the full-run output tag
-- launch the run under `setsid`
+- launch the run under `nohup`
 - write a PID file, console log, and progress log
+
+The workflow also validates `gam.init` against the full requested quantile grid
+before any workers are launched, so incompatible starts fail fast at startup.
 
 ## Outputs
 

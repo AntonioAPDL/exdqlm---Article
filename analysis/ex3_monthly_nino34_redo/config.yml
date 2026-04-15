@@ -34,7 +34,7 @@ model:
     tol: 0.10
     n_samp: 40
     max_iter: 6
-    gam_init: -0.1
+    gam_init: 0.0
     sig_init: 0.10
     verbose: false
   priors:
