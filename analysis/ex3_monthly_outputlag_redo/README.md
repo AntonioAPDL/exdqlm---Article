@@ -67,12 +67,12 @@ The prepared full run currently uses:
 - seasonal harmonics:
   `1`, `2`, `0.1469118636`
 - direct discounts:
-  - trend `0.99`
-  - harmonics `0.99`, `0.99`, `0.99`
-  - covariate block `0.99`
+  - trend `0.9`
+  - harmonics `0.9`, `0.9`, `0.9`
+  - covariate block `0.9`
 - transfer settings:
   - `lam = 0.85`
-  - `tf.df = c(0.99, 0.99)`
+  - `tf.df = c(0.9, 0.9)`
 - LDVB settings:
   - `tol = 0.10`
   - `n.samp = 1000`
@@ -156,5 +156,16 @@ The workflow writes:
 - fit summaries
 - convergence tables
 - in-sample diagnostics tables
-- review figures for the data, fit windows, state paths, and convergence traces
+- review figures for the data, fit windows, regression / transfer state paths,
+  structural component paths, and convergence traces
 - a manifest summarizing the run
+
+The structural component figures are built from the cached posterior state draws,
+not from a Gaussian approximation. For each model family and review window, the
+workflow decomposes the latent structural block into:
+
+- `1` trend contribution
+- `3` seasonal contributions matching the configured harmonics
+
+and then summarizes each component with empirical `2.5%`, `50%`, and `97.5%`
+posterior behavior through the plotted mean and `95%` credible band.

@@ -9,6 +9,7 @@ ci_level <- uncertainty_level()
 ci_pct <- sprintf("%d%%", round(100 * ci_level))
 quant_cols <- quantile_palette(p_levels)
 trim_iter <- convergence_trim_start_iter()
+figure_cache_valid <- figure_data_cache_ok()
 
 read_cached_table <- function(filename, date_cols = NULL) {
   path <- file.path(table_dir, filename)
@@ -65,7 +66,8 @@ build_fit_period_obs <- function() {
 
 build_fit_period_data <- function() {
   cached_fit <- read_cached_table("ex3_monthly_fit_periods_summary.csv", date_cols = "date")
-  if (!is.null(cached_fit) &&
+  if (isTRUE(figure_cache_valid) &&
+      !is.null(cached_fit) &&
       labels_compatible(cached_fit$period_label, periods$period_label) &&
       labels_compatible(cached_fit$model_label, model_levels) &&
       labels_compatible(cached_fit$tau_label, tau_levels)) {
@@ -128,7 +130,8 @@ build_fit_period_data <- function() {
 build_transfer_state_data <- function() {
   cached_df <- read_cached_table("ex3_monthly_transfer_states_summary.csv", date_cols = "date")
   expected_state_levels <- c("Transfer state zeta", state_label_map(colnames(prep$X_train_scaled)))
-  if (!is.null(cached_df) &&
+  if (isTRUE(figure_cache_valid) &&
+      !is.null(cached_df) &&
       labels_compatible(cached_df$period_label, periods$period_label) &&
       labels_compatible(cached_df$tau_label, tau_levels) &&
       labels_compatible(cached_df$state_label, expected_state_levels)) {
@@ -199,7 +202,8 @@ build_transfer_state_data <- function() {
 build_direct_state_data <- function() {
   cached_df <- read_cached_table("ex3_monthly_direct_states_summary.csv", date_cols = "date")
   expected_state_levels <- state_label_map(colnames(prep$X_train_scaled))
-  if (!is.null(cached_df) &&
+  if (isTRUE(figure_cache_valid) &&
+      !is.null(cached_df) &&
       labels_compatible(cached_df$period_label, periods$period_label) &&
       labels_compatible(cached_df$tau_label, tau_levels) &&
       labels_compatible(cached_df$state_label, expected_state_levels)) {
@@ -248,9 +252,73 @@ build_direct_state_data <- function() {
   df
 }
 
+build_structural_component_data <- function(model_type = c("direct", "transfer")) {
+  model_type <- match.arg(model_type)
+  cache_name <- if (identical(model_type, "direct")) {
+    "ex3_monthly_direct_structural_components_summary.csv"
+  } else {
+    "ex3_monthly_transfer_structural_components_summary.csv"
+  }
+  cached_df <- read_cached_table(cache_name, date_cols = "date")
+  expected_component_levels <- structural_component_labels()
+  if (isTRUE(figure_cache_valid) &&
+      !is.null(cached_df) &&
+      labels_compatible(cached_df$period_label, periods$period_label) &&
+      labels_compatible(cached_df$tau_label, tau_levels) &&
+      labels_compatible(cached_df$component_label, expected_component_levels)) {
+    cached_df$period_label <- factor(cached_df$period_label, levels = periods$period_label)
+    cached_df$tau_label <- factor(cached_df$tau_label, levels = tau_levels)
+    cached_df$component_label <- factor(cached_df$component_label, levels = expected_component_levels)
+    return(cached_df)
+  }
+
+  fit_results <- get_fit_results()
+  out <- list()
+  row_id <- 0L
+
+  for (ii in seq_len(nrow(periods))) {
+    period_i <- periods[ii, ]
+    idx <- subset_idx(prep$fit_df$date, period_i$start, period_i$end)
+    if (!length(idx)) next
+
+    for (p0 in p_levels) {
+      key <- sprintf("p%03d", round(100 * p0))
+      res <- fit_results[[key]]
+      fit <- if (identical(model_type, "direct")) res$direct else res$transfer
+      if (!fit_ok(fit)) next
+
+      component_defs <- structural_component_definitions(
+        res = res,
+        model = if (identical(model_type, "direct")) "direct" else "transfer"
+      )
+      for (comp in component_defs) {
+        row_id <- row_id + 1L
+        out[[row_id]] <- component_series_summary(
+          fit = fit,
+          state_indices = comp$indices,
+          weights = comp$weights,
+          component_name = comp$component,
+          component_label = comp$label,
+          dates = prep$fit_df$date,
+          idx = idx,
+          p0 = p0,
+          period_label = period_i$period_label,
+          level = ci_level
+        )
+      }
+    }
+  }
+
+  df <- do.call(rbind, out)
+  df$period_label <- factor(df$period_label, levels = periods$period_label)
+  df$tau_label <- factor(df$tau_label, levels = tau_levels)
+  df$component_label <- factor(df$component_label, levels = expected_component_levels)
+  df
+}
+
 build_convergence_plot_data <- function() {
   conv_df <- read_cached_table("ex3_monthly_convergence_traces.csv")
-  if (is.null(conv_df)) {
+  if (is.null(conv_df) || !isTRUE(figure_cache_valid)) {
     fit_results <- get_fit_results()
     conv_df <- trim_convergence_trace_df(build_convergence_trace_df(fit_results), trim_start = trim_iter)
   }
@@ -408,6 +476,52 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
   )
 }
 
+render_structural_component_figure <- function(df, period_label, filename, title) {
+  period_df <- df[df$period_label == period_label, , drop = FALSE]
+  if (!nrow(period_df)) return(invisible(NULL))
+
+  component_levels <- structural_component_labels()
+  period_df$component_label <- factor(period_df$component_label, levels = component_levels)
+
+  plot_obj <- ggplot2::ggplot(
+    period_df,
+    ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
+  ) +
+    ggplot2::geom_hline(
+      yintercept = 0,
+      color = state_zero_line_color(),
+      linewidth = state_zero_line_linewidth(),
+      linetype = "solid"
+    ) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = lower, ymax = upper),
+      alpha = quantile_ribbon_alpha(),
+      color = NA,
+      show.legend = FALSE
+    ) +
+    ggplot2::geom_line(linewidth = 0.55, alpha = quantile_line_alpha()) +
+    ggplot2::facet_wrap(~ component_label, scales = "free_y", ncol = 2) +
+    ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
+    ggplot2::scale_fill_manual(values = quant_cols) +
+    ggplot2::labs(
+      title = title,
+      subtitle = sprintf(
+        "Posterior bands are empirical %s credible intervals from the cached state-draw decomposition.",
+        ci_pct
+      ),
+      x = NULL,
+      y = NULL
+    ) +
+    theme_ex3(base_size = 10) +
+    ggplot2::theme(
+      strip.text = ggplot2::element_text(size = 9.5, face = "bold"),
+      axis.text.x = ggplot2::element_text(size = 8),
+      axis.text.y = ggplot2::element_text(size = 8)
+    )
+
+  save_gg_plot(filename, plot_obj, width = 12.5, height = 9.5)
+}
+
 make_convergence_plot <- function(df, value_col, title, filename) {
   plot_df <- df[!is.na(df[[value_col]]), , drop = FALSE]
   subtitle <- sprintf(
@@ -460,34 +574,43 @@ make_convergence_plot <- function(df, value_col, title, filename) {
 fit_plot_data <- build_fit_period_data()
 transfer_state_data <- build_transfer_state_data()
 direct_state_data <- build_direct_state_data()
+transfer_structural_data <- build_structural_component_data("transfer")
+direct_structural_data <- build_structural_component_data("direct")
 convergence_df <- build_convergence_plot_data()
 
 save_csv_if_rows(fit_plot_data$fit, "ex3_monthly_fit_periods_summary.csv")
 save_csv_if_rows(transfer_state_data, "ex3_monthly_transfer_states_summary.csv")
 save_csv_if_rows(direct_state_data, "ex3_monthly_direct_states_summary.csv")
+save_csv_if_rows(transfer_structural_data, "ex3_monthly_transfer_structural_components_summary.csv")
+save_csv_if_rows(direct_structural_data, "ex3_monthly_direct_structural_components_summary.csv")
 save_csv_if_rows(convergence_df, "ex3_monthly_convergence_traces.csv")
+write_figure_data_signature()
 
 save_png_plot("ex3_monthly_data_overview.png", {
   graphics::par(mfrow = c(2, 1), mar = c(3, 4, 2, 1))
   graphics::plot(
     prep$fit_df$date, prep$fit_df$usgs_cfs_monthly_mean, type = "l", col = "grey35",
+    lwd = historical_obs_linewidth(),
     xlab = "", ylab = "monthly mean flow",
     main = "Monthly San Lorenzo flow (aggregated from daily data)"
   )
   graphics::points(
     prep$fit_df$date, prep$fit_df$usgs_cfs_monthly_mean,
-    pch = 16, cex = 0.25,
-    col = grDevices::adjustcolor("grey35", alpha.f = 0.7)
+    pch = 1, cex = 0.35,
+    lwd = 0.5,
+    col = grDevices::adjustcolor("grey35", alpha.f = 0.85)
   )
   graphics::plot(
     prep$fit_df$date, prep$y_train, type = "l", col = "#0b6e99",
+    lwd = historical_obs_linewidth(),
     xlab = "date", ylab = "log(monthly mean flow)",
     main = "Transformed monthly response used in the output-lag analysis"
   )
   graphics::points(
     prep$fit_df$date, prep$y_train,
-    pch = 16, cex = 0.25,
-    col = grDevices::adjustcolor("#0b6e99", alpha.f = 0.7)
+    pch = 1, cex = 0.35,
+    lwd = 0.5,
+    col = grDevices::adjustcolor("#0b6e99", alpha.f = 0.85)
   )
 })
 
@@ -503,15 +626,16 @@ fit_period_plot <- ggplot2::ggplot() +
     data = fit_plot_data$obs,
     ggplot2::aes(x = date, y = y),
     color = historical_obs_color(),
-    linewidth = 0.45
+    linewidth = historical_obs_linewidth()
   ) +
   ggplot2::geom_point(
     data = fit_plot_data$obs,
     ggplot2::aes(x = date, y = y),
     color = historical_obs_color(),
     size = historical_obs_point_size(),
-    shape = 16,
-    stroke = 0,
+    shape = historical_obs_shape(),
+    stroke = historical_obs_stroke(),
+    fill = NA,
     alpha = 0.9
   ) +
   ggplot2::geom_line(
@@ -565,6 +689,31 @@ render_state_figure(
   title = "Direct-model regression state paths during the dry / drought window (2012-2016)"
 )
 
+render_structural_component_figure(
+  df = transfer_structural_data,
+  period_label = periods$period_label[periods$period == "enso"],
+  filename = "ex3_monthly_transfer_structural_enso.png",
+  title = "Transfer-model structural components during the 1997-1999 comparison window"
+)
+render_structural_component_figure(
+  df = transfer_structural_data,
+  period_label = periods$period_label[periods$period == "drought"],
+  filename = "ex3_monthly_transfer_structural_drought.png",
+  title = "Transfer-model structural components during the dry / drought window (2012-2016)"
+)
+render_structural_component_figure(
+  df = direct_structural_data,
+  period_label = periods$period_label[periods$period == "enso"],
+  filename = "ex3_monthly_direct_structural_enso.png",
+  title = "Direct-model structural components during the 1997-1999 comparison window"
+)
+render_structural_component_figure(
+  df = direct_structural_data,
+  period_label = periods$period_label[periods$period == "drought"],
+  filename = "ex3_monthly_direct_structural_drought.png",
+  title = "Direct-model structural components during the dry / drought window (2012-2016)"
+)
+
 make_convergence_plot(
   df = convergence_df,
   value_col = "elbo",
@@ -584,4 +733,4 @@ make_convergence_plot(
   filename = "ex3_monthly_convergence_gamma.png"
 )
 
-log_progress("figures_written | monthly output-lag data, fit, state, and convergence figures completed")
+log_progress("figures_written | monthly output-lag data, fit, state, structural, and convergence figures completed")

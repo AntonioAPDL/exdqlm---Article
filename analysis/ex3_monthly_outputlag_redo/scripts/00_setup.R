@@ -232,6 +232,10 @@ fit_signature_path <- function() {
   file.path(cache_dir, "ex3_monthly_fit_signature.txt")
 }
 
+figure_data_signature_path <- function() {
+  file.path(table_dir, "ex3_monthly_figure_data_signature.txt")
+}
+
 feature_base_terms <- function() {
   terms <- config$model$features$base_terms %||% character()
   unique(as.character(terms))
@@ -293,6 +297,28 @@ fit_signature_object <- function() {
 
 write_fit_signature <- function() {
   writeLines(yaml::as.yaml(fit_signature_object()), con = fit_signature_path())
+}
+
+signature_file_text <- function(path) {
+  if (!file.exists(path)) return(NULL)
+  paste(readLines(path, warn = FALSE), collapse = "\n")
+}
+
+fit_signature_text <- function() {
+  signature_file_text(fit_signature_path())
+}
+
+figure_data_cache_ok <- function() {
+  current_sig <- fit_signature_text()
+  cached_sig <- signature_file_text(figure_data_signature_path())
+  !is.null(current_sig) && identical(current_sig, cached_sig)
+}
+
+write_figure_data_signature <- function() {
+  current_sig <- fit_signature_text()
+  if (is.null(current_sig)) return(invisible(FALSE))
+  writeLines(current_sig, con = figure_data_signature_path())
+  invisible(TRUE)
 }
 
 fit_cache_status <- function() {
@@ -661,6 +687,9 @@ convergence_trim_start_iter <- function() {
 
 historical_obs_color <- function() as.character(config$plots$historical_obs_color %||% "grey60")
 historical_obs_point_size <- function() as.numeric(config$plots$historical_obs_point_size %||% 0.65)
+historical_obs_linewidth <- function() as.numeric(config$plots$historical_obs_linewidth %||% 0.45)
+historical_obs_shape <- function() as.integer(config$plots$historical_obs_shape %||% 1L)
+historical_obs_stroke <- function() as.numeric(config$plots$historical_obs_stroke %||% 0.35)
 state_zero_line_color <- function() as.character(config$plots$state_zero_line_color %||% "#8c6d1f")
 state_zero_line_linewidth <- function() as.numeric(config$plots$state_zero_line_linewidth %||% 0.55)
 quantile_line_alpha <- function() as.numeric(config$plots$quantile_line_alpha %||% 0.72)
@@ -715,6 +744,26 @@ posterior_quantile_draw_matrix <- function(fit, idx) {
   draws
 }
 
+linear_component_draw_matrix <- function(fit, state_indices, weights, idx) {
+  idx <- as.integer(idx)
+  state_indices <- as.integer(state_indices)
+  weights <- as.numeric(weights)
+  theta <- fit$samp.theta[state_indices, idx, , drop = FALSE]
+  ns <- dim(theta)[3]
+  draws <- vapply(seq_len(ns), function(s) {
+    theta_s <- matrix(
+      theta[, , s, drop = TRUE],
+      nrow = length(state_indices),
+      ncol = length(idx)
+    )
+    as.numeric(crossprod(weights, theta_s))
+  }, numeric(length(idx)))
+  if (is.null(dim(draws))) {
+    draws <- matrix(draws, nrow = length(idx), ncol = 1L)
+  }
+  draws
+}
+
 summarize_draw_matrix <- function(draws, level = uncertainty_level()) {
   probs <- posterior_ci_probs(level)
   data.frame(
@@ -762,6 +811,29 @@ state_series_summary <- function(fit, state_index, state_name, state_label,
   )
 }
 
+component_series_summary <- function(fit, state_indices, weights,
+                                     component_name, component_label,
+                                     dates, idx, p0, period_label,
+                                     level = uncertainty_level()) {
+  draws <- linear_component_draw_matrix(
+    fit = fit,
+    state_indices = state_indices,
+    weights = weights,
+    idx = idx
+  )
+  summary_df <- summarize_draw_matrix(draws, level = level)
+  data.frame(
+    date = dates[idx],
+    period_label = period_label,
+    component = component_name,
+    component_label = component_label,
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    summary_df,
+    stringsAsFactors = FALSE
+  )
+}
+
 transfer_state_indices <- function(res, prep) {
   base_p <- length(res$transfer_spec$base_model$m0)
   k <- ncol(prep$X_train_scaled)
@@ -797,6 +869,61 @@ state_label_map <- function(name) {
     zeta = "Transfer state zeta",
     name
   )
+}
+
+structural_component_labels <- function() {
+  seasonal_period <- as.numeric(config$model$seasonal_period)
+  harmonics <- as.numeric(config$model$seasonal_harmonics)
+  c(
+    "Trend component",
+    vapply(seq_along(harmonics), function(jj) {
+      cycle_months <- seasonal_period / harmonics[jj]
+      cycle_label <- if (abs(cycle_months - round(cycle_months)) < 1e-6) {
+        sprintf("%d-month cycle", as.integer(round(cycle_months)))
+      } else {
+        sprintf("%.2f-month cycle", cycle_months)
+      }
+      sprintf("Seasonal component %d (%s)", jj, cycle_label)
+    }, character(1))
+  )
+}
+
+structural_component_definitions <- function(res, model = c("direct", "transfer")) {
+  model <- match.arg(model)
+  base_model <- if (identical(model, "direct")) {
+    res$direct_spec$base_model
+  } else {
+    res$transfer_spec$base_model
+  }
+  ff <- as.numeric(base_model$FF)
+  trend_order <- as.integer(config$model$trend_order)
+  labels <- structural_component_labels()
+  defs <- list()
+
+  if (trend_order > 0L) {
+    idx <- seq_len(trend_order)
+    defs[[length(defs) + 1L]] <- list(
+      component = "trend",
+      label = labels[1],
+      indices = idx,
+      weights = ff[idx]
+    )
+  }
+
+  cursor <- trend_order
+  seasonal_harmonics <- as.numeric(config$model$seasonal_harmonics)
+  for (jj in seq_along(seasonal_harmonics)) {
+    idx <- seq.int(cursor + 1L, cursor + 2L)
+    defs[[length(defs) + 1L]] <- list(
+      component = sprintf("seasonal_%d", jj),
+      label = labels[jj + 1L],
+      indices = idx,
+      weights = ff[idx]
+    )
+    cursor <- cursor + 2L
+  }
+
+  defs
 }
 
 convergence_trace_for_fit <- function(fit, p0, model) {

@@ -1,0 +1,52 @@
+pkg_ref: 668685f
+fit_start: '1987-01-01'
+fit_end: '2026-03-01'
+response_transform: log
+response_col: usgs_cfs
+aggregation: monthly_mean
+p_levels:
+- 0.15
+- 0.5
+trend_order: 1.0
+seasonal_period: 12.0
+seasonal_harmonics:
+- 1.0
+- 2.0
+- 0.1469119
+features:
+  base_terms: []
+  lag_terms:
+  - flow
+  - flow_sq
+  lag_months:
+  - 1.0
+  - 2.0
+  - 3.0
+  - 4.0
+  - 5.0
+  - 6.0
+discounts:
+  trend: 0.9
+  harmonics:
+  - 0.9
+  - 0.9
+  - 0.9
+  covariates: 0.9
+transfer:
+  lam: 0.85
+  tf_df:
+  - 0.9
+  - 0.9
+ldvb:
+  tol: 0.1
+  n_samp: 40.0
+  max_iter: 6.0
+  gam_init: 0.0
+  sig_init: 0.1
+priors:
+  trend_c0: 0.1
+  seasonal_c0: 1.0
+  reg_c0: 1.0
+  transfer_zeta_c0: 0.1
+  transfer_psi_c0: 0.005
+
