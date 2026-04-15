@@ -1,0 +1,69 @@
+runtime:
+  seed: 20260414
+  pkg_path: /home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
+  output_tag: monthly_nino34_launchcheck
+  parallel: true
+  workers: 2
+  reuse_fit_cache: true
+
+data:
+  daily_input_path: /home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv
+  response_col: usgs_cfs
+  fit_start: 1987-01-01
+  fit_end: 2021-04-01
+  response_transform: log
+  aggregation: monthly_mean
+
+model:
+  p_levels: [0.15, 0.50]
+  trend_order: 1
+  seasonal_period: 12
+  seasonal_harmonics: [1.0]
+  features:
+    base_terms: [nino34, nino34_sq]
+    lag_terms: [nino34]
+    lag_months: [1, 2, 3]
+  discounts:
+    trend: 1.0
+    harmonics: [0.9]
+    covariates: 0.95
+  transfer:
+    lam: 0.85
+    tf_df: [0.95, 0.95]
+  ldvb:
+    tol: 0.10
+    n_samp: 40
+    max_iter: 6
+    gam_init: -0.1
+    sig_init: 0.10
+    verbose: false
+  priors:
+    trend_c0: 0.1
+    seasonal_c0: 1.0
+    reg_c0: 1.0
+    transfer_zeta_c0: 0.1
+    transfer_psi_c0: 0.005
+
+plots:
+  width: 11
+  height: 7
+  res: 220
+  pointsize: 11
+  convergence_trim_start_iter: 5
+  uncertainty_level: 0.95
+  historical_obs_color: "#8e8e8e"
+  historical_obs_point_size: 0.7
+  state_zero_line_color: "#8c6d1f"
+  state_zero_line_linewidth: 0.55
+  quantile_line_alpha: 0.72
+  quantile_ribbon_alpha: 0.06
+  quantile_palette: ["#7f0000", "#111111", "#053061"]
+  periods:
+    enso:
+      label: Strong El Nino (1997-1999)
+      start: 1997-01-01
+      end: 1999-12-01
+    drought:
+      label: Dry / drought (2012-2016)
+      start: 2012-01-01
+      end: 2016-12-01
