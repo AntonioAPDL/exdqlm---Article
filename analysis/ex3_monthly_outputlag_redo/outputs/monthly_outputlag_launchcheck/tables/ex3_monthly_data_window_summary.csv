@@ -1,0 +1,2 @@
+"monthly_start","monthly_end","monthly_n","fit_start_requested","fit_end_requested","fit_start_modeled","fit_end_modeled","fit_n_modeled","dropped_for_lags","n_features","base_feature_terms","lag_feature_terms","feature_lag_months","response_transform"
+"1987-01-01","2026-03-01",471,"1987-01-01","2026-03-01","1987-07-01","2026-03-01",465,6,12,"","flow,flow_sq","1,2,3,4,5,6","log"

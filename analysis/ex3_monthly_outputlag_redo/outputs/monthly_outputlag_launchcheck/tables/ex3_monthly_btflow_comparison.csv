@@ -1,0 +1,2 @@
+"overlap_start","overlap_end","overlap_n","fit_start_requested","fit_end_requested","fit_start_modeled","fit_end_modeled","fit_n_modeled","corr_raw","corr_log","max_abs_diff","median_abs_diff"
+"1987-01-01","2021-04-01",412,"1987-01-01","2026-03-01","1987-07-01","2026-03-01",465,0.999999877684395,0.999993164962299,1.92,0.0295161290322588
