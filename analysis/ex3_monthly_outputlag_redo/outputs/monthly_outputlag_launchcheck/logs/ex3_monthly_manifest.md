@@ -2,7 +2,7 @@
 
 - config path: `/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_outputlag_redo/config_launchcheck.yml`
 - output tag: `monthly_outputlag_launchcheck`
-- article repo snapshot at rerun: `3d6771f`
+- article repo snapshot at rerun: `65ccf34`
 - package repo snapshot at rerun: `668685f`
 - staged daily data path: `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
 - staged daily data sha256: `1ee2854398a8ed93fb171fa04e2a81c824dc7ab933e37bb80068a25cdbc4a69a`
@@ -25,14 +25,14 @@
 
 ## Fit status snapshot
 
-- p0=0.15 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.170 | median.kt=NA
-- p0=0.15 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.436 | median.kt=33.37040
-- p0=0.50 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.045 | median.kt=NA
-- p0=0.50 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.113 | median.kt=33.98655
+- p0=0.15 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=11.989 | median.kt=NA
+- p0=0.15 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.226 | median.kt=32.35584
+- p0=0.50 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.243 | median.kt=NA
+- p0=0.50 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.888 | median.kt=32.91911
 
 ## Diagnostics snapshot
 
-- p0=0.15 | direct_regression | KL=0.8050994 | CRPS=0.2350358 | pplc= 239.7550 | runtime=12.170
-- p0=0.15 | transfer_function | KL=1.2177695 | CRPS=0.2013805 | pplc= 200.3117 | runtime=13.436
-- p0=0.50 | direct_regression | KL=0.5980238 | CRPS=2.5886993 | pplc=2136.1797 | runtime=12.045
-- p0=0.50 | transfer_function | KL=0.9011255 | CRPS=2.1339435 | pplc=1771.7741 | runtime=13.113
+- p0=0.15 | direct_regression | KL=0.4993919 | CRPS=0.2097694 | pplc= 205.0672 | runtime=11.989
+- p0=0.15 | transfer_function | KL=0.8051852 | CRPS=0.2039456 | pplc= 195.2905 | runtime=13.226
+- p0=0.50 | direct_regression | KL=0.2907586 | CRPS=2.3842172 | pplc=1963.9960 | runtime=12.243
+- p0=0.50 | transfer_function | KL=0.5196081 | CRPS=2.1603015 | pplc=1797.1287 | runtime=12.888

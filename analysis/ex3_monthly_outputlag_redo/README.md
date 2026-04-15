@@ -67,8 +67,8 @@ The prepared full run currently uses:
 - seasonal harmonics:
   `1`, `2`, `0.1469118636`
 - direct discounts:
-  - trend `1.0`
-  - harmonics `0.9`, `0.9`, `0.9`
+  - trend `0.95`
+  - harmonics `0.95`, `0.95`, `0.95`
   - covariate block `0.95`
 - transfer settings:
   - `lam = 0.85`

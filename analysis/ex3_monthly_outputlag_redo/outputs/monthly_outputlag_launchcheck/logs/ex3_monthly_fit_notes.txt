@@ -1,8 +1,8 @@
 p0 = 0.15
-  direct_regression | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.170
-  transfer_function | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.436 | median.kt=33.37040
+  direct_regression | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=11.989
+  transfer_function | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.226 | median.kt=32.35584
 
 p0 = 0.50
-  direct_regression | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.045
-  transfer_function | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.113 | median.kt=33.98655
+  direct_regression | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.243
+  transfer_function | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.888 | median.kt=32.91911
 
