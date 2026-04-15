@@ -24,12 +24,12 @@ model:
     lag_terms: [flow, flow_sq]
     lag_months: [1, 2, 3, 4, 5, 6]
   discounts:
-    trend: 0.95
-    harmonics: [0.95, 0.95, 0.95]
-    covariates: 0.95
+    trend: 0.99
+    harmonics: [0.99, 0.99, 0.99]
+    covariates: 0.99
   transfer:
     lam: 0.85
-    tf_df: [0.95, 0.95]
+    tf_df: [0.99, 0.99]
   ldvb:
     tol: 0.10
     n_samp: 40

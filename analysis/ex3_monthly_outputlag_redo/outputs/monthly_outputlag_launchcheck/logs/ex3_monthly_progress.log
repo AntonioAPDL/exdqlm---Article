@@ -1,24 +1,24 @@
-[2026-04-14 22:28:59] pid=625518 | run_start | config=/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_outputlag_redo/config_launchcheck.yml | output_tag=monthly_outputlag_launchcheck | targets=prep,fit,figures,manifest
-[2026-04-14 22:28:59] pid=625518 | step_start | step=prep
-[2026-04-14 22:28:59] pid=625518 | prep_summary | monthly_n=471 | fit_n=465 | monthly_window=1987-01-01:2026-03-01 | modeled_window=1987-07-01:2026-03-01
-[2026-04-14 22:28:59] pid=625518 | step_done | step=prep
-[2026-04-14 22:28:59] pid=625518 | step_start | step=fit
-[2026-04-14 22:28:59] pid=625608 | fit_start | p0=0.15 | model=direct_regression | seed=20260415
-[2026-04-14 22:28:59] pid=625609 | fit_start | p0=0.50 | model=direct_regression | seed=20260416
-[2026-04-14 22:29:13] pid=625608 | fit_done | p0=0.15 | model=direct_regression | iter=6 | converged=FALSE | runtime=11.989
-[2026-04-14 22:29:13] pid=625608 | fit_start | p0=0.15 | model=transfer_function | seed=20260415
-[2026-04-14 22:29:13] pid=625609 | fit_done | p0=0.50 | model=direct_regression | iter=6 | converged=FALSE | runtime=12.243
-[2026-04-14 22:29:13] pid=625609 | fit_start | p0=0.50 | model=transfer_function | seed=20260416
-[2026-04-14 22:29:27] pid=625608 | fit_done | p0=0.15 | model=transfer_function | iter=6 | converged=FALSE | runtime=13.226 | median.kt=32.35584
-[2026-04-14 22:29:27] pid=625609 | fit_done | p0=0.50 | model=transfer_function | iter=6 | converged=FALSE | runtime=12.888 | median.kt=32.91911
-[2026-04-14 22:29:30] pid=625518 | fit_cache_written | cache=ex3_monthly_fits_ldvb.rds | signature=ex3_monthly_fit_signature.txt
-[2026-04-14 22:29:30] pid=625518 | fit_summary_written | rows=4 | convergence_rows=4 | diagnostics_rows=4
-[2026-04-14 22:29:30] pid=625518 | fit_notes_written | ex3_monthly_fit_notes.txt
-[2026-04-14 22:29:30] pid=625518 | step_done | step=fit
-[2026-04-14 22:29:30] pid=625518 | step_start | step=figures
-[2026-04-14 22:29:45] pid=625518 | figures_written | monthly output-lag data, fit, state, and convergence figures completed
-[2026-04-14 22:29:45] pid=625518 | step_done | step=figures
-[2026-04-14 22:29:45] pid=625518 | step_start | step=manifest
-[2026-04-14 22:29:45] pid=625518 | manifest_written | ex3_monthly_manifest.md
-[2026-04-14 22:29:45] pid=625518 | step_done | step=manifest
-[2026-04-14 22:29:45] pid=625518 | run_done | all requested steps completed
+[2026-04-14 22:58:10] pid=681044 | run_start | config=/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_outputlag_redo/config_launchcheck.yml | output_tag=monthly_outputlag_launchcheck | targets=prep,fit,figures,manifest
+[2026-04-14 22:58:10] pid=681044 | step_start | step=prep
+[2026-04-14 22:58:10] pid=681044 | prep_summary | monthly_n=471 | fit_n=465 | monthly_window=1987-01-01:2026-03-01 | modeled_window=1987-07-01:2026-03-01
+[2026-04-14 22:58:10] pid=681044 | step_done | step=prep
+[2026-04-14 22:58:10] pid=681044 | step_start | step=fit
+[2026-04-14 22:58:10] pid=681136 | fit_start | p0=0.15 | model=direct_regression | seed=20260415
+[2026-04-14 22:58:10] pid=681137 | fit_start | p0=0.50 | model=direct_regression | seed=20260416
+[2026-04-14 22:58:24] pid=681136 | fit_done | p0=0.15 | model=direct_regression | iter=6 | converged=FALSE | runtime=12.019
+[2026-04-14 22:58:24] pid=681136 | fit_start | p0=0.15 | model=transfer_function | seed=20260415
+[2026-04-14 22:58:24] pid=681137 | fit_done | p0=0.50 | model=direct_regression | iter=6 | converged=FALSE | runtime=12.186
+[2026-04-14 22:58:24] pid=681137 | fit_start | p0=0.50 | model=transfer_function | seed=20260416
+[2026-04-14 22:58:38] pid=681136 | fit_done | p0=0.15 | model=transfer_function | iter=6 | converged=FALSE | runtime=13.259 | median.kt=27.63251
+[2026-04-14 22:58:38] pid=681137 | fit_done | p0=0.50 | model=transfer_function | iter=6 | converged=FALSE | runtime=13.371 | median.kt=27.81882
+[2026-04-14 22:58:40] pid=681044 | fit_cache_written | cache=ex3_monthly_fits_ldvb.rds | signature=ex3_monthly_fit_signature.txt
+[2026-04-14 22:58:40] pid=681044 | fit_summary_written | rows=4 | convergence_rows=4 | diagnostics_rows=4
+[2026-04-14 22:58:40] pid=681044 | fit_notes_written | ex3_monthly_fit_notes.txt
+[2026-04-14 22:58:40] pid=681044 | step_done | step=fit
+[2026-04-14 22:58:40] pid=681044 | step_start | step=figures
+[2026-04-14 22:58:55] pid=681044 | figures_written | monthly output-lag data, fit, state, and convergence figures completed
+[2026-04-14 22:58:55] pid=681044 | step_done | step=figures
+[2026-04-14 22:58:55] pid=681044 | step_start | step=manifest
+[2026-04-14 22:58:55] pid=681044 | manifest_written | ex3_monthly_manifest.md
+[2026-04-14 22:58:55] pid=681044 | step_done | step=manifest
+[2026-04-14 22:58:55] pid=681044 | run_done | all requested steps completed

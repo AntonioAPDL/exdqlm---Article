@@ -2,7 +2,7 @@
 
 - config path: `/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_outputlag_redo/config_launchcheck.yml`
 - output tag: `monthly_outputlag_launchcheck`
-- article repo snapshot at rerun: `65ccf34`
+- article repo snapshot at rerun: `1862548`
 - package repo snapshot at rerun: `668685f`
 - staged daily data path: `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
 - staged daily data sha256: `1ee2854398a8ed93fb171fa04e2a81c824dc7ab933e37bb80068a25cdbc4a69a`
@@ -15,7 +15,7 @@
 - feature lag terms: `flow, flow_sq`
 - feature lag months: `1, 2, 3, 4, 5, 6`
 - LDVB settings: tol=0.1, n.samp=40, max_iter=6, gam.init=0, sig.init=0.1
-- transfer settings: lam=0.85, tf.df=0.95, 0.95
+- transfer settings: lam=0.85, tf.df=0.99, 0.99
 - BTflow comparison: corr_raw=0.999999877684395, corr_log=0.999993164962299, max_abs_diff=1.92
 
 ## Output files
@@ -25,14 +25,14 @@
 
 ## Fit status snapshot
 
-- p0=0.15 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=11.989 | median.kt=NA
-- p0=0.15 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.226 | median.kt=32.35584
-- p0=0.50 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.243 | median.kt=NA
-- p0=0.50 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.888 | median.kt=32.91911
+- p0=0.15 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.019 | median.kt=NA
+- p0=0.15 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.259 | median.kt=27.63251
+- p0=0.50 | direct_regression | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=12.186 | median.kt=NA
+- p0=0.50 | transfer_function | status=ok | iter=6 | converged=FALSE | hit_iter_cap=TRUE | runtime=13.371 | median.kt=27.81882
 
 ## Diagnostics snapshot
 
-- p0=0.15 | direct_regression | KL=0.4993919 | CRPS=0.2097694 | pplc= 205.0672 | runtime=11.989
-- p0=0.15 | transfer_function | KL=0.8051852 | CRPS=0.2039456 | pplc= 195.2905 | runtime=13.226
-- p0=0.50 | direct_regression | KL=0.2907586 | CRPS=2.3842172 | pplc=1963.9960 | runtime=12.243
-- p0=0.50 | transfer_function | KL=0.5196081 | CRPS=2.1603015 | pplc=1797.1287 | runtime=12.888
+- p0=0.15 | direct_regression | KL=0.23935640 | CRPS=0.3686590 | pplc=  95.10828 | runtime=12.019
+- p0=0.15 | transfer_function | KL=0.20363050 | CRPS=0.3713092 | pplc=  97.72482 | runtime=13.259
+- p0=0.50 | direct_regression | KL=0.08663709 | CRPS=1.3440723 | pplc=1082.96671 | runtime=12.186
+- p0=0.50 | transfer_function | KL=0.07005799 | CRPS=1.3723621 | pplc=1121.07452 | runtime=13.371

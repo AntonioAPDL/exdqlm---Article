@@ -1,5 +1,0 @@
-[2026-04-14 22:28:59] pid=625519 | run_start | config=/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_outputlag_redo/config_q7_full.yml | output_tag=monthly_outputlag_q7_full | targets=prep
-[2026-04-14 22:28:59] pid=625519 | step_start | step=prep
-[2026-04-14 22:28:59] pid=625519 | prep_summary | monthly_n=471 | fit_n=465 | monthly_window=1987-01-01:2026-03-01 | modeled_window=1987-07-01:2026-03-01
-[2026-04-14 22:28:59] pid=625519 | step_done | step=prep
-[2026-04-14 22:28:59] pid=625519 | run_done | all requested steps completed
