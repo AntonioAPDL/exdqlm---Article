@@ -64,10 +64,10 @@ The prepared full run currently uses:
 - seasonal period:
   `12`
 - seasonal harmonics:
-  `1`
+  `1`, `2`, `0.1469118636`
 - direct discounts:
   - trend `1.0`
-  - harmonic `0.9`
+  - harmonics `0.9`, `0.9`, `0.9`
   - covariate block `0.95`
 - transfer settings:
   - `lam = 0.85`
@@ -75,6 +75,18 @@ The prepared full run currently uses:
 
 These are manuscript-consistent starting values for a monthly Nino34-based
 contrast, and they can be changed later in the YAML configs if needed.
+
+The seasonal harmonics are chosen to match the daily redesign's annualized
+structure after changing the time base from daily to monthly:
+
+- `h = 1` gives a 12-month cycle
+- `h = 2` gives a 6-month cycle
+- `h = 0.1469118636` gives an `12 / 0.1469118636 ≈ 81.68` month cycle,
+  or about `6.81` years
+
+Because `seasMod()` parameterizes each harmonic through `w = h * 2 * pi / p`,
+keeping the same `h` values while changing `p` from an annual daily period to
+an annual monthly period preserves the same cycles-per-year interpretation.
 
 ## Run
 
