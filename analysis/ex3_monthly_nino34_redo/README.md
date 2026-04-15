@@ -46,13 +46,12 @@ modeled window begins after the initial lag burn-in.
 The prepared feature recipe uses:
 
 - `nino34`
-- `nino34_sq`
 - `nino34_lag1`
 - `nino34_lag2`
 - `nino34_lag3`
 
-The direct-regression model uses those 5 standardized features in `regMod(X)`.
-The transfer-function model uses the same 5 standardized features in the
+The direct-regression model uses those 4 standardized features in `regMod(X)`.
+The transfer-function model uses the same 4 standardized features in the
 multivariate transfer wrapper from the `0.4.0` package branch.
 
 The prepared full run currently uses:
@@ -66,12 +65,12 @@ The prepared full run currently uses:
 - seasonal harmonics:
   `1`, `2`, `0.1469118636`
 - direct discounts:
-  - trend `1.0`
-  - harmonics `0.9`, `0.9`, `0.9`
-  - covariate block `0.95`
+  - trend `0.97`
+  - harmonics `0.97`, `0.97`, `0.97`
+  - covariate block `0.97`
 - transfer settings:
   - `lam = 0.85`
-  - `tf.df = c(0.95, 0.95)`
+  - `tf.df = c(0.97, 0.97)`
 
 These are manuscript-consistent starting values for a monthly Nino34-based
 contrast, and they can be changed later in the YAML configs if needed.

@@ -233,7 +233,7 @@ fit_signature_path <- function() {
 }
 
 feature_base_terms <- function() {
-  terms <- config$model$features$base_terms %||% c("nino34", "nino34_sq")
+  terms <- config$model$features$base_terms %||% c("nino34")
   unique(as.character(terms))
 }
 

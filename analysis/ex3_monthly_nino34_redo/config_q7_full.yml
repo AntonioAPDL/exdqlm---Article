@@ -20,16 +20,16 @@ model:
   seasonal_period: 12
   seasonal_harmonics: [1.0, 2.0, 0.1469118636]
   features:
-    base_terms: [nino34, nino34_sq]
+    base_terms: [nino34]
     lag_terms: [nino34]
     lag_months: [1, 2, 3]
   discounts:
-    trend: 1.0
-    harmonics: [0.9, 0.9, 0.9]
-    covariates: 0.95
+    trend: 0.97
+    harmonics: [0.97, 0.97, 0.97]
+    covariates: 0.97
   transfer:
     lam: 0.85
-    tf_df: [0.95, 0.95]
+    tf_df: [0.97, 0.97]
   ldvb:
     tol: 0.10
     n_samp: 1000
