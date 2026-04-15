@@ -26,17 +26,17 @@ features:
   - 5.0
   - 6.0
 discounts:
-  trend: 0.9
+  trend: 0.95
   harmonics:
-  - 0.9
-  - 0.9
-  - 0.9
-  covariates: 0.9
+  - 0.95
+  - 0.95
+  - 0.95
+  covariates: 0.95
 transfer:
   lam: 0.85
   tf_df:
-  - 0.9
-  - 0.9
+  - 0.95
+  - 0.95
 ldvb:
   tol: 0.1
   n_samp: 40.0

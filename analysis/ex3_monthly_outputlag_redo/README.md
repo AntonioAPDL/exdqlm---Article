@@ -67,12 +67,12 @@ The prepared full run currently uses:
 - seasonal harmonics:
   `1`, `2`, `0.1469118636`
 - direct discounts:
-  - trend `0.9`
-  - harmonics `0.9`, `0.9`, `0.9`
-  - covariate block `0.9`
+  - trend `0.95`
+  - harmonics `0.95`, `0.95`, `0.95`
+  - covariate block `0.95`
 - transfer settings:
   - `lam = 0.85`
-  - `tf.df = c(0.9, 0.9)`
+  - `tf.df = c(0.95, 0.95)`
 - LDVB settings:
   - `tol = 0.10`
   - `n.samp = 1000`
