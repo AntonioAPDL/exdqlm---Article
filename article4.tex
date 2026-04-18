@@ -196,7 +196,7 @@ y_t | \boldsymbol{\theta}_t,\gamma,\sigma  & \sim \text{exAL}_{p_0}({\bf F}'_t \
 Here $\zeta_{t}$ captures the effect of the current and past regression effects on the quantile at time $t$. Alternatively, the parameter $\psi_{t}$ determines the instantaneous effect $X_t$ has on the quantile. The parameter $\lambda\in[0,1]$ represents the memory of the regression effect up to time $t$. This effect decays at an exponential rate, reducing by a factor of $\lambda$ at every time step. More explicitly, the effect of $X_t$ on the quantile at time $t+k$ is $\lambda^k \psi_{t-1}X_t$. Thus, the series $k_t \geq \frac{\log(\epsilon) - \log(|\psi_{t-1}X_t|)}{\log(\lambda)}$ represents a lower bound for the number of time steps until the effect of $X_t$ is less than or equal to a fixed $\epsilon$. The median value of $k_t$ corresponding to $\epsilon = 1\mathrm{e}{-3}$ is included as an output of our transfer function routine.
 
 Conditional on a fixed $\lambda$, say $\tilde\lambda$, \aA{we augment the dynamic fitting routines} to incorporate the transfer function structure by simply replacing ${\bf F}_t, {\boldsymbol{\theta}}_t, {\bf G}_t,$ and ${\bf W}_t$ in Equations \eqref{EQ:exDLM}-\eqref{EQ:exDLMevo} with $\tilde{\bf F}'_t = ({\bf F}'_t, 1,0)$, $\tilde{\boldsymbol{\theta}}'_t = ({\boldsymbol{\theta}}'_t,\zeta_{t},\psi_{t})$, $\tilde{\bf G}_t = \text{blockdiag}\left\{{\bf G}_t,\left(\begin{smallmatrix}
-\tilde\lambda & X_{t} \\ 0 & 1 \end{smallmatrix} \right)\right\}$, and  $\tilde{\bf W}_t = \text{blockdiag}\left\{{\bf W}_t,\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)\right\}$, respectively. This augmentation is implemented in the functions \code{transfn_exdqlmLDVB()} and \code{transfn_exdqlmMCMC()}, which extend the routines found in \code{exdqlmLDVB()} and \code{exdqlmMCMC()}.
+\tilde\lambda & X_{t} \\ 0 & 1 \end{smallmatrix} \right)\right\}$, and  $\tilde{\bf W}_t = \text{blockdiag}\left\{{\bf W}_t,\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)\right\}$, respectively. This augmentation is implemented in the functions \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}, which extend the routines found in \code{exdqlmLDVB()} and \code{exdqlmMCMC()}.
 
 Similar to the specification of $\bf{W}_t$ discussed in Section \ref{sec:dfs}, discount factors $(\delta_\zeta,\delta_\psi)$ are utilized to specify $\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)$. A bivariate normal conjugate prior on $(\zeta_{0},\psi_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$ completes the transfer function model extension. Table \ref{table:tf} shows the additional parameters used in the transfer-function fitting routines, as well as their mathematical symbols discussed in this section.
 
@@ -223,9 +223,9 @@ Similar to the specification of $\bf{W}_t$ discussed in Section \ref{sec:dfs}, d
 The first special case of our exDQLM arises from the fact that the exAL is an extension of the AL \citep{yan2025family}. When $\gamma = 0$, the
 observational error $\epsilon_t$ in Equation \eqref{EQ:exDLM} reduces such that $\epsilon_t \sim \text{exAL}_{p_0}(\epsilon_t |0,\sigma,\gamma) = \text{AL}_{p_0}(\epsilon_t |0,\sigma)$. This special case with observational errors distributed independently from an AL is the dynamic quantile linear model (DQLM) presented in \cite{gonccalves2017dynamic}. The DQLM can be implemented with our package using the parameter \code{dqlm.ind = TRUE}.
 
-Non-time-varying quantile regression is also a special case of our methodology. More specifically, when discount factors are set to 1, the evolution covariance ${\bf W}_t$ reduces to ${\bf 0}$ resulting in non-time-varying parameters \citep{west1985dynamic}. Thus, the model reduces to the static exAL regression methodology of \cite{yan2025family}. \aA{The static exAL special case is implemented directly in the package.} This model can be implemented using our functions \code{exal_static_mcmc()} or \code{exal_static_LDVB()}, which provide MCMC and VB algorithms, respectively.
+Non-time-varying quantile regression is also a special case of our methodology. More specifically, when discount factors are set to 1, the evolution covariance ${\bf W}_t$ reduces to ${\bf 0}$ resulting in non-time-varying parameters \citep{west1985dynamic}. Thus, the model reduces to the static exAL regression methodology of \cite{yan2025family}. \aA{The static exAL special case is implemented directly in the package.} This model can be implemented using our functions \code{exalStaticMCMC()} or \code{exalStaticLDVB()}, which provide MCMC and VB algorithms, respectively.
 
-The final special case is the intersection of the previous two. A static quantile regression model with observational errors distributed according to an AL corresponds to Bayesian linear quantile regression under the AL working likelihood, first presented in \cite{yu2001bayesian}. This methodology, utilized to create the Bayesian package for quantile regression \pkg{bayesQR}, can also be implemented with our package using functions \code{exal_static_mcmc()} or \code{exal_static_LDVB()} with parameter \code{dqlm.ind = TRUE}, which acts as a convenience flag fixing $\gamma = 0$.
+The final special case is the intersection of the previous two. A static quantile regression model with observational errors distributed according to an AL corresponds to Bayesian linear quantile regression under the AL working likelihood, first presented in \cite{yu2001bayesian}. This methodology, utilized to create the Bayesian package for quantile regression \pkg{bayesQR}, can also be implemented with our package using functions \code{exalStaticMCMC()} or \code{exalStaticLDVB()} with parameter \code{dqlm.ind = TRUE}, which acts as a convenience flag fixing $\gamma = 0$.
 
 Examples of these special cases can be found in Section 4. A static quantile regression example specifically can be found in Section \ref{sec:ex4static}. For further details on the methodology outlined in this section, see \cite{me}.
 
@@ -319,19 +319,19 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Model fitting} -- Input \code{exdqlm} objects} \\
     \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Estimate the posterior with MCMC algorithm.\\
     \code{exdqlmLDVB()} & \code{exdqlmLDVB} & \aA{Estimate the posterior with a VB approximation.}\\
-    \code{transfn_exdqlmLDVB()} & \code{exdqlmLDVB} & \aA{Estimate the transfer-function exDQLM with a VB approximation.}\\
-    \code{transfn_exdqlmMCMC()} & \code{exdqlmMCMC} & \aA{Estimate the transfer-function exDQLM with MCMC.}\\
+    \code{exdqlmTransferLDVB()} & \code{exdqlmLDVB} & \aA{Estimate the transfer-function exDQLM with a VB approximation.}\\
+    \code{exdqlmTransferMCMC()} & \code{exdqlmMCMC} & \aA{Estimate the transfer-function exDQLM with MCMC.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Static fitting} -- Input design matrix and response} \\
-    \rule{0pt}{3ex}\code{exal_static_LDVB()} & \code{exal\_ldvb} & \aA{Estimate static exAL regression with a VB approximation.}\\
-    \code{exal_static_mcmc()} & \code{exal\_mcmc} & \aA{Estimate static exAL regression with MCMC.}\\
+    \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exal\_ldvb} & \aA{Estimate static exAL regression with a VB approximation.}\\
+    \code{exalStaticMCMC()} & \code{exal\_mcmc} & \aA{Estimate static exAL regression with MCMC.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Model fit exploration} -- Input \code{exdqlmMCMC} or \code{exdqlmLDVB}  objects} \\
     \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute $k$-step-ahead forecast quantiles.\\
     \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute \& plot model diagnostics. \\
     \code{exdqlmPlot()} & \code{list} & Plot posterior summary of dynamic quantile.\\
     \code{compPlot()} & \code{list} & Plot posterior summary of component/parameter.\\
-    \code{exalDiagnostics()} & \code{exalDiagnostic} & \aA{Compute static fit diagnostics and comparisons.}\\
+    \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & \aA{Compute static fit diagnostics and comparisons.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Predictive synthesis} -- Input posterior predictive draw lists} \\
     \rule{0pt}{3ex}\shortstack[l]{\code{exdqlm\_synthesize\_}\\\code{from\_draws()}} & \code{list} & \aA{Synthesize predictive draws across fitted quantiles.}\\
@@ -542,12 +542,12 @@ R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M5,
 
 This generates a plot of the data with the forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (before 1972), for reference. Results can be seen in the top-right panel of Figure \ref{fig:ex1quants}. The percentage in the CrIs can be modified with the parameter \code{cr.percent}.
 
-When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{exdqlm_synthesize_from_draws()}. For the Lake Huron example, we apply this routine to the posterior predictive samples stored in \code{M5}, \code{M50}, and \code{M95} over the observed period. \aA{Since these posterior predictive draws are produced from the smoothed state draws, the lower panels of Figure \ref{fig:ex1quants} display the synthesized posterior predictive 95\% interval over the observed and forecast windows.} For the eight-step forecast horizon, we first generate future predictive draws from each fitted model using the corresponding forecasted quantile distributions together with posterior draws of $\sigma$ and $\gamma$, and then apply the same synthesis step. This provides a single predictive envelope while preserving the separate quantile-specific fits.
+When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{quantileSynthesis()}. For the Lake Huron example, we apply this routine to the posterior predictive samples stored in \code{M5}, \code{M50}, and \code{M95} over the observed period. \aA{Since these posterior predictive draws are produced from the smoothed state draws, the lower panels of Figure \ref{fig:ex1quants} display the synthesized posterior predictive 95\% interval over the observed and forecast windows.} For the eight-step forecast horizon, we first generate future predictive draws from each fitted model using the corresponding forecasted quantile distributions together with posterior draws of $\sigma$ and $\gamma$, and then apply the same synthesis step. This provides a single predictive envelope while preserving the separate quantile-specific fits.
 
 \aA{A direct call for the observed posterior predictive draws is:}
 \begin{CodeChunk}
 \begin{CodeInput}
-R> syn.obs = exdqlm_synthesize_from_draws(
+R> syn.obs = quantileSynthesis(
 +               draws_list = list(M5$samp.post.pred, M50$samp.post.pred,
 +                                  M95$samp.post.pred),
 +               p = c(0.05, 0.50, 0.95),
@@ -579,7 +579,7 @@ R> future.draws = list(future.M5$ydraw, future.M50$ydraw,
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> syn.fore = exdqlm_synthesize_from_draws(
+R> syn.fore = quantileSynthesis(
 +               draws_list = future.draws,
 +               p = c(0.05, 0.50, 0.95),
 +               T_expected = 8)
@@ -816,14 +816,14 @@ R> model.w.reg = model + reg.comp
 To allow the Ni\~no 3.4 input components of both models to vary over time, we set the respective discount factors to be $0.95$ (this is done via the parameter \code{df} in the regression fit and the parameter \code{tf.df} in the transfer-function fit). Alternatively, we set the discount factors to 1 and 0.9 for the trend and seasonal components, respectively. This allows the seasonal amplitudes to evolve over time, while any further variation in the $0.15$ quantile from year to year will solely be attributed to the effects of the Ni\~no 3.4 input in our models.
 
 \aANote{Updated to clarify that Example 3 uses LDVB for illustration, while the package also provides the corresponding MCMC workflow, and to explain that the KL scan below is used only as a coarse screening step for the transfer-function decay rate.}
-The transfer function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{transfn_exdqlmLDVB()} to obtain a fast approximate fit on the monthly series, although the corresponding exact posterior workflow is also available through \code{transfn_exdqlmMCMC()}. On the coarse candidate grid used here, we use the KL divergence as a calibration-oriented screening criterion to select the transfer-function decay rate, and then assess the resulting fitted models with the broader diagnostic comparison reported below. This screen selects a decay rate of 0.85.
+The transfer function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{exdqlmTransferLDVB()} to obtain a fast approximate fit on the monthly series, although the corresponding exact posterior workflow is also available through \code{exdqlmTransferMCMC()}. On the coarse candidate grid used here, we use the KL divergence as a calibration-oriented screening criterion to select the transfer-function decay rate, and then assess the resulting fitted models with the broader diagnostic comparison reported below. This screen selects a decay rate of 0.85.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> possible.lams = c(0.1,0.3,0.5,0.7,0.85)
 R> KLs <- vector("numeric")
 R> ref.samp = rnorm(length(BTflow))
 R> for(i in 1:length(possible.lams)){
-R>   temp.M2 = transfn_exdqlmLDVB(y = log(BTflow), p0 = 0.15, model = model,
+R>   temp.M2 = exdqlmTransferLDVB(y = log(BTflow), p0 = 0.15, model = model,
 +                               df = c(1,0.9), dim.df = c(1,2),
 +                               X = nino34, tf.df = c(0.95), lam = possible.lams[i],
 +                               tf.m0 = c(0,0), tf.C0 = diag(c(0.1,0.005),2),
@@ -856,7 +856,7 @@ R> M1 = exdqlmLDVB(y = log(BTflow), p0 = 0.15, model = model.w.reg,
 +                df = c(1,0.9,0.95), dim.df = c(1,2,1),
 +                sig.init = 0.1, gam.init = - 0.1,
 +                tol = 0.05, verbose = FALSE)
-R> M2 = transfn_exdqlmLDVB(y = log(BTflow), p0 = 0.15, model = model,
+R> M2 = exdqlmTransferLDVB(y = log(BTflow), p0 = 0.15, model = model,
 +                        df = c(1,0.9), dim.df = c(1,2),
 +                        X = nino34, tf.df = c(0.95), lam = 0.85,
 +                        tf.m0 = c(0,0), tf.C0 = diag(c(0.1,0.005),2),
@@ -1002,7 +1002,7 @@ Then
 \[
 Q_Y(p_0 \mid {\bf x}_i) = {\bf x}_i^\top \boldsymbol{\beta}^\star,
 \]
-so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit a VB approximation with \code{exal_static_LDVB()} using \code{n.samp = 3000}, and an MCMC fit with \code{exal_static_mcmc()} using \code{n.burn = 2000} and \code{n.mcmc = 3000}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the VB fit. The lower-tail VB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger VB iteration budget there. For reproducibility, we fix the dataset seed at \code{20260714}. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
+so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit a VB approximation with \code{exalStaticLDVB()} using \code{n.samp = 3000}, and an MCMC fit with \code{exalStaticMCMC()} using \code{n.burn = 2000} and \code{n.mcmc = 3000}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the VB fit. The lower-tail VB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger VB iteration budget there. For reproducibility, we fix the dataset seed at \code{20260714}. Setting \code{dqlm.ind = TRUE} would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> Sigma.x = 0.5 ^ as.matrix(dist(1:8))
@@ -1017,14 +1017,14 @@ R> X.raw = MASS::mvrnorm(160, mu = rep(0, 8), Sigma = Sigma.x)
 R> X = cbind(1, X.raw)
 R> p.grid = c(0.05, 0.25, 0.50)
 R> y.train = lapply(p.grid, function(p0) sim.y(X.raw, p0))
-R> M.ldvb = lapply(p.grid, function(p0) exal_static_LDVB(
+R> M.ldvb = lapply(p.grid, function(p0) exalStaticLDVB(
 +                    y = y.train[[which(p.grid == p0)]], X = X, p0 = p0,
 +                    beta_prior = "rhs_ns",
 +                    beta_prior_controls = rhs.ctrl,
 +                    max_iter = ifelse(p0 == 0.05, 420, 260),
 +                    n.samp = 3000,
 +                    tol = 1e-4, verbose = FALSE))
-R> M.mcmc = lapply(p.grid, function(p0) exal_static_mcmc(
+R> M.mcmc = lapply(p.grid, function(p0) exalStaticMCMC(
 +                    y = y.train[[which(p.grid == p0)]], X = X, p0 = p0,
 +                    beta_prior = "rhs_ns",
 +                    beta_prior_controls = rhs.ctrl,
@@ -1034,7 +1034,7 @@ R> M.mcmc = lapply(p.grid, function(p0) exal_static_mcmc(
 \end{CodeInput}
 \end{CodeChunk}
 
-For static fits, the helper function \code{exalDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on an independent holdout design:
+For static fits, the helper function \code{exalStaticDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on an independent holdout design:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1042,7 +1042,7 @@ R> X.hold.raw = MASS::mvrnorm(800, mu = rep(0, 8), Sigma = Sigma.x)
 R> X.hold = cbind(1, X.hold.raw)
 R> ref.hold = drop(X.hold %*% c(0, beta.true))
 R> y.hold = sim.y(X.hold.raw, 0.25)
-R> exalDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
+R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 +                  X = X.hold, y = y.hold, ref = ref.hold,
 +                  plot = FALSE)
 \end{CodeInput}

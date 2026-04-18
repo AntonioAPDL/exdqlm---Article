@@ -571,7 +571,7 @@ fit_model_pair <- function(p0, prep, fit_seed) {
 
   log_progress(sprintf("fit_start | p0=%.2f | model=transfer_function | seed=%s", p0, fit_seed))
   transfer_fit <- tryCatch(
-    do.call(exdqlm::transfn_exdqlmLDVB, c(list(
+    do.call(exdqlm::exdqlmTransferLDVB, c(list(
       y = prep$y_train, p0 = p0,
       model = transfer_spec$model,
       X = prep$X_train_scaled,

@@ -54,7 +54,7 @@ if (!need_ex3) {
     )
   }
 
-  transfn_exdqlmLDVB_local <- function(y, p0, model, X, df, dim.df, lam, tf.df,
+  exdqlmTransferLDVB_local <- function(y, p0, model, X, df, dim.df, lam, tf.df,
                                        fix.gamma = FALSE, gam.init = NA,
                                        fix.sigma = TRUE, sig.init = NA, dqlm.ind = FALSE,
                                        tol = 0.1, n.samp = 200,
@@ -131,7 +131,7 @@ if (!need_ex3) {
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
-          transfn_exdqlmLDVB_local(
+          exdqlmTransferLDVB_local(
             y = y_log, p0 = 0.15, model = model,
             df = c(1, 0.9), dim.df = c(1, 2),
             X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_grid[i],
@@ -162,7 +162,7 @@ if (!need_ex3) {
 
       M2_ldvb <- if (is.finite(lambda_star_ldvb)) {
         tryCatch(
-          transfn_exdqlmLDVB_local(
+          exdqlmTransferLDVB_local(
             y = y_log, p0 = 0.15, model = model,
             df = c(1, 0.9), dim.df = c(1, 2),
             X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_star_ldvb,

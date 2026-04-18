@@ -211,10 +211,10 @@ load_exdqlm()
 required_fns <- c(
   "polytrendMod", "seasMod", "as.exdqlm",
   "exdqlmMCMC", "exdqlmISVB", "exdqlmLDVB",
-  "transfn_exdqlmISVB", "exdqlmDiagnostics",
+  "exdqlmTransferISVB", "exdqlmDiagnostics",
   "exdqlmPlot", "compPlot", "exdqlmForecast",
-  "exal_static_LDVB", "exal_static_mcmc", "exalDiagnostics",
-  "exdqlm_synthesize_from_draws"
+  "exalStaticLDVB", "exalStaticMCMC", "exalStaticDiagnostics",
+  "quantileSynthesis"
 )
 missing_fns <- required_fns[!vapply(required_fns, function(f) {
   exists(f, where = asNamespace("exdqlm"), mode = "function", inherits = FALSE)

@@ -107,7 +107,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
 
       warn_ldvb <- msg_ldvb <- character()
       fit_ldvb <- withCallingHandlers(
-        exdqlm::exal_static_LDVB(
+        exdqlm::exalStaticLDVB(
           y = y_train,
           X = X_train,
           p0 = p0,
@@ -153,7 +153,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
 
       warn_mcmc <- msg_mcmc <- character()
       fit_mcmc <- withCallingHandlers(
-        exdqlm::exal_static_mcmc(
+        exdqlm::exalStaticMCMC(
           y = y_train,
           X = X_train,
           p0 = p0,
@@ -200,7 +200,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
         )
       }
 
-      diag_holdout <- exdqlm::exalDiagnostics(
+      diag_holdout <- exdqlm::exalStaticDiagnostics(
         fit_ldvb, fit_mcmc,
         X = X_holdout,
         y = y_holdout,

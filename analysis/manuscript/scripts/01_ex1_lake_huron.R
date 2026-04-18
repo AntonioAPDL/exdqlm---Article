@@ -329,7 +329,7 @@ if (!need_ex1) {
         subset_draw_matrix(M95$samp.post.pred, synth_source_draws)
       )
       syn_obs <- with_local_seed(seed_value + 111L, {
-        exdqlm::exdqlm_synthesize_from_draws(
+        exdqlm::quantileSynthesis(
           draws_list = obs_draws,
           p = c(0.05, 0.50, 0.95),
           T_expected = length(y),
@@ -342,7 +342,7 @@ if (!need_ex1) {
       future_M50 <- sample_forecast_predictive_draws(M50_dqlm, fc50, synth_source_draws, seed_value + 250L)
       future_M95 <- sample_forecast_predictive_draws(M95, fc95, synth_source_draws, seed_value + 295L)
       syn_future <- with_local_seed(seed_value + 333L, {
-        exdqlm::exdqlm_synthesize_from_draws(
+        exdqlm::quantileSynthesis(
           draws_list = list(future_M5$ydraw, future_M50$ydraw, future_M95$ydraw),
           p = c(0.05, 0.50, 0.95),
           T_expected = k_fore,

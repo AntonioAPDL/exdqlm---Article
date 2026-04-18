@@ -38,7 +38,7 @@ The prototype fits, for each quantile level,
 
 1. a no-transfer dynamic quantile regression using `regMod(X)`, and
 2. a transfer-function dynamic quantile model using the multivariate
-   `transfn_exdqlmLDVB()` wrapper.
+   `exdqlmTransferLDVB()` wrapper.
 
 The current config is intentionally a **wiring-first prototype**:
 
