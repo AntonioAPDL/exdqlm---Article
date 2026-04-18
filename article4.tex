@@ -323,8 +323,8 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \code{exdqlmTransferMCMC()} & \code{exdqlmMCMC} & \aA{Estimate the transfer-function exDQLM with MCMC.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Static fitting} -- Input design matrix and response} \\
-    \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exal\_ldvb} & \aA{Estimate static exAL regression with a VB approximation.}\\
-    \code{exalStaticMCMC()} & \code{exal\_mcmc} & \aA{Estimate static exAL regression with MCMC.}\\
+    \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exalStaticLDVB} & \aA{Estimate static exAL regression with a VB approximation.}\\
+    \code{exalStaticMCMC()} & \code{exalStaticMCMC} & \aA{Estimate static exAL regression with MCMC.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Model fit exploration} -- Input \code{exdqlmMCMC} or \code{exdqlmLDVB}  objects} \\
     \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute $k$-step-ahead forecast quantiles.\\
@@ -334,7 +334,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & \aA{Compute static fit diagnostics and comparisons.}\\
     \hline
     \multicolumn{3}{l}{ \rule{0pt}{3ex} {\it Predictive synthesis} -- Input posterior predictive draw lists} \\
-    \rule{0pt}{3ex}\shortstack[l]{\code{exdqlm\_synthesize\_}\\\code{from\_draws()}} & \code{list} & \aA{Synthesize predictive draws across fitted quantiles.}\\
+    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{list} & \aA{Synthesize predictive draws across fitted quantiles.}\\
     \hline
 \end{tabular}
 \caption{\aA{Overview of the core workflow functions used in this paper.} Generic S3 methods defined for the fitted objects listed in the table include \code{plot()}, \code{print()}, and \code{summary()}.}
