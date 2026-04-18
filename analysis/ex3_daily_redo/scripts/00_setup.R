@@ -1034,7 +1034,7 @@ summarize_draw_matrix <- function(draws, level = uncertainty_level()) {
   )
 }
 
-synthesis_anchor_from_draws <- function(draws_list, p,
+synthesis_anchor_from_predictive_draws <- function(draws_list, p,
                                         enforce_isotonic = TRUE,
                                         T_expected = NULL) {
   stopifnot(is.list(draws_list), is.numeric(p), length(draws_list) == length(p))

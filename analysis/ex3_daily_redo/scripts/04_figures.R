@@ -370,12 +370,12 @@ build_synthesis_plot_data <- function() {
     if (length(used_p) < 2L) next
 
     synth_seed_base <- seed_base + 10000L * match(model_name, names(model_map))
-    obs_anchor <- synthesis_anchor_from_draws(
+    obs_anchor <- synthesis_anchor_from_predictive_draws(
       draws_list = obs_draws,
       p = used_p,
       T_expected = length(tail_idx)
     )
-    future_anchor <- synthesis_anchor_from_draws(
+    future_anchor <- synthesis_anchor_from_predictive_draws(
       draws_list = future_draws,
       p = used_p,
       T_expected = nrow(prep$future_df)

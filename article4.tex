@@ -185,12 +185,12 @@ Quantifying the relationship between an input and a quantile of a response is a 
 
 For $t=1,\dots,T$ and univariate input, $X_t$, a transfer function exDQLM with exponential decay is defined by
 \begin{align}
-\label{EQ:begin_transfn}
+\label{EQ:begin_transfer}
 y_t | \boldsymbol{\theta}_t,\gamma,\sigma  & \sim \text{exAL}_{p_0}({\bf F}'_t \boldsymbol{\theta}_t +  \zeta_{t},\sigma,\gamma) \\
 \boldsymbol{\theta}_t | \boldsymbol{\theta}_{t-1},{\bf W}_t  & \sim  \text{N}({\bf G}_t \boldsymbol{\theta}_{t-1},{\bf W}_t) \\
-\label{EQ:transfn_effect}
+\label{EQ:transfer_effect}
 \zeta_{t}|\zeta_{t-1},\psi_{t-1},\omega_{t} & \sim \text{N}(\lambda \zeta_{t-1} + X_{t}\psi_{t-1},\omega_{t}) \\
-\label{EQ:end_transfn}
+\label{EQ:end_transfer}
 \psi_{t}|\psi_{t-1},\nu_{t} & \sim \text{N}(\psi_{t-1},\nu_{t}).
 \end{align}
 Here $\zeta_{t}$ captures the effect of the current and past regression effects on the quantile at time $t$. Alternatively, the parameter $\psi_{t}$ determines the instantaneous effect $X_t$ has on the quantile. The parameter $\lambda\in[0,1]$ represents the memory of the regression effect up to time $t$. This effect decays at an exponential rate, reducing by a factor of $\lambda$ at every time step. More explicitly, the effect of $X_t$ on the quantile at time $t+k$ is $\lambda^k \psi_{t-1}X_t$. Thus, the series $k_t \geq \frac{\log(\epsilon) - \log(|\psi_{t-1}X_t|)}{\log(\lambda)}$ represents a lower bound for the number of time steps until the effect of $X_t$ is less than or equal to a fixed $\epsilon$. The median value of $k_t$ corresponding to $\epsilon = 1\mathrm{e}{-3}$ is included as an output of our transfer function routine.
