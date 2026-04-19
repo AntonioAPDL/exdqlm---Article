@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 18:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 19:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -634,7 +634,37 @@ LaTeX Font Info:    Try loading font information for T1+lmtt on input line 69.
 (/usr/share/texlive/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-Underfull \vbox (badness 1810) has occurred while \output is active []
+Underfull \hbox (badness 10000) in paragraph at lines 88--88
+[]|\T1/lmr/m/n/8 General-purpose fre-quen-
+ []
+
+
+Underfull \hbox (badness 6364) in paragraph at lines 88--88
+[]|\T1/lmr/m/n/8 Static Bayesian quan-tile
+ []
+
+
+Underfull \hbox (badness 1975) in paragraph at lines 88--88
+\T1/lmr/m/n/8 re-gres-sion un-der the AL
+ []
+
+
+Underfull \hbox (badness 2134) in paragraph at lines 88--88
+[]|\T1/lmr/m/n/8 Joint es-ti-ma-tion of non-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--88
+[]|\T1/lmr/m/n/8 Bayesian dynamic/state-
+ []
+
+
+Underfull \hbox (badness 3690) in paragraph at lines 88--88
+\T1/lmr/m/n/8 space quan-tile re-gres-sion
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -652,6 +682,9 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [4]
+Underfull \vbox (badness 1721) has occurred while \output is active []
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 5
  []
@@ -689,16 +722,24 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [7]
-LaTeX Font Info:    Try loading font information for OT1+lmss on input line 279
-.
- (/usr/share/texlive/texmf-dist/tex/latex/lm/ot1lmss.fd
-File: ot1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 8 []
  []
 
 [8]
+LaTeX Font Info:    Try loading font information for OT1+lmss on input line 279
+.
+ (/usr/share/texlive/texmf-dist/tex/latex/lm/ot1lmss.fd
+File: ot1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
+Underfull \vbox (badness 1603) has occurred while \output is active []
+
+
+Overfull \hbox (5.47499pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 9
+ []
+
+[9]
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <9> on input line 331.
 
@@ -707,11 +748,6 @@ Overfull \hbox (5.97043pt too wide) in paragraph at lines 356--356
  []
 
 
-Overfull \hbox (5.47499pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 9
- []
-
-[9]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 10 []
  []
@@ -722,7 +758,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [11]
-<analysis/manuscript/outputs/figures/ex1mcmc.png, id=323, 722.7pt x 433.62pt>
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 12 []
+ []
+
+[12]
+<analysis/manuscript/outputs/figures/ex1mcmc.png, id=328, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex1mcmc.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex1mcmc.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex1mcmc.png  used 
@@ -731,21 +772,17 @@ Package pdftex.def Info: Requested size: 309.85626pt x 185.91042pt on input lin
 e 468.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 12 []
- []
-
-[12]
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 527
-.
- (/usr/share/texlive/texmf-dist/tex/latex/lm/ts1lmtt.fd
-File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 13
  []
 
 [13 <./analysis/manuscript/outputs/figures/ex1mcmc.png>]
-<analysis/manuscript/outputs/figures/ex1quants.png, id=337, 722.7pt x 433.62pt>
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 527
+.
+
+(/usr/share/texlive/texmf-dist/tex/latex/lm/ts1lmtt.fd
+File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
+<analysis/manuscript/outputs/figures/ex1quants.png, id=338, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex1quants.png Graphic file (type png)
 
@@ -765,7 +802,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [15]
-<analysis/manuscript/outputs/figures/ex2quant.png, id=352, 722.7pt x 505.89pt>
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 16 []
+ []
+
+[16]
+<analysis/manuscript/outputs/figures/ex2quant.png, id=359, 722.7pt x 505.89pt>
 File: analysis/manuscript/outputs/figures/ex2quant.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex2quant.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex2quant.png  used
@@ -774,16 +816,11 @@ Package pdftex.def Info: Requested size: 442.65375pt x 309.8584pt on input line
  661.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 16 []
- []
-
-[16]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 17
  []
 
 [17 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex2checks.png, id=364, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex2checks.png, id=365, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
 
@@ -803,7 +840,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [19 <./analysis/manuscript/outputs/figures/ex2checks.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3data.png, id=379, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex3data.png, id=380, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex3data.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex3data.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3data.png  used 
@@ -821,7 +858,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [21 <./analysis/manuscript/outputs/figures/ex3data.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=402, 722.7pt x 433.6
+<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=403, 722.7pt x 433.6
 2pt>
 File: analysis/manuscript/outputs/figures/ex3quantcomps.png Graphic file (type 
 png)
@@ -830,7 +867,13 @@ Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3quantcomps.png
  used on input line 869. on input line 869.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
 e 869.
-<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=404, 722.7pt x 433.62pt
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 22 []
+ []
+
+[22]
+<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=409, 722.7pt x 433.62pt
 >
 File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
 )
@@ -841,11 +884,6 @@ Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
 e 902.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 22 []
- []
-
-[22]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 23
  []
 
@@ -855,7 +893,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./analysis/manuscript/outputs/figures/ex3zetapsi.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3forecast.png, id=425, 722.7pt x 433.62p
+<analysis/manuscript/outputs/figures/ex3forecast.png, id=426, 722.7pt x 433.62p
 t>
 File: analysis/manuscript/outputs/figures/ex3forecast.png Graphic file (type pn
 g)
@@ -875,7 +913,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [26]
-<analysis/manuscript/outputs/figures/ex4static.png, id=444, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex4static.png, id=445, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex4static.png Graphic file (type png)
 
@@ -889,12 +927,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 27
  []
 
-[27 <./analysis/manuscript/outputs/figures/ex4static.png (PNG copy)>]
+[27]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 28 []
  []
 
-[28] (./article4.bbl
+[28 <./analysis/manuscript/outputs/figures/ex4static.png (PNG copy)>]
+(./article4.bbl
 
 LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
 (Font)              Font shape `T1/lmr/b/sl' tried instead on input line 28.
@@ -932,11 +971,11 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1118.
 Here is how much of TeX's memory you used:
  8637 strings out of 494917
  125840 string characters out of 6180699
- 213490 words of memory out of 5000000
+ 211600 words of memory out of 5000000
  11617 multiletter control sequences out of 15000+600000
  141206 words of font info for 96 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 35i,12n,34p,2787b,519s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,12n,34p,2787b,523s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texli
 ve/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texlive/texmf-dist/font
 s/enc/dvips/lm/lm-mathit.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/
@@ -967,10 +1006,10 @@ nts/type1/public/lm/lmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /lm/lmtto10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symb
 ols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.
 pfb>
-Output written on article4.pdf (31 pages, 2960461 bytes).
+Output written on article4.pdf (31 pages, 2961695 bytes).
 PDF statistics:
- 626 PDF objects out of 1000 (max. 8388607)
- 547 compressed objects within 6 object streams
+ 627 PDF objects out of 1000 (max. 8388607)
+ 548 compressed objects within 6 object streams
  127 named destinations out of 1000 (max. 500000)
  171 words of extra memory for PDF output out of 10000 (max. 10000000)
 
