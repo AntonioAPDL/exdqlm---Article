@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{28}
+\begin{thebibliography}{32}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -22,11 +22,11 @@ Beal MJ (2003).
 \newblock \emph{Variational algorithms for approximate Bayesian inference}.
 \newblock Ph.D. thesis, UCL (University College London).
 
-\bibitem[{Benoit \emph{et~al.}(2011)Benoit, Al-Hamzawi, Yu, and Van~den
+\bibitem[{Benoit \emph{et~al.}(2023)Benoit, Al-Hamzawi, Yu, and Van~den
   Poel}]{bayesQR}
-Benoit D, Al-Hamzawi R, Yu K, Van~den Poel D (2011).
-\newblock \emph{\pkg{bayesQR}: A Bayesian approach to quantile regression}.
-\newblock R package version 2.3,
+Benoit D, Al-Hamzawi R, Yu K, Van~den Poel D (2023).
+\newblock \emph{\pkg{bayesQR}: Bayesian Quantile Regression}.
+\newblock R package version 2.4,
   \urlprefix\url{https://CRAN.R-project.org/package=bayesQR}.
 
 \bibitem[{Carter and Kohn(1994)}]{carter1994gibbs}
@@ -44,6 +44,13 @@ Fox K (2012).
 Fr{\"u}hwirth-Schnatter S (1994).
 \newblock \enquote{Data augmentation and dynamic linear models.}
 \newblock \emph{Journal of time series analysis}, \textbf{15}(2), 183--202.
+
+\bibitem[{Galarza \emph{et~al.}(2024)Galarza, Benites, Bourguignon, and
+  Lachos}]{lqr}
+Galarza CE, Benites L, Bourguignon M, Lachos VH (2024).
+\newblock \emph{\pkg{lqr}: Robust Linear Quantile Regression}.
+\newblock R package version 5.2,
+  \urlprefix\url{https://CRAN.R-project.org/package=lqr}.
 
 \bibitem[{Gelfand and Ghosh(1998)}]{gelfand1998model}
 Gelfand AE, Ghosh SK (1998).
@@ -66,10 +73,10 @@ Koenker R (2005).
 \newblock \emph{Quantile regression}.
 \newblock Cambridge University Press, New York.
 
-\bibitem[{Koenker(2021)}]{quantreg}
-Koenker R (2021).
+\bibitem[{Koenker(2025)}]{quantreg}
+Koenker R (2025).
 \newblock \emph{\pkg{quantreg}: Quantile Regression}.
-\newblock R package version 5.85,
+\newblock R package version 6.1,
   \urlprefix\url{https://CRAN.R-project.org/package=quantreg}.
 
 \bibitem[{Kottas and Krnjaji{\'c}(2009)}]{kottas2009bayesian}
@@ -146,12 +153,24 @@ Rosenblatt M (1952).
 \newblock \emph{The annals of mathematical statistics}, \textbf{23}(3),
   470--472.
 
+\bibitem[{Striaukas(2026)}]{dynquant}
+Striaukas J (2026).
+\newblock \enquote{\pkg{dynquant}: Dynamic Quantile Regression Models.}
+\newblock GitHub repository, accessed 2026-04-19,
+  \urlprefix\url{https://github.com/jstriaukas/dynquant}.
+
 \bibitem[{Taddy and Kottas(2010)}]{taddy2010bayesian}
 Taddy MA, Kottas A (2010).
 \newblock \enquote{A {B}ayesian nonparametric approach to inference for
   quantile regression.}
 \newblock \emph{Journal of Business \& Economic Statistics}, \textbf{28}(3),
   357--369.
+
+\bibitem[{Tokdar and Cunningham(2025)}]{qrjoint}
+Tokdar S, Cunningham E (2025).
+\newblock \emph{\pkg{qrjoint}: Joint Estimation in Linear Quantile Regression}.
+\newblock R package version 2.0-11,
+  \urlprefix\url{https://CRAN.R-project.org/package=qrjoint}.
 
 \bibitem[{{U.S. Geological Survey}(2016)}]{btflow}
 {US Geological Survey} (2016).
@@ -171,6 +190,12 @@ West M, Harrison PJ, Migon HS (1985).
   forecasting.}
 \newblock \emph{Journal of the American Statistical Association},
   \textbf{80}(389), 73--83.
+
+\bibitem[{Xu and Reich(2022)}]{SPQR}
+Xu S, Reich BJ (2022).
+\newblock \emph{\pkg{SPQR}: Semiparametric Quantile Regression}.
+\newblock Archived CRAN package, version 0.1.0,
+  \urlprefix\url{https://CRAN.R-project.org/package=SPQR}.
 
 \bibitem[{Yan \emph{et~al.}(2025)Yan, Zheng, and Kottas}]{yan2025family}
 Yan Y, Zheng X, Kottas A (2025).
