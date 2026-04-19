@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 18:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 18:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -642,7 +642,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [2]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 5622) has occurred while \output is active []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -766,12 +766,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 14 []
  []
 
-[14 <./analysis/manuscript/outputs/figures/ex1quants.png (PNG copy)>]
+[14]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 15
  []
 
-[15]
+[15 <./analysis/manuscript/outputs/figures/ex1quants.png (PNG copy)>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 16 []
  []
@@ -789,7 +789,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 17
  []
 
-[17 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
+[17]
 <analysis/manuscript/outputs/figures/ex2checks.png, id=365, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
@@ -804,7 +804,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 18 []
  []
 
-[18]
+[18 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 19
  []
@@ -823,6 +823,9 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20]
+Underfull \vbox (badness 2393) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 21
  []
@@ -941,7 +944,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1120.
 Here is how much of TeX's memory you used:
  8640 strings out of 494917
  125872 string characters out of 6180699
- 213440 words of memory out of 5000000
+ 214440 words of memory out of 5000000
  11619 multiletter control sequences out of 15000+600000
  141527 words of font info for 97 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
@@ -976,7 +979,7 @@ nts/type1/public/lm/lmtt8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /lm/lmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtto10.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on article4.pdf (31 pages, 2982398 bytes).
+Output written on article4.pdf (31 pages, 2982516 bytes).
 PDF statistics:
  629 PDF objects out of 1000 (max. 8388607)
  549 compressed objects within 6 object streams
