@@ -1014,21 +1014,21 @@ R> exdqlmForecast(start.t = length(flow.monthly)-18, k = 18, m1 = M2,
 % R> abline(v = xy.coords(log(flow.monthly))$x[length(flow.monthly)-18],
 % +           col = "orange", lty = 5)
 
-Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL divergence, CRPS, and pplc discussed in Section \ref{sec:diags}. Table \ref{tab:ex3} reports these diagnostics together with a brief reminder of what each criterion emphasizes.
+Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL divergence, CRPS, and pplc discussed in Section \ref{sec:diags}. Table \ref{tab:ex3} summarizes the resulting diagnostic comparison.
 
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabularx}{0.92\textwidth}{@{}l X cc@{}}
+\begin{tabular}{@{}lcc@{}}
  \toprule
- Criterion & Main emphasis & \code{M1} regression & \code{M2} transfer function \\
+ Criterion & \code{M1} regression & \code{M2} transfer function \\
  \midrule
- CRPS & full predictive-distribution score & \textbf{0.350} & 0.357 \\
- pplc & target-quantile posterior predictive loss & 132.10 & \textbf{122.90} \\
- KL divergence & one-step-ahead calibration discrepancy & \textbf{0.0562} & 0.0565 \\
+ CRPS & \textbf{0.350} & 0.357 \\
+ pplc & 132.10 & \textbf{122.90} \\
+ KL divergence & \textbf{0.0562} & 0.0565 \\
  \bottomrule
-\end{tabularx}
-\caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria, and bold entries indicate the smaller value in each row.}
+\end{tabular}
+\caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, pplc assesses target-quantile posterior predictive loss, and KL divergence summarizes one-step-ahead calibration discrepancy. Bold entries indicate the smaller value in each row.}
 \label{tab:ex3}
 \end{table}
 
