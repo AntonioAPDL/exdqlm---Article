@@ -288,7 +288,11 @@ Using this estimated sequence $\{\hat u_t\}$, we can assess the model performanc
 \end{align}
 can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-\aA{In addition to these calibration-based diagnostics, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws. The CRPS rewards sharp and well-calibrated predictive distributions, with smaller values indicating better predictive performance.}
+\aA{In addition to these calibration-based diagnostics, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. For a predictive distribution $G$ and an observation $y$, the CRPS is
+\[
+\text{CRPS}(y,G)=\mathbb{E}_{Y\sim G}|Y-y|-\frac{1}{2}\mathbb{E}_{Y,Y'\sim G}|Y-Y'|.
+\]
+It rewards forecasts that are both sharp and well calibrated, can be interpreted as an average of the quantile score over all probability levels, and reduces to the absolute error, and hence to the MAE after averaging, for deterministic forecasts. Smaller values indicate better predictive performance.}
 
 For a final diagnostic, we include \cite{gelfand1998model} posterior predictive loss criterion (pplc) with check loss function $\rho_{p_0}(x) = x[p_0-I(x<0)]$. That is,
 \begin{align}

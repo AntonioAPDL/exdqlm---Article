@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{42}
+\begin{thebibliography}{43}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -100,6 +100,13 @@ Galarza CE, Benites L, Bourguignon M, Lachos VH (2024).
 Gelfand AE, Ghosh SK (1998).
 \newblock \enquote{Model choice: a minimum posterior predictive loss approach.}
 \newblock \emph{Biometrika}, \textbf{85}(1), 1--11.
+
+\bibitem[{Gneiting and Raftery(2007)}]{gneiting2007}
+Gneiting T, Raftery AE (2007).
+\newblock \enquote{Strictly Proper Scoring Rules, Prediction, and Estimation.}
+\newblock \emph{Journal of the American Statistical Association},
+  \textbf{102}(477), 359--378.
+\newblock \doi{10.1198/016214506000001437}.
 
 \bibitem[{Gon{\c{c}}alves \emph{et~al.}(2017)Gon{\c{c}}alves, Migon, and
   Bastos}]{gonccalves2017dynamic}
