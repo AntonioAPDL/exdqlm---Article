@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 22:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 22:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -659,8 +659,13 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [2]
-Underfull \hbox (badness 3148) in paragraph at lines 91--91
-[]|\T1/lmr/m/n/9 Dynamic re-gres-sion via
+Underfull \hbox (badness 1286) in paragraph at lines 91--91
+[]|\T1/lmr/m/n/9 Broad fre-quen-tist quan-
+ []
+
+
+Underfull \hbox (badness 3646) in paragraph at lines 91--91
+[]|\T1/lmr/m/n/9 Joint non-crossing es-ti-
  []
 
 
@@ -674,12 +679,7 @@ Underfull \hbox (badness 1292) in paragraph at lines 91--91
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 91--91
-[]|\T1/lmr/m/n/9 Latent-state state-space
- []
-
-
-Underfull \vbox (badness 4366) has occurred while \output is active []
+Underfull \vbox (badness 3815) has occurred while \output is active []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -687,6 +687,9 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [3]
+Underfull \vbox (badness 1052) has occurred while \output is active []
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 4 []
  []
@@ -759,7 +762,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
-<analysis/manuscript/outputs/figures/ex1mcmc.png, id=361, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex1mcmc.png, id=363, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex1mcmc.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex1mcmc.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex1mcmc.png  used 
@@ -778,7 +781,7 @@ LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 538
 (/usr/share/texlive/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<analysis/manuscript/outputs/figures/ex1quants.png, id=371, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex1quants.png, id=373, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex1quants.png Graphic file (type png)
 
@@ -806,7 +809,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [16]
-<analysis/manuscript/outputs/figures/ex2quant.png, id=399, 722.7pt x 505.89pt>
+<analysis/manuscript/outputs/figures/ex2quant.png, id=401, 722.7pt x 505.89pt>
 File: analysis/manuscript/outputs/figures/ex2quant.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex2quant.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex2quant.png  used
@@ -824,7 +827,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [18 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex2checks.png, id=409, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex2checks.png, id=411, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
 
@@ -844,7 +847,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20]
-<analysis/manuscript/outputs/figures/ex3data.png, id=425, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex3data.png, id=427, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex3data.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex3data.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3data.png  used 
@@ -869,7 +872,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [22]
-<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=447, 722.7pt x 433.6
+<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=449, 722.7pt x 433.6
 2pt>
 File: analysis/manuscript/outputs/figures/ex3quantcomps.png Graphic file (type 
 png)
@@ -884,7 +887,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23 <./analysis/manuscript/outputs/figures/ex3quantcomps.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=454, 722.7pt x 433.62pt
+<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=456, 722.7pt x 433.62pt
 >
 File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
 )
@@ -899,7 +902,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./analysis/manuscript/outputs/figures/ex3zetapsi.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3forecast.png, id=466, 722.7pt x 433.62p
+<analysis/manuscript/outputs/figures/ex3forecast.png, id=468, 722.7pt x 433.62p
 t>
 File: analysis/manuscript/outputs/figures/ex3forecast.png Graphic file (type pn
 g)
@@ -919,7 +922,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [26 <./analysis/manuscript/outputs/figures/ex3forecast.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex4static.png, id=483, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex4static.png, id=485, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex4static.png Graphic file (type png)
 
@@ -1000,7 +1003,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1127.
 Here is how much of TeX's memory you used:
  8753 strings out of 494917
  127596 string characters out of 6180699
- 213444 words of memory out of 5000000
+ 213365 words of memory out of 5000000
  11716 multiletter control sequences out of 15000+600000
  144187 words of font info for 97 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
@@ -1035,10 +1038,10 @@ ts/type1/public/lm/lmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /lm/lmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtto10.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on article4.pdf (32 pages, 2982309 bytes).
+Output written on article4.pdf (32 pages, 2982342 bytes).
 PDF statistics:
- 691 PDF objects out of 1000 (max. 8388607)
- 609 compressed objects within 7 object streams
+ 693 PDF objects out of 1000 (max. 8388607)
+ 611 compressed objects within 7 object streams
  139 named destinations out of 1000 (max. 500000)
  171 words of extra memory for PDF output out of 10000 (max. 10000000)
 
