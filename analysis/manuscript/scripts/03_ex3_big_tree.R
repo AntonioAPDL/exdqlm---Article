@@ -81,7 +81,8 @@ if (!need_ex3) {
     stop("Monthly USGS flow and nino34 overlap lengths do not match.", call. = FALSE)
   }
 
-  y_log <- log(as.numeric(flow_monthly))
+  y_log_ts <- log(flow_monthly)
+  y_log <- as.numeric(y_log_ts)
   ex3_cols <- list(
     m1 = "#8A46B2",
     m1_aux = "#C48AE0",
@@ -245,23 +246,29 @@ if (!need_ex3) {
         notes = "LDVB monthly USGS/nino34 counterpart including lambda scan and runtime summaries."
       )
 
-    xlim_idx_mid <- time_window_to_index(flow_monthly, 1995, 2015)
-    xlim_idx_fore <- time_window_to_index(flow_monthly, 2017, 2021.4)
+    xlim_mid <- c(1995, 2015)
+    xlim_fore <- c(2017, 2021.4)
+
+    # Preserve the monthly ts index so exdqlmPlot()/compPlot() use calendar time.
+    M1$y <- y_log_ts
+    M2$y <- y_log_ts
+    if (fit_ok(M1_ldvb)) M1_ldvb$y <- y_log_ts
+    if (fit_ok(M2_ldvb)) M2_ldvb$y <- y_log_ts
 
     if (need_ex3quantcomps) {
       save_png_plot("ex3quantcomps.png", {
         graphics::par(mfrow = c(3, 1))
 
-        stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_mid, ylab = "quantile 95% CrIs")
+        stats::plot.ts(y_log_ts, col = "grey70", ylim = c(1, 8), xlim = xlim_mid, ylab = "quantile 95% CrIs")
         exdqlm::exdqlmPlot(M1, add = TRUE, col = ex3_cols$m1)
         exdqlm::exdqlmPlot(M2, add = TRUE, col = ex3_cols$m2)
         graphics::legend("topleft", legend = c("M1 regression", "M2 transfer fn"), col = c(ex3_cols$m1, ex3_cols$m2), lty = 1, bty = "n")
 
-        graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "seasonal components", xlab = "Index")
+        graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_mid, ylab = "seasonal components", xlab = "time")
         exdqlm::compPlot(M1, index = 2:7, add = TRUE, col = ex3_cols$m1)
         exdqlm::compPlot(M2, index = 2:7, add = TRUE, col = ex3_cols$m2)
 
-        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_idx_mid, ylab = "Nino 3.4 components", xlab = "Index")
+        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 components", xlab = "time")
         exdqlm::compPlot(M1, index = 8, add = TRUE, col = ex3_cols$m1)
         exdqlm::compPlot(M2, index = 8:9, add = TRUE, col = ex3_cols$m2)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
@@ -281,20 +288,20 @@ if (!need_ex3) {
         save_png_plot("ex3quantcomps_ldvb.png", {
           graphics::par(mfrow = c(3, 1))
 
-          stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_mid, ylab = "quantile 95% CrIs")
+          stats::plot.ts(y_log_ts, col = "grey70", ylim = c(1, 8), xlim = xlim_mid, ylab = "quantile 95% CrIs")
           q1_ld <- quantile_summary_from_fit(M1_ldvb, cr.percent = 0.95)
           q2_ld <- quantile_summary_from_fit(M2_ldvb, cr.percent = 0.95)
           plot_quantile_summary(q1_ld, col = ldvb_cols$m1, add = TRUE)
           plot_quantile_summary(q2_ld, col = ldvb_cols$m2, add = TRUE)
           graphics::legend("topleft", legend = c("M1 regression LD", "M2 transfer fn LD"), col = c(ldvb_cols$m1, ldvb_cols$m2), lty = 1, bty = "n")
 
-          graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "seasonal components", xlab = "Index")
+          graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_mid, ylab = "seasonal components", xlab = "time")
           c1_seas <- component_summary_from_fit(M1_ldvb, index = 2:7)
           c2_seas <- component_summary_from_fit(M2_ldvb, index = 2:7)
           plot_component_summary(c1_seas, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_seas, add = TRUE, col = ldvb_cols$m2)
 
-          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_idx_mid, ylab = "Nino 3.4 components", xlab = "Index")
+          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 components", xlab = "time")
           c1_cov <- component_summary_from_fit(M1_ldvb, index = 8)
           c2_cov <- component_summary_from_fit(M2_ldvb, index = 8:9)
           plot_component_summary(c1_cov, add = TRUE, col = ldvb_cols$m1)
@@ -376,12 +383,12 @@ if (!need_ex3) {
 
     if (need_ex3forecast) {
       save_png_plot("ex3forecast.png", {
-        stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_fore)
+        stats::plot.ts(y_log_ts, col = "grey70", ylim = c(1, 8), xlim = xlim_fore)
         fc1 <- exdqlm::exdqlmForecast(start.t = length(y_log) - 18, k = 18, m1 = M1, plot = FALSE)
         plot(fc1, add = TRUE, cols = c(ex3_cols$m1, ex3_cols$m1_aux))
         fc2 <- exdqlm::exdqlmForecast(start.t = length(y_log) - 18, k = 18, m1 = M2, plot = FALSE)
         plot(fc2, add = TRUE, cols = c(ex3_cols$m2, ex3_cols$m2_aux))
-        vline_x <- grDevices::xy.coords(y_log)$x[length(y_log) - 18]
+        vline_x <- grDevices::xy.coords(y_log_ts)$x[length(y_log_ts) - 18]
         graphics::abline(v = vline_x, col = ex3_cols$ref, lty = 5)
       })
       register_artifact(
@@ -397,12 +404,12 @@ if (!need_ex3) {
     if (need_ex3forecast_ldvb) {
       if (ex3_ldvb_pair_ok) {
         save_png_plot("ex3forecast_ldvb.png", {
-          stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_fore)
+          stats::plot.ts(y_log_ts, col = "grey70", ylim = c(1, 8), xlim = xlim_fore)
           fc1_ld <- forecast_from_fit(start.t = length(y_log) - 18, k = 18, m1 = M1_ldvb, y_data = y_log, plot = FALSE)
           plot(fc1_ld, add = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1_aux))
           fc2_ld <- forecast_from_fit(start.t = length(y_log) - 18, k = 18, m1 = M2_ldvb, y_data = y_log, plot = FALSE)
           plot(fc2_ld, add = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2_aux))
-          vline_x <- grDevices::xy.coords(y_log)$x[length(y_log) - 18]
+          vline_x <- grDevices::xy.coords(y_log_ts)$x[length(y_log_ts) - 18]
           graphics::abline(v = vline_x, col = ex3_cols$ref, lty = 5)
         })
         register_artifact(

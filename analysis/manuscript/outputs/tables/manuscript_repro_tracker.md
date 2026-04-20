@@ -1,12 +1,11 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-20 04:00:18
+Generated: 2026-04-20 04:08:36
 Profile: standard
 Seed: 20260302
 
 ## Artifact Status
 
-- [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log monthly Big Tree flow aggregated from the staged daily file. Bottom: nino34 over the overlapping 1987-01 to 2021-04 window.
 - [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Monthly USGS/nino34 Example 3 summary including lambda optimization table and median.kt.
 - [reproduced] `ex3_run_summary_ldvb` -> `analysis/manuscript/outputs/logs/ex3_run_summary_ldvb.txt` (new: Example 3 LDVB textual outputs). LDVB monthly USGS/nino34 counterpart including lambda scan and runtime summaries.
 - [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Primary Example 3 three-panel LDVB quantile/components figure with index-window fix.
@@ -25,7 +24,7 @@ Seed: 20260302
 - ldvb_note: Added ISVB vs LDVB comparison figure for dynamic Sunspots example.
 - backend: Benchmark Profile B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
 - ex3: Best LDVB lambda by KL in this run profile: 0.300.
-- coverage: Targeted run; requested targets: ex3data, ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables.
+- coverage: Targeted run; requested targets: ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables.
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.
 - timing: Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.
 - benchmark: Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.

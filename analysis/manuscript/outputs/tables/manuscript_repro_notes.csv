@@ -4,7 +4,7 @@
 "ldvb_note","Added ISVB vs LDVB comparison figure for dynamic Sunspots example."
 "backend","Benchmark Profile B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'."
 "ex3","Best LDVB lambda by KL in this run profile: 0.300."
-"coverage","Targeted run; requested targets: ex3data, ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables."
+"coverage","Targeted run; requested targets: ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables."
 "timing","Exact runtime printouts in manuscript are historical and expected to differ."
 "timing","Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here."
 "benchmark","Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles."
