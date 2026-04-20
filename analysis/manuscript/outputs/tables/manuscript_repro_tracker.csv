@@ -6,7 +6,7 @@
 "fig_ex3zetapsi","figure","analysis/manuscript/outputs/figures/ex3zetapsi.png","fig:ex3tftheta","reproduced","Primary Example 3 LDVB transfer-function theta component plots."
 "fig_ex3forecast","figure","analysis/manuscript/outputs/figures/ex3forecast.png","fig:ex3forecast","reproduced","Primary Example 3 LDVB 18-step ahead forecast comparison."
 "tab_ex3_diagnostics","table","analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv","tab:ex3","reproduced","Primary Example 3 LDVB diagnostics table generated with manuscript diagnostics helper."
-"tab_ex3_lambda_scan","table","analysis/manuscript/outputs/tables/ex3_lambda_scan_kl.csv","Example 3 lambda selection output","reproduced","Primary LDVB lambda scan; best lambda in this run=0.300"
+"tab_ex3_lambda_scan","table","analysis/manuscript/outputs/tables/ex3_lambda_scan_kl.csv","Example 3 lambda selection output","reproduced","Primary LDVB lambda scan; best lambda in this run=0.100"
 "tab_api_migration_map","table","analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv","global code migration","reproduced","Maps deprecated manuscript calls to current package API."
 "tab_benchmark_backend_profiles","table","analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv","support: benchmark backend profiles","reproduced","Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend)."
 "tab_benchmark_environment","table","analysis/manuscript/outputs/tables/benchmark_environment.csv","support: benchmark environment details","reproduced","CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run."

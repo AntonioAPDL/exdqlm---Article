@@ -81,7 +81,17 @@ if (!need_ex3) {
     stop("Monthly USGS flow and nino34 overlap lengths do not match.", call. = FALSE)
   }
 
-  y_log_ts <- log(flow_monthly)
+  lag_order <- 12L
+  X_lags <- embed(as.numeric(nino_ts), lag_order + 1L)
+  colnames(X_lags) <- c("nino_t", paste0("nino_lag", seq_len(lag_order)))
+  flow_fit <- stats::window(flow_monthly, start = stats::time(flow_monthly)[lag_order + 1L])
+  nino_transfer <- stats::window(nino_ts, start = stats::start(flow_fit), end = stats::end(flow_fit))
+
+  if (length(flow_fit) != nrow(X_lags) || length(flow_fit) != length(nino_transfer)) {
+    stop("Lagged nino34 design, transfer input, and flow series do not align.", call. = FALSE)
+  }
+
+  y_log_ts <- log(flow_fit)
   y_log <- as.numeric(y_log_ts)
   ex3_cols <- list(
     m1 = "#8A46B2",
@@ -117,7 +127,7 @@ if (!need_ex3) {
     seas_comp <- exdqlm::seasMod(p = 12, h = c(1, 2, 0.1469118636), C0 = diag(1, 6))
     model <- trend_comp + seas_comp
 
-    reg_comp <- exdqlm::regMod(as.numeric(nino_ts), m0 = 1, C0 = 1)
+    reg_comp <- exdqlm::regMod(X_lags, m0 = rep(0, ncol(X_lags)), C0 = diag(1, ncol(X_lags)))
     model_w_reg <- model + reg_comp
 
     n_samp <- as.integer(cfg_profile$ex3$n_samp)
@@ -125,14 +135,14 @@ if (!need_ex3) {
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
     diag_ref_samp <- seeded_rnorm(length(y_log), seed_value + 301L)
 
-    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v5_monthly_usgs_nino_df099", {
+    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v9_monthly_usgs_nino_lag12reg_df099", {
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
             df = c(0.99, 0.99), dim.df = c(1, 6),
-            X = as.numeric(nino_ts), tf.df = c(0.99), lam = lambda_grid[i],
+            X = as.numeric(nino_transfer), tf.df = c(0.99), lam = lambda_grid[i],
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
@@ -151,7 +161,7 @@ if (!need_ex3) {
       M1_ldvb <- tryCatch(
         exdqlm::exdqlmLDVB(
           y = y_log, p0 = 0.15, model = model_w_reg,
-          df = c(0.99, 0.99, 0.99), dim.df = c(1, 6, 1),
+          df = c(0.99, 0.99, 0.99), dim.df = c(1, 6, ncol(X_lags)),
           sig.init = 0.1, gam.init = -0.1,
           tol = tol, n.samp = n_samp,
           verbose = FALSE
@@ -164,7 +174,7 @@ if (!need_ex3) {
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
             df = c(0.99, 0.99), dim.df = c(1, 6),
-            X = as.numeric(nino_ts), tf.df = c(0.99), lam = lambda_star_ldvb,
+            X = as.numeric(nino_transfer), tf.df = c(0.99), lam = lambda_star_ldvb,
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
@@ -184,7 +194,7 @@ if (!need_ex3) {
         lambda_star = lambda_star_ldvb, lambda_star_ldvb = lambda_star_ldvb,
         n_samp = n_samp, tol = tol
       )
-    }, note = "ex3_models_ldvb_v5_monthly_usgs_nino_df099")
+    }, note = "ex3_models_ldvb_v9_monthly_usgs_nino_lag12reg_df099")
 
     fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
     M1 <- ex3_models$M1
@@ -268,8 +278,8 @@ if (!need_ex3) {
         exdqlm::compPlot(M1, index = 2:7, add = TRUE, col = ex3_cols$m1)
         exdqlm::compPlot(M2, index = 2:7, add = TRUE, col = ex3_cols$m2)
 
-        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 components", xlab = "time")
-        exdqlm::compPlot(M1, index = 8, add = TRUE, col = ex3_cols$m1)
+        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 lag block", xlab = "time")
+        exdqlm::compPlot(M1, index = 8:20, add = TRUE, col = ex3_cols$m1)
         exdqlm::compPlot(M2, index = 8:9, add = TRUE, col = ex3_cols$m2)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
       })
@@ -301,8 +311,8 @@ if (!need_ex3) {
           plot_component_summary(c1_seas, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_seas, add = TRUE, col = ldvb_cols$m2)
 
-          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 components", xlab = "time")
-          c1_cov <- component_summary_from_fit(M1_ldvb, index = 8)
+          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 lag block", xlab = "time")
+          c1_cov <- component_summary_from_fit(M1_ldvb, index = 8:20)
           c2_cov <- component_summary_from_fit(M2_ldvb, index = 8:9)
           plot_component_summary(c1_cov, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_cov, add = TRUE, col = ldvb_cols$m2)
@@ -385,8 +395,12 @@ if (!need_ex3) {
       save_png_plot("ex3forecast.png", {
         stats::plot.ts(y_log_ts, col = "grey70", ylim = c(1, 8), xlim = xlim_fore)
         fc1 <- exdqlm::exdqlmForecast(start.t = length(y_log) - 18, k = 18, m1 = M1, plot = FALSE)
+        fc1$ff <- fc1$ff[seq_len(fc1$k)]
+        fc1$fQ <- fc1$fQ[seq_len(fc1$k)]
         plot(fc1, add = TRUE, cols = c(ex3_cols$m1, ex3_cols$m1_aux))
         fc2 <- exdqlm::exdqlmForecast(start.t = length(y_log) - 18, k = 18, m1 = M2, plot = FALSE)
+        fc2$ff <- fc2$ff[seq_len(fc2$k)]
+        fc2$fQ <- fc2$fQ[seq_len(fc2$k)]
         plot(fc2, add = TRUE, cols = c(ex3_cols$m2, ex3_cols$m2_aux))
         vline_x <- grDevices::xy.coords(y_log_ts)$x[length(y_log_ts) - 18]
         graphics::abline(v = vline_x, col = ex3_cols$ref, lty = 5)
@@ -406,8 +420,12 @@ if (!need_ex3) {
         save_png_plot("ex3forecast_ldvb.png", {
           stats::plot.ts(y_log_ts, col = "grey70", ylim = c(1, 8), xlim = xlim_fore)
           fc1_ld <- forecast_from_fit(start.t = length(y_log) - 18, k = 18, m1 = M1_ldvb, y_data = y_log, plot = FALSE)
+          fc1_ld$ff <- fc1_ld$ff[seq_len(fc1_ld$k)]
+          fc1_ld$fQ <- fc1_ld$fQ[seq_len(fc1_ld$k)]
           plot(fc1_ld, add = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1_aux))
           fc2_ld <- forecast_from_fit(start.t = length(y_log) - 18, k = 18, m1 = M2_ldvb, y_data = y_log, plot = FALSE)
+          fc2_ld$ff <- fc2_ld$ff[seq_len(fc2_ld$k)]
+          fc2_ld$fQ <- fc2_ld$fQ[seq_len(fc2_ld$k)]
           plot(fc2_ld, add = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2_aux))
           vline_x <- grDevices::xy.coords(y_log_ts)$x[length(y_log_ts) - 18]
           graphics::abline(v = vline_x, col = ex3_cols$ref, lty = 5)
