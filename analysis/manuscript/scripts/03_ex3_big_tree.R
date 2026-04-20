@@ -41,7 +41,7 @@ if (!need_ex3) {
     )
   }
   ex3_daily_df <- utils::read.csv(ex3_daily_path, stringsAsFactors = FALSE)
-  required_cols <- c("date", "usgs_cfs", "ppt_mm", "soil_moisture")
+  required_cols <- c("date", "usgs_cfs")
   missing_cols <- setdiff(required_cols, names(ex3_daily_df))
   if (length(missing_cols) > 0L) {
     stop(
@@ -52,11 +52,16 @@ if (!need_ex3) {
       call. = FALSE
     )
   }
+  utils::data("nino34", package = "exdqlm", envir = environment())
+  if (!exists("nino34")) {
+    stop("Required dataset nino34 not available from exdqlm package.", call. = FALSE)
+  }
+
   ex3_daily_df$date <- as.Date(ex3_daily_df$date)
   ex3_daily_df <- ex3_daily_df[order(ex3_daily_df$date), required_cols, drop = FALSE]
   ex3_month_id <- format(ex3_daily_df$date, "%Y-%m")
   ex3_monthly_df <- aggregate(
-    ex3_daily_df[c("usgs_cfs", "ppt_mm", "soil_moisture")],
+    ex3_daily_df["usgs_cfs"],
     by = list(month = ex3_month_id),
     FUN = mean
   )
@@ -65,43 +70,33 @@ if (!need_ex3) {
 
   ex3_start_year <- as.integer(format(ex3_monthly_df$date[1], "%Y"))
   ex3_start_month <- as.integer(format(ex3_monthly_df$date[1], "%m"))
-  btflow_ts <- stats::ts(
+  btflow_ts_full <- stats::ts(
     ex3_monthly_df$usgs_cfs,
     start = c(ex3_start_year, ex3_start_month),
     frequency = 12
   )
-  ppt_ts <- stats::ts(
-    ex3_monthly_df$ppt_mm,
-    start = c(ex3_start_year, ex3_start_month),
-    frequency = 12
-  )
-  soil_ts <- stats::ts(
-    ex3_monthly_df$soil_moisture,
-    start = c(ex3_start_year, ex3_start_month),
-    frequency = 12
-  )
-  X_monthly <- scale(cbind(
-    ppt = as.numeric(ppt_ts),
-    soil = as.numeric(soil_ts)
-  ))
-  y_log <- log(as.numeric(btflow_ts))
+  flow_monthly <- stats::window(btflow_ts_full, end = c(2021, 4))
+  nino_ts <- stats::window(nino34, start = stats::start(flow_monthly), end = stats::end(flow_monthly))
+  if (length(flow_monthly) != length(nino_ts)) {
+    stop("Monthly USGS flow and nino34 overlap lengths do not match.", call. = FALSE)
+  }
+
+  y_log <- log(as.numeric(flow_monthly))
   ex3_cols <- list(
     m1 = "#8A46B2",
     m1_aux = "#C48AE0",
     m2 = "#2E7D5B",
     m2_aux = "#85B89A",
-    ppt = "#2D6F95",
-    soil = "#5C8358",
+    nino = "#2D6F95",
     ref = "#C47A2C"
   )
   ldvb_cols <- ex3_cols
 
   if (need_ex3data) {
     save_png_plot("ex3data.png", {
-      graphics::par(mfrow = c(3, 1))
-      stats::plot.ts(log(btflow_ts), col = "grey40", ylab = "log(flow)")
-      stats::plot.ts(ppt_ts, col = ex3_cols$ppt, ylab = "ppt_mm")
-      stats::plot.ts(soil_ts, col = ex3_cols$soil, ylab = "soil_moisture")
+      graphics::par(mfrow = c(2, 1))
+      stats::plot.ts(log(flow_monthly), col = "grey40", ylab = "log(flow)")
+      stats::plot.ts(nino_ts, col = ex3_cols$nino, ylab = "nino34")
     })
     register_artifact(
       artifact_id = "fig_ex3data",
@@ -111,8 +106,7 @@ if (!need_ex3) {
       status = "reproduced",
       notes = paste(
         "Top: log monthly Big Tree flow aggregated from the staged daily file.",
-        "Middle: monthly mean precipitation.",
-        "Bottom: monthly mean soil moisture."
+        "Bottom: nino34 over the overlapping 1987-01 to 2021-04 window."
       )
     )
   }
@@ -122,11 +116,7 @@ if (!need_ex3) {
     seas_comp <- exdqlm::seasMod(p = 12, h = c(1, 2, 0.1469118636), C0 = diag(1, 6))
     model <- trend_comp + seas_comp
 
-    reg_comp <- exdqlm::regMod(
-      X_monthly,
-      m0 = rep(0, ncol(X_monthly)),
-      C0 = diag(1, ncol(X_monthly))
-    )
+    reg_comp <- exdqlm::regMod(as.numeric(nino_ts), m0 = 1, C0 = 1)
     model_w_reg <- model + reg_comp
 
     n_samp <- as.integer(cfg_profile$ex3$n_samp)
@@ -134,16 +124,16 @@ if (!need_ex3) {
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
     diag_ref_samp <- seeded_rnorm(length(y_log), seed_value + 301L)
 
-    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v3_monthly_usgs_ppt_soil", {
+    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v4_monthly_usgs_nino_harmonics", {
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
             df = c(1, 0.9), dim.df = c(1, 6),
-            X = X_monthly, tf.df = c(0.95, 0.95), lam = lambda_grid[i],
-            tf.m0 = rep(0, 1 + ncol(X_monthly)),
-            tf.C0 = diag(c(0.1, 0.05, 0.05), 3),
+            X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_grid[i],
+            tf.m0 = c(0, 0),
+            tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
             tol = tol, n.samp = n_samp,
             verbose = FALSE
@@ -160,7 +150,7 @@ if (!need_ex3) {
       M1_ldvb <- tryCatch(
         exdqlm::exdqlmLDVB(
           y = y_log, p0 = 0.15, model = model_w_reg,
-          df = c(1, 0.9, 0.95), dim.df = c(1, 6, ncol(X_monthly)),
+          df = c(1, 0.9, 0.95), dim.df = c(1, 6, 1),
           sig.init = 0.1, gam.init = -0.1,
           tol = tol, n.samp = n_samp,
           verbose = FALSE
@@ -173,9 +163,9 @@ if (!need_ex3) {
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
             df = c(1, 0.9), dim.df = c(1, 6),
-            X = X_monthly, tf.df = c(0.95, 0.95), lam = lambda_star_ldvb,
-            tf.m0 = rep(0, 1 + ncol(X_monthly)),
-            tf.C0 = diag(c(0.1, 0.05, 0.05), 3),
+            X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_star_ldvb,
+            tf.m0 = c(0, 0),
+            tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
             tol = tol, n.samp = n_samp,
             verbose = FALSE
@@ -193,7 +183,7 @@ if (!need_ex3) {
         lambda_star = lambda_star_ldvb, lambda_star_ldvb = lambda_star_ldvb,
         n_samp = n_samp, tol = tol
       )
-    }, note = "ex3_models_ldvb_v3_monthly_usgs_ppt_soil")
+    }, note = "ex3_models_ldvb_v4_monthly_usgs_nino_harmonics")
 
     fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
     M1 <- ex3_models$M1
@@ -218,14 +208,14 @@ if (!need_ex3) {
       cat("\nRun times (seconds):\n")
       print(c(M1 = M1$run.time, M2 = M2$run.time))
     })
-    register_artifact(
-      artifact_id = "ex3_run_summary",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary.txt",
-      manuscript_target = "Example 3 textual outputs",
-      status = "reproduced",
-      notes = "Monthly USGS/ppt/soil Example 3 summary including lambda optimization table and median.kt."
-    )
+      register_artifact(
+        artifact_id = "ex3_run_summary",
+        artifact_type = "log",
+        relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary.txt",
+        manuscript_target = "Example 3 textual outputs",
+        status = "reproduced",
+        notes = "Monthly USGS/nino34 Example 3 summary including lambda optimization table and median.kt."
+      )
 
     capture_output_file("ex3_run_summary_ldvb.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
@@ -246,17 +236,17 @@ if (!need_ex3) {
       if (fit_ok(M2_ldvb)) rt <- c(rt, M2_ldvb = M2_ldvb$run.time)
       print(rt)
     })
-    register_artifact(
-      artifact_id = "ex3_run_summary_ldvb",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary_ldvb.txt",
-      manuscript_target = "new: Example 3 LDVB textual outputs",
-      status = if (ex3_ldvb_pair_ok) "reproduced" else "approximate",
-      notes = "LDVB monthly USGS/ppt/soil counterpart including lambda scan and runtime summaries."
-    )
+      register_artifact(
+        artifact_id = "ex3_run_summary_ldvb",
+        artifact_type = "log",
+        relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary_ldvb.txt",
+        manuscript_target = "new: Example 3 LDVB textual outputs",
+        status = if (ex3_ldvb_pair_ok) "reproduced" else "approximate",
+        notes = "LDVB monthly USGS/nino34 counterpart including lambda scan and runtime summaries."
+      )
 
-    xlim_idx_mid <- time_window_to_index(btflow_ts, 1995, 2015)
-    xlim_idx_fore <- time_window_to_index(btflow_ts, 2023, 2026.3)
+    xlim_idx_mid <- time_window_to_index(flow_monthly, 1995, 2015)
+    xlim_idx_fore <- time_window_to_index(flow_monthly, 2017, 2021.4)
 
     if (need_ex3quantcomps) {
       save_png_plot("ex3quantcomps.png", {
@@ -271,9 +261,9 @@ if (!need_ex3) {
         exdqlm::compPlot(M1, index = 2:7, add = TRUE, col = ex3_cols$m1)
         exdqlm::compPlot(M2, index = 2:7, add = TRUE, col = ex3_cols$m2)
 
-        graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "covariate components", xlab = "Index")
-        exdqlm::compPlot(M1, index = 8:9, add = TRUE, col = ex3_cols$m1)
-        exdqlm::compPlot(M2, index = 8:10, add = TRUE, col = ex3_cols$m2)
+        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_idx_mid, ylab = "Nino 3.4 components", xlab = "Index")
+        exdqlm::compPlot(M1, index = 8, add = TRUE, col = ex3_cols$m1)
+        exdqlm::compPlot(M2, index = 8:9, add = TRUE, col = ex3_cols$m2)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
       })
       register_artifact(
@@ -304,9 +294,9 @@ if (!need_ex3) {
           plot_component_summary(c1_seas, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_seas, add = TRUE, col = ldvb_cols$m2)
 
-          graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "covariate components", xlab = "Index")
-          c1_cov <- component_summary_from_fit(M1_ldvb, index = 8:9)
-          c2_cov <- component_summary_from_fit(M2_ldvb, index = 8:10)
+          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_idx_mid, ylab = "Nino 3.4 components", xlab = "Index")
+          c1_cov <- component_summary_from_fit(M1_ldvb, index = 8)
+          c2_cov <- component_summary_from_fit(M2_ldvb, index = 8:9)
           plot_component_summary(c1_cov, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_cov, add = TRUE, col = ldvb_cols$m2)
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
@@ -333,16 +323,13 @@ if (!need_ex3) {
 
     if (need_ex3zetapsi) {
       save_png_plot("ex3zetapsi.png", {
-        graphics::par(mfrow = c(1, 3))
+        graphics::par(mfrow = c(1, 2))
         exdqlm::compPlot(M2, index = 8, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
         graphics::title(expression(zeta[t]))
         exdqlm::compPlot(M2, index = 9, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
-        graphics::title("psi[ppt,t]")
-        exdqlm::compPlot(M2, index = 10, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
-        graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
-        graphics::title("psi[soil,t]")
+        graphics::title(expression(psi[t]))
       })
       register_artifact(
         artifact_id = "fig_ex3zetapsi",
@@ -357,19 +344,15 @@ if (!need_ex3) {
     if (need_ex3zetapsi_ldvb) {
       if (fit_ok(M2_ldvb)) {
         save_png_plot("ex3zetapsi_ldvb.png", {
-          graphics::par(mfrow = c(1, 3))
+          graphics::par(mfrow = c(1, 2))
           zeta_ld <- component_summary_from_fit(M2_ldvb, index = 8, just.theta = TRUE)
           plot_component_summary(zeta_ld, col = ldvb_cols$m2, add = FALSE)
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
           graphics::title(expression(zeta[t]))
-          psi_ppt_ld <- component_summary_from_fit(M2_ldvb, index = 9, just.theta = TRUE)
-          plot_component_summary(psi_ppt_ld, col = ldvb_cols$m2, add = FALSE)
+          psi_ld <- component_summary_from_fit(M2_ldvb, index = 9, just.theta = TRUE)
+          plot_component_summary(psi_ld, col = ldvb_cols$m2, add = FALSE)
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
-          graphics::title("psi[ppt,t]")
-          psi_soil_ld <- component_summary_from_fit(M2_ldvb, index = 10, just.theta = TRUE)
-          plot_component_summary(psi_soil_ld, col = ldvb_cols$m2, add = FALSE)
-          graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
-          graphics::title("psi[soil,t]")
+          graphics::title(expression(psi[t]))
         })
         register_artifact(
           artifact_id = "fig_ex3zetapsi_ldvb",
