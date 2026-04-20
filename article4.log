@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 22:14
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  19 APR 2026 22:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -749,9 +749,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [10]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 11
  []
@@ -762,7 +759,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
-<analysis/manuscript/outputs/figures/ex1mcmc.png, id=360, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex1mcmc.png, id=361, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex1mcmc.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex1mcmc.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex1mcmc.png  used 
@@ -781,7 +778,7 @@ LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 538
 (/usr/share/texlive/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<analysis/manuscript/outputs/figures/ex1quants.png, id=370, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex1quants.png, id=371, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex1quants.png Graphic file (type png)
 
@@ -809,7 +806,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [16]
-<analysis/manuscript/outputs/figures/ex2quant.png, id=398, 722.7pt x 505.89pt>
+<analysis/manuscript/outputs/figures/ex2quant.png, id=399, 722.7pt x 505.89pt>
 File: analysis/manuscript/outputs/figures/ex2quant.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex2quant.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex2quant.png  used
@@ -827,7 +824,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [18 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex2checks.png, id=408, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex2checks.png, id=409, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
 
@@ -847,7 +844,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20]
-<analysis/manuscript/outputs/figures/ex3data.png, id=424, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex3data.png, id=425, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex3data.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex3data.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3data.png  used 
@@ -872,7 +869,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [22]
-<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=446, 722.7pt x 433.6
+<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=447, 722.7pt x 433.6
 2pt>
 File: analysis/manuscript/outputs/figures/ex3quantcomps.png Graphic file (type 
 png)
@@ -887,7 +884,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23 <./analysis/manuscript/outputs/figures/ex3quantcomps.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=453, 722.7pt x 433.62pt
+<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=454, 722.7pt x 433.62pt
 >
 File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
 )
@@ -902,7 +899,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [24 <./analysis/manuscript/outputs/figures/ex3zetapsi.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3forecast.png, id=465, 722.7pt x 433.62p
+<analysis/manuscript/outputs/figures/ex3forecast.png, id=466, 722.7pt x 433.62p
 t>
 File: analysis/manuscript/outputs/figures/ex3forecast.png Graphic file (type pn
 g)
@@ -922,7 +919,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [26 <./analysis/manuscript/outputs/figures/ex3forecast.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex4static.png, id=482, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex4static.png, id=483, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex4static.png Graphic file (type png)
 
@@ -1003,7 +1000,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1127.
 Here is how much of TeX's memory you used:
  8753 strings out of 494917
  127596 string characters out of 6180699
- 212444 words of memory out of 5000000
+ 213444 words of memory out of 5000000
  11716 multiletter control sequences out of 15000+600000
  144187 words of font info for 97 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
@@ -1038,10 +1035,10 @@ ts/type1/public/lm/lmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /lm/lmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtto10.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on article4.pdf (32 pages, 2982329 bytes).
+Output written on article4.pdf (32 pages, 2982309 bytes).
 PDF statistics:
- 690 PDF objects out of 1000 (max. 8388607)
- 608 compressed objects within 7 object streams
+ 691 PDF objects out of 1000 (max. 8388607)
+ 609 compressed objects within 7 object streams
  139 named destinations out of 1000 (max. 500000)
  171 words of extra memory for PDF output out of 10000 (max. 10000000)
 
