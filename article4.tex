@@ -874,7 +874,7 @@ R> model.w.reg = model + reg.comp
 \end{CodeInput}
 \end{CodeChunk}
 
-To allow the Ni\~no 3.4 input components of both models to vary over time, we set the respective discount factors to 0.95 via the parameter \code{df} in the regression fit and the parameter \code{tf.df} in the transfer-function fit. We set the trend and seasonal discount factors to 1 and 0.9, respectively. This lets the seasonal amplitudes evolve over time while the remaining variation in the \(0.15\) quantile is attributed to the changing effect of the monthly Ni\~no 3.4 input.
+To allow all components to evolve gradually over time while keeping the fitted paths smooth, we set every discount factor in both models to 0.99. In particular, we use 0.99 for the trend block, the seasonal block, the dynamic Ni\~no 3.4 regression effect, and the transfer-function block.
 
 The transfer-function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{exdqlmTransferLDVB()} to obtain a fast approximate fit on the monthly series, although the corresponding exact posterior workflow is also available through \code{exdqlmTransferMCMC()}. On the coarse candidate grid used here, we use the KL divergence as a calibration-oriented screening criterion to select the transfer-function decay rate, and then assess the resulting fitted models with the broader diagnostic comparison reported below. This screen selects a decay rate of 0.30.
 \begin{CodeChunk}
@@ -884,8 +884,8 @@ R> KLs <- vector("numeric")
 R> ref.samp = rnorm(length(flow.monthly))
 R> for(i in 1:length(possible.lams)){
 R>   temp.M2 = exdqlmTransferLDVB(y = log(flow.monthly), p0 = 0.15, model = model,
-+                               df = c(1,0.9), dim.df = c(1,6),
-+                               X = nino.monthly, tf.df = c(0.95),
++                               df = c(0.99,0.99), dim.df = c(1,6),
++                               X = nino.monthly, tf.df = c(0.99),
 +                               lam = possible.lams[i],
 +                               tf.m0 = c(0,0),
 +                               tf.C0 = diag(c(0.1,0.005),2),
@@ -915,12 +915,12 @@ With these discount factors and optimal $\lambda$, we estimate the dynamic quant
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M1 = exdqlmLDVB(y = log(flow.monthly), p0 = 0.15, model = model.w.reg,
-+                df = c(1,0.9,0.95), dim.df = c(1,6,1),
++                df = c(0.99,0.99,0.99), dim.df = c(1,6,1),
 +                sig.init = 0.1, gam.init = - 0.1,
 +                tol = 0.05, verbose = FALSE)
 R> M2 = exdqlmTransferLDVB(y = log(flow.monthly), p0 = 0.15, model = model,
-+                        df = c(1,0.9), dim.df = c(1,6),
-+                        X = nino.monthly, tf.df = c(0.95), lam = 0.30,
++                        df = c(0.99,0.99), dim.df = c(1,6),
++                        X = nino.monthly, tf.df = c(0.99), lam = 0.30,
 +                        tf.m0 = c(0,0),
 +                        tf.C0 = diag(c(0.1,0.005),2),
 +                        sig.init = 0.1, gam.init = - 0.1,
@@ -982,12 +982,13 @@ R> title(expression(psi[t]))
 \end{CodeChunk}
 
 \aA{To further understand these transfer-function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here the effect is \(|\psi_{t-1} X_t|\), where \(X_t\) denotes the monthly Ni\~no 3.4 input. A median value of about \(3.03\) suggests that the transfer effect lasts on the order of three months.}
+\aA{To further understand these transfer-function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here the effect is \(|\psi_{t-1} X_t|\), where \(X_t\) denotes the monthly Ni\~no 3.4 input. A median value of about \(2.62\) suggests that the transfer effect lasts on the order of three months.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 3.033997
+[1] 2.617446
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1023,9 +1024,9 @@ Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL diverg
        \cmidrule(lr){2-3}\cmidrule(l){4-5}
        & output & value & output & value \\
  \midrule
-      CRPS & \code{m1.CRPS} & 0.301  & \code{m2.CRPS} & \textbf{0.295} \\
-      pplc & \code{m1.pplc} & 191.63 & \code{m2.pplc} & \textbf{185.87} \\
-      KL   & \code{m1.KL}   & 0.023  & \code{m2.KL}   & \textbf{0.017} \\
+      CRPS & \code{m1.CRPS} & \textbf{0.470}  & \code{m2.CRPS} & 0.477 \\
+      pplc & \code{m1.pplc} & \textbf{100.43} & \code{m2.pplc} & 100.74 \\
+      KL   & \code{m1.KL}   & 0.132  & \code{m2.KL}   & \textbf{0.106} \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Model diagnostic output from exdqlmDiagnostics() and resulting values. Bold entries indicate the smaller value for each diagnostic.}
@@ -1038,7 +1039,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2,
 +                              cols = c("purple","orange"), plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-\aA{The resulting diagnostics favor the transfer-function model across all three reported criteria. The KL divergence, CRPS, and pplc are each smaller for \(M_2\), suggesting that in this example the nonlinear transfer-function specification captures the relationship between monthly Big Tree flow and Ni\~no 3.4 more effectively than the simpler dynamic regression alternative.}
+\aA{Under this smoother discount-factor specification, the resulting diagnostics are not unanimous. The KL divergence favors the transfer-function model, whereas both the CRPS and the pplc are slightly smaller for the regression model. In this version of the example we therefore treat the transfer-function specification as a useful nonlinear alternative whose main advantage appears in calibration-oriented fit, rather than as a uniformly dominant model under every predictive diagnostic.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

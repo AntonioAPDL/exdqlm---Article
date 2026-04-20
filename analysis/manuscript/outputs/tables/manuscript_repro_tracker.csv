@@ -1,4 +1,5 @@
 "artifact_id","artifact_type","relative_path","manuscript_target","status","notes"
+"fig_ex3data","figure","analysis/manuscript/outputs/figures/ex3data.png","fig:ex3data","reproduced","Top: log monthly Big Tree flow aggregated from the staged daily file. Bottom: nino34 over the overlapping 1987-01 to 2021-04 window."
 "ex3_run_summary","log","analysis/manuscript/outputs/logs/ex3_run_summary.txt","Example 3 textual outputs","reproduced","Monthly USGS/nino34 Example 3 summary including lambda optimization table and median.kt."
 "ex3_run_summary_ldvb","log","analysis/manuscript/outputs/logs/ex3_run_summary_ldvb.txt","new: Example 3 LDVB textual outputs","reproduced","LDVB monthly USGS/nino34 counterpart including lambda scan and runtime summaries."
 "fig_ex3quantcomps","figure","analysis/manuscript/outputs/figures/ex3quantcomps.png","fig:ex3quant","reproduced","Primary Example 3 three-panel LDVB quantile/components figure with index-window fix."
