@@ -132,14 +132,14 @@ if (!need_ex3) {
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
     diag_ref_samp <- seeded_rnorm(length(y_log), seed_value + 301L)
 
-    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v11_monthly_usgs_nino_single_df0999", {
+    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v10_monthly_usgs_nino_single_df097", {
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
-            df = c(0.999, 0.999), dim.df = c(1, 6),
-            X = as.numeric(nino_input), tf.df = c(0.999), lam = lambda_grid[i],
+            df = c(0.97, 0.97), dim.df = c(1, 6),
+            X = as.numeric(nino_input), tf.df = c(0.97), lam = lambda_grid[i],
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
@@ -158,7 +158,7 @@ if (!need_ex3) {
       M1_ldvb <- tryCatch(
         exdqlm::exdqlmLDVB(
           y = y_log, p0 = 0.15, model = model_w_reg,
-          df = c(0.999, 0.999, 0.999), dim.df = c(1, 6, 1),
+          df = c(0.97, 0.97, 0.97), dim.df = c(1, 6, 1),
           sig.init = 0.1, gam.init = -0.1,
           tol = tol, n.samp = n_samp,
           verbose = FALSE
@@ -170,8 +170,8 @@ if (!need_ex3) {
         tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
-            df = c(0.999, 0.999), dim.df = c(1, 6),
-            X = as.numeric(nino_input), tf.df = c(0.999), lam = lambda_star_ldvb,
+            df = c(0.97, 0.97), dim.df = c(1, 6),
+            X = as.numeric(nino_input), tf.df = c(0.97), lam = lambda_star_ldvb,
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
@@ -191,7 +191,7 @@ if (!need_ex3) {
         lambda_star = lambda_star_ldvb, lambda_star_ldvb = lambda_star_ldvb,
         n_samp = n_samp, tol = tol
       )
-    }, note = "ex3_models_ldvb_v11_monthly_usgs_nino_single_df0999")
+    }, note = "ex3_models_ldvb_v10_monthly_usgs_nino_single_df097")
 
     fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
     M1 <- ex3_models$M1

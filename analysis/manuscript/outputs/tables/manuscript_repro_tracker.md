@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-20 18:01:54
+Generated: 2026-04-20 17:13:42
 Profile: standard
 Seed: 20260302
 
@@ -16,8 +16,8 @@ Seed: 20260302
 - [reproduced] `fig_ex3forecast` -> `analysis/manuscript/outputs/figures/ex3forecast.png` (fig:ex3forecast). Primary Example 3 LDVB 18-step ahead forecast comparison.
 - [reproduced] `fig_ex3forecast_ldvb` -> `analysis/manuscript/outputs/figures/ex3forecast_ldvb.png` (new: fig ex3forecast LDVB counterpart). LDVB counterpart for the 18-step forecast figure.
 - [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (tab:ex3). Primary Example 3 LDVB diagnostics table generated with manuscript diagnostics helper.
-- [reproduced] `tab_ex3_lambda_scan` -> `analysis/manuscript/outputs/tables/ex3_lambda_scan_kl.csv` (Example 3 lambda selection output). Primary LDVB lambda scan; best lambda in this run=0.700
-- [reproduced] `tab_ex3_lambda_scan_ldvb` -> `analysis/manuscript/outputs/tables/ex3_lambda_scan_kl_ldvb.csv` (new: Example 3 lambda selection output (LDVB)). Best LDVB lambda in this run=0.700
+- [reproduced] `tab_ex3_lambda_scan` -> `analysis/manuscript/outputs/tables/ex3_lambda_scan_kl.csv` (Example 3 lambda selection output). Primary LDVB lambda scan; best lambda in this run=0.500
+- [reproduced] `tab_ex3_lambda_scan_ldvb` -> `analysis/manuscript/outputs/tables/ex3_lambda_scan_kl_ldvb.csv` (new: Example 3 lambda selection output (LDVB)). Best LDVB lambda in this run=0.500
 - [reproduced] `tab_ex3_diagnostics_ldvb` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary_ldvb.csv` (new: tab ex3 LDVB counterpart). LDVB counterpart diagnostics table generated with manuscript diagnostics helper.
 - [reproduced] `tab_api_migration_map` -> `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv` (global code migration). Maps deprecated manuscript calls to current package API.
 - [reproduced] `tab_benchmark_backend_profiles` -> `analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv` (support: benchmark backend profiles). Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend).
@@ -29,8 +29,8 @@ Seed: 20260302
 - api_update: Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.
 - ldvb_note: Added ISVB vs LDVB comparison figure for dynamic Sunspots example.
 - backend: Benchmark Profile B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
-- ex3: Best LDVB lambda by KL in this run profile: 0.700.
-- ex3_ldvb: Best lambda by KL for LDVB support run: 0.700.
+- ex3: Best LDVB lambda by KL in this run profile: 0.500.
+- ex3_ldvb: Best lambda by KL for LDVB support run: 0.500.
 - coverage: Targeted run; requested targets: ex3data, ex3quantcomps, ex3zetapsi, ex3forecast, ex3tables, ex3quantcomps_ldvb, ex3zetapsi_ldvb, ex3forecast_ldvb, ex3tables_ldvb.
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.
 - timing: Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.
