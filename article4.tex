@@ -1014,23 +1014,21 @@ R> exdqlmForecast(start.t = length(flow.monthly)-18, k = 18, m1 = M2,
 % R> abline(v = xy.coords(log(flow.monthly))$x[length(flow.monthly)-18],
 % +           col = "orange", lty = 5)
 
-Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL divergence, CRPS, and pplc discussed in Section \ref{sec:diags}, the results of which are seen in Table \ref{tab:ex3}.
+Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL divergence, CRPS, and pplc discussed in Section \ref{sec:diags}. Table \ref{tab:ex3} reports these diagnostics together with a brief reminder of what each criterion emphasizes.
 
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabular}{@{}lcccc@{}}
+\begin{tabularx}{0.92\textwidth}{@{}l X cc@{}}
  \toprule
-       & \multicolumn{2}{c}{\code{M1}}  & \multicolumn{2}{c}{\code{M2}}  \\
-       \cmidrule(lr){2-3}\cmidrule(l){4-5}
-       & output & value & output & value \\
+ Criterion & Main emphasis & \code{M1} regression & \code{M2} transfer function \\
  \midrule
-      CRPS & \code{m1.CRPS} & \textbf{0.350}  & \code{m2.CRPS} & 0.357 \\
-      pplc & \code{m1.pplc} & 132.10 & \code{m2.pplc} & \textbf{122.90} \\
-      KL   & \code{m1.KL}   & \textbf{0.0562}  & \code{m2.KL}   & 0.0565 \\
+ CRPS & full predictive-distribution score & \textbf{0.350} & 0.357 \\
+ pplc & target-quantile posterior predictive loss & 132.10 & \textbf{122.90} \\
+ KL divergence & one-step-ahead calibration discrepancy & \textbf{0.0562} & 0.0565 \\
  \bottomrule
-\end{tabular}
-\caption{Example 3: Big Tree water flow. Model diagnostic output from exdqlmDiagnostics() and resulting values. Bold entries indicate the smaller value for each diagnostic.}
+\end{tabularx}
+\caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria, and bold entries indicate the smaller value in each row.}
 \label{tab:ex3}
 \end{table}
 
@@ -1040,7 +1038,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2,
 +                              cols = c("purple","orange"), plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-\aA{With this simpler monthly Ni\~no 3.4 specification, the resulting diagnostics are again not unanimous. The direct regression model attains the smaller KL divergence and CRPS, whereas the transfer-function model achieves the smaller pplc. The differences are now fairly modest, so we view the two specifications as offering closely competing summaries of the same low-quantile dynamics, with the direct regression slightly favored by the calibration-oriented and distributional scoring criteria and the transfer-function model remaining competitive under the posterior predictive loss criterion.}
+\aA{With this simpler monthly Ni\~no 3.4 specification, the resulting diagnostics are again not unanimous. The direct regression model attains the smaller KL divergence and CRPS, whereas the transfer-function model achieves the smaller pplc. The differences are fairly modest, so we view the two specifications as offering closely competing summaries of the same low-quantile dynamics: the direct regression is slightly favored by the calibration-oriented and full-distribution criteria, while the transfer-function model is favored by the target-quantile loss criterion.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
