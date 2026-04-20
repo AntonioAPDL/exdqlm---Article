@@ -37,12 +37,21 @@ if (!need_ex3) {
   btflow_ts <- BTflow
   nino_ts <- nino34
   y_log <- log(as.numeric(btflow_ts))
+  ex3_cols <- list(
+    m1 = "#8A46B2",
+    m1_aux = "#C48AE0",
+    m2 = "#2E7D5B",
+    m2_aux = "#85B89A",
+    nino = "#3C6E91",
+    ref = "#C47A2C"
+  )
+  ldvb_cols <- ex3_cols
 
   if (need_ex3data) {
     save_png_plot("ex3data.png", {
       graphics::par(mfrow = c(2, 1))
       stats::plot.ts(log(btflow_ts), col = "grey40", ylab = "log(BTflow)")
-      stats::plot.ts(nino_ts, col = "steelblue4", ylab = "nino34")
+      stats::plot.ts(nino_ts, col = ex3_cols$nino, ylab = "nino34")
     })
     register_artifact(
       artifact_id = "fig_ex3data",
@@ -52,61 +61,6 @@ if (!need_ex3) {
       status = "reproduced",
       notes = "Top: log BTflow. Bottom: nino34."
     )
-  }
-
-  exdqlmTransferLDVB_local <- function(y, p0, model, X, df, dim.df, lam, tf.df,
-                                       fix.gamma = FALSE, gam.init = NA,
-                                       fix.sigma = TRUE, sig.init = NA, dqlm.ind = FALSE,
-                                       tol = 0.1, n.samp = 200,
-                                       PriorSigma = NULL, PriorGamma = NULL,
-                                       tf.m0 = rep(0, 2), tf.C0 = diag(1, 2), verbose = FALSE) {
-    y <- as.numeric(y)
-    X <- as.numeric(X)
-    if (length(X) != length(y)) stop("y and X must have the same length")
-    if (length(lam) != 1L || !is.finite(lam) || lam <= 0 || lam >= 1) {
-      stop("lam must be a scalar in (0, 1)")
-    }
-
-    TT <- length(y)
-    base_p <- length(model$m0)
-    FF_base <- matrix(model$FF, nrow = base_p, ncol = TT)
-    GG_base <- array(model$GG, dim = c(base_p, base_p, TT))
-
-    p <- base_p + 2L
-    FF <- matrix(0, nrow = p, ncol = TT)
-    FF[seq_len(base_p), ] <- FF_base
-    FF[base_p + 1L, ] <- 1
-
-    GG <- array(0, dim = c(p, p, TT))
-    GG[seq_len(base_p), seq_len(base_p), ] <- GG_base
-    GG[(base_p + 1L):p, (base_p + 1L):p, ] <- matrix(c(lam, 0, 0, 1), nrow = 2)
-    GG[base_p + 1L, base_p + 2L, ] <- X
-
-    tf_model <- exdqlm::as.exdqlm(list(
-      GG = GG,
-      FF = FF,
-      m0 = c(model$m0, tf.m0),
-      C0 = magic::adiag(model$C0, tf.C0)
-    ))
-    tf_model_df <- c(df, matrix(tf.df, nrow = 1, ncol = 2))
-    tf_model_dim_df <- c(dim.df, rep(1, 2))
-
-    fit <- exdqlm::exdqlmLDVB(
-      y = y, p0 = p0, model = tf_model,
-      df = tf_model_df, dim.df = tf_model_dim_df,
-      fix.gamma = fix.gamma, gam.init = gam.init,
-      fix.sigma = fix.sigma, sig.init = sig.init,
-      dqlm.ind = dqlm.ind, tol = tol, n.samp = n.samp,
-      PriorSigma = PriorSigma, PriorGamma = PriorGamma,
-      verbose = verbose
-    )
-    fit$lam <- lam
-
-    sm <- fit$theta.out$sm
-    base_term <- c(tf_model$m0[1], sm[(dim(sm)[1] - 1), -TT])
-    k_seq <- (log(1e-3) - log(abs(base_term * X))) / log(lam)
-    fit$median.kt <- stats::median(k_seq, na.rm = TRUE)
-    fit
   }
 
   if (need_ex3_models) {
@@ -127,11 +81,11 @@ if (!need_ex3) {
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
     diag_ref_samp <- seeded_rnorm(length(y_log), seed_value + 301L)
 
-    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v1", {
+    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v2_pkg_transfer", {
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
-          exdqlmTransferLDVB_local(
+          exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
             df = c(1, 0.9), dim.df = c(1, 2),
             X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_grid[i],
@@ -162,7 +116,7 @@ if (!need_ex3) {
 
       M2_ldvb <- if (is.finite(lambda_star_ldvb)) {
         tryCatch(
-          exdqlmTransferLDVB_local(
+          exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
             df = c(1, 0.9), dim.df = c(1, 2),
             X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_star_ldvb,
@@ -254,18 +208,18 @@ if (!need_ex3) {
         graphics::par(mfrow = c(3, 1))
 
         stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_1970, ylab = "quantile 95% CrIs")
-        exdqlm::exdqlmPlot(M1, add = TRUE, col = "purple")
-        exdqlm::exdqlmPlot(M2, add = TRUE, col = "forestgreen")
-        graphics::legend("topleft", legend = c("M1 regression", "M2 transfer fn"), col = c("purple", "forestgreen"), lty = 1, bty = "n")
+        exdqlm::exdqlmPlot(M1, add = TRUE, col = ex3_cols$m1)
+        exdqlm::exdqlmPlot(M2, add = TRUE, col = ex3_cols$m2)
+        graphics::legend("topleft", legend = c("M1 regression", "M2 transfer fn"), col = c(ex3_cols$m1, ex3_cols$m2), lty = 1, bty = "n")
 
         graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_idx_1970, ylab = "seasonal components", xlab = "Index")
-        exdqlm::compPlot(M1, index = c(2, 3), add = TRUE, col = "purple")
-        exdqlm::compPlot(M2, index = c(2, 3), add = TRUE, col = "forestgreen")
+        exdqlm::compPlot(M1, index = c(2, 3), add = TRUE, col = ex3_cols$m1)
+        exdqlm::compPlot(M2, index = c(2, 3), add = TRUE, col = ex3_cols$m2)
 
         graphics::plot(NA, ylim = c(-0.5, 1.5), xlim = xlim_idx_1970, ylab = "Nino 3.4 components", xlab = "Index")
-        exdqlm::compPlot(M1, index = c(4), add = TRUE, col = "purple")
-        exdqlm::compPlot(M2, index = c(4, 5), add = TRUE, col = "forestgreen")
-        graphics::abline(h = 0, col = "orange", lty = 3, lwd = 2)
+        exdqlm::compPlot(M1, index = c(4), add = TRUE, col = ex3_cols$m1)
+        exdqlm::compPlot(M2, index = c(4, 5), add = TRUE, col = ex3_cols$m2)
+        graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
       })
       register_artifact(
         artifact_id = "fig_ex3quantcomps",
@@ -300,7 +254,7 @@ if (!need_ex3) {
           c2_nino <- component_summary_from_fit(M2_ldvb, index = c(4, 5))
           plot_component_summary(c1_nino, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_nino, add = TRUE, col = ldvb_cols$m2)
-          graphics::abline(h = 0, col = "orange", lty = 3, lwd = 2)
+          graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
         })
         register_artifact(
           artifact_id = "fig_ex3quantcomps_ldvb",
@@ -325,11 +279,11 @@ if (!need_ex3) {
     if (need_ex3zetapsi) {
       save_png_plot("ex3zetapsi.png", {
         graphics::par(mfrow = c(1, 2))
-        exdqlm::compPlot(M2, index = 4, col = "forestgreen", add = FALSE, just.theta = TRUE)
-        graphics::abline(h = 0, col = "orange", lty = 3, lwd = 2)
+        exdqlm::compPlot(M2, index = 4, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
+        graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
         graphics::title(expression(zeta[t]))
-        exdqlm::compPlot(M2, index = 5, col = "forestgreen", add = FALSE, just.theta = TRUE)
-        graphics::abline(h = 0, col = "orange", lty = 3, lwd = 2)
+        exdqlm::compPlot(M2, index = 5, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
+        graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
         graphics::title(expression(psi[t]))
       })
       register_artifact(
@@ -348,11 +302,11 @@ if (!need_ex3) {
           graphics::par(mfrow = c(1, 2))
           zeta_ld <- component_summary_from_fit(M2_ldvb, index = 4, just.theta = TRUE)
           plot_component_summary(zeta_ld, col = ldvb_cols$m2, add = FALSE)
-          graphics::abline(h = 0, col = "orange", lty = 3, lwd = 2)
+          graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
           graphics::title(expression(zeta[t]))
           psi_ld <- component_summary_from_fit(M2_ldvb, index = 5, just.theta = TRUE)
           plot_component_summary(psi_ld, col = ldvb_cols$m2, add = FALSE)
-          graphics::abline(h = 0, col = "orange", lty = 3, lwd = 2)
+          graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
           graphics::title(expression(psi[t]))
         })
         register_artifact(
@@ -379,11 +333,11 @@ if (!need_ex3) {
       save_png_plot("ex3forecast.png", {
         stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_fore)
         fc1 <- exdqlm::exdqlmForecast(start.t = length(y_log) - 18, k = 18, m1 = M1, plot = FALSE)
-        plot(fc1, add = TRUE, cols = c("purple", "magenta"))
+        plot(fc1, add = TRUE, cols = c(ex3_cols$m1, ex3_cols$m1_aux))
         fc2 <- exdqlm::exdqlmForecast(start.t = length(y_log) - 18, k = 18, m1 = M2, plot = FALSE)
-        plot(fc2, add = TRUE, cols = c("forestgreen", "green"))
+        plot(fc2, add = TRUE, cols = c(ex3_cols$m2, ex3_cols$m2_aux))
         vline_x <- grDevices::xy.coords(y_log)$x[length(y_log) - 18]
-        graphics::abline(v = vline_x, col = "orange", lty = 5)
+        graphics::abline(v = vline_x, col = ex3_cols$ref, lty = 5)
       })
       register_artifact(
         artifact_id = "fig_ex3forecast",
@@ -404,7 +358,7 @@ if (!need_ex3) {
           fc2_ld <- forecast_from_fit(start.t = length(y_log) - 18, k = 18, m1 = M2_ldvb, y_data = y_log, plot = FALSE)
           plot(fc2_ld, add = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2_aux))
           vline_x <- grDevices::xy.coords(y_log)$x[length(y_log) - 18]
-          graphics::abline(v = vline_x, col = "orange", lty = 5)
+          graphics::abline(v = vline_x, col = ex3_cols$ref, lty = 5)
         })
         register_artifact(
           artifact_id = "fig_ex3forecast_ldvb",

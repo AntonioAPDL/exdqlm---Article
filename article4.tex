@@ -970,13 +970,13 @@ R> title(expression(psi[t]))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{To further understand these transfer function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the $0.15$ quantile is less than or equal to $1\mathrm{e}{-3}$, as discussed in Section \ref{sec:tf}. A median value $22.47$ suggests the effect of the Ni\~no 3.4 index value at time $t$ lasts for around $22$ months.}
+\aA{To further understand these transfer function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the $0.15$ quantile is less than or equal to $1\mathrm{e}{-3}$, as discussed in Section \ref{sec:tf}. A median value $16.45$ suggests the effect of the Ni\~no 3.4 index value at time $t$ lasts for around $16$ months.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 22.46999
+[1] 16.45278
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1012,7 +1012,7 @@ Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL diverg
        \cmidrule(lr){2-3}\cmidrule(l){4-5}
        & output & value & output & value \\
  \midrule
-      pplc & \code{m1.pplc} & \textbf{308.91} & \code{m2.pplc} & 309.78 \\
+      pplc & \code{m1.pplc} & \textbf{309.64} & \code{m2.pplc} & 311.07 \\
       KL   & \code{m1.kl}   & 0.262           & \code{m2.kl}   & \textbf{0.204} \\
  \bottomrule
 \end{tabular}
