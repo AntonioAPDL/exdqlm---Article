@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{40}
+\begin{thebibliography}{41}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -29,8 +29,14 @@ Benoit D, Al-Hamzawi R, Yu K, Van~den Poel D (2023).
 \newblock R package version 2.4,
   \urlprefix\url{https://CRAN.R-project.org/package=bayesQR}.
 
-\bibitem[{B{\"u}rkner(2026)}]{brmsfamily}
-B{\"u}rkner PC (2026).
+\bibitem[{B{\"u}rkner(2026{\natexlab{a}})}]{brmsAutocor}
+B{\"u}rkner PC (2026{\natexlab{a}}).
+\newblock \emph{\pkg{brms}: Autocorrelation Structures}.
+\newblock Package documentation, accessed 2026-04-19,
+  \urlprefix\url{https://paulbuerkner.com/brms/reference/autocor-terms.html}.
+
+\bibitem[{B{\"u}rkner(2026{\natexlab{b}})}]{brmsfamily}
+B{\"u}rkner PC (2026{\natexlab{b}}).
 \newblock \emph{\pkg{brms}: Special Family Functions for \pkg{brms} Models}.
 \newblock Package documentation, accessed 2026-04-19,
   \urlprefix\url{https://paulbuerkner.com/brms/reference/brmsfamily.html}.
