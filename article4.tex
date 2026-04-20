@@ -876,9 +876,9 @@ R> model.w.reg = model + reg.comp
 \end{CodeInput}
 \end{CodeChunk}
 
-To allow all components to evolve gradually over time while keeping the fitted paths smooth, we set every discount factor in both models to 0.97. In particular, we use 0.97 for the trend block, the seasonal block, the monthly Ni\~no 3.4 regression block, and the transfer-function block.
+To allow all components to evolve gradually over time while keeping the fitted paths smooth, we set every discount factor in both models to 0.999. In particular, we use 0.999 for the trend block, the seasonal block, the monthly Ni\~no 3.4 regression block, and the transfer-function block.
 
-The transfer-function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{exdqlmTransferLDVB()} to obtain a fast approximate fit on the monthly series, although the corresponding exact posterior workflow is also available through \code{exdqlmTransferMCMC()}. On the coarse candidate grid used here, we use the KL divergence as a calibration-oriented screening criterion to select the transfer-function decay rate, and then assess the resulting fitted models with the broader diagnostic comparison reported below. This screen selects a decay rate of 0.50.
+The transfer-function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{exdqlmTransferLDVB()} to obtain a fast approximate fit on the monthly series, although the corresponding exact posterior workflow is also available through \code{exdqlmTransferMCMC()}. On the coarse candidate grid used here, we use the KL divergence as a calibration-oriented screening criterion to select the transfer-function decay rate, and then assess the resulting fitted models with the broader diagnostic comparison reported below. This screen selects a decay rate of 0.70.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> possible.lams = c(0.1,0.3,0.5,0.7,0.85)
@@ -886,8 +886,8 @@ R> KLs <- vector("numeric")
 R> ref.samp = rnorm(length(flow.fit))
 R> for(i in 1:length(possible.lams)){
 R>   temp.M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
-+                               df = c(0.97,0.97), dim.df = c(1,6),
-+                               X = nino.input, tf.df = c(0.97),
++                               df = c(0.999,0.999), dim.df = c(1,6),
++                               X = nino.input, tf.df = c(0.999),
 +                               lam = possible.lams[i],
 +                               tf.m0 = c(0,0),
 +                               tf.C0 = diag(c(0.1,0.005),2),
@@ -901,7 +901,7 @@ R> # optimal lambda based off KL divergence
 R> possible.lams[which.min(KLs)]
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 0.5
+[1] 0.7
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -917,12 +917,12 @@ With these discount factors and optimal $\lambda$, we estimate the dynamic quant
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M1 = exdqlmLDVB(y = log(flow.fit), p0 = 0.15, model = model.w.reg,
-+                df = c(0.97,0.97,0.97), dim.df = c(1,6,1),
++                df = c(0.999,0.999,0.999), dim.df = c(1,6,1),
 +                sig.init = 0.1, gam.init = - 0.1,
 +                tol = 0.05, verbose = FALSE)
 R> M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
-+                        df = c(0.97,0.97), dim.df = c(1,6),
-+                        X = nino.input, tf.df = c(0.97), lam = 0.50,
++                        df = c(0.999,0.999), dim.df = c(1,6),
++                        X = nino.input, tf.df = c(0.999), lam = 0.70,
 +                        tf.m0 = c(0,0),
 +                        tf.C0 = diag(c(0.1,0.005),2),
 +                        sig.init = 0.1, gam.init = - 0.1,
@@ -983,13 +983,13 @@ R> title(expression(psi[t]))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{To further understand these transfer-function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here the effect is \(|\psi_{t-1} X_t|\), where \(X_t\) denotes the contemporaneous monthly Ni\~no 3.4 input. A median value of about \(3.76\) suggests that the transfer effect lasts on the order of four months.}
+\aA{To further understand these transfer-function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here the effect is \(|\psi_{t-1} X_t|\), where \(X_t\) denotes the contemporaneous monthly Ni\~no 3.4 input. A median value of about \(6.10\) suggests that the transfer effect lasts on the order of six months.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 3.758485
+[1] 6.101485
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1023,9 +1023,9 @@ Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL diverg
  \toprule
  Criterion & \code{M1} regression & \code{M2} transfer function \\
  \midrule
- CRPS & \textbf{0.350} & 0.357 \\
- pplc & 132.10 & \textbf{122.90} \\
- KL & \textbf{0.0562} & 0.0565 \\
+ CRPS & 0.543 & \textbf{0.540} \\
+ pplc & \textbf{109.44} & 111.10 \\
+ KL & \textbf{0.251} & 0.265 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, pplc assesses target-quantile posterior predictive loss, and KL summarizes one-step-ahead calibration discrepancy. Bold entries indicate the smaller value in each row.}
@@ -1038,7 +1038,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2,
 +                              cols = c("purple","orange"), plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-\aA{With this simpler monthly Ni\~no 3.4 specification, the resulting diagnostics are again not unanimous. The direct regression model attains the smaller KL divergence and CRPS, whereas the transfer-function model achieves the smaller pplc. The differences are fairly modest, so we view the two specifications as offering closely competing summaries of the same low-quantile dynamics: the direct regression is slightly favored by the calibration-oriented and full-distribution criteria, while the transfer-function model is favored by the target-quantile loss criterion.}
+\aA{With this simpler monthly Ni\~no 3.4 specification, the resulting diagnostics are again not unanimous. Under the stronger smoothing implied by discount factors of 0.999, the direct regression model attains the smaller KL and pplc, whereas the transfer-function model achieves the smaller CRPS. We therefore again view the two specifications as offering closely competing summaries of the same low-quantile dynamics, but now with a clearer split between the calibration and target-quantile criteria, which favor the direct regression, and the full-distribution score, which slightly favors the transfer-function model.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
