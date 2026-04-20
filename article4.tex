@@ -288,17 +288,18 @@ Using this estimated sequence $\{\hat u_t\}$, we can assess the model performanc
 \end{align}
 can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-\aA{In addition to these calibration-based diagnostics, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. For a predictive distribution $G$ and an observation $y$, the CRPS is
+\aA{In addition to these calibration-based diagnostics, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
 \[
-\text{CRPS}(y,G)=\mathbb{E}_{Y\sim G}|Y-y|-\frac{1}{2}\mathbb{E}_{Y,Y'\sim G}|Y-Y'|.
+\text{CRPS}(y,G)=\mathbb{E}_{Y\sim G}|Y-y|-\frac{1}{2}\mathbb{E}_{Y,Y'\sim G}|Y-Y'|
+=2\int_0^1 \rho_p\!\left(y-G^{-1}(p)\right)\,dp,
 \]
-It rewards forecasts that are both sharp and well calibrated, can be interpreted as an average of the quantile score over all probability levels, and reduces to the absolute error, and hence to the MAE after averaging, for deterministic forecasts. Smaller values indicate better predictive performance.}
+where $\rho_p(x)=x[p-I(x<0)]$ is the check loss at level $p$. This representation shows that the CRPS aggregates check-loss performance over all quantile levels, so it evaluates the full predictive distribution rather than a single target quantile. It rewards forecasts that are both sharp and well calibrated, and it reduces to the absolute error, and hence to the MAE after averaging, for deterministic forecasts. Smaller values indicate better predictive performance.}
 
-For a final diagnostic, we include \cite{gelfand1998model} posterior predictive loss criterion (pplc) with check loss function $\rho_{p_0}(x) = x[p_0-I(x<0)]$. That is,
+For a final diagnostic, we include \cite{gelfand1998model} posterior predictive loss criterion (pplc) based on the same check-loss notation, now evaluated at the target quantile level $p_0$, i.e. $\rho_{p_0}(x) = x[p_0-I(x<0)]$. That is,
 \begin{align}
 \text{pplc} = \sum_t \E[\rho_{p_0} (y_t^{obs}-y^{rep}_t)|y_{1:T}],
 \end{align}
-where the expectation is with respect to the posterior predictive distribution of $y_t$, $p(y^{rep}_t| y_{1:T})$. This distribution is used to generate a replicate dataset and is the expected value of the observation equation \eqref{EQ:exDLM} with respect to the posterior distributions of the parameters. Again, a smaller pplc value suggest a superior model fit. Samples from the posterior replicate distributions are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
+where the expectation is with respect to the posterior predictive distribution of $y_t$, $p(y^{rep}_t| y_{1:T})$. This distribution is used to generate a replicate dataset and is the expected value of the observation equation \eqref{EQ:exDLM} with respect to the posterior distributions of the parameters. Thus, the CRPS summarizes the full predictive distribution through an integrated check loss, whereas the pplc keeps the target quantile explicit through $\rho_{p_0}$. Again, a smaller pplc value suggest a superior model fit. Samples from the posterior replicate distributions are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
 The function \code{exdqlmDiagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} and \code{exdqlmLDVB()} is passed to \code{exdqlmDiagnostics()}, the resulting object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence, the mean CRPS, pplc, the ordered pairs of the QQ-plot, and autocorrelations by lag. By default, the function also produces the QQ-plot, ACF plot and MAP standard forecast error plot.  Examples of the utility of \code{exdqlmDiagnostics()} can be found in the following Section \ref{sec:exs}.
 
