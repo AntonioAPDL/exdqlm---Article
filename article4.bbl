@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{40}
+\begin{thebibliography}{42}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -16,6 +16,13 @@ Barata R, Prado R, Sans\'{o} B ({2022}).
   dynamic models with application to the characterization of atmospheric
   rivers}.}
 \newblock \emph{The annals of applied statistics}.
+
+\bibitem[{Barlow \emph{et~al.}(1972)Barlow, Bartholomew, Bremner, and
+  Brunk}]{barlow1972}
+Barlow RE, Bartholomew DJ, Bremner JM, Brunk HD (1972).
+\newblock \emph{Statistical Inference Under Order Restrictions: The Theory and
+  Application of Isotonic Regression}.
+\newblock John Wiley \& Sons, New York.
 
 \bibitem[{Beal(2003)}]{beal2003variational}
 Beal MJ (2003).
@@ -39,6 +46,13 @@ B{\"u}rkner PC (2026).
 Carter CK, Kohn R (1994).
 \newblock \enquote{On Gibbs sampling for state space models.}
 \newblock \emph{Biometrika}, \textbf{81}(3), 541--553.
+
+\bibitem[{Chernozhukov \emph{et~al.}(2010)Chernozhukov, Fern{\'a}ndez-Val, and
+  Galichon}]{chernozhukov2010}
+Chernozhukov V, Fern{\'a}ndez-Val I, Galichon A (2010).
+\newblock \enquote{Quantile and Probability Curves Without Crossing.}
+\newblock \emph{Econometrica}, \textbf{78}(3), 1093--1125.
+\newblock \doi{10.3982/ECTA7880}.
 
 \bibitem[{Fan \emph{et~al.}(2026)Fan, Wu, Ren, Li, and Zhou}]{pqrBayes}
 Fan K, Wu C, Ren J, Li X, Zhou F (2026).
