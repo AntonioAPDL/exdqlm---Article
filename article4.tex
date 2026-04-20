@@ -213,31 +213,52 @@ Discounting by component of the state-space model is also a functionality of our
 
 Quantifying the relationship between an input and a quantile of a response is a non-trivial task, particularly when the relationship is nonlinear. In mean-centric dynamic modeling, transfer functions are a straightforward method to incorporate variables which measure the combined effect of current and past regression effects \citep{west1985dynamic}. \aA{Within \pkg{exdqlm}, this extension is handled by augmenting the dynamic state-space representation conditional on a fixed transfer-function rate \(\lambda\), and the resulting workflow is available through both VB and MCMC fitting routines.}
 
-For $t=1,\dots,T$ and univariate input, $X_t$, a transfer function exDQLM with exponential decay is defined by
+For $t=1,\dots,T$ and transfer input vector ${\bf x}_t \in \mathbb{R}^k$, a transfer-function exDQLM with exponential decay is defined by
 \begin{align}
 \label{EQ:begin_transfer}
-y_t | \boldsymbol{\theta}_t,\gamma,\sigma  & \sim \text{exAL}_{p_0}({\bf F}'_t \boldsymbol{\theta}_t +  \zeta_{t},\sigma,\gamma) \\
-\boldsymbol{\theta}_t | \boldsymbol{\theta}_{t-1},{\bf W}_t  & \sim  \text{N}({\bf G}_t \boldsymbol{\theta}_{t-1},{\bf W}_t) \\
+y_t | \boldsymbol{\theta}_t,\zeta_t,\gamma,\sigma  & \sim \text{exAL}_{p_0}({\bf F}'_t \boldsymbol{\theta}_t +  \zeta_{t},\sigma,\gamma) \\
+\boldsymbol{\theta}_t | \boldsymbol{\theta}_{t-1},{\bf W}_t^\theta  & \sim  \text{N}({\bf G}_t \boldsymbol{\theta}_{t-1},{\bf W}_t^\theta) \\
 \label{EQ:transfer_effect}
-\zeta_{t}|\zeta_{t-1},\psi_{t-1},\omega_{t} & \sim \text{N}(\lambda \zeta_{t-1} + X_{t}\psi_{t-1},\omega_{t}) \\
+\zeta_{t}|\zeta_{t-1},\boldsymbol{\psi}_{t-1},\omega_{t} & \sim \text{N}(\lambda \zeta_{t-1} + {\bf x}'_{t}\boldsymbol{\psi}_{t-1},\omega_{t}) \\
 \label{EQ:end_transfer}
-\psi_{t}|\psi_{t-1},\nu_{t} & \sim \text{N}(\psi_{t-1},\nu_{t}).
+\boldsymbol{\psi}_{t}|\boldsymbol{\psi}_{t-1},{\bf W}_{t}^{\psi} & \sim \text{N}(\boldsymbol{\psi}_{t-1},{\bf W}_{t}^{\psi}).
 \end{align}
-Here $\zeta_{t}$ captures the effect of the current and past regression effects on the quantile at time $t$. Alternatively, the parameter $\psi_{t}$ determines the instantaneous effect $X_t$ has on the quantile. The parameter $\lambda\in[0,1]$ represents the memory of the regression effect up to time $t$. This effect decays at an exponential rate, reducing by a factor of $\lambda$ at every time step. More explicitly, the effect of $X_t$ on the quantile at time $t+k$ is $\lambda^k \psi_{t-1}X_t$. Thus, the series $k_t \geq \frac{\log(\epsilon) - \log(|\psi_{t-1}X_t|)}{\log(\lambda)}$ represents a lower bound for the number of time steps until the effect of $X_t$ is less than or equal to a fixed $\epsilon$. The median value of $k_t$ corresponding to $\epsilon = 1\mathrm{e}{-3}$ is included as an output of our transfer function routine.
+Here $\zeta_t \in \mathbb{R}$ denotes the accumulated transfer effect on the quantile at time $t$, while $\boldsymbol{\psi}_t \in \mathbb{R}^k$ is the vector of instantaneous transfer coefficients associated with the components of ${\bf x}_t$. The mean contribution of the transfer block is therefore $\lambda \zeta_{t-1} + {\bf x}'_t \boldsymbol{\psi}_{t-1}$: the inner product ${\bf x}'_t \boldsymbol{\psi}_{t-1}$ captures the contemporaneous effect of the current inputs, and the parameter $\lambda\in[0,1]$ controls how much of the previous accumulated effect is propagated forward. For $0<\lambda<1$, this propagated contribution decays geometrically. More explicitly, the contribution of ${\bf x}_t$ to the quantile at time $t+h$ is $\lambda^h {\bf x}'_t \boldsymbol{\psi}_{t-1}$. Therefore, for each $t$ and tolerance $\epsilon>0$, any
+\[
+k_t \geq \frac{\log(\epsilon)-\log\!\left(|{\bf x}'_t \boldsymbol{\psi}_{t-1}|\right)}{\log(\lambda)}
+\]
+provides a lower bound on the number of time steps until the magnitude of the propagated effect falls below $\epsilon$. The package reports the median of this bound over time for $\epsilon = 1\mathrm{e}{-3}$.
 
-Conditional on a fixed $\lambda$, say $\tilde\lambda$, \aA{we augment the dynamic fitting routines} to incorporate the transfer function structure by simply replacing ${\bf F}_t, {\boldsymbol{\theta}}_t, {\bf G}_t,$ and ${\bf W}_t$ in Equations \eqref{EQ:exDLM}-\eqref{EQ:exDLMevo} with $\tilde{\bf F}'_t = ({\bf F}'_t, 1,0)$, $\tilde{\boldsymbol{\theta}}'_t = ({\boldsymbol{\theta}}'_t,\zeta_{t},\psi_{t})$, $\tilde{\bf G}_t = \text{blockdiag}\left\{{\bf G}_t,\left(\begin{smallmatrix}
-\tilde\lambda & X_{t} \\ 0 & 1 \end{smallmatrix} \right)\right\}$, and  $\tilde{\bf W}_t = \text{blockdiag}\left\{{\bf W}_t,\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)\right\}$, respectively. This augmentation is implemented in the functions \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}, which extend the routines found in \code{exdqlmLDVB()} and \code{exdqlmMCMC()}.
+Conditional on a fixed $\lambda$, say $\tilde\lambda$, \aA{we augment the dynamic fitting routines} to incorporate the transfer-function structure by replacing ${\bf F}_t$, $\boldsymbol{\theta}_t$, ${\bf G}_t$, and ${\bf W}_t^\theta$ in Equations \eqref{EQ:exDLM}-\eqref{EQ:exDLMevo} with
+\[
+\tilde{\bf F}'_t = ({\bf F}'_t, 1, {\bf 0}'_k), \qquad
+\tilde{\boldsymbol{\theta}}'_t = (\boldsymbol{\theta}'_t,\zeta_t,\boldsymbol{\psi}'_t),
+\]
+\[
+\tilde{\bf G}_t = \text{blockdiag}\{{\bf G}_t, {\bf G}^{tf}_t\},
+\qquad
+{\bf G}^{tf}_t =
+\begin{pmatrix}
+\tilde\lambda & {\bf x}'_t \\
+{\bf 0}_k & {\bf I}_k
+\end{pmatrix},
+\]
+and
+\[
+\tilde{\bf W}_t = \text{blockdiag}\{{\bf W}_t^\theta,\omega_t,{\bf W}_t^\psi\}.
+\]
+This augmentation is implemented in the functions \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}, which extend the routines found in \code{exdqlmLDVB()} and \code{exdqlmMCMC()}.
 
-Similar to the specification of $\bf{W}_t$ discussed in Section \ref{sec:dfs}, discount factors $(\delta_\zeta,\delta_\psi)$ are utilized to specify $\left(\begin{smallmatrix} \omega_t & 0 \\ 0 & \nu_t \end{smallmatrix} \right)$. A bivariate normal conjugate prior on $(\zeta_{0},\psi_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$ completes the transfer function model extension. Table \ref{table:tf} shows the additional parameters used in the transfer-function fitting routines, as well as their mathematical symbols discussed in this section.
+Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec:dfs}, discount factors are used to specify the transfer block variances $\omega_t$ and ${\bf W}_t^\psi$. In the package, \code{tf.df} can be supplied as a single shared discount factor, as a pair $(\delta_\zeta,\delta_\psi)$ with a shared value for the whole $\boldsymbol{\psi}_t$ block, or componentwise across $(\zeta_t,\psi_{1,t},\dots,\psi_{k,t})$. A conjugate normal prior on $(\zeta_{0},\boldsymbol{\psi}'_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$, with ${\bf m}_0^{tf}\in\mathbb{R}^{k+1}$ and ${\bf C}_0^{tf}\in\mathbb{R}^{(k+1)\times(k+1)}$, completes the transfer-function model extension. Table \ref{table:tf} shows the additional parameters used in the transfer-function fitting routines, as well as their mathematical symbols discussed in this section.
 
 \begin{table}[t!]
 \centering
 \TableStyle
 \begin{tabular}{@{}lccccc@{}}
 	\toprule
-	Symbol & $X_t$ & $\tilde\lambda$ & $(\delta_\zeta,\delta_\psi)$ & ${\bf m}_0^{tf}$ & ${\bf C}_0^{tf}$ \\
+	Symbol & ${\bf x}_t$ & $\tilde\lambda$ & $(\delta_\zeta,\boldsymbol{\delta}_\psi)$ & ${\bf m}_0^{tf}$ & ${\bf C}_0^{tf}$ \\
 	\midrule
-	transfer-function input & \code{X} & \code{lam} & \code{tf.df} & \code{tf.m0} & \code{tf.C0} \\
+	transfer-function inputs & \code{X} & \code{lam} & \code{tf.df} & \code{tf.m0} & \code{tf.C0} \\
 	\bottomrule
 \end{tabular}
 \caption{Translation from mathematical symbols to parameters used in the transfer-function fitting routines.}
