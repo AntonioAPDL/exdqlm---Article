@@ -27,31 +27,81 @@ if (!need_ex3) {
     need_ex3forecast_ldvb, need_ex3quantcomps_ldvb, need_ex3zetapsi_ldvb, need_ex3tables_ldvb
   ))
 
-  utils::data("BTflow", package = "exdqlm", envir = environment())
-  utils::data("nino34", package = "exdqlm", envir = environment())
-
-  if (!exists("BTflow") || !exists("nino34")) {
-    stop("Required datasets BTflow/nino34 not available from exdqlm package.", call. = FALSE)
+  ex3_daily_path <- Sys.getenv(
+    "EX3_DAILY_DATA_PATH",
+    unset = "/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv"
+  )
+  if (!file.exists(ex3_daily_path)) {
+    stop(
+      sprintf(
+        "Required daily Big Tree input file not found: %s",
+        ex3_daily_path
+      ),
+      call. = FALSE
+    )
   }
+  ex3_daily_df <- utils::read.csv(ex3_daily_path, stringsAsFactors = FALSE)
+  required_cols <- c("date", "usgs_cfs", "ppt_mm", "soil_moisture")
+  missing_cols <- setdiff(required_cols, names(ex3_daily_df))
+  if (length(missing_cols) > 0L) {
+    stop(
+      sprintf(
+        "Daily Big Tree input is missing required columns: %s",
+        paste(missing_cols, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+  ex3_daily_df$date <- as.Date(ex3_daily_df$date)
+  ex3_daily_df <- ex3_daily_df[order(ex3_daily_df$date), required_cols, drop = FALSE]
+  ex3_month_id <- format(ex3_daily_df$date, "%Y-%m")
+  ex3_monthly_df <- aggregate(
+    ex3_daily_df[c("usgs_cfs", "ppt_mm", "soil_moisture")],
+    by = list(month = ex3_month_id),
+    FUN = mean
+  )
+  ex3_monthly_df$date <- as.Date(paste0(ex3_monthly_df$month, "-01"))
+  ex3_monthly_df <- ex3_monthly_df[order(ex3_monthly_df$date), , drop = FALSE]
 
-  btflow_ts <- BTflow
-  nino_ts <- nino34
+  ex3_start_year <- as.integer(format(ex3_monthly_df$date[1], "%Y"))
+  ex3_start_month <- as.integer(format(ex3_monthly_df$date[1], "%m"))
+  btflow_ts <- stats::ts(
+    ex3_monthly_df$usgs_cfs,
+    start = c(ex3_start_year, ex3_start_month),
+    frequency = 12
+  )
+  ppt_ts <- stats::ts(
+    ex3_monthly_df$ppt_mm,
+    start = c(ex3_start_year, ex3_start_month),
+    frequency = 12
+  )
+  soil_ts <- stats::ts(
+    ex3_monthly_df$soil_moisture,
+    start = c(ex3_start_year, ex3_start_month),
+    frequency = 12
+  )
+  X_monthly <- scale(cbind(
+    ppt = as.numeric(ppt_ts),
+    soil = as.numeric(soil_ts)
+  ))
   y_log <- log(as.numeric(btflow_ts))
   ex3_cols <- list(
     m1 = "#8A46B2",
     m1_aux = "#C48AE0",
     m2 = "#2E7D5B",
     m2_aux = "#85B89A",
-    nino = "#3C6E91",
+    ppt = "#2D6F95",
+    soil = "#5C8358",
     ref = "#C47A2C"
   )
   ldvb_cols <- ex3_cols
 
   if (need_ex3data) {
     save_png_plot("ex3data.png", {
-      graphics::par(mfrow = c(2, 1))
-      stats::plot.ts(log(btflow_ts), col = "grey40", ylab = "log(BTflow)")
-      stats::plot.ts(nino_ts, col = ex3_cols$nino, ylab = "nino34")
+      graphics::par(mfrow = c(3, 1))
+      stats::plot.ts(log(btflow_ts), col = "grey40", ylab = "log(flow)")
+      stats::plot.ts(ppt_ts, col = ex3_cols$ppt, ylab = "ppt_mm")
+      stats::plot.ts(soil_ts, col = ex3_cols$soil, ylab = "soil_moisture")
     })
     register_artifact(
       artifact_id = "fig_ex3data",
@@ -59,21 +109,24 @@ if (!need_ex3) {
       relative_path = "analysis/manuscript/outputs/figures/ex3data.png",
       manuscript_target = "fig:ex3data",
       status = "reproduced",
-      notes = "Top: log BTflow. Bottom: nino34."
+      notes = paste(
+        "Top: log monthly Big Tree flow aggregated from the staged daily file.",
+        "Middle: monthly mean precipitation.",
+        "Bottom: monthly mean soil moisture."
+      )
     )
   }
 
   if (need_ex3_models) {
     trend_comp <- exdqlm::polytrendMod(1, m0 = 3, C0 = 0.1)
-    seas_comp <- exdqlm::seasMod(p = 12, h = 1, C0 = diag(1, 2))
+    seas_comp <- exdqlm::seasMod(p = 12, h = c(1, 2, 0.1469118636), C0 = diag(1, 6))
     model <- trend_comp + seas_comp
 
-    reg_comp <- exdqlm::as.exdqlm(list(
-      m0 = 0,
-      C0 = 1,
-      FF = matrix(as.numeric(nino_ts), nrow = 1),
-      GG = 1
-    ))
+    reg_comp <- exdqlm::regMod(
+      X_monthly,
+      m0 = rep(0, ncol(X_monthly)),
+      C0 = diag(1, ncol(X_monthly))
+    )
     model_w_reg <- model + reg_comp
 
     n_samp <- as.integer(cfg_profile$ex3$n_samp)
@@ -81,15 +134,16 @@ if (!need_ex3) {
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
     diag_ref_samp <- seeded_rnorm(length(y_log), seed_value + 301L)
 
-    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v2_pkg_transfer", {
+    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v3_monthly_usgs_ppt_soil", {
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
-            df = c(1, 0.9), dim.df = c(1, 2),
-            X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_grid[i],
-            tf.m0 = c(0, 0), tf.C0 = diag(c(0.1, 0.005), 2),
+            df = c(1, 0.9), dim.df = c(1, 6),
+            X = X_monthly, tf.df = c(0.95, 0.95), lam = lambda_grid[i],
+            tf.m0 = rep(0, 1 + ncol(X_monthly)),
+            tf.C0 = diag(c(0.1, 0.05, 0.05), 3),
             sig.init = 0.1, gam.init = -0.1,
             tol = tol, n.samp = n_samp,
             verbose = FALSE
@@ -106,7 +160,7 @@ if (!need_ex3) {
       M1_ldvb <- tryCatch(
         exdqlm::exdqlmLDVB(
           y = y_log, p0 = 0.15, model = model_w_reg,
-          df = c(1, 0.9, 0.95), dim.df = c(1, 2, 1),
+          df = c(1, 0.9, 0.95), dim.df = c(1, 6, ncol(X_monthly)),
           sig.init = 0.1, gam.init = -0.1,
           tol = tol, n.samp = n_samp,
           verbose = FALSE
@@ -118,9 +172,10 @@ if (!need_ex3) {
         tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
-            df = c(1, 0.9), dim.df = c(1, 2),
-            X = as.numeric(nino_ts), tf.df = c(0.95), lam = lambda_star_ldvb,
-            tf.m0 = c(0, 0), tf.C0 = diag(c(0.1, 0.005), 2),
+            df = c(1, 0.9), dim.df = c(1, 6),
+            X = X_monthly, tf.df = c(0.95, 0.95), lam = lambda_star_ldvb,
+            tf.m0 = rep(0, 1 + ncol(X_monthly)),
+            tf.C0 = diag(c(0.1, 0.05, 0.05), 3),
             sig.init = 0.1, gam.init = -0.1,
             tol = tol, n.samp = n_samp,
             verbose = FALSE
@@ -138,7 +193,7 @@ if (!need_ex3) {
         lambda_star = lambda_star_ldvb, lambda_star_ldvb = lambda_star_ldvb,
         n_samp = n_samp, tol = tol
       )
-    }, note = "ex3_models_ldvb_v1")
+    }, note = "ex3_models_ldvb_v3_monthly_usgs_ppt_soil")
 
     fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
     M1 <- ex3_models$M1
@@ -169,7 +224,7 @@ if (!need_ex3) {
       relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary.txt",
       manuscript_target = "Example 3 textual outputs",
       status = "reproduced",
-      notes = "Includes lambda optimization table and median.kt."
+      notes = "Monthly USGS/ppt/soil Example 3 summary including lambda optimization table and median.kt."
     )
 
     capture_output_file("ex3_run_summary_ldvb.txt", {
@@ -197,28 +252,28 @@ if (!need_ex3) {
       relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary_ldvb.txt",
       manuscript_target = "new: Example 3 LDVB textual outputs",
       status = if (ex3_ldvb_pair_ok) "reproduced" else "approximate",
-      notes = "LDVB counterpart including lambda scan and runtime summaries."
+      notes = "LDVB monthly USGS/ppt/soil counterpart including lambda scan and runtime summaries."
     )
 
-    xlim_idx_1970 <- time_window_to_index(btflow_ts, 1970, 1990)
-    xlim_idx_fore <- time_window_to_index(btflow_ts, 2017, 2021.4)
+    xlim_idx_mid <- time_window_to_index(btflow_ts, 1995, 2015)
+    xlim_idx_fore <- time_window_to_index(btflow_ts, 2023, 2026.3)
 
     if (need_ex3quantcomps) {
       save_png_plot("ex3quantcomps.png", {
         graphics::par(mfrow = c(3, 1))
 
-        stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_1970, ylab = "quantile 95% CrIs")
+        stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_mid, ylab = "quantile 95% CrIs")
         exdqlm::exdqlmPlot(M1, add = TRUE, col = ex3_cols$m1)
         exdqlm::exdqlmPlot(M2, add = TRUE, col = ex3_cols$m2)
         graphics::legend("topleft", legend = c("M1 regression", "M2 transfer fn"), col = c(ex3_cols$m1, ex3_cols$m2), lty = 1, bty = "n")
 
-        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_idx_1970, ylab = "seasonal components", xlab = "Index")
-        exdqlm::compPlot(M1, index = c(2, 3), add = TRUE, col = ex3_cols$m1)
-        exdqlm::compPlot(M2, index = c(2, 3), add = TRUE, col = ex3_cols$m2)
+        graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "seasonal components", xlab = "Index")
+        exdqlm::compPlot(M1, index = 2:7, add = TRUE, col = ex3_cols$m1)
+        exdqlm::compPlot(M2, index = 2:7, add = TRUE, col = ex3_cols$m2)
 
-        graphics::plot(NA, ylim = c(-0.5, 1.5), xlim = xlim_idx_1970, ylab = "Nino 3.4 components", xlab = "Index")
-        exdqlm::compPlot(M1, index = c(4), add = TRUE, col = ex3_cols$m1)
-        exdqlm::compPlot(M2, index = c(4, 5), add = TRUE, col = ex3_cols$m2)
+        graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "covariate components", xlab = "Index")
+        exdqlm::compPlot(M1, index = 8:9, add = TRUE, col = ex3_cols$m1)
+        exdqlm::compPlot(M2, index = 8:10, add = TRUE, col = ex3_cols$m2)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
       })
       register_artifact(
@@ -236,24 +291,24 @@ if (!need_ex3) {
         save_png_plot("ex3quantcomps_ldvb.png", {
           graphics::par(mfrow = c(3, 1))
 
-          stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_1970, ylab = "quantile 95% CrIs")
+          stats::plot.ts(y_log, col = "grey70", ylim = c(1, 8), xlim = xlim_idx_mid, ylab = "quantile 95% CrIs")
           q1_ld <- quantile_summary_from_fit(M1_ldvb, cr.percent = 0.95)
           q2_ld <- quantile_summary_from_fit(M2_ldvb, cr.percent = 0.95)
           plot_quantile_summary(q1_ld, col = ldvb_cols$m1, add = TRUE)
           plot_quantile_summary(q2_ld, col = ldvb_cols$m2, add = TRUE)
           graphics::legend("topleft", legend = c("M1 regression LD", "M2 transfer fn LD"), col = c(ldvb_cols$m1, ldvb_cols$m2), lty = 1, bty = "n")
 
-          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_idx_1970, ylab = "seasonal components", xlab = "Index")
-          c1_seas <- component_summary_from_fit(M1_ldvb, index = c(2, 3))
-          c2_seas <- component_summary_from_fit(M2_ldvb, index = c(2, 3))
+          graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "seasonal components", xlab = "Index")
+          c1_seas <- component_summary_from_fit(M1_ldvb, index = 2:7)
+          c2_seas <- component_summary_from_fit(M2_ldvb, index = 2:7)
           plot_component_summary(c1_seas, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_seas, add = TRUE, col = ldvb_cols$m2)
 
-          graphics::plot(NA, ylim = c(-0.5, 1.5), xlim = xlim_idx_1970, ylab = "Nino 3.4 components", xlab = "Index")
-          c1_nino <- component_summary_from_fit(M1_ldvb, index = c(4))
-          c2_nino <- component_summary_from_fit(M2_ldvb, index = c(4, 5))
-          plot_component_summary(c1_nino, add = TRUE, col = ldvb_cols$m1)
-          plot_component_summary(c2_nino, add = TRUE, col = ldvb_cols$m2)
+          graphics::plot(NA, ylim = c(-2.0, 2.0), xlim = xlim_idx_mid, ylab = "covariate components", xlab = "Index")
+          c1_cov <- component_summary_from_fit(M1_ldvb, index = 8:9)
+          c2_cov <- component_summary_from_fit(M2_ldvb, index = 8:10)
+          plot_component_summary(c1_cov, add = TRUE, col = ldvb_cols$m1)
+          plot_component_summary(c2_cov, add = TRUE, col = ldvb_cols$m2)
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
         })
         register_artifact(
@@ -278,13 +333,16 @@ if (!need_ex3) {
 
     if (need_ex3zetapsi) {
       save_png_plot("ex3zetapsi.png", {
-        graphics::par(mfrow = c(1, 2))
-        exdqlm::compPlot(M2, index = 4, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
+        graphics::par(mfrow = c(1, 3))
+        exdqlm::compPlot(M2, index = 8, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
         graphics::title(expression(zeta[t]))
-        exdqlm::compPlot(M2, index = 5, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
+        exdqlm::compPlot(M2, index = 9, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
-        graphics::title(expression(psi[t]))
+        graphics::title("psi[ppt,t]")
+        exdqlm::compPlot(M2, index = 10, col = ex3_cols$m2, add = FALSE, just.theta = TRUE)
+        graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
+        graphics::title("psi[soil,t]")
       })
       register_artifact(
         artifact_id = "fig_ex3zetapsi",
@@ -299,15 +357,19 @@ if (!need_ex3) {
     if (need_ex3zetapsi_ldvb) {
       if (fit_ok(M2_ldvb)) {
         save_png_plot("ex3zetapsi_ldvb.png", {
-          graphics::par(mfrow = c(1, 2))
-          zeta_ld <- component_summary_from_fit(M2_ldvb, index = 4, just.theta = TRUE)
+          graphics::par(mfrow = c(1, 3))
+          zeta_ld <- component_summary_from_fit(M2_ldvb, index = 8, just.theta = TRUE)
           plot_component_summary(zeta_ld, col = ldvb_cols$m2, add = FALSE)
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
           graphics::title(expression(zeta[t]))
-          psi_ld <- component_summary_from_fit(M2_ldvb, index = 5, just.theta = TRUE)
-          plot_component_summary(psi_ld, col = ldvb_cols$m2, add = FALSE)
+          psi_ppt_ld <- component_summary_from_fit(M2_ldvb, index = 9, just.theta = TRUE)
+          plot_component_summary(psi_ppt_ld, col = ldvb_cols$m2, add = FALSE)
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
-          graphics::title(expression(psi[t]))
+          graphics::title("psi[ppt,t]")
+          psi_soil_ld <- component_summary_from_fit(M2_ldvb, index = 10, just.theta = TRUE)
+          plot_component_summary(psi_soil_ld, col = ldvb_cols$m2, add = FALSE)
+          graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
+          graphics::title("psi[soil,t]")
         })
         register_artifact(
           artifact_id = "fig_ex3zetapsi_ldvb",
