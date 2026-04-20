@@ -81,14 +81,11 @@ if (!need_ex3) {
     stop("Monthly USGS flow and nino34 overlap lengths do not match.", call. = FALSE)
   }
 
-  lag_order <- 12L
-  X_lags <- embed(as.numeric(nino_ts), lag_order + 1L)
-  colnames(X_lags) <- c("nino_t", paste0("nino_lag", seq_len(lag_order)))
-  flow_fit <- stats::window(flow_monthly, start = stats::time(flow_monthly)[lag_order + 1L])
-  nino_transfer <- stats::window(nino_ts, start = stats::start(flow_fit), end = stats::end(flow_fit))
+  flow_fit <- flow_monthly
+  nino_input <- nino_ts
 
-  if (length(flow_fit) != nrow(X_lags) || length(flow_fit) != length(nino_transfer)) {
-    stop("Lagged nino34 design, transfer input, and flow series do not align.", call. = FALSE)
+  if (length(flow_fit) != length(nino_input)) {
+    stop("Monthly USGS flow and nino34 fit inputs do not align.", call. = FALSE)
   }
 
   y_log_ts <- log(flow_fit)
@@ -127,7 +124,7 @@ if (!need_ex3) {
     seas_comp <- exdqlm::seasMod(p = 12, h = c(1, 2, 0.1469118636), C0 = diag(1, 6))
     model <- trend_comp + seas_comp
 
-    reg_comp <- exdqlm::regMod(X_lags, m0 = rep(0, ncol(X_lags)), C0 = diag(1, ncol(X_lags)))
+    reg_comp <- exdqlm::regMod(as.numeric(nino_input), m0 = 0, C0 = matrix(1, 1, 1))
     model_w_reg <- model + reg_comp
 
     n_samp <- as.integer(cfg_profile$ex3$n_samp)
@@ -135,14 +132,14 @@ if (!need_ex3) {
     lambda_grid <- as.numeric(cfg_profile$ex3$lambda_grid)
     diag_ref_samp <- seeded_rnorm(length(y_log), seed_value + 301L)
 
-    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v9_monthly_usgs_nino_lag12reg_df099", {
+    ex3_models <- load_or_fit_cache("ex3_models_ldvb_v10_monthly_usgs_nino_single_df097", {
       KLs_ldvb <- rep(NA_real_, length(lambda_grid))
       for (i in seq_along(lambda_grid)) {
         temp_M2_ldvb <- tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
-            df = c(0.99, 0.99), dim.df = c(1, 6),
-            X = as.numeric(nino_transfer), tf.df = c(0.99), lam = lambda_grid[i],
+            df = c(0.97, 0.97), dim.df = c(1, 6),
+            X = as.numeric(nino_input), tf.df = c(0.97), lam = lambda_grid[i],
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
@@ -161,7 +158,7 @@ if (!need_ex3) {
       M1_ldvb <- tryCatch(
         exdqlm::exdqlmLDVB(
           y = y_log, p0 = 0.15, model = model_w_reg,
-          df = c(0.99, 0.99, 0.99), dim.df = c(1, 6, ncol(X_lags)),
+          df = c(0.97, 0.97, 0.97), dim.df = c(1, 6, 1),
           sig.init = 0.1, gam.init = -0.1,
           tol = tol, n.samp = n_samp,
           verbose = FALSE
@@ -173,8 +170,8 @@ if (!need_ex3) {
         tryCatch(
           exdqlm::exdqlmTransferLDVB(
             y = y_log, p0 = 0.15, model = model,
-            df = c(0.99, 0.99), dim.df = c(1, 6),
-            X = as.numeric(nino_transfer), tf.df = c(0.99), lam = lambda_star_ldvb,
+            df = c(0.97, 0.97), dim.df = c(1, 6),
+            X = as.numeric(nino_input), tf.df = c(0.97), lam = lambda_star_ldvb,
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
@@ -194,7 +191,7 @@ if (!need_ex3) {
         lambda_star = lambda_star_ldvb, lambda_star_ldvb = lambda_star_ldvb,
         n_samp = n_samp, tol = tol
       )
-    }, note = "ex3_models_ldvb_v9_monthly_usgs_nino_lag12reg_df099")
+    }, note = "ex3_models_ldvb_v10_monthly_usgs_nino_single_df097")
 
     fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
     M1 <- ex3_models$M1
@@ -278,8 +275,8 @@ if (!need_ex3) {
         exdqlm::compPlot(M1, index = 2:7, add = TRUE, col = ex3_cols$m1)
         exdqlm::compPlot(M2, index = 2:7, add = TRUE, col = ex3_cols$m2)
 
-        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 lag block", xlab = "time")
-        exdqlm::compPlot(M1, index = 8:20, add = TRUE, col = ex3_cols$m1)
+        graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 component", xlab = "time")
+        exdqlm::compPlot(M1, index = 8, add = TRUE, col = ex3_cols$m1)
         exdqlm::compPlot(M2, index = 8:9, add = TRUE, col = ex3_cols$m2)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 2)
       })
@@ -311,8 +308,8 @@ if (!need_ex3) {
           plot_component_summary(c1_seas, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_seas, add = TRUE, col = ldvb_cols$m2)
 
-          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 lag block", xlab = "time")
-          c1_cov <- component_summary_from_fit(M1_ldvb, index = 8:20)
+          graphics::plot(NA, ylim = c(-1.5, 1.5), xlim = xlim_mid, ylab = "Nino 3.4 component", xlab = "time")
+          c1_cov <- component_summary_from_fit(M1_ldvb, index = 8)
           c2_cov <- component_summary_from_fit(M2_ldvb, index = 8:9)
           plot_component_summary(c1_cov, add = TRUE, col = ldvb_cols$m1)
           plot_component_summary(c2_cov, add = TRUE, col = ldvb_cols$m2)
