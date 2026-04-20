@@ -191,6 +191,15 @@ if (!need_ex1) {
     graphics::lines(x_future, c(qlb[fc$start.t], fqlb), col = cols[2], lty = 3, lwd = lwd_ci)
   }
 
+  ex1_quant_cols <- list(
+    q95 = "#8A46B2",
+    q95_future = "#C48AE0",
+    q50 = "#2F6FA8",
+    q50_future = "#8DBFDE",
+    q05 = "#2E7D5B",
+    q05_future = "#85B89A"
+  )
+
   if (need_ex1_quants_models) {
     ex1_quants <- load_or_fit_cache("ex1_quants_models_v3_main_2000_3000", {
       M95 <- exdqlm::exdqlmMCMC(
@@ -386,20 +395,20 @@ if (!need_ex1) {
 
       graphics::par(mfrow = c(2, 2), mar = c(3.6, 4.1, 2.2, 1.2), oma = c(0, 0, 0.8, 0))
 
-      exdqlm::exdqlmPlot(M95_plot)
-      exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = "blue")
-      exdqlm::exdqlmPlot(M5_plot, add = TRUE, col = "forestgreen")
+      exdqlm::exdqlmPlot(M95_plot, col = ex1_quant_cols$q95)
+      exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = ex1_quant_cols$q50)
+      exdqlm::exdqlmPlot(M5_plot, add = TRUE, col = ex1_quant_cols$q05)
       graphics::legend(
         "topright",
-        lty = 1, col = c("purple", "blue", "forestgreen"),
+        lty = 1, col = c(ex1_quant_cols$q95, ex1_quant_cols$q50, ex1_quant_cols$q05),
         legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05))
       )
       graphics::title(main = "(a) Dynamic quantiles", cex.main = 0.95)
 
       stats::plot.ts(y_ts, xlim = xlim_fore, ylim = c(575, 581), col = "dark grey", ylab = "quantile forecast")
-      add_forecast_overlay(fc95, cols = c("purple", "magenta"))
-      add_forecast_overlay(fc50, cols = c("blue", "lightblue"))
-      add_forecast_overlay(fc05, cols = c("forestgreen", "green"))
+      add_forecast_overlay(fc95, cols = c(ex1_quant_cols$q95, ex1_quant_cols$q95_future))
+      add_forecast_overlay(fc50, cols = c(ex1_quant_cols$q50, ex1_quant_cols$q50_future))
+      add_forecast_overlay(fc05, cols = c(ex1_quant_cols$q05, ex1_quant_cols$q05_future))
       graphics::title(main = "(b) Forecasted quantiles", cex.main = 0.95)
 
       stats::plot.ts(
