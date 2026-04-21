@@ -1,95 +1,94 @@
-# Example 3 Monthly Nino34 Contrast
+# Example 3 Monthly Specification Sandbox
 
-This directory contains a separate, self-contained monthly contrast analysis
-for Example 3. It is intentionally distinct from:
+This directory is a small monthly experimentation sandbox for Example 3. It is
+deliberately separate from the manuscript-facing workflow under
+`analysis/manuscript/`, so we can try alternative monthly covariate
+specifications without overwriting the paper each time.
 
-- the current manuscript-facing monthly Big Tree workflow under
-  `analysis/manuscript/`
-- the daily redesign prototype under `analysis/ex3_daily_redo/`
+The design goal is simple:
 
-This track uses:
+- keep the response and model structure close to the current paper Example 3
+- use the monthly USGS flow series built by averaging the staged daily flow
+  data within each calendar month
+- swap only the monthly covariate specification and a few tuning settings
+- generate diagnostics, convergence traces, and coefficient-path plots that are
+  useful for screening before deciding whether to change the manuscript
 
-- the staged daily San Lorenzo / Big Trees CSV stored outside the repos
-- monthly means aggregated from that daily flow series
-- the package `nino34` dataset loaded from the `0.4.0` package checkout
+## Two intended modes
 
-It is designed to compare:
+The sandbox now supports two explicit monthly modes.
 
-1. a direct dynamic quantile regression, and
-2. a multivariate transfer-function exDQLM,
+1. Paper-like `nino34`
+   - monthly mean USGS flow from the staged daily file
+   - package `nino34` as the covariate
+   - same direct-regression versus transfer-function contrast used in the paper
 
-across all seven quantile levels, without a forecast stage.
+2. Monthly all-index alternative
+   - the same monthly USGS response
+   - the 17 monthly climate indices from
+     `/home/jaguir26/muscat_data_backup/jaguir26/project1_ucsc_phd/climate_indices/combined_indices.csv`
+   - covariates standardized inside the workflow before fitting
+   - the same Example 3 logic: one direct model, one transfer-function model,
+     lambda screening, and diagnostic/plot review
 
 ## Data
 
-The monthly response is built by averaging the daily `usgs_cfs` values within
-each calendar month. The covariate series comes from the package `nino34`
-dataset.
+The default staged daily input is:
 
-By default the workflow expects:
+- `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
 
-- daily CSV:
-  `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
-- package checkout:
-  `/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`
+The monthly response is always built by averaging daily `usgs_cfs` values
+within each calendar month.
 
-The overlapping monthly window between the aggregated daily flow and package
-`nino34` is:
+By default, the fit window is:
 
 - `1987-01-01` through `2021-04-01`
 
-Because the prepared feature recipe includes 3 monthly lags, the effective
-modeled window begins after the initial lag burn-in.
+That is the overlap used in the current monthly USGS plus `nino34` Example 3
+setup.
 
-## Model setup
+## Configs
 
-The prepared feature recipe uses:
+Tracked configs:
 
-- `nino34`
-- `nino34_lag1`
-- `nino34_lag2`
-- `nino34_lag3`
+- [config.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config.yml)
+  - default paper-like launchcheck
+  - `p0 = 0.15`
+  - `nino34`, no lagged covariates
+- [config_launchcheck.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config_launchcheck.yml)
+  - explicit copy of the default paper-like launchcheck
+- [config_q7_full.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config_q7_full.yml)
+  - paper-like q7 run
+- [config_allidx_launchcheck.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config_allidx_launchcheck.yml)
+  - monthly all-index launchcheck
+  - one quantile at `0.15`
+  - all 17 monthly indices at once
+  - no lags, transforms, or interactions
+  - all discount factors set to `0.99`
+- [config_allidx_intermediate.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config_allidx_intermediate.yml)
+  - the first serious screening run
+  - same all-index monthly structure as above
+  - deeper VB budget: `tol = 0.05`, `n.samp = 300`, `max_iter = 50`
+- [config_allidx_fullconv.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config_allidx_fullconv.yml)
+  - pruning-grade all-index screening run
+  - same all-index monthly structure as above
+  - large VB budget intended for convergence-sensitive pruning:
+    `tol = 0.02`, `n.samp = 500`, `max_iter = 300`
+- [config_reduced6_refined.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config_reduced6_refined.yml)
+  - reduced 6-index rerun after full-model screening
+  - uses `NOI`, `SOI`, `ESPI`, `PNA`, `WHWP`, and `AMO`
+  - keeps the same monthly Example 3 structure
+  - refined transfer-decay grid around the previously selected `lambda = 0.30`
+  - `tol = 0.02`, `n.samp = 500`, `max_iter = 200`
+- [config_reduced6_crps_dense.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml)
+  - reduced 6-index rerun using the same covariate set
+  - selects the transfer decay by `CRPS`, not `KL`
+  - dense lambda grid from `0.01` through `0.99`
+  - `tol = 0.02`, `n.samp = 500`, `max_iter = 200`
 
-The direct-regression model uses those 4 standardized features in `regMod(X)`.
-The transfer-function model uses the same 4 standardized features in the
-multivariate transfer wrapper from the `0.4.0` package branch.
+## Current API
 
-The prepared full run currently uses:
-
-- quantiles:
-  `0.05, 0.20, 0.35, 0.50, 0.65, 0.80, 0.95`
-- trend order:
-  `1`
-- seasonal period:
-  `12`
-- seasonal harmonics:
-  `1`, `2`, `0.1469118636`
-- direct discounts:
-  - trend `0.97`
-  - harmonics `0.97`, `0.97`, `0.97`
-  - covariate block `0.97`
-- transfer settings:
-  - `lam = 0.85`
-  - `tf.df = c(0.97, 0.97)`
-
-These are manuscript-consistent starting values for a monthly Nino34-based
-contrast, and they can be changed later in the YAML configs if needed.
-
-The seasonal harmonics are chosen to match the daily redesign's annualized
-structure after changing the time base from daily to monthly:
-
-- `h = 1` gives a 12-month cycle
-- `h = 2` gives a 6-month cycle
-- `h = 0.1469118636` gives an `12 / 0.1469118636 ≈ 81.68` month cycle,
-  or about `6.81` years
-
-Because `seasMod()` parameterizes each harmonic through `w = h * 2 * pi / p`,
-keeping the same `h` values while changing `p` from an annual daily period to
-an annual monthly period preserves the same cycles-per-year interpretation.
-
-## Run
-
-From the article repository root:
+The intended interface remains the existing one:
 
 ```bash
 Rscript analysis/ex3_monthly_nino34_redo/run_all.R
@@ -102,54 +101,46 @@ Rscript analysis/ex3_monthly_nino34_redo/run_all.R --targets prep,fit
 Rscript analysis/ex3_monthly_nino34_redo/run_all.R --targets figures,manifest
 Rscript analysis/ex3_monthly_nino34_redo/run_all.R --config analysis/ex3_monthly_nino34_redo/config_launchcheck.yml
 Rscript analysis/ex3_monthly_nino34_redo/run_all.R --config analysis/ex3_monthly_nino34_redo/config_q7_full.yml
-EX3_MONTHLY_DAILY_INPUT_PATH=/path/to/big_trees_daily_usgs_ppt_soil.csv \
-  Rscript analysis/ex3_monthly_nino34_redo/run_all.R
-EX3_MONTHLY_PKG_PATH=/path/to/exdqlm \
-  Rscript analysis/ex3_monthly_nino34_redo/run_all.R
+Rscript analysis/ex3_monthly_nino34_redo/run_all.R --config analysis/ex3_monthly_nino34_redo/config_allidx_launchcheck.yml
+Rscript analysis/ex3_monthly_nino34_redo/run_all.R --config analysis/ex3_monthly_nino34_redo/config_allidx_intermediate.yml
+Rscript analysis/ex3_monthly_nino34_redo/run_all.R --config analysis/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml
 ```
 
-The default `config.yml` mirrors the launchcheck profile.
-
-## Launchcheck vs full run
-
-Two tracked configs are prepared:
-
-- `config_launchcheck.yml`
-  - same monthly overlap window
-  - two quantiles
-  - shallow LDVB budget
-  - used to validate wiring cheaply
-- `config_q7_full.yml`
-  - same monthly overlap window
-  - all seven quantiles
-  - prepared full run settings
-
-## Prepared launcher
-
-When you are ready to launch the full 7-quantile monthly run, use:
+The q7 launcher remains available for the paper-like profile:
 
 ```bash
 bash analysis/ex3_monthly_nino34_redo/run_full_q7.sh
 ```
 
-That helper is intentionally manual. It will:
-
-- clear cached `.rds`, `.rda`, and `.RData` files under this workflow's output
-  tree
-- clear stale runtime files under the full-run output tag
-- launch the run under `nohup` from a login shell
-- write a PID file, console log, and progress log
-
-The workflow also validates `gam.init` against the full requested quantile grid
-before any workers are launched, so incompatible starts fail fast at startup.
-
 ## Outputs
 
-The workflow writes:
+Each config writes its own output tree under `outputs/<output_tag>/`, including:
 
-- a generated monthly merged dataset
-- fit summaries
-- convergence tables
-- in-sample diagnostics tables
-- review figures for the data, fit windows, state paths, and convergence traces
+- a merged monthly modeling dataset
+- covariate mapping and scaling tables
+- fit summaries and diagnostics
+- lambda-screen summaries
+- LDVB convergence tables and ELBO / sigma / gamma traces
+- selected-window fitted-quantile plots
+- forecast comparison plots
+- selected-window state plots
+- full-window coefficient-path plots
+- simple full-window screening tables
 - a manifest summarizing the run
+
+The root `outputs/` folder is ignored by git so we can regenerate these freely
+without cluttering repo status.
+
+## Intended workflow
+
+The practical order is:
+
+1. run the paper-like launchcheck to confirm the baseline monthly sandbox
+2. run the all-index launchcheck to confirm the 17-index monthly wiring
+3. run the all-index intermediate spec for a faster first look
+4. run the all-index full-convergence spec before any pruning decision
+5. inspect the full-window coefficient paths and screening tables
+6. prune to smaller index subsets before trying anything more complicated
+
+That keeps the sandbox close to the current paper Example 3 while still making
+room for careful monthly covariate experiments.

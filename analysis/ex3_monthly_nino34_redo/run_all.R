@@ -28,6 +28,18 @@ config_path <- arg_get(
 config_path <- normalizePath(config_path, mustWork = TRUE)
 
 source(file.path(redo_root, "scripts", "00_setup.R"))
+
+clean_runtime_dir_files <- function(dir_path) {
+  existing <- list.files(dir_path, all.files = TRUE, no.. = TRUE, full.names = TRUE)
+  existing <- existing[basename(existing) != ".gitignore"]
+  if (length(existing)) {
+    unlink(existing, recursive = TRUE, force = TRUE)
+  }
+}
+
+clean_runtime_dir_files(figure_dir)
+clean_runtime_dir_files(table_dir)
+clean_runtime_dir_files(log_dir)
 reset_progress_log()
 log_progress(sprintf(
   "run_start | config=%s | output_tag=%s | targets=%s",

@@ -18,8 +18,8 @@ if (isTRUE(cache_status$can_reuse)) {
     cache_status$reason
   ))
 } else {
-  fit_results <- if (parallel_ok) {
-    parallel::mclapply(seq_along(p_levels), fit_fun, mc.cores = workers)
+  fit_results <- if (parallel_ok && length(p_levels) > 1L) {
+    parallel::mclapply(seq_along(p_levels), fit_fun, mc.cores = min(workers, length(p_levels)))
   } else {
     lapply(seq_along(p_levels), fit_fun)
   }
@@ -42,18 +42,41 @@ fit_rows <- do.call(rbind, lapply(fit_results, function(res) {
     p0 = res$p0,
     label = "direct_regression",
     fit = res$direct,
-    median_kt = NA_real_
+    median_kt = NA_real_,
+    selected_lambda = NA_real_
   )
   transfer_row <- fit_status_row(
     p0 = res$p0,
     label = "transfer_function",
     fit = res$transfer,
-    median_kt = if (fit_ok(res$transfer)) res$transfer$median.kt else NA_real_
+    median_kt = if (fit_ok(res$transfer)) res$transfer$median.kt else NA_real_,
+    selected_lambda = res$lambda_selected %||% NA_real_
   )
   rbind(direct_row, transfer_row)
 }))
 
 write_csv(fit_rows, "ex3_monthly_fit_summary.csv")
+
+lambda_rows <- do.call(rbind, lapply(fit_results, function(res) {
+  screen <- res$lambda_screen %||% data.frame()
+  if (is.null(screen) || !nrow(screen)) {
+    return(data.frame(
+      p0 = res$p0,
+      lambda = as.numeric(res$lambda_selected %||% NA_real_),
+      KL = NA_real_,
+      CRPS = NA_real_,
+      pplc = NA_real_,
+      selection_metric = as.character(res$lambda_selection_metric %||% transfer_selection_metric()),
+      selection_value = NA_real_,
+      runtime = NA_real_,
+      status = "not_screened",
+      stringsAsFactors = FALSE
+    ))
+  }
+  screen
+}))
+
+write_csv(lambda_rows, "ex3_monthly_lambda_screen.csv")
 
 conv_rows <- do.call(rbind, lapply(fit_results, function(res) {
   rbind(
@@ -95,8 +118,8 @@ diag_rows <- do.call(rbind, lapply(fit_results, function(res) {
 
 write_csv(diag_rows, "ex3_monthly_fit_diagnostics.csv")
 log_progress(sprintf(
-  "fit_summary_written | rows=%d | convergence_rows=%d | diagnostics_rows=%d",
-  nrow(fit_rows), nrow(conv_rows), nrow(diag_rows)
+  "fit_summary_written | rows=%d | convergence_rows=%d | diagnostics_rows=%d | lambda_rows=%d",
+  nrow(fit_rows), nrow(conv_rows), nrow(diag_rows), nrow(lambda_rows)
 ))
 
 fit_notes <- unlist(lapply(fit_results, function(res) {
@@ -115,11 +138,13 @@ fit_notes <- unlist(lapply(fit_results, function(res) {
   } else {
     lines <- c(lines, sprintf("  direct_regression failed: %s", conditionMessage(res$direct)))
   }
+
   if (fit_ok(res$transfer)) {
     lines <- c(
       lines,
       sprintf(
-        "  transfer_function | iter=%s | converged=%s | hit_iter_cap=%s | runtime=%.3f | median.kt=%.5f",
+        "  transfer_function | lambda=%.3f | iter=%s | converged=%s | hit_iter_cap=%s | runtime=%.3f | median.kt=%.5f",
+        as.numeric(res$lambda_selected %||% NA_real_),
         res$transfer$iter %||% NA_integer_,
         isTRUE(res$transfer$converged),
         fit_hit_iter_cap(res$transfer),
@@ -127,9 +152,23 @@ fit_notes <- unlist(lapply(fit_results, function(res) {
         as.numeric(res$transfer$median.kt)
       )
     )
+    if (!is.null(res$lambda_screen) && nrow(res$lambda_screen)) {
+      lines <- c(lines, "  lambda_screen:")
+      lines <- c(
+        lines,
+        apply(res$lambda_screen, 1, function(row) {
+          sprintf(
+            "    lambda=%s | KL=%s | CRPS=%s | pplc=%s | metric=%s | metric_value=%s | runtime=%s | status=%s",
+            row[["lambda"]], row[["KL"]], row[["CRPS"]], row[["pplc"]],
+            row[["selection_metric"]], row[["selection_value"]], row[["runtime"]], row[["status"]]
+          )
+        })
+      )
+    }
   } else {
     lines <- c(lines, sprintf("  transfer_function failed: %s", conditionMessage(res$transfer)))
   }
+
   c(lines, "")
 }))
 

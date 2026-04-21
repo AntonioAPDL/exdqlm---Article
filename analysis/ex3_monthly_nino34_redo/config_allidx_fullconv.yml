@@ -1,9 +1,9 @@
 runtime:
   seed: 20260421
   pkg_path: /home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
-  output_tag: monthly_nino34_q7_full
+  output_tag: monthly_allidx_fullconv_p015_df099
   parallel: true
-  workers: 7
+  workers: 2
   reuse_fit_cache: true
 
 data:
@@ -13,33 +13,33 @@ data:
   fit_end: 2021-04-01
   response_transform: log
   aggregation: monthly_mean
-  covariate_source: package_nino34
+  covariate_source: climate_panel_csv
   climate_panel_path: /home/jaguir26/muscat_data_backup/jaguir26/project1_ucsc_phd/climate_indices/combined_indices.csv
   climate_panel_date_col: Date
 
 model:
-  p_levels: [0.05, 0.20, 0.35, 0.50, 0.65, 0.80, 0.95]
+  p_levels: [0.15]
   trend_order: 1
   seasonal_period: 12
   seasonal_harmonics: [1.0, 2.0, 0.1469118636]
   features:
-    use_all_covariates: false
-    base_terms: [nino34]
+    use_all_covariates: true
+    base_terms: []
     lag_terms: []
     lag_months: []
   discounts:
-    trend: 0.97
-    harmonics: [0.97, 0.97, 0.97]
-    covariates: 0.97
+    trend: 0.99
+    harmonics: [0.99, 0.99, 0.99]
+    covariates: 0.99
   transfer:
     lam: 0.85
     lambda_grid: [0.10, 0.30, 0.50, 0.70, 0.85]
-    tf_df: [0.97, 0.97]
+    tf_df: [0.99, 0.99]
   ldvb:
-    tol: 0.10
-    n_samp: 1000
-    max_iter: 150
-    gam_init: 0.0
+    tol: 0.02
+    n_samp: 500
+    max_iter: 300
+    gam_init: -0.10
     sig_init: 0.10
     verbose: false
   priors:
@@ -54,7 +54,7 @@ plots:
   height: 7
   res: 220
   pointsize: 11
-  convergence_trim_start_iter: 20
+  convergence_trim_start_iter: 15
   uncertainty_level: 0.95
   historical_obs_color: "#8e8e8e"
   historical_obs_point_size: 0.7
@@ -62,7 +62,7 @@ plots:
   state_zero_line_linewidth: 0.55
   quantile_line_alpha: 0.72
   quantile_ribbon_alpha: 0.06
-  quantile_palette: ["#7f0000", "#b2182b", "#6b3f3f", "#111111", "#3e5f8a", "#2166ac", "#053061"]
+  quantile_palette: ["#7f0000"]
   full_state_batch_size: 6
   full_state_ylim: [-1.0, 1.0]
   periods:

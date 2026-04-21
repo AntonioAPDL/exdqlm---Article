@@ -117,6 +117,34 @@ build_fit_period_data <- function() {
   list(fit = fit_df, obs = obs_df)
 }
 
+build_forecast_objects <- function() {
+  if (length(p_levels) != 1L) return(NULL)
+  fit_results <- get_fit_results()
+  key <- sprintf("p%03d", round(100 * p_levels[1]))
+  res <- fit_results[[key]]
+  if (is.null(res) || !fit_ok(res$direct) || !fit_ok(res$transfer)) return(NULL)
+
+  start_year <- as.integer(format(prep$fit_df$date[1], "%Y"))
+  start_month <- as.integer(format(prep$fit_df$date[1], "%m"))
+  y_ts <- stats::ts(prep$y_train, start = c(start_year, start_month), frequency = 12)
+  start_t <- length(prep$y_train) - 18L
+  if (!is.finite(start_t) || start_t < 1L) return(NULL)
+
+  fc_direct <- forecast_from_fit(start.t = start_t, k = 18, m1 = res$direct, y_data = y_ts, plot = FALSE)
+  fc_transfer <- forecast_from_fit(start.t = start_t, k = 18, m1 = res$transfer, y_data = y_ts, plot = FALSE)
+  fc_direct$ff <- fc_direct$ff[seq_len(fc_direct$k)]
+  fc_direct$fQ <- fc_direct$fQ[seq_len(fc_direct$k)]
+  fc_transfer$ff <- fc_transfer$ff[seq_len(fc_transfer$k)]
+  fc_transfer$fQ <- fc_transfer$fQ[seq_len(fc_transfer$k)]
+
+  list(
+    y_ts = y_ts,
+    start_t = start_t,
+    direct = fc_direct,
+    transfer = fc_transfer
+  )
+}
+
 build_transfer_state_data <- function() {
   cached_df <- read_cached_table("ex3_monthly_transfer_states_summary.csv", date_cols = "date")
   if (!is.null(cached_df)) {
@@ -230,6 +258,236 @@ build_direct_state_data <- function() {
   df$tau_label <- factor(df$tau_label, levels = tau_levels)
   df$state_label <- factor(df$state_label, levels = state_label_map(colnames(prep$X_train_scaled)))
   df
+}
+
+build_transfer_state_data_full <- function() {
+  cached_df <- read_cached_table("ex3_monthly_transfer_states_full_summary.csv", date_cols = "date")
+  if (!is.null(cached_df)) {
+    cached_df$tau_label <- factor(cached_df$tau_label, levels = tau_levels)
+    return(cached_df)
+  }
+
+  fit_results <- get_fit_results()
+  out <- list()
+  row_id <- 0L
+  idx <- seq_along(prep$fit_df$date)
+
+  for (p0 in p_levels) {
+    key <- sprintf("p%03d", round(100 * p0))
+    res <- fit_results[[key]]
+    if (!fit_ok(res$transfer)) next
+
+    idx_map <- transfer_state_indices(res, prep)
+    for (jj in seq_along(idx_map$psi)) {
+      row_id <- row_id + 1L
+      out[[row_id]] <- state_series_summary(
+        fit = res$transfer,
+        state_index = idx_map$psi[jj],
+        state_name = idx_map$psi_names[jj],
+        state_label = state_label_map(idx_map$psi_names[jj]),
+        dates = prep$fit_df$date,
+        idx = idx,
+        p0 = p0,
+        period_label = "Full modeled window",
+        level = ci_level
+      )
+    }
+  }
+
+  df <- do.call(rbind, out)
+  df$tau_label <- factor(df$tau_label, levels = tau_levels)
+  df
+}
+
+build_transfer_zeta_data_full <- function() {
+  cached_df <- read_cached_table("ex3_monthly_transfer_zeta_full_summary.csv", date_cols = "date")
+  if (!is.null(cached_df)) {
+    cached_df$tau_label <- factor(cached_df$tau_label, levels = tau_levels)
+    return(cached_df)
+  }
+
+  fit_results <- get_fit_results()
+  out <- list()
+  row_id <- 0L
+  idx <- seq_along(prep$fit_df$date)
+
+  for (p0 in p_levels) {
+    key <- sprintf("p%03d", round(100 * p0))
+    res <- fit_results[[key]]
+    if (!fit_ok(res$transfer)) next
+
+    idx_map <- transfer_state_indices(res, prep)
+    row_id <- row_id + 1L
+    out[[row_id]] <- state_series_summary(
+      fit = res$transfer,
+      state_index = idx_map$zeta,
+      state_name = "zeta",
+      state_label = "Transfer state zeta",
+      dates = prep$fit_df$date,
+      idx = idx,
+      p0 = p0,
+      period_label = "Full modeled window",
+      level = ci_level
+    )
+  }
+
+  df <- do.call(rbind, out)
+  df$tau_label <- factor(df$tau_label, levels = tau_levels)
+  df
+}
+
+build_direct_state_data_full <- function() {
+  cached_df <- read_cached_table("ex3_monthly_direct_states_full_summary.csv", date_cols = "date")
+  if (!is.null(cached_df)) {
+    cached_df$tau_label <- factor(cached_df$tau_label, levels = tau_levels)
+    return(cached_df)
+  }
+
+  fit_results <- get_fit_results()
+  out <- list()
+  row_id <- 0L
+  idx <- seq_along(prep$fit_df$date)
+
+  for (p0 in p_levels) {
+    key <- sprintf("p%03d", round(100 * p0))
+    res <- fit_results[[key]]
+    if (!fit_ok(res$direct)) next
+
+    idx_map <- direct_state_indices(res, prep)
+    for (jj in seq_along(idx_map$beta)) {
+      row_id <- row_id + 1L
+      out[[row_id]] <- state_series_summary(
+        fit = res$direct,
+        state_index = idx_map$beta[jj],
+        state_name = idx_map$beta_names[jj],
+        state_label = state_label_map(idx_map$beta_names[jj]),
+        dates = prep$fit_df$date,
+        idx = idx,
+        p0 = p0,
+        period_label = "Full modeled window",
+        level = ci_level
+      )
+    }
+  }
+
+  df <- do.call(rbind, out)
+  df$tau_label <- factor(df$tau_label, levels = tau_levels)
+  df
+}
+
+screen_state_paths <- function(df) {
+  if (is.null(df) || !nrow(df)) return(data.frame())
+
+  split_df <- split(df, interaction(df$p0, df$state, drop = TRUE))
+  rows <- lapply(split_df, function(x) {
+    ci_cross_zero <- x$lower <= 0 & x$upper >= 0
+    data.frame(
+      p0 = x$p0[1],
+      tau_label = x$tau_label[1],
+      state = x$state[1],
+      state_label = x$state_label[1],
+      n_time = nrow(x),
+      prop_ci_crosses_zero = mean(ci_cross_zero),
+      prop_ci_excludes_zero = mean(!ci_cross_zero),
+      mean_abs_estimate = mean(abs(x$estimate)),
+      max_abs_estimate = max(abs(x$estimate)),
+      mean_ci_width = mean(x$upper - x$lower),
+      stringsAsFactors = FALSE
+    )
+  })
+  do.call(rbind, rows)
+}
+
+render_full_state_batches <- function(df, filename_prefix, title_prefix) {
+  if (is.null(df) || !nrow(df)) return(invisible(NULL))
+
+  state_labels <- unique(as.character(df$state_label))
+  batch_size <- max(1L, full_state_batch_size())
+  batches <- split(state_labels, ceiling(seq_along(state_labels) / batch_size))
+  y_lim <- full_state_ylim()
+
+  for (ii in seq_along(batches)) {
+    labels_i <- batches[[ii]]
+    batch_df <- df[df$state_label %in% labels_i, , drop = FALSE]
+    batch_df$state_label <- factor(batch_df$state_label, levels = labels_i)
+
+    plot_obj <- ggplot2::ggplot(
+      batch_df,
+      ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
+    ) +
+      ggplot2::geom_hline(
+        yintercept = 0,
+        color = state_zero_line_color(),
+        linewidth = state_zero_line_linewidth(),
+        linetype = "solid"
+      ) +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = lower, ymax = upper),
+        alpha = quantile_ribbon_alpha(),
+        color = NA,
+        show.legend = FALSE
+      ) +
+      ggplot2::geom_line(linewidth = 0.5, alpha = quantile_line_alpha()) +
+      ggplot2::facet_wrap(~ state_label, scales = if (is.null(y_lim)) "free_y" else "fixed", ncol = 3) +
+      ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
+      ggplot2::scale_fill_manual(values = quant_cols) +
+      ggplot2::labs(
+        title = sprintf("%s (batch %02d)", title_prefix, ii),
+        subtitle = sprintf("Shaded bands show %s posterior intervals.", ci_pct),
+        x = NULL,
+        y = NULL
+      ) +
+      theme_ex3(base_size = 10) +
+      ggplot2::theme(
+        strip.text = ggplot2::element_text(size = 9.5, face = "bold"),
+        axis.text.x = ggplot2::element_text(size = 7.5),
+        axis.text.y = ggplot2::element_text(size = 7.5)
+      )
+
+    if (!is.null(y_lim)) {
+      plot_obj <- plot_obj + ggplot2::coord_cartesian(ylim = y_lim)
+    }
+
+    save_gg_plot(
+      sprintf("%s_batch%02d.png", filename_prefix, ii),
+      plot_obj,
+      width = 13,
+      height = 8 + 0.45 * max(0, length(labels_i) - 3)
+    )
+  }
+}
+
+render_full_zeta_plot <- function(df) {
+  if (is.null(df) || !nrow(df)) return(invisible(NULL))
+
+  plot_obj <- ggplot2::ggplot(
+    df,
+    ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
+  ) +
+    ggplot2::geom_hline(
+      yintercept = 0,
+      color = state_zero_line_color(),
+      linewidth = state_zero_line_linewidth(),
+      linetype = "solid"
+    ) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = lower, ymax = upper),
+      alpha = quantile_ribbon_alpha(),
+      color = NA,
+      show.legend = FALSE
+    ) +
+    ggplot2::geom_line(linewidth = 0.55, alpha = quantile_line_alpha()) +
+    ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
+    ggplot2::scale_fill_manual(values = quant_cols) +
+    ggplot2::labs(
+      title = "Transfer-state zeta over the full modeled window",
+      subtitle = sprintf("Shaded bands show %s posterior intervals.", ci_pct),
+      x = NULL,
+      y = NULL
+    ) +
+    theme_ex3(base_size = 10)
+
+  save_gg_plot("ex3_monthly_transfer_zeta_full.png", plot_obj, width = 13, height = 6)
 }
 
 build_convergence_plot_data <- function() {
@@ -444,11 +702,21 @@ make_convergence_plot <- function(df, value_col, title, filename) {
 fit_plot_data <- build_fit_period_data()
 transfer_state_data <- build_transfer_state_data()
 direct_state_data <- build_direct_state_data()
+transfer_state_data_full <- build_transfer_state_data_full()
+transfer_zeta_data_full <- build_transfer_zeta_data_full()
+direct_state_data_full <- build_direct_state_data_full()
 convergence_df <- build_convergence_plot_data()
+direct_screening <- screen_state_paths(direct_state_data_full)
+transfer_screening <- screen_state_paths(transfer_state_data_full)
 
 save_csv_if_rows(fit_plot_data$fit, "ex3_monthly_fit_periods_summary.csv")
 save_csv_if_rows(transfer_state_data, "ex3_monthly_transfer_states_summary.csv")
 save_csv_if_rows(direct_state_data, "ex3_monthly_direct_states_summary.csv")
+save_csv_if_rows(transfer_state_data_full, "ex3_monthly_transfer_states_full_summary.csv")
+save_csv_if_rows(transfer_zeta_data_full, "ex3_monthly_transfer_zeta_full_summary.csv")
+save_csv_if_rows(direct_state_data_full, "ex3_monthly_direct_states_full_summary.csv")
+save_csv_if_rows(direct_screening, "ex3_monthly_direct_states_full_screening.csv")
+save_csv_if_rows(transfer_screening, "ex3_monthly_transfer_states_full_screening.csv")
 save_csv_if_rows(convergence_df, "ex3_monthly_convergence_traces.csv")
 
 save_png_plot("ex3_monthly_data_overview.png", {
@@ -463,16 +731,44 @@ save_png_plot("ex3_monthly_data_overview.png", {
     pch = 16, cex = 0.25,
     col = grDevices::adjustcolor("grey35", alpha.f = 0.7)
   )
-  graphics::plot(
-    prep$fit_df$date, prep$fit_df$nino34, type = "l", col = "#0b6e99",
-    xlab = "date", ylab = "nino34",
-    main = "Monthly nino34 over the common overlap window"
-  )
-  graphics::points(
-    prep$fit_df$date, prep$fit_df$nino34,
-    pch = 16, cex = 0.25,
-    col = grDevices::adjustcolor("#0b6e99", alpha.f = 0.7)
-  )
+  preview_terms <- prep$preview_terms %||% character()
+  preview_labels <- state_label_map(preview_terms)
+  preview_mat <- as.matrix(prep$fit_df[, preview_terms, drop = FALSE])
+  preview_scaled <- scale(preview_mat)
+  preview_cols <- c("#0b6e99", "#2d728f", "#457b9d")[seq_len(max(1, ncol(preview_scaled)))]
+  if (ncol(preview_scaled) <= 1L) {
+    graphics::plot(
+      prep$fit_df$date, as.numeric(preview_scaled[, 1]), type = "l", col = preview_cols[1],
+      xlab = "date", ylab = preview_labels[1],
+      main = sprintf("Monthly %s over the common overlap window", preview_labels[1])
+    )
+    graphics::points(
+      prep$fit_df$date, as.numeric(preview_scaled[, 1]),
+      pch = 16, cex = 0.25,
+      col = grDevices::adjustcolor(preview_cols[1], alpha.f = 0.7)
+    )
+  } else {
+    graphics::matplot(
+      prep$fit_df$date,
+      preview_scaled,
+      type = "l",
+      lty = 1,
+      lwd = 1.1,
+      col = preview_cols,
+      xlab = "date",
+      ylab = "scaled covariates",
+      main = "Representative monthly covariates over the common overlap window"
+    )
+    graphics::legend(
+      "topright",
+      legend = preview_labels,
+      col = preview_cols,
+      lty = 1,
+      lwd = 1.1,
+      bty = "n",
+      cex = 0.8
+    )
+  }
 })
 
 fit_period_plot <- ggplot2::ggplot() +
@@ -508,7 +804,7 @@ fit_period_plot <- ggplot2::ggplot() +
   ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
   ggplot2::scale_fill_manual(values = quant_cols) +
   ggplot2::labs(
-    title = "Monthly Nino34 contrast fits across the selected windows",
+    title = "Monthly Example 3 sandbox fits across the selected windows",
     subtitle = sprintf(
       "Rows compare the direct and transfer models; shaded bands show %s posterior intervals.",
       ci_pct
@@ -519,6 +815,39 @@ fit_period_plot <- ggplot2::ggplot() +
   theme_ex3()
 
 save_gg_plot("ex3_monthly_fit_periods.png", fit_period_plot, width = 13, height = 10)
+
+forecast_obj <- build_forecast_objects()
+if (!is.null(forecast_obj)) {
+  direct_cols <- c("#8A46B2", "#C48AE0")
+  transfer_cols <- c("#2E7D5B", "#85B89A")
+  ref_col <- "#C47A2C"
+  y_range <- range(as.numeric(forecast_obj$y_ts), na.rm = TRUE)
+  y_pad <- 0.25 * diff(y_range)
+  if (!is.finite(y_pad) || y_pad <= 0) y_pad <- 0.5
+  save_png_plot("ex3_monthly_forecast.png", {
+    stats::plot.ts(
+      forecast_obj$y_ts,
+      col = "grey70",
+      ylim = c(y_range[1] - y_pad, y_range[2] + y_pad),
+      xlim = c(2017, 2021.4),
+      ylab = "log(monthly mean flow)",
+      xlab = "",
+      main = "Monthly Example 3 sandbox: 18-step forecast comparison"
+    )
+    plot(forecast_obj$direct, add = TRUE, cols = direct_cols)
+    plot(forecast_obj$transfer, add = TRUE, cols = transfer_cols)
+    vline_x <- grDevices::xy.coords(forecast_obj$y_ts)$x[forecast_obj$start_t]
+    graphics::abline(v = vline_x, col = ref_col, lty = 5)
+    graphics::legend(
+      "topleft",
+      legend = c("Direct regression", "Transfer function"),
+      col = c(direct_cols[1], transfer_cols[1]),
+      lwd = 2,
+      bty = "n",
+      cex = 0.9
+    )
+  }, width = 11.5, height = 7.0)
+}
 
 render_state_figure(
   df = transfer_state_data,
@@ -552,20 +881,32 @@ render_state_figure(
 make_convergence_plot(
   df = convergence_df,
   value_col = "elbo",
-  title = "Monthly Nino34 contrast: ELBO traces",
+  title = "Monthly Example 3 sandbox: ELBO traces",
   filename = "ex3_monthly_convergence_elbo.png"
 )
 make_convergence_plot(
   df = convergence_df,
   value_col = "sigma",
-  title = "Monthly Nino34 contrast: sigma traces",
+  title = "Monthly Example 3 sandbox: sigma traces",
   filename = "ex3_monthly_convergence_sigma.png"
 )
 make_convergence_plot(
   df = convergence_df,
   value_col = "gamma",
-  title = "Monthly Nino34 contrast: gamma traces",
+  title = "Monthly Example 3 sandbox: gamma traces",
   filename = "ex3_monthly_convergence_gamma.png"
 )
 
-log_progress("figures_written | monthly nino34 data, fit, state, and convergence figures completed")
+render_full_state_batches(
+  df = direct_state_data_full,
+  filename_prefix = "ex3_monthly_direct_states_full",
+  title_prefix = "Direct-model coefficient paths over the full modeled window"
+)
+render_full_state_batches(
+  df = transfer_state_data_full,
+  filename_prefix = "ex3_monthly_transfer_coefficients_full",
+  title_prefix = "Transfer-model coefficient paths over the full modeled window"
+)
+render_full_zeta_plot(transfer_zeta_data_full)
+
+log_progress("figures_written | monthly data, fit, forecast, state, screening, and convergence figures completed")

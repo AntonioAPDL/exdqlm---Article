@@ -1,5 +1,5 @@
 runtime:
-  seed: 20260414
+  seed: 20260421
   pkg_path: /home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
   output_tag: monthly_nino34_launchcheck
   parallel: true
@@ -13,22 +13,27 @@ data:
   fit_end: 2021-04-01
   response_transform: log
   aggregation: monthly_mean
+  covariate_source: package_nino34
+  climate_panel_path: /home/jaguir26/muscat_data_backup/jaguir26/project1_ucsc_phd/climate_indices/combined_indices.csv
+  climate_panel_date_col: Date
 
 model:
-  p_levels: [0.15, 0.50]
+  p_levels: [0.15]
   trend_order: 1
   seasonal_period: 12
   seasonal_harmonics: [1.0, 2.0, 0.1469118636]
   features:
+    use_all_covariates: false
     base_terms: [nino34]
-    lag_terms: [nino34]
-    lag_months: [1, 2, 3]
+    lag_terms: []
+    lag_months: []
   discounts:
     trend: 0.97
     harmonics: [0.97, 0.97, 0.97]
     covariates: 0.97
   transfer:
     lam: 0.85
+    lambda_grid: [0.10, 0.30, 0.50, 0.70, 0.85]
     tf_df: [0.97, 0.97]
   ldvb:
     tol: 0.10
@@ -57,7 +62,9 @@ plots:
   state_zero_line_linewidth: 0.55
   quantile_line_alpha: 0.72
   quantile_ribbon_alpha: 0.06
-  quantile_palette: ["#7f0000", "#111111", "#053061"]
+  quantile_palette: ["#7f0000"]
+  full_state_batch_size: 6
+  full_state_ylim: [-1.0, 1.0]
   periods:
     enso:
       label: Strong El Nino (1997-1999)
