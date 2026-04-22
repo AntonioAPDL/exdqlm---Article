@@ -120,11 +120,14 @@ Each config writes its own output tree under `outputs/<output_tag>/`, including:
 - covariate mapping and scaling tables
 - fit summaries and diagnostics
 - lambda-screen summaries
-- LDVB convergence tables and ELBO / sigma / gamma traces
+- LDVB convergence tables and ELBO / sigma / gamma traces from
+  `fit$diagnostics$vb_trace`
 - selected-window fitted-quantile plots
+- article-style quantile/components and zeta/psi comparison figures
 - forecast comparison plots
 - selected-window state plots
 - full-window coefficient-path plots
+- full-window trend / harmonic state plots
 - simple full-window screening tables
 - a manifest summarizing the run
 

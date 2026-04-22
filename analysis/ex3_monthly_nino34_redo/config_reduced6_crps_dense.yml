@@ -65,7 +65,7 @@ plots:
   quantile_ribbon_alpha: 0.06
   quantile_palette: ["#7f0000"]
   full_state_batch_size: 6
-  full_state_ylim: [-1.0, 1.0]
+  full_state_ylim: [-0.5, 0.5]
   periods:
     enso:
       label: Strong El Nino (1997-1999)

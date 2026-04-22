@@ -331,6 +331,10 @@ resolved_lag_terms <- function(base_terms) {
 }
 
 fit_signature_object <- function() {
+  lag_terms_sig <- configured_lag_terms()
+  if (!length(lag_terms_sig)) lag_terms_sig <- list()
+  lag_months_sig <- feature_lag_months()
+  if (!length(lag_months_sig)) lag_months_sig <- list()
   normalize_signature_object(list(
     pkg_ref = git_ref(pkg_path),
     fit_start = as.character(config$data$fit_start),
@@ -348,8 +352,8 @@ fit_signature_object <- function() {
     features = list(
       use_all_covariates = isTRUE(config$model$features$use_all_covariates %||% FALSE),
       base_terms = configured_base_terms(),
-      lag_terms = configured_lag_terms(),
-      lag_months = feature_lag_months()
+      lag_terms = lag_terms_sig,
+      lag_months = lag_months_sig
     ),
     discounts = list(
       trend = as.numeric(config$model$discounts$trend),
@@ -966,6 +970,52 @@ quantile_palette <- function(p_levels = as.numeric(config$model$p_levels)) {
   stats::setNames(cols, labels)
 }
 
+single_quantile_run <- function() {
+  length(as.numeric(config$model$p_levels)) == 1L
+}
+
+ex3_palette <- function() {
+  defaults <- list(
+    m1 = "#7D4FA8",
+    m1_aux = "#C7A9DF",
+    m2 = "#2F7A60",
+    m2_aux = "#9AC8AD",
+    cov = "#3D7297",
+    ref = "#C98A2D",
+    obs = historical_obs_color()
+  )
+  custom <- config$plots$example3_palette %||% list()
+  modifyList(defaults, custom)
+}
+
+model_line_color <- function(model_type) {
+  pal <- ex3_palette()
+  switch(
+    model_type,
+    direct = pal$m1,
+    direct_regression = pal$m1,
+    transfer = pal$m2,
+    transfer_function = pal$m2,
+    "Direct regression" = pal$m1,
+    "Transfer function" = pal$m2,
+    pal$m1
+  )
+}
+
+model_fill_color <- function(model_type) {
+  pal <- ex3_palette()
+  switch(
+    model_type,
+    direct = pal$m1_aux,
+    direct_regression = pal$m1_aux,
+    transfer = pal$m2_aux,
+    transfer_function = pal$m2_aux,
+    "Direct regression" = pal$m1_aux,
+    "Transfer function" = pal$m2_aux,
+    pal$m1_aux
+  )
+}
+
 theme_ex3 <- function(base_size = config$plots$pointsize %||% 11) {
   ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(
@@ -1014,6 +1064,71 @@ summarize_draw_matrix <- function(draws, level = uncertainty_level()) {
   )
 }
 
+quantile_summary_from_fit <- function(fit, cr.percent = uncertainty_level()) {
+  draws <- posterior_quantile_draw_matrix(fit, seq_len(length(fit$y)))
+  probs <- posterior_ci_probs(cr.percent)
+  x_vals <- grDevices::xy.coords(fit$y)$x
+  list(
+    x = x_vals,
+    map = rowMeans(draws),
+    lb = apply(draws, 1, stats::quantile, probs = probs[1], names = FALSE),
+    ub = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE)
+  )
+}
+
+plot_quantile_summary <- function(qsum, col = "#7D4FA8", add = TRUE, lwd = 1.5) {
+  if (!add) {
+    graphics::plot(qsum$x, qsum$map, type = "n")
+  }
+  graphics::lines(qsum$x, qsum$map, col = col, lwd = lwd)
+  graphics::lines(qsum$x, qsum$lb, col = col, lwd = 0.9, lty = 2)
+  graphics::lines(qsum$x, qsum$ub, col = col, lwd = 0.9, lty = 2)
+}
+
+component_summary_from_fit <- function(fit, index, just.theta = FALSE,
+                                       cr.percent = uncertainty_level()) {
+  theta <- fit$samp.theta
+  d <- dim(theta)
+  if (length(d) != 3L) {
+    stop("samp.theta must be a 3D array.", call. = FALSE)
+  }
+  TT <- d[2]
+  n_samp <- d[3]
+  probs <- posterior_ci_probs(cr.percent)
+
+  if (!just.theta) {
+    p <- length(index)
+    FF <- array(fit$model$FF[index, ], dim = c(p, TT, n_samp))
+    theta_sub <- array(theta[index, , ], dim = c(p, TT, n_samp))
+    draws <- colSums(FF * theta_sub)
+  } else {
+    if (length(index) != 1L) {
+      stop("when just.theta=TRUE, index must have length 1", call. = FALSE)
+    }
+    draws <- matrix(theta[index, , ], nrow = TT, ncol = n_samp)
+  }
+
+  x_vals <- if (!is.null(fit$y) && length(fit$y) == TT) grDevices::xy.coords(fit$y)$x else seq_len(TT)
+  list(
+    x = x_vals,
+    map = rowMeans(draws),
+    lb = apply(draws, 1, stats::quantile, probs = probs[1], names = FALSE),
+    ub = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE)
+  )
+}
+
+plot_component_summary <- function(csum, add = TRUE, col = "#7D4FA8", lwd = 1.5) {
+  if (!add) {
+    graphics::plot(
+      csum$x, csum$map, type = "n", xlab = "time", ylab = "component",
+      ylim = range(c(csum$lb, csum$ub), na.rm = TRUE)
+    )
+  }
+  graphics::lines(csum$x, csum$map, col = col, lwd = lwd)
+  graphics::lines(csum$x, csum$lb, col = col, lwd = 0.9, lty = 2)
+  graphics::lines(csum$x, csum$ub, col = col, lwd = 0.9, lty = 2)
+}
+
 fitted_path_summary <- function(fit, dates, idx, p0, model, period_label,
                                 level = uncertainty_level()) {
   draws <- posterior_quantile_draw_matrix(fit, idx)
@@ -1052,7 +1167,11 @@ state_series_summary <- function(fit, state_index, state_name, state_label,
 }
 
 transfer_state_indices <- function(res, prep) {
-  base_p <- length(res$transfer_spec$base_model$m0)
+  k <- ncol(prep$X_train_scaled)
+  base_p <- length(res$transfer$model$m0) - (k + 1L)
+  if (!is.finite(base_p) || base_p < 1L) {
+    stop("Could not resolve transfer-model base state dimension from fitted object.", call. = FALSE)
+  }
   k <- ncol(prep$X_train_scaled)
   list(
     zeta = base_p + 1L,
@@ -1062,11 +1181,42 @@ transfer_state_indices <- function(res, prep) {
 }
 
 direct_state_indices <- function(res, prep) {
-  base_p <- length(res$direct_spec$base_model$m0)
+  k <- ncol(prep$X_train_scaled)
+  base_p <- length(res$direct$model$m0) - k
+  if (!is.finite(base_p) || base_p < 1L) {
+    stop("Could not resolve direct-model base state dimension from fitted object.", call. = FALSE)
+  }
   k <- ncol(prep$X_train_scaled)
   list(
     beta = seq.int(base_p + 1L, base_p + k),
     beta_names = colnames(prep$X_train_scaled)
+  )
+}
+
+base_state_indices <- function(fit, prep, model = c("direct", "transfer")) {
+  model <- match.arg(model)
+  k <- ncol(prep$X_train_scaled)
+  base_p <- if (identical(model, "direct")) {
+    length(fit$model$m0) - k
+  } else {
+    length(fit$model$m0) - (k + 1L)
+  }
+  if (!is.finite(base_p) || base_p < 1L) {
+    stop("Could not resolve base-state dimension from fitted object.", call. = FALSE)
+  }
+  h <- as.numeric(config$model$seasonal_harmonics)
+  seasonal_labels <- unlist(lapply(h, function(h_i) {
+    c(sprintf("Seasonal h=%s (cos)", format(h_i, digits = 3)),
+      sprintf("Seasonal h=%s (sin)", format(h_i, digits = 3)))
+  }), use.names = FALSE)
+  labels <- c("Trend", seasonal_labels)
+  if (length(labels) != base_p) {
+    labels <- c("Trend", sprintf("Base state %d", seq_len(max(0L, base_p - 1L))))
+  }
+  list(
+    indices = seq_len(base_p),
+    names = sanitize_feature_names_unique(labels),
+    labels = labels
   )
 }
 
@@ -1110,6 +1260,16 @@ state_label_map <- function(name) {
 }
 
 convergence_trace_for_fit <- function(fit, p0, model) {
+  vb_trace <- fit$diagnostics$vb_trace %||% NULL
+  if (is.data.frame(vb_trace) && nrow(vb_trace) > 0L) {
+    out <- vb_trace
+    out$p0 <- p0
+    out$tau_label <- format_p0_label(p0)
+    out$model <- model
+    out$model_label <- model_label(model)
+    return(out)
+  }
+
   elbo <- as.numeric(fit$diagnostics$elbo %||% fit$misc$elbo %||% numeric())
   sigma <- as.numeric(fit$seq.sigma %||% numeric())
   gamma <- as.numeric(fit$seq.gamma %||% rep(NA_real_, length(sigma)))

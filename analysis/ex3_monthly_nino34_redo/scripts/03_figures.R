@@ -375,6 +375,52 @@ build_direct_state_data_full <- function() {
   df
 }
 
+build_base_state_data_full <- function(model_type = c("direct", "transfer")) {
+  model_type <- match.arg(model_type)
+  filename <- if (identical(model_type, "direct")) {
+    "ex3_monthly_direct_base_states_full_summary.csv"
+  } else {
+    "ex3_monthly_transfer_base_states_full_summary.csv"
+  }
+  cached_df <- read_cached_table(filename, date_cols = "date")
+  if (!is.null(cached_df)) {
+    cached_df$tau_label <- factor(cached_df$tau_label, levels = tau_levels)
+    return(cached_df)
+  }
+
+  fit_results <- get_fit_results()
+  out <- list()
+  row_id <- 0L
+  idx <- seq_along(prep$fit_df$date)
+
+  for (p0 in p_levels) {
+    key <- sprintf("p%03d", round(100 * p0))
+    res <- fit_results[[key]]
+    fit_obj <- if (identical(model_type, "direct")) res$direct else res$transfer
+    if (!fit_ok(fit_obj)) next
+
+    idx_map <- base_state_indices(fit_obj, prep, model = model_type)
+    for (jj in seq_along(idx_map$indices)) {
+      row_id <- row_id + 1L
+      out[[row_id]] <- state_series_summary(
+        fit = fit_obj,
+        state_index = idx_map$indices[jj],
+        state_name = idx_map$names[jj],
+        state_label = idx_map$labels[jj],
+        dates = prep$fit_df$date,
+        idx = idx,
+        p0 = p0,
+        period_label = "Full modeled window",
+        level = ci_level
+      )
+    }
+  }
+
+  df <- do.call(rbind, out)
+  df$tau_label <- factor(df$tau_label, levels = tau_levels)
+  df
+}
+
 screen_state_paths <- function(df) {
   if (is.null(df) || !nrow(df)) return(data.frame())
 
@@ -398,13 +444,15 @@ screen_state_paths <- function(df) {
   do.call(rbind, rows)
 }
 
-render_full_state_batches <- function(df, filename_prefix, title_prefix) {
+render_full_state_batches <- function(df, filename_prefix, title_prefix, model_type) {
   if (is.null(df) || !nrow(df)) return(invisible(NULL))
 
   state_labels <- unique(as.character(df$state_label))
   batch_size <- max(1L, full_state_batch_size())
   batches <- split(state_labels, ceiling(seq_along(state_labels) / batch_size))
   y_lim <- full_state_ylim()
+  line_col <- model_line_color(model_type)
+  fill_col <- model_fill_color(model_type)
 
   for (ii in seq_along(batches)) {
     labels_i <- batches[[ii]]
@@ -429,8 +477,8 @@ render_full_state_batches <- function(df, filename_prefix, title_prefix) {
       ) +
       ggplot2::geom_line(linewidth = 0.5, alpha = quantile_line_alpha()) +
       ggplot2::facet_wrap(~ state_label, scales = if (is.null(y_lim)) "free_y" else "fixed", ncol = 3) +
-      ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
-      ggplot2::scale_fill_manual(values = quant_cols) +
+      ggplot2::scale_color_manual(values = setNames(line_col, tau_levels), name = "Quantile level") +
+      ggplot2::scale_fill_manual(values = setNames(fill_col, tau_levels)) +
       ggplot2::labs(
         title = sprintf("%s (batch %02d)", title_prefix, ii),
         subtitle = sprintf("Shaded bands show %s posterior intervals.", ci_pct),
@@ -459,6 +507,7 @@ render_full_state_batches <- function(df, filename_prefix, title_prefix) {
 
 render_full_zeta_plot <- function(df) {
   if (is.null(df) || !nrow(df)) return(invisible(NULL))
+  pal <- ex3_palette()
 
   plot_obj <- ggplot2::ggplot(
     df,
@@ -477,8 +526,8 @@ render_full_zeta_plot <- function(df) {
       show.legend = FALSE
     ) +
     ggplot2::geom_line(linewidth = 0.55, alpha = quantile_line_alpha()) +
-    ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
-    ggplot2::scale_fill_manual(values = quant_cols) +
+    ggplot2::scale_color_manual(values = setNames(pal$m2, tau_levels), name = "Quantile level") +
+    ggplot2::scale_fill_manual(values = setNames(pal$m2_aux, tau_levels)) +
     ggplot2::labs(
       title = "Transfer-state zeta over the full modeled window",
       subtitle = sprintf("Shaded bands show %s posterior intervals.", ci_pct),
@@ -501,7 +550,10 @@ build_convergence_plot_data <- function() {
   conv_df
 }
 
-state_panel_plot <- function(df, panel_title, show_legend = FALSE) {
+state_panel_plot <- function(df, panel_title, show_legend = FALSE, model_type = c("direct", "transfer")) {
+  model_type <- match.arg(model_type)
+  line_col <- model_line_color(model_type)
+  fill_col <- model_fill_color(model_type)
   ggplot2::ggplot(df, ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)) +
     ggplot2::geom_hline(
       yintercept = 0,
@@ -516,8 +568,8 @@ state_panel_plot <- function(df, panel_title, show_legend = FALSE) {
       show.legend = FALSE
     ) +
     ggplot2::geom_line(linewidth = 0.55, alpha = quantile_line_alpha()) +
-    ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
-    ggplot2::scale_fill_manual(values = quant_cols) +
+    ggplot2::scale_color_manual(values = setNames(line_col, tau_levels), name = "Quantile level") +
+    ggplot2::scale_fill_manual(values = setNames(fill_col, tau_levels)) +
     ggplot2::labs(title = panel_title, x = NULL, y = NULL) +
     theme_ex3(base_size = 10) +
     ggplot2::theme(
@@ -544,11 +596,14 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
   legend_plot <- state_panel_plot(
     period_df[period_df$state_label == state_labels[1], , drop = FALSE],
     panel_title = state_labels[1],
-    show_legend = TRUE
+    show_legend = TRUE,
+    model_type = model_type
   )
   leg <- legend_grob(legend_plot)
 
   ncol_facets <- 3L
+  line_col <- model_line_color(model_type)
+  fill_col <- model_fill_color(model_type)
 
   if (identical(model_type, "transfer")) {
     zeta_df <- period_df[period_df$state_label == "Transfer state zeta", , drop = FALSE]
@@ -557,7 +612,8 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
     zeta_plot <- state_panel_plot(
       df = zeta_df,
       panel_title = "Transfer state zeta",
-      show_legend = FALSE
+      show_legend = FALSE,
+      model_type = model_type
     ) +
       ggplot2::theme(plot.margin = ggplot2::margin(5.5, 5.5, 0, 5.5))
 
@@ -579,8 +635,8 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
       ) +
       ggplot2::geom_line(linewidth = 0.5, alpha = quantile_line_alpha()) +
       ggplot2::facet_wrap(~ state_label, scales = "free_y", ncol = ncol_facets) +
-      ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
-      ggplot2::scale_fill_manual(values = quant_cols) +
+      ggplot2::scale_color_manual(values = setNames(line_col, tau_levels), name = "Quantile level") +
+      ggplot2::scale_fill_manual(values = setNames(fill_col, tau_levels)) +
       ggplot2::labs(x = NULL, y = NULL) +
       theme_ex3(base_size = 10) +
       ggplot2::theme(
@@ -618,8 +674,8 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
       ) +
       ggplot2::geom_line(linewidth = 0.5, alpha = quantile_line_alpha()) +
       ggplot2::facet_wrap(~ state_label, scales = "free_y", ncol = ncol_facets) +
-      ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
-      ggplot2::scale_fill_manual(values = quant_cols) +
+      ggplot2::scale_color_manual(values = setNames(line_col, tau_levels), name = "Quantile level") +
+      ggplot2::scale_fill_manual(values = setNames(fill_col, tau_levels)) +
       ggplot2::labs(x = NULL, y = NULL) +
       theme_ex3(base_size = 10) +
       ggplot2::theme(
@@ -650,10 +706,192 @@ render_state_figure <- function(df, period_label, model_type, filename, title) {
   )
 }
 
+render_base_state_full_plot <- function(df, model_type, filename, title) {
+  if (is.null(df) || !nrow(df)) return(invisible(NULL))
+  line_col <- model_line_color(model_type)
+  fill_col <- model_fill_color(model_type)
+
+  plot_obj <- ggplot2::ggplot(
+    df,
+    ggplot2::aes(x = date, y = estimate, color = tau_label, fill = tau_label)
+  ) +
+    ggplot2::geom_hline(
+      yintercept = 0,
+      color = state_zero_line_color(),
+      linewidth = state_zero_line_linewidth(),
+      linetype = "solid"
+    ) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = lower, ymax = upper),
+      alpha = quantile_ribbon_alpha(),
+      color = NA,
+      show.legend = FALSE
+    ) +
+    ggplot2::geom_line(linewidth = 0.5, alpha = quantile_line_alpha()) +
+    ggplot2::facet_wrap(~ state_label, scales = "free_y", ncol = 3) +
+    ggplot2::scale_color_manual(values = setNames(line_col, tau_levels), name = "Quantile level") +
+    ggplot2::scale_fill_manual(values = setNames(fill_col, tau_levels)) +
+    ggplot2::labs(
+      title = title,
+      subtitle = sprintf("Shaded bands show %s posterior intervals.", ci_pct),
+      x = NULL,
+      y = NULL
+    ) +
+    theme_ex3(base_size = 10) +
+    ggplot2::theme(
+      strip.text = ggplot2::element_text(size = 9.5, face = "bold"),
+      axis.text.x = ggplot2::element_text(size = 7.5),
+      axis.text.y = ggplot2::element_text(size = 7.5)
+    )
+
+  save_gg_plot(filename, plot_obj, width = 13, height = 8.5)
+}
+
+render_article_like_quantcomps_plot <- function() {
+  if (!single_quantile_run()) return(invisible(NULL))
+  fit_results <- get_fit_results()
+  key <- sprintf("p%03d", round(100 * p_levels[1]))
+  res <- fit_results[[key]]
+  if (is.null(res) || !fit_ok(res$direct) || !fit_ok(res$transfer)) {
+    return(invisible(NULL))
+  }
+
+  pal <- ex3_palette()
+  start_year <- as.integer(format(prep$fit_df$date[1], "%Y"))
+  start_month <- as.integer(format(prep$fit_df$date[1], "%m"))
+  y_ts <- stats::ts(prep$y_train, start = c(start_year, start_month), frequency = 12)
+  direct_fit <- res$direct
+  transfer_fit <- res$transfer
+  direct_fit$y <- y_ts
+  transfer_fit$y <- y_ts
+
+  direct_q <- quantile_summary_from_fit(direct_fit, cr.percent = ci_level)
+  transfer_q <- quantile_summary_from_fit(transfer_fit, cr.percent = ci_level)
+  direct_base <- base_state_indices(direct_fit, prep, model = "direct")
+  transfer_base <- base_state_indices(transfer_fit, prep, model = "transfer")
+  direct_reg <- direct_state_indices(res, prep)
+  transfer_tf <- transfer_state_indices(res, prep)
+
+  direct_seas <- component_summary_from_fit(direct_fit, index = direct_base$indices[-1], cr.percent = ci_level)
+  transfer_seas <- component_summary_from_fit(transfer_fit, index = transfer_base$indices[-1], cr.percent = ci_level)
+  direct_cov <- component_summary_from_fit(direct_fit, index = direct_reg$beta, cr.percent = ci_level)
+  transfer_cov <- component_summary_from_fit(transfer_fit, index = transfer_tf$zeta, cr.percent = ci_level)
+
+  xlim_mid <- c(1995, 2015)
+  q_ylim <- range(c(prep$y_train, direct_q$lb, direct_q$ub, transfer_q$lb, transfer_q$ub), na.rm = TRUE)
+  seas_ylim <- range(c(direct_seas$lb, direct_seas$ub, transfer_seas$lb, transfer_seas$ub), na.rm = TRUE)
+  cov_ylim <- range(c(direct_cov$lb, direct_cov$ub, transfer_cov$lb, transfer_cov$ub), na.rm = TRUE)
+
+  save_png_plot("ex3_monthly_quantcomps.png", {
+    graphics::par(mfrow = c(3, 1), mar = c(3, 4, 2, 1))
+
+    stats::plot.ts(
+      y_ts,
+      col = grDevices::adjustcolor(pal$obs, alpha.f = 0.9),
+      ylim = q_ylim,
+      xlim = xlim_mid,
+      ylab = sprintf("quantile %s CrIs", ci_pct)
+    )
+    plot_quantile_summary(direct_q, col = pal$m1, add = TRUE)
+    plot_quantile_summary(transfer_q, col = pal$m2, add = TRUE)
+    graphics::legend(
+      "topleft",
+      legend = c("M1 regression", "M2 transfer fn"),
+      col = c(pal$m1, pal$m2),
+      lty = 1,
+      lwd = 1.5,
+      bty = "n"
+    )
+
+    graphics::plot(
+      NA,
+      ylim = seas_ylim,
+      xlim = xlim_mid,
+      ylab = "seasonal components",
+      xlab = "time"
+    )
+    plot_component_summary(direct_seas, add = TRUE, col = pal$m1)
+    plot_component_summary(transfer_seas, add = TRUE, col = pal$m2)
+
+    graphics::plot(
+      NA,
+      ylim = cov_ylim,
+      xlim = xlim_mid,
+      ylab = "climate contribution",
+      xlab = "time"
+    )
+    plot_component_summary(direct_cov, add = TRUE, col = pal$m1)
+    plot_component_summary(transfer_cov, add = TRUE, col = pal$m2)
+    graphics::abline(h = 0, col = pal$ref, lty = 3, lwd = 2)
+  }, width = 11.5, height = 10.0)
+}
+
+render_article_like_zetapsi_plot <- function(zeta_df, psi_df) {
+  if (!single_quantile_run() || is.null(zeta_df) || !nrow(zeta_df) || is.null(psi_df) || !nrow(psi_df)) {
+    return(invisible(NULL))
+  }
+  pal <- ex3_palette()
+
+  zeta_plot <- ggplot2::ggplot(
+    zeta_df,
+    ggplot2::aes(x = date, y = estimate)
+  ) +
+    ggplot2::geom_hline(yintercept = 0, color = pal$ref, linetype = 3, linewidth = 0.7) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = lower, ymax = upper),
+      fill = pal$m2_aux,
+      alpha = 0.35
+    ) +
+    ggplot2::geom_line(color = pal$m2, linewidth = 0.6) +
+    ggplot2::labs(title = expression(zeta[t]), x = NULL, y = NULL) +
+    theme_ex3(base_size = 10) +
+    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+
+  psi_plot <- ggplot2::ggplot(
+    psi_df,
+    ggplot2::aes(x = date, y = estimate)
+  ) +
+    ggplot2::geom_hline(yintercept = 0, color = pal$ref, linetype = 3, linewidth = 0.6) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = lower, ymax = upper),
+      fill = pal$m2_aux,
+      alpha = 0.25
+    ) +
+    ggplot2::geom_line(color = pal$m2, linewidth = 0.45) +
+    ggplot2::facet_wrap(~ state_label, scales = "free_y", ncol = 3) +
+    ggplot2::labs(title = expression(psi[t]), x = NULL, y = NULL) +
+    theme_ex3(base_size = 10) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(hjust = 0.5),
+      strip.text = ggplot2::element_text(size = 9, face = "bold")
+    )
+
+  full_grob <- gridExtra::arrangeGrob(
+    ggplot2::ggplotGrob(zeta_plot),
+    ggplot2::ggplotGrob(psi_plot),
+    ncol = 1,
+    heights = c(1.2, 2.7),
+    top = grid::textGrob(
+      "Transfer-state zeta and psi paths over the full modeled window",
+      gp = grid::gpar(fontsize = 14, fontface = "bold")
+    )
+  )
+
+  save_png_plot(
+    "ex3_monthly_zetapsi.png",
+    {
+      grid::grid.newpage()
+      grid::grid.draw(full_grob)
+    },
+    width = 13,
+    height = 10
+  )
+}
+
 make_convergence_plot <- function(df, value_col, title, filename) {
   plot_df <- df[!is.na(df[[value_col]]), , drop = FALSE]
   subtitle <- sprintf(
-    "Curves are shown from iteration %d onward to suppress early start-up scale distortion; the x-axis still spans the full iteration range.",
+    "Traces come from fit$diagnostics$vb_trace and are shown from iteration %d onward to suppress early start-up scale distortion.",
     trim_iter
   )
 
@@ -682,19 +920,40 @@ make_convergence_plot <- function(df, value_col, title, filename) {
 
   plot_df$value <- plot_df[[value_col]]
   max_iter <- max(df$iter, na.rm = TRUE)
-  plot_obj <- ggplot2::ggplot(plot_df, ggplot2::aes(x = iter, y = value, color = tau_label)) +
-    ggplot2::geom_vline(xintercept = trim_iter, color = "grey55", linetype = 3, linewidth = 0.5) +
-    ggplot2::geom_line(linewidth = 0.55, alpha = 0.9) +
-    ggplot2::facet_wrap(~ model_label, ncol = 1, scales = "free_y") +
-    ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
-    ggplot2::scale_x_continuous(limits = c(0, max_iter), expand = c(0.01, 0.01)) +
-    ggplot2::labs(
-      title = title,
-      subtitle = subtitle,
-      x = "LDVB iteration",
-      y = NULL
-    ) +
-    theme_ex3()
+  if (single_quantile_run()) {
+    plot_obj <- ggplot2::ggplot(plot_df, ggplot2::aes(x = iter, y = value, color = model_label)) +
+      ggplot2::geom_vline(xintercept = trim_iter, color = "grey55", linetype = 3, linewidth = 0.5) +
+      ggplot2::geom_line(linewidth = 0.6, alpha = 0.95) +
+      ggplot2::scale_color_manual(
+        values = c(
+          "Direct regression" = model_line_color("direct"),
+          "Transfer function" = model_line_color("transfer")
+        ),
+        name = "Model"
+      ) +
+      ggplot2::scale_x_continuous(limits = c(0, max_iter), expand = c(0.01, 0.01)) +
+      ggplot2::labs(
+        title = title,
+        subtitle = subtitle,
+        x = "LDVB iteration",
+        y = NULL
+      ) +
+      theme_ex3()
+  } else {
+    plot_obj <- ggplot2::ggplot(plot_df, ggplot2::aes(x = iter, y = value, color = tau_label)) +
+      ggplot2::geom_vline(xintercept = trim_iter, color = "grey55", linetype = 3, linewidth = 0.5) +
+      ggplot2::geom_line(linewidth = 0.55, alpha = 0.9) +
+      ggplot2::facet_wrap(~ model_label, ncol = 1, scales = "free_y") +
+      ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
+      ggplot2::scale_x_continuous(limits = c(0, max_iter), expand = c(0.01, 0.01)) +
+      ggplot2::labs(
+        title = title,
+        subtitle = subtitle,
+        x = "LDVB iteration",
+        y = NULL
+      ) +
+      theme_ex3()
+  }
 
   save_gg_plot(filename, plot_obj, width = 11.5, height = 8.0)
 }
@@ -705,6 +964,8 @@ direct_state_data <- build_direct_state_data()
 transfer_state_data_full <- build_transfer_state_data_full()
 transfer_zeta_data_full <- build_transfer_zeta_data_full()
 direct_state_data_full <- build_direct_state_data_full()
+direct_base_state_data_full <- build_base_state_data_full("direct")
+transfer_base_state_data_full <- build_base_state_data_full("transfer")
 convergence_df <- build_convergence_plot_data()
 direct_screening <- screen_state_paths(direct_state_data_full)
 transfer_screening <- screen_state_paths(transfer_state_data_full)
@@ -715,21 +976,24 @@ save_csv_if_rows(direct_state_data, "ex3_monthly_direct_states_summary.csv")
 save_csv_if_rows(transfer_state_data_full, "ex3_monthly_transfer_states_full_summary.csv")
 save_csv_if_rows(transfer_zeta_data_full, "ex3_monthly_transfer_zeta_full_summary.csv")
 save_csv_if_rows(direct_state_data_full, "ex3_monthly_direct_states_full_summary.csv")
+save_csv_if_rows(direct_base_state_data_full, "ex3_monthly_direct_base_states_full_summary.csv")
+save_csv_if_rows(transfer_base_state_data_full, "ex3_monthly_transfer_base_states_full_summary.csv")
 save_csv_if_rows(direct_screening, "ex3_monthly_direct_states_full_screening.csv")
 save_csv_if_rows(transfer_screening, "ex3_monthly_transfer_states_full_screening.csv")
 save_csv_if_rows(convergence_df, "ex3_monthly_convergence_traces.csv")
 
 save_png_plot("ex3_monthly_data_overview.png", {
+  pal <- ex3_palette()
   graphics::par(mfrow = c(2, 1), mar = c(3, 4, 2, 1))
   graphics::plot(
-    prep$fit_df$date, prep$y_train, type = "l", col = "grey35",
+    prep$fit_df$date, prep$y_train, type = "l", col = pal$obs,
     xlab = "", ylab = "log(monthly mean flow)",
     main = "Monthly San Lorenzo flow (aggregated from daily data)"
   )
   graphics::points(
     prep$fit_df$date, prep$y_train,
     pch = 16, cex = 0.25,
-    col = grDevices::adjustcolor("grey35", alpha.f = 0.7)
+    col = grDevices::adjustcolor(pal$obs, alpha.f = 0.7)
   )
   preview_terms <- prep$preview_terms %||% character()
   preview_labels <- state_label_map(preview_terms)
@@ -771,48 +1035,104 @@ save_png_plot("ex3_monthly_data_overview.png", {
   }
 })
 
-fit_period_plot <- ggplot2::ggplot() +
-  ggplot2::geom_ribbon(
-    data = fit_plot_data$fit,
-    ggplot2::aes(x = date, ymin = lower, ymax = upper, fill = tau_label, group = tau_label),
-    alpha = quantile_ribbon_alpha(),
-    color = NA,
-    show.legend = FALSE
-  ) +
-  ggplot2::geom_line(
-    data = fit_plot_data$obs,
-    ggplot2::aes(x = date, y = y),
-    color = historical_obs_color(),
-    linewidth = 0.45
-  ) +
-  ggplot2::geom_point(
-    data = fit_plot_data$obs,
-    ggplot2::aes(x = date, y = y),
-    color = historical_obs_color(),
-    size = historical_obs_point_size(),
-    shape = 16,
-    stroke = 0,
-    alpha = 0.9
-  ) +
-  ggplot2::geom_line(
-    data = fit_plot_data$fit,
-    ggplot2::aes(x = date, y = estimate, color = tau_label),
-    linewidth = 0.5,
-    alpha = quantile_line_alpha()
-  ) +
-  ggplot2::facet_grid(model_label ~ period_label, scales = "free_x") +
-  ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
-  ggplot2::scale_fill_manual(values = quant_cols) +
-  ggplot2::labs(
-    title = "Monthly Example 3 sandbox fits across the selected windows",
-    subtitle = sprintf(
-      "Rows compare the direct and transfer models; shaded bands show %s posterior intervals.",
-      ci_pct
-    ),
-    x = NULL,
-    y = "log(monthly mean flow)"
-  ) +
-  theme_ex3()
+if (single_quantile_run()) {
+  fit_period_plot <- ggplot2::ggplot() +
+    ggplot2::geom_ribbon(
+      data = fit_plot_data$fit,
+      ggplot2::aes(x = date, ymin = lower, ymax = upper, fill = model_label, group = model_label),
+      alpha = quantile_ribbon_alpha(),
+      color = NA,
+      show.legend = FALSE
+    ) +
+    ggplot2::geom_line(
+      data = fit_plot_data$obs,
+      ggplot2::aes(x = date, y = y),
+      color = ex3_palette()$obs,
+      linewidth = 0.45
+    ) +
+    ggplot2::geom_point(
+      data = fit_plot_data$obs,
+      ggplot2::aes(x = date, y = y),
+      color = ex3_palette()$obs,
+      size = historical_obs_point_size(),
+      shape = 16,
+      stroke = 0,
+      alpha = 0.9
+    ) +
+    ggplot2::geom_line(
+      data = fit_plot_data$fit,
+      ggplot2::aes(x = date, y = estimate, color = model_label),
+      linewidth = 0.55,
+      alpha = 0.85
+    ) +
+    ggplot2::facet_grid(model_label ~ period_label, scales = "free_x") +
+    ggplot2::scale_color_manual(
+      values = c(
+        "Direct regression" = model_line_color("direct"),
+        "Transfer function" = model_line_color("transfer")
+      ),
+      name = "Model"
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c(
+        "Direct regression" = model_fill_color("direct"),
+        "Transfer function" = model_fill_color("transfer")
+      )
+    ) +
+    ggplot2::labs(
+      title = "Monthly Example 3 sandbox fits across the selected windows",
+      subtitle = sprintf(
+        "Rows compare the direct and transfer models; shaded bands show %s posterior intervals.",
+        ci_pct
+      ),
+      x = NULL,
+      y = "log(monthly mean flow)"
+    ) +
+    theme_ex3()
+} else {
+  fit_period_plot <- ggplot2::ggplot() +
+    ggplot2::geom_ribbon(
+      data = fit_plot_data$fit,
+      ggplot2::aes(x = date, ymin = lower, ymax = upper, fill = tau_label, group = tau_label),
+      alpha = quantile_ribbon_alpha(),
+      color = NA,
+      show.legend = FALSE
+    ) +
+    ggplot2::geom_line(
+      data = fit_plot_data$obs,
+      ggplot2::aes(x = date, y = y),
+      color = historical_obs_color(),
+      linewidth = 0.45
+    ) +
+    ggplot2::geom_point(
+      data = fit_plot_data$obs,
+      ggplot2::aes(x = date, y = y),
+      color = historical_obs_color(),
+      size = historical_obs_point_size(),
+      shape = 16,
+      stroke = 0,
+      alpha = 0.9
+    ) +
+    ggplot2::geom_line(
+      data = fit_plot_data$fit,
+      ggplot2::aes(x = date, y = estimate, color = tau_label),
+      linewidth = 0.5,
+      alpha = quantile_line_alpha()
+    ) +
+    ggplot2::facet_grid(model_label ~ period_label, scales = "free_x") +
+    ggplot2::scale_color_manual(values = quant_cols, name = "Quantile level") +
+    ggplot2::scale_fill_manual(values = quant_cols) +
+    ggplot2::labs(
+      title = "Monthly Example 3 sandbox fits across the selected windows",
+      subtitle = sprintf(
+        "Rows compare the direct and transfer models; shaded bands show %s posterior intervals.",
+        ci_pct
+      ),
+      x = NULL,
+      y = "log(monthly mean flow)"
+    ) +
+    theme_ex3()
+}
 
 save_gg_plot("ex3_monthly_fit_periods.png", fit_period_plot, width = 13, height = 10)
 
@@ -900,13 +1220,32 @@ make_convergence_plot(
 render_full_state_batches(
   df = direct_state_data_full,
   filename_prefix = "ex3_monthly_direct_states_full",
-  title_prefix = "Direct-model coefficient paths over the full modeled window"
+  title_prefix = "Direct-model coefficient paths over the full modeled window",
+  model_type = "direct"
 )
 render_full_state_batches(
   df = transfer_state_data_full,
   filename_prefix = "ex3_monthly_transfer_coefficients_full",
-  title_prefix = "Transfer-model coefficient paths over the full modeled window"
+  title_prefix = "Transfer-model coefficient paths over the full modeled window",
+  model_type = "transfer"
 )
 render_full_zeta_plot(transfer_zeta_data_full)
+render_base_state_full_plot(
+  df = direct_base_state_data_full,
+  model_type = "direct",
+  filename = "ex3_monthly_direct_base_states_full.png",
+  title = "Direct-model trend and harmonic state paths over the full modeled window"
+)
+render_base_state_full_plot(
+  df = transfer_base_state_data_full,
+  model_type = "transfer",
+  filename = "ex3_monthly_transfer_base_states_full.png",
+  title = "Transfer-model trend and harmonic state paths over the full modeled window"
+)
+render_article_like_quantcomps_plot()
+render_article_like_zetapsi_plot(
+  zeta_df = transfer_zeta_data_full,
+  psi_df = transfer_state_data_full
+)
 
-log_progress("figures_written | monthly data, fit, forecast, state, screening, and convergence figures completed")
+log_progress("figures_written | monthly data, fit, forecast, article-style, state, screening, and convergence figures completed")
