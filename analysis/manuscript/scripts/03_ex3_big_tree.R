@@ -143,6 +143,7 @@ if (!need_ex3) {
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
+            fix.sigma = FALSE,
             tol = tol, n.samp = n_samp,
             verbose = FALSE
           ),
@@ -160,6 +161,7 @@ if (!need_ex3) {
           y = y_log, p0 = 0.15, model = model_w_reg,
           df = c(0.97, 0.97, 0.97), dim.df = c(1, 6, 1),
           sig.init = 0.1, gam.init = -0.1,
+          fix.sigma = FALSE,
           tol = tol, n.samp = n_samp,
           verbose = FALSE
         ),
@@ -175,6 +177,7 @@ if (!need_ex3) {
             tf.m0 = c(0, 0),
             tf.C0 = diag(c(0.1, 0.005), 2),
             sig.init = 0.1, gam.init = -0.1,
+            fix.sigma = FALSE,
             tol = tol, n.samp = n_samp,
             verbose = FALSE
           ),

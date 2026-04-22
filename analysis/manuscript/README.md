@@ -12,13 +12,11 @@ and recommended rerun entry points, see
 
 - Rebuilds Example 1 (Lake Huron) figures.
 - Rebuilds Example 1 predictive-synthesis figure from the tracked 0.05, 0.50, and 0.95 fits.
-- Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with support-only ISVB/LDVB comparison artifacts available when requested.
+- Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with optional support-only LDVB diagnostics available when requested.
 - Rebuilds a representative dynamic Example 2 runtime-and-quality benchmark table (`tab:ex2bench`) pairing runtime with KL, CRPS, and pplc under the disclosed backend profile.
 - Rebuilds Example 3 (Big Tree) primary figures + diagnostics table from the LDVB workflow.
 - Rebuilds Example 4 sparse static exAL simulation figure + summary table under the regularized horseshoe (RHS) prior.
-- Adds one extra dynamic comparison figure: ISVB vs LDVB (`ex2_isvb_ldvb_compare.png`).
-- Adds side-by-side gamma posterior comparison for Example 2 with 95% CrIs (`ex2_gamma_posteriors.png` + `ex2_gamma_credible_intervals.csv`).
-- Adds LDVB-only counterparts for ISVB artifacts in Example 2 and Example 3 (figures + diagnostics/scan tables).
+- Adds LDVB-focused support artifacts for Example 2 and Example 3 (figures + diagnostics/scan tables).
 - Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.
 - Adds an optional support-only Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds before promoting one seed into the tracked static example.
 - Writes a reproducibility tracker with per-artifact status notes.
@@ -30,6 +28,13 @@ From repository root:
 
 ```bash
 Rscript analysis/run_all.R --stage manuscript
+```
+
+For the staged overnight relaunch sequence against the current package checkout,
+you can also run:
+
+```bash
+bash analysis/manuscript/run_overnight_relaunch.sh
 ```
 
 Useful variants:
@@ -44,7 +49,6 @@ Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant,ex2checks --profile standard --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2bench --profile standard --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2_gamma_posteriors --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --profile standard --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb --skip-tests
@@ -79,3 +83,6 @@ Main tracker files:
 - `manuscript_api_migration_map.csv`
 - `benchmark_backend_profiles.csv`
 - `benchmark_environment.csv`
+
+For the staged overnight relaunch sequence against the current package checkout,
+see `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.

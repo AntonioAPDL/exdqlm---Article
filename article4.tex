@@ -695,7 +695,7 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \label{fig:ex2quant}
 \end{figure}
 
-\aA{We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. In this example we set \code{n.samp = 3000}. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after convergence using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 10 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 114 seconds.}
+\aA{We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. In this example we set \code{n.samp = 3000}. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after fitting using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 23 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 104 seconds.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -719,7 +719,7 @@ Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
 
 DQLM fitted using VB
 Iterations until convergence: 67
-Run-time: 9.522 seconds
+Run-time: 22.891 seconds
 \end{CodeOutput}
 \begin{CodeInput}
 R> summary(M2)
@@ -733,7 +733,7 @@ Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
 exDQLM fitted using LDVB
 Parameters estimated with LD: gamma sigma
 Iterations until convergence: 200
-Run-time: 113.551 seconds
+Run-time: 104.092 seconds
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -795,7 +795,8 @@ R> ref.samp = rnorm(length(sunspot.year))
 R> for(i in 1:nrow(possible.dfs)){
 +   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = possible.dfs[i,], dim.df = c(1,8),
-+                  sig.init = 2, n.samp = 3000, verbose = FALSE)
++                  sig.init = 2, fix.sigma = FALSE,
++                  n.samp = 3000, verbose = FALSE)
 +   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
 +                              ref = ref.samp)
 +   metrics[i,] = c(temp.check$m1.CRPS, temp.check$m1.KL)
@@ -818,18 +819,18 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
  \toprule
  model & method & runtime (s) & KL & CRPS & pplc \\
  \midrule
- DQLM & \aA{VB} & \textbf{9.52} & 0.144 & 8.588 & 3909.4 \\
- DQLM & MCMC & 266.16 & \textbf{0.136} & \textbf{7.664} & \textbf{3048.1} \\
+ DQLM & \aA{VB} & \textbf{22.89} & \textbf{0.144} & 8.624 & 3906.5 \\
+ DQLM & MCMC & 273.68 & 0.153 & \textbf{7.708} & \textbf{3051.2} \\
  \addlinespace[2pt]
- exDQLM & \aA{VB} & \textbf{113.55} & \textbf{0.078} & 6.424 & 2346.5 \\
- exDQLM & MCMC & 330.91 & 0.111 & \textbf{5.069} & \textbf{2186.7} \\
+ exDQLM & \aA{VB} & \textbf{104.09} & \textbf{0.078} & 6.416 & 2350.3 \\
+ exDQLM & MCMC & 343.14 & 0.126 & \textbf{5.075} & \textbf{2189.8} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Within each model block, bold entries indicate the smaller value for that metric.}
 \label{tab:ex2bench}
 \end{table}
 
-\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched 3000-draw summaries. For the simpler DQLM, the VB fit remains much faster than MCMC, whereas the MCMC fit achieves smaller values for all three reported diagnostics. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is mixed: the VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the inferential method being compared.}
+\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched 3000-draw summaries. For the simpler DQLM, the VB fit remains much faster than MCMC and attains the smaller KL divergence, whereas the MCMC fit achieves smaller values for the CRPS and the pplc. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is again mixed: the VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the inferential method being compared.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -845,10 +846,18 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \label{fig:ex3data}
 \end{figure}
 
-For our final example, we consider the average monthly natural water flow (cubic feet per second) at the Big Tree gauge of the San Lorenzo river in Santa Cruz County, CA, obtained by averaging daily USGS observations within each calendar month \citep{btflow}. The resulting monthly series is included in the package as \code{BTflowUSGS}. To keep the covariate structure of the original example, we pair this monthly USGS-derived series with the monthly Ni\~no 3.4 index \citep{nino34}. Because the package \code{nino34} series ends in April 2021, we restrict attention to the overlapping window from January 1987 through April 2021, for a total of 412 observations. With this example we show how to build a state-space structure manually for a dynamic quantile regression, apply our transfer-function exDQLM, examine individual components of the estimated quantiles, and perform quantitative model diagnostics to compare models.
+For our final example, we consider the average monthly natural water flow (cubic feet per second) at the Big Tree gauge of the San Lorenzo river in Santa Cruz County, CA, obtained by averaging daily USGS observations within each calendar month \citep{btflow}. In the article workflow we construct this monthly series directly from the staged daily USGS file rather than relying on a packaged monthly flow dataset. To keep the covariate structure of the original example, we pair this monthly USGS-derived series with the monthly Ni\~no 3.4 index \citep{nino34} supplied by the package. Because the package \code{nino34} series ends in April 2021, we restrict attention to the overlapping window from January 1987 through April 2021, for a total of 412 observations. With this example we show how to build a state-space structure manually for a dynamic quantile regression, apply our transfer-function exDQLM, examine individual components of the estimated quantiles, and perform quantitative model diagnostics to compare models.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> flow.monthly = window(BTflowUSGS, end = c(2021,4))
+R> bt.daily = read.csv("big_trees_daily_usgs_ppt_soil.csv")
+R> bt.daily$date = as.Date(bt.daily$date)
+R> bt.daily = bt.daily[order(bt.daily$date), c("date","usgs_cfs")]
+R> month.id = format(bt.daily$date, "%Y-%m")
+R> flow.monthly.df = aggregate(bt.daily["usgs_cfs"],
++                             by = list(month = month.id), FUN = mean)
+R> flow.monthly = ts(flow.monthly.df$usgs_cfs, start = c(1980,1),
++                   frequency = 12)
+R> flow.monthly = window(flow.monthly, end = c(2021,4))
 R> nino.monthly = window(nino34, start = start(flow.monthly),
 +                      end = end(flow.monthly))
 R> flow.fit = flow.monthly
@@ -892,6 +901,7 @@ R>   temp.M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
 +                               tf.m0 = c(0,0),
 +                               tf.C0 = diag(c(0.1,0.005),2),
 +                               sig.init = 0.1, gam.init = - 0.1,
++                               fix.sigma = FALSE,
 +                               tol = 0.05, verbose = FALSE)
 R>   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
 +                            ref = ref.samp)
@@ -919,6 +929,7 @@ With these discount factors and optimal $\lambda$, we estimate the dynamic quant
 R> M1 = exdqlmLDVB(y = log(flow.fit), p0 = 0.15, model = model.w.reg,
 +                df = c(0.97,0.97,0.97), dim.df = c(1,6,1),
 +                sig.init = 0.1, gam.init = - 0.1,
++                fix.sigma = FALSE,
 +                tol = 0.05, verbose = FALSE)
 R> M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
 +                        df = c(0.97,0.97), dim.df = c(1,6),
@@ -926,6 +937,7 @@ R> M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
 +                        tf.m0 = c(0,0),
 +                        tf.C0 = diag(c(0.1,0.005),2),
 +                        sig.init = 0.1, gam.init = - 0.1,
++                        fix.sigma = FALSE,
 +                        tol = 0.05, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1023,9 +1035,9 @@ Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL diverg
  \toprule
  Criterion & \code{M1} regression & \code{M2} transfer function \\
  \midrule
- CRPS & \textbf{0.350} & 0.357 \\
- pplc & 132.10 & \textbf{122.90} \\
- KL & \textbf{0.0562} & 0.0565 \\
+ CRPS & \textbf{0.349} & 0.357 \\
+ pplc & 130.81 & \textbf{123.37} \\
+ KL & \textbf{0.0565} & 0.0570 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, pplc assesses target-quantile posterior predictive loss, and KL summarizes one-step-ahead calibration discrepancy. Bold entries indicate the smaller value in each row.}
@@ -1127,21 +1139,21 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
  \toprule
  \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \midrule
- \tworowcell{0.05} & \aA{VB} & \textbf{19.11} & \textbf{0.153} & 0.069 & 0.471 \\
- & MCMC & 136.99 & 0.162 & \textbf{0.057} & \textbf{0.419} \\
+ \tworowcell{0.05} & \aA{VB} & \textbf{21.52} & \textbf{0.153} & 0.069 & 0.471 \\
+ & MCMC & 94.20 & 0.170 & \textbf{0.061} & \textbf{0.413} \\
  \addlinespace[2pt]
- \tworowcell{0.25} & \aA{VB} & \textbf{11.45} & \textbf{0.148} & 0.115 & \textbf{0.401} \\
- & MCMC & 125.99 & 0.166 & \textbf{0.114} & 0.417 \\
+ \tworowcell{0.25} & \aA{VB} & \textbf{10.92} & \textbf{0.141} & \textbf{0.040} & 0.478 \\
+ & MCMC & 96.51 & 0.176 & 0.043 & \textbf{0.476} \\
  \addlinespace[2pt]
- \tworowcell{0.50} & \aA{VB} & \textbf{9.37} & 0.166 & \textbf{0.045} & 0.247 \\
- & MCMC & 127.27 & \textbf{0.159} & \textbf{0.045} & \textbf{0.238} \\
+ \tworowcell{0.50} & \aA{VB} & \textbf{5.52} & 0.224 & 0.169 & 0.476 \\
+ & MCMC & 81.81 & \textbf{0.195} & \textbf{0.161} & \textbf{0.439} \\
  \bottomrule
 \end{tabular}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The VB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Within each quantile block, bold entries indicate the smaller value for that metric; ties are bolded in both rows.}
 \label{tab:ex4static}
 \end{table}
 
-\aA{Table \ref{tab:ex4static} reinforces the visual comparison. The two methods remain competitive across all three quantile levels, but the relative advantage depends on the metric. At \(p_0 = 0.05\), the VB fit is slightly better on the active coefficients, whereas MCMC is better on the null coefficients and the holdout quantile RMSE. At \(p_0 = 0.25\), the VB fit is slightly better on the active-signal and holdout metrics, while the null-coefficient summaries are effectively tied. At \(p_0 = 0.50\), MCMC again holds a small advantage on the active-signal and holdout metrics, and the null-coefficient summaries are nearly indistinguishable. The VB fit is nevertheless much faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 11-fold at \(p_0 = 0.25\), and 14-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation offers meaningful computational savings as a first-pass analysis while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: VB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
+\aA{Table \ref{tab:ex4static} reinforces the visual comparison. The two methods remain competitive across all three quantile levels, but the relative advantage depends on the metric. At \(p_0 = 0.05\), the VB fit is slightly better on the active coefficients, whereas MCMC is better on the null coefficients and the holdout quantile RMSE. At \(p_0 = 0.25\), the VB fit is slightly better on both the active-signal and null-coefficient metrics, while MCMC has a marginally smaller holdout quantile RMSE. At \(p_0 = 0.50\), MCMC again holds a small advantage on the active-signal, null-coefficient, and holdout metrics. The VB fit is nevertheless much faster in all three cases, with runtime reductions of roughly 4-fold at \(p_0 = 0.05\), 9-fold at \(p_0 = 0.25\), and 15-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation offers meaningful computational savings as a first-pass analysis while still recovering the sparse signal well, but this speed comes with the usual variational tradeoff that posterior uncertainty quantification may be less faithful than the exact MCMC baseline. Accordingly, the static RHS specification supports both roles cleanly: VB for rapid screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
 
 \section{Conclusion}
 \label{sec:summary}

@@ -90,9 +90,6 @@ Publication-facing:
 
 Support-only:
 - [ex2_df_scan_kl.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
-- [ex2_gamma_credible_intervals.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex2_gamma_credible_intervals.csv)
-- [ex2_gamma_posteriors.png](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/figures/ex2_gamma_posteriors.png)
-- [ex2_isvb_ldvb_compare.png](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/figures/ex2_isvb_ldvb_compare.png)
 - [ex2_ldvb_diagnostics.png](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png)
 
 ### Example 3: Big Tree

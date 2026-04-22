@@ -29,7 +29,6 @@ Rscript analysis/run_all.R --stage manuscript --promote
 Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2_gamma_posteriors --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
@@ -56,3 +55,5 @@ package instead. Source mode remains the default.
 - Deterministic seeds are stage-specific (`config/params_*.yml`).
 - Output filenames are stable for repeatable manuscript linkage.
 - Promotion copies selected figures into top-level `Figures/`.
+- The staged overnight manuscript relaunch plan is documented in
+  `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.

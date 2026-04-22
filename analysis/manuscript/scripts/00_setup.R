@@ -210,8 +210,7 @@ load_exdqlm()
 
 required_fns <- c(
   "polytrendMod", "seasMod", "as.exdqlm",
-  "exdqlmMCMC", "exdqlmISVB", "exdqlmLDVB",
-  "exdqlmTransferISVB", "exdqlmDiagnostics",
+  "exdqlmMCMC", "exdqlmLDVB", "exdqlmDiagnostics",
   "exdqlmPlot", "compPlot", "exdqlmForecast",
   "exalStaticLDVB", "exalStaticMCMC", "exalStaticDiagnostics",
   "quantileSynthesis"
@@ -836,7 +835,7 @@ promote_publication_figures <- function() {
 
 register_note("api_update", "Deprecated exdqlmChecks replaced with exdqlmDiagnostics.")
 register_note("api_update", "Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.")
-register_note("ldvb_note", "Added ISVB vs LDVB comparison figure for dynamic Sunspots example.")
+register_note("ex2_policy", "Example 2 manuscript workflow now uses LDVB and MCMC only; ISVB support artifacts were retired.")
 register_note(
   "backend",
   sprintf(
