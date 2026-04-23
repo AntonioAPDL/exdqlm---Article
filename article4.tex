@@ -75,26 +75,29 @@ Most other \proglang{R} packages relevant here implement static quantile regress
 \centering
 \TableStyle
 \setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\textwidth}{@{}l X X c X@{}}
+\begin{tabularx}{\textwidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X c >{\raggedright\arraybackslash}X@{}}
 \toprule
-Package & Primary focus & Temporal structure & \shortstack{Fast approximate\\inference} & \shortstack{Cross-quantile\\treatment} \\
+Package & Main scope & Dynamic support & \shortstack{Fast\\approximation} & \shortstack{Across-quantile\\strategy} \\
 \midrule
-\pkg{quantreg} & Broad frequentist quantile regression & Regression-style dynamic via \code{dynrq()} & No & Post hoc rearrangement \\
+\pkg{quantreg} & Frequentist general-purpose quantile regression & Regression-style time-series interface via \code{dynrq()} & No & Separate fits; rearrangement available \\
 \addlinespace[2pt]
-\pkg{bayesQR} & Static Bayesian quantile regression under the AL working likelihood & Static & No & None \\
+\pkg{bayesQR} & Bayesian quantile regression under the AL working likelihood & Static & No & Separate fits \\
 \addlinespace[2pt]
-\pkg{pqrBayes} & Static Bayesian penalized quantile regression & Static & No & None \\
+\pkg{brms} & Bayesian multilevel and distributional regression, including quantiles & Autocorrelation terms, but not a dedicated quantile state-space workflow & No & Separate fits \\
 \addlinespace[2pt]
-\pkg{qrjoint} & Joint estimation of non-crossing quantiles in regression settings & Static & No & Joint non-crossing estimation \\
+\pkg{qgam} & Frequentist additive quantile regression with calibrated Bayesian intervals & Static & Yes  & Separate fits \\
 \addlinespace[2pt]
-\pkg{qgam} & Additive and semiparametric quantile regression & Static & No & No dedicated joint/non-crossing treatment \\
+\pkg{qrjoint} & Bayesian joint linear quantile regression across quantiles & Static & No & Joint estimation \\
 \addlinespace[2pt]
-\pkg{exdqlm} & Bayesian dynamic/state-space quantile regression; static exAL regression & Latent-state state-space & Yes & Post hoc predictive synthesis \\
+\pkg{dlm} & Bayesian/likelihood Gaussian time-series modeling & Latent-state Gaussian state space & No & Not quantile-specific \\
+\addlinespace[2pt]
+\pkg{exdqlm} & Bayesian quantile time-series modeling with forecasting & Latent-state quantile state space & Yes & Post hoc predictive synthesis \\
 \bottomrule
 \end{tabularx}
-\caption{Representative \proglang{R} packages spanning broad, static Bayesian, additive, joint multi-quantile, and dynamic/state-space quantile-regression workflows. Temporal structure distinguishes static packages, regression-style dynamic formulations, and latent-state state-space models. Fast approximate inference denotes a package-facing deterministic posterior approximation, such as variational Bayes. Cross-quantile treatment records any package-specific way of linking information across quantile levels; these entries are not methodologically interchangeable. In particular, post hoc predictive synthesis is distinct from joint non-crossing estimation.}
+\caption{Representative \proglang{R} packages spanning broad, static, joint multi-quantile, and dynamic/state-space workflows relevant to quantile modeling. Dynamic support distinguishes static packages, regression-style time-series interfaces, and latent-state state-space formulations. Fast approximation denotes a package-facing deterministic or calibrated approximation used in place of full simulation-based inference. Across-quantile strategy records how, if at all, information is linked across quantile levels; these entries are not methodologically interchangeable. In particular, post hoc predictive synthesis is distinct from joint estimation across quantiles.}
 \label{table:software}
 \end{table}
+
 
 \aA{Related implementations also exist outside \proglang{R}. In Python, \pkg{statsmodels} \citep{statsmodelsQuantReg} provides linear quantile regression via iterative reweighted least squares. Julia offers \pkg{QuantReg.jl} \citep{QuantRegjl}, and MATLAB includes tools such as \code{fitrqlinear} and \code{fitrqnet} \citep{matlabQuantile}. These implementations are useful reference points for the broader software ecosystem, but they are better viewed as general or static quantile-regression tools than as direct counterparts to a dedicated package for Bayesian dynamic quantile state-space modeling.}
 
