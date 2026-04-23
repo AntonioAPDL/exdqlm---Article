@@ -1137,9 +1137,10 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabular}{@{}lrrrrr@{}}
+{\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrrr@{}}
  \toprule
- \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
+ \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
  \tworowcell{0.05} & \aA{VB} & \textbf{22.50} & 0.267 & 0.128 & 0.714 \\
  & MCMC & 156.91 & \textbf{0.201} & \textbf{0.085} & \textbf{0.515} \\
@@ -1150,7 +1151,7 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
  \tworowcell{0.50} & \aA{VB} & \textbf{2.51} & 0.110 & 0.101 & 0.382 \\
  & MCMC & 155.25 & \textbf{0.013} & \textbf{0.074} & \textbf{0.367} \\
  \bottomrule
-\end{tabular}
+\end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The VB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
