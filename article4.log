@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  22 APR 2026 21:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  22 APR 2026 21:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -700,9 +700,6 @@ Underfull \hbox (badness 1852) in paragraph at lines 193--193
  []
 
 
-Underfull \vbox (badness 1852) has occurred while \output is active []
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 6 []
  []
@@ -718,9 +715,6 @@ Overfull \hbox (53.01382pt too wide) in paragraph at lines 252--254
 mtt/m/n/10.95 exdqlmTransferLDVB() \T1/lmr/m/n/10.95 and \T1/lmtt/m/n/10.95 exd
 qlmTransferMCMC()\T1/lmr/m/n/10.95 ,
  []
-
-
-Underfull \vbox (badness 3690) has occurred while \output is active []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -1033,7 +1027,7 @@ nts/type1/public/lm/lmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /lm/lmtto10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symb
 ols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.
 pfb>
-Output written on article4.pdf (33 pages, 2757661 bytes).
+Output written on article4.pdf (33 pages, 2757673 bytes).
 PDF statistics:
  690 PDF objects out of 1000 (max. 8388607)
  608 compressed objects within 7 object streams
