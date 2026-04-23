@@ -1132,7 +1132,7 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \label{fig:ex4static}
 \end{figure}
 
-\aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. The median panel is especially clean under the screened seed, with the MCMC reference intervals covering all plotted coefficients while the VB fit remains visually close for the active signals.}
+\aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. The median panel is especially clean, with the MCMC reference intervals covering all plotted coefficients, while the VB fit remains visually close for the active signals.}
 
 \begin{table}[t!]
 \centering
@@ -1156,7 +1156,7 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \label{tab:ex4static}
 \end{table}
 
-\aA{Table \ref{tab:ex4static} reinforces the visual comparison. Under the screened seed, the MCMC reference fit is better on the active-signal RMSE, the null-coefficient MAE, and the holdout quantile RMSE at all three quantile levels. The advantage is mild at \(p_0 = 0.05\) and \(p_0 = 0.25\), but it is especially pronounced for the active coefficients at \(p_0 = 0.50\), where the MCMC active-signal RMSE is much smaller. The VB fit is nevertheless dramatically faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 11-fold at \(p_0 = 0.25\), and 62-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner coefficient-recovery and uncertainty illustration. Accordingly, the static RHS specification still supports both roles cleanly: VB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.}
+Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference fit is better on the active-signal RMSE, the null-coefficient MAE, and the holdout quantile RMSE at all three quantile levels. The advantage is mild at \(p_0 = 0.05\) and \(p_0 = 0.25\), but it is especially pronounced for the active coefficients at \(p_0 = 0.50\), where the MCMC active-signal RMSE is much smaller. The VB fit is nevertheless dramatically faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 11-fold at \(p_0 = 0.25\), and 62-fold at \(p_0 = 0.50\). In this benchmark, the VB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner coefficient-recovery and uncertainty illustration. Accordingly, the static RHS specification still supports both roles cleanly: VB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}
