@@ -815,7 +815,7 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabular}{@{}llcccc@{}}
+\begin{tabular}{@{}llrrrr@{}}
  \toprule
  model & method & runtime (s) & KL & CRPS & pplc \\
  \midrule
@@ -826,7 +826,7 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
  exDQLM & MCMC & 343.14 & 0.126 & \textbf{5.075} & \textbf{2189.8} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Within each model block, bold entries indicate the smaller value for that metric.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1031,7 +1031,7 @@ Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL diverg
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabular}{@{}lcc@{}}
+\begin{tabular}{@{}lrr@{}}
  \toprule
  Criterion & \code{M1} regression & \code{M2} transfer function \\
  \midrule
@@ -1040,7 +1040,7 @@ Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL diverg
  KL & \textbf{0.0565} & 0.0570 \\
  \bottomrule
 \end{tabular}
-\caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, pplc assesses target-quantile posterior predictive loss, and KL summarizes one-step-ahead calibration discrepancy. Bold entries indicate the smaller value in each row.}
+\caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, pplc assesses target-quantile posterior predictive loss, and KL summarizes one-step-ahead calibration discrepancy. Because the rows are the comparison metrics, bold entries indicate the smaller value within each row.}
 \label{tab:ex3}
 \end{table}
 
@@ -1135,7 +1135,7 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabular}{@{}lccccc@{}}
+\begin{tabular}{@{}lrrrrr@{}}
  \toprule
  \(p_0\) & method & runtime (s) & active RMSE & null MAE & holdout quantile RMSE \\
  \midrule
@@ -1149,7 +1149,7 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
  & MCMC & 81.81 & \textbf{0.195} & \textbf{0.161} & \textbf{0.439} \\
  \bottomrule
 \end{tabular}
-\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The VB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Within each quantile block, bold entries indicate the smaller value for that metric; ties are bolded in both rows.}
+\caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the RHS prior. The VB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; ties are bolded in both rows.}
 \label{tab:ex4static}
 \end{table}
 
