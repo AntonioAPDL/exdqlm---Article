@@ -48,6 +48,14 @@ log "Package root: $PKG_ROOT"
 log "Package commit: $(git -C "$PKG_ROOT" rev-parse --short HEAD)"
 log "Run dir: $RUN_DIR"
 
+run_step "ex4screen" \
+  Rscript "$ARTICLE_ROOT/analysis/run_all.R" \
+    --stage manuscript \
+    --pkg-path "$PKG_ROOT" \
+    --targets ex4screen \
+    --force-refit \
+    --skip-tests
+
 run_step "ex4" \
   Rscript "$ARTICLE_ROOT/analysis/run_all.R" \
     --stage manuscript \

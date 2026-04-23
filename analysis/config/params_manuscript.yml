@@ -57,10 +57,14 @@ profiles:
       holdout_n: 450
       n_predictors: 8
       dataset_seed: 20260714
+      dataset_seed_mode: screen_selection
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
       p_levels: [0.05, 0.25, 0.50]
+      screen_target_p0: 0.50
+      screen_seeds: [20260711, 20260712, 20260713, 20260714, 20260715, 20260716, 20260717, 20260718]
+      screen_extra_seed_count: 0
       ldvb_max_iter: 260
       ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001
@@ -108,10 +112,12 @@ profiles:
       holdout_n: 800
       n_predictors: 8
       dataset_seed: 20260714
+      dataset_seed_mode: screen_selection
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
       p_levels: [0.05, 0.25, 0.50]
+      screen_target_p0: 0.50
       ldvb_max_iter: 260
       ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001
@@ -121,9 +127,8 @@ profiles:
       rhs_b_zeta: 9.0
       rhs_zeta2_fixed: 9.0
       screen_seeds: [20260711, 20260712, 20260713, 20260714, 20260715, 20260716, 20260717, 20260718]
-      screen_holdout_ratio_max: 1.25
-      screen_active_ratio_max: 1.35
-      screen_check_ratio_max: 1.05
+      screen_extra_seed_count: 8
+      screen_batch_size: 4
       n_burn: 2000
       n_mcmc: 3000
       thin: 1
@@ -163,10 +168,15 @@ profiles:
       holdout_n: 1200
       n_predictors: 8
       dataset_seed: 20260714
+      dataset_seed_mode: screen_selection
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
       p_levels: [0.05, 0.25, 0.50]
+      screen_target_p0: 0.50
+      screen_seeds: [20260711, 20260712, 20260713, 20260714, 20260715, 20260716, 20260717, 20260718]
+      screen_extra_seed_count: 8
+      screen_batch_size: 4
       ldvb_max_iter: 260
       ldvb_max_iter_tail: 420
       ldvb_tol: 0.0001

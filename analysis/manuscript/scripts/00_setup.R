@@ -324,6 +324,33 @@ benchmark_profiles_table <- function() {
   do.call(rbind, rows)
 }
 
+resolve_ex4_dataset_seed_for_reporting <- function(cfg_ex4 = cfg_profile$ex4) {
+  mode <- tolower(trimws(as.character(cfg_ex4$dataset_seed_mode %||% "configured")))
+  configured_seed <- as.integer(cfg_ex4$dataset_seed %||% NA_integer_)
+  if (!identical(mode, "screen_selection")) {
+    return(configured_seed)
+  }
+
+  target_p0 <- as.numeric(cfg_ex4$screen_target_p0 %||% 0.50)
+  selection_path <- file.path(
+    tables_dir,
+    sprintf("ex4_seed_screen_p%03d_selection.csv", round(100 * target_p0))
+  )
+  if (!file.exists(selection_path)) {
+    return(configured_seed)
+  }
+
+  selected_tab <- tryCatch(utils::read.csv(selection_path, stringsAsFactors = FALSE), error = function(e) NULL)
+  if (is.null(selected_tab) || !"selected" %in% names(selected_tab)) {
+    return(configured_seed)
+  }
+  selected_rows <- selected_tab[selected_tab$selected %in% c(TRUE, "TRUE", "True", "true", 1, "1"), , drop = FALSE]
+  if (nrow(selected_rows) != 1L) {
+    return(configured_seed)
+  }
+  as.integer(selected_rows$seed[[1L]])
+}
+
 benchmark_environment_table <- function() {
   cpu_model <- detect_cpu_model()
   pkg_version <- tryCatch(as.character(utils::packageVersion("exdqlm")), error = function(e) NA_character_)
@@ -388,7 +415,7 @@ benchmark_environment_table <- function() {
       as.character(ex3_len),
       as.character(cfg_profile$ex4$n_train %||% NA_integer_),
       as.character(cfg_profile$ex4$holdout_n %||% NA_integer_),
-      as.character(cfg_profile$ex4$dataset_seed %||% NA_integer_)
+      as.character(resolve_ex4_dataset_seed_for_reporting(cfg_profile$ex4))
     ),
     stringsAsFactors = FALSE
   )

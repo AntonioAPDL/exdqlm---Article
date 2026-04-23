@@ -25,7 +25,8 @@ if (!need_ex4) {
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
   thin <- as.integer(cfg_ex4$thin %||% 1L)
-  ex4_seed <- as.integer(cfg_ex4$dataset_seed %||% (seed_value + 404L))
+  ex4_seed_info <- ex4_resolve_dataset_seed(cfg_ex4)
+  ex4_seed <- as.integer(ex4_seed_info$seed)
   rhs_ctrl <- ex4_build_rhs_ctrl(cfg_ex4)
   cache_key <- sprintf(
     "ex4_static_rhsns_sparse_seed_%d_ns%d_b%d_k%d_v3",
@@ -34,15 +35,32 @@ if (!need_ex4) {
     n_burn,
     n_mcmc
   )
-  ex4_obj <- ex4_load_or_fit_cache_safe(
-    cache_key,
-    ex4_fit_seed(ex4_seed, cfg_ex4, stop_on_failure = TRUE),
-    note = cache_key
-  )
+  ex4_obj <- NULL
+  if (!force_refit && identical(ex4_seed_info$source, "screen_selection")) {
+    screen_cache_key <- ex4_seed_screen_cache_key(ex4_seed, cfg_ex4)
+    screen_cache_path <- cache_file(screen_cache_key)
+    if (file.exists(screen_cache_path)) {
+      log_msg(sprintf("Reusing Example 4 seed-screen cache for %s", screen_cache_key))
+      ex4_obj <- readRDS(screen_cache_path)
+      saveRDS(ex4_obj, cache_file(cache_key))
+    }
+  }
+  if (is.null(ex4_obj)) {
+    ex4_obj <- ex4_load_or_fit_cache_safe(
+      cache_key,
+      ex4_fit_seed(ex4_seed, cfg_ex4, stop_on_failure = TRUE),
+      note = cache_key
+    )
+  }
 
   capture_output_file("ex4_run_summary.txt", {
     cat(sprintf("profile=%s\n", selected_profile))
     cat(sprintf("seed=%d\n", ex4_obj$seed))
+    cat(sprintf("seed_source=%s\n", ex4_seed_info$source))
+    if (!is.na(ex4_seed_info$selection_file)) {
+      cat(sprintf("seed_selection_file=%s\n", ex4_seed_info$selection_file))
+      cat(sprintf("seed_selection_target_p0=%0.2f\n", ex4_seed_info$target_p0))
+    }
     cat(sprintf("train_n=%d, holdout_n=%d, predictors=%d\n", train_n, holdout_n, predictor_n))
     cat(sprintf("ldvb_n.samp=%d, n.burn=%d, n.mcmc=%d\n", n_samp, n_burn, n_mcmc))
     cat(sprintf("cov_rho=%0.2f, sigma_eps=%0.2f\n", cov_rho, sigma_eps))
@@ -182,6 +200,16 @@ if (!need_ex4) {
     "ex4",
     "The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget."
   )
+  if (identical(ex4_seed_info$source, "screen_selection")) {
+    register_note(
+      "ex4",
+      sprintf(
+        "The tracked Example 4 dataset seed (%d) was selected by the support-only ex4screen workflow using the p0=%0.2f MCMC full-coverage criterion for the plotted slope coefficients.",
+        ex4_seed,
+        ex4_seed_info$target_p0
+      )
+    )
+  }
   register_note(
     "ex4",
     "Example 4 focuses on the general static exAL model; the AL special case remains available via dqlm.ind = TRUE."

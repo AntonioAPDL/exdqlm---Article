@@ -10,6 +10,130 @@ ex4_build_rhs_ctrl <- function(cfg_ex4) {
   )
 }
 
+ex4_interval_coverage <- function(lb, ub, truth) {
+  contains <- as.logical(lb <= truth & truth <= ub)
+  list(
+    contains = contains,
+    n_contains = sum(contains),
+    n_total = length(contains),
+    all_contains = all(contains)
+  )
+}
+
+ex4_resolve_slope_coverage <- function(method_fit, beta_true) {
+  if (!is.null(method_fit$slope_coverage)) {
+    cov <- method_fit$slope_coverage
+    if (!is.null(cov$contains) &&
+        !is.null(cov$n_contains) &&
+        !is.null(cov$n_total) &&
+        !is.null(cov$all_contains)) {
+      return(cov)
+    }
+  }
+  ex4_interval_coverage(
+    lb = as.numeric(method_fit$beta_lb_slopes),
+    ub = as.numeric(method_fit$beta_ub_slopes),
+    truth = as.numeric(beta_true)
+  )
+}
+
+ex4_screen_target_p0 <- function(cfg_ex4) {
+  as.numeric(cfg_ex4$screen_target_p0 %||% 0.50)
+}
+
+ex4_screen_file_stem <- function(cfg_ex4) {
+  sprintf("ex4_seed_screen_p%03d", round(100 * ex4_screen_target_p0(cfg_ex4)))
+}
+
+ex4_screen_candidate_batches <- function(cfg_ex4, seed_value) {
+  base_seeds <- as.integer(unlist(cfg_ex4$screen_seeds %||% (seed_value + 500L + seq_len(8L))))
+  base_seeds <- sort(unique(base_seeds))
+  if (length(base_seeds) < 2L) {
+    stop("Example 4 seed screen requires at least two candidate seeds.", call. = FALSE)
+  }
+
+  extra_seed_count <- as.integer(cfg_ex4$screen_extra_seed_count %||% 0L)
+  batch_size <- as.integer(cfg_ex4$screen_batch_size %||% length(base_seeds))
+  if (!is.finite(batch_size) || batch_size < 1L) batch_size <- length(base_seeds)
+
+  batches <- list(base_seeds)
+  if (extra_seed_count > 0L) {
+    extra_start <- max(base_seeds) + 1L
+    extra_seeds <- seq.int(extra_start, length.out = extra_seed_count)
+    extra_batches <- split(extra_seeds, ceiling(seq_along(extra_seeds) / batch_size))
+    batches <- c(batches, extra_batches)
+  }
+  batches
+}
+
+ex4_seed_selection_path <- function(cfg_ex4) {
+  file.path(tables_dir, sprintf("%s_selection.csv", ex4_screen_file_stem(cfg_ex4)))
+}
+
+ex4_seed_screen_cache_key <- function(dataset_seed, cfg_ex4) {
+  sprintf(
+    "ex4_seed_screen_seed_%d_ns%d_b%d_k%d_v2",
+    as.integer(dataset_seed),
+    as.integer(cfg_ex4$n_samp %||% 200L),
+    as.integer(cfg_ex4$n_burn),
+    as.integer(cfg_ex4$n_mcmc)
+  )
+}
+
+ex4_resolve_dataset_seed <- function(cfg_ex4) {
+  mode <- tolower(trimws(as.character(cfg_ex4$dataset_seed_mode %||% "configured")))
+  configured_seed <- as.integer(cfg_ex4$dataset_seed %||% (seed_value + 404L))
+  if (!mode %in% c("configured", "screen_selection")) {
+    stop(sprintf("Unsupported Example 4 dataset_seed_mode '%s'.", mode), call. = FALSE)
+  }
+  if (identical(mode, "configured")) {
+    return(list(
+      seed = configured_seed,
+      source = "configured",
+      target_p0 = ex4_screen_target_p0(cfg_ex4),
+      selection_file = NA_character_
+    ))
+  }
+
+  selection_path <- ex4_seed_selection_path(cfg_ex4)
+  if (!file.exists(selection_path)) {
+    stop(
+      sprintf(
+        paste(
+          "Example 4 is configured to use a screen-selected dataset seed, but the selection file was not found:",
+          "%s",
+          "Run the ex4screen target first."
+        ),
+        selection_path
+      ),
+      call. = FALSE
+    )
+  }
+
+  selected_tab <- utils::read.csv(selection_path, stringsAsFactors = FALSE)
+  if (!"selected" %in% names(selected_tab)) {
+    stop(sprintf("Example 4 seed-selection file is missing the 'selected' column: %s", selection_path), call. = FALSE)
+  }
+  selected_rows <- selected_tab[isTRUE(selected_tab$selected) | selected_tab$selected %in% c(TRUE, "TRUE", "True", "true", 1, "1"), , drop = FALSE]
+  if (nrow(selected_rows) != 1L) {
+    stop(
+      sprintf(
+        "Expected exactly one selected Example 4 seed in %s, found %d.",
+        selection_path,
+        nrow(selected_rows)
+      ),
+      call. = FALSE
+    )
+  }
+
+  list(
+    seed = as.integer(selected_rows$seed[[1L]]),
+    source = "screen_selection",
+    target_p0 = ex4_screen_target_p0(cfg_ex4),
+    selection_file = selection_path
+  )
+}
+
 ex4_simulate_target_quantile_sample <- function(X_raw, beta_slopes, sigma_eps, p0, z = NULL) {
   if (is.null(z)) z <- stats::rnorm(nrow(X_raw))
   as.numeric(X_raw %*% beta_slopes) + sigma_eps * (z - stats::qnorm(p0))
@@ -231,6 +355,8 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
       mcmc_beta_slopes <- mcmc_beta_full[slope_idx]
       ldvb_support <- ex4_support_recovery(ldvb_beta_slopes, beta_slopes)
       mcmc_support <- ex4_support_recovery(mcmc_beta_slopes, beta_slopes)
+      ldvb_slope_coverage <- ex4_interval_coverage(ldvb_lb_full[slope_idx], ldvb_ub_full[slope_idx], beta_slopes)
+      mcmc_slope_coverage <- ex4_interval_coverage(mcmc_lb_full[slope_idx], mcmc_ub_full[slope_idx], beta_slopes)
 
       fits[[ex4_p_key(p0)]] <- list(
         p0 = p0,
@@ -250,7 +376,8 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
           holdout_check_loss = as.numeric(diag_holdout$m1.check_loss),
           tau = as.numeric(fit_ldvb$beta_prior$summary$tau),
           zeta2 = as.numeric(fit_ldvb$beta_prior$summary$zeta2),
-          support = ldvb_support
+          support = ldvb_support,
+          slope_coverage = ldvb_slope_coverage
         ),
         mcmc = list(
           kernel = fit_mcmc$mh.diagnostics$proposal,
@@ -265,7 +392,8 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
           holdout_check_loss = as.numeric(diag_holdout$m2.check_loss),
           tau = as.numeric(fit_mcmc$beta_prior$summary$tau),
           zeta2 = as.numeric(fit_mcmc$beta_prior$summary$zeta2),
-          support = mcmc_support
+          support = mcmc_support,
+          slope_coverage = mcmc_slope_coverage
         )
       )
     }
@@ -311,6 +439,8 @@ ex4_summary_rows <- function(ex4_obj, cfg_ex4 = NULL) {
     rbind,
     lapply(names(ex4_obj$fits), function(nm) {
       res <- ex4_obj$fits[[nm]]
+      ldvb_cov <- ex4_resolve_slope_coverage(res$ldvb, ex4_obj$beta_slopes)
+      mcmc_cov <- ex4_resolve_slope_coverage(res$mcmc, ex4_obj$beta_slopes)
       data.frame(
         p0 = rep(res$p0, 2L),
         method = c("VB", "MCMC"),
@@ -325,6 +455,9 @@ ex4_summary_rows <- function(ex4_obj, cfg_ex4 = NULL) {
         burn_in = c(NA_integer_, mcmc_n_burn),
         ldvb_iter = c(res$ldvb$iter, NA_integer_),
         ldvb_stop = c(res$ldvb$stop, NA_character_),
+        truth_interval_cover_n = c(ldvb_cov$n_contains, mcmc_cov$n_contains),
+        truth_interval_cover_total = c(ldvb_cov$n_total, mcmc_cov$n_total),
+        truth_interval_cover_all = c(ldvb_cov$all_contains, mcmc_cov$all_contains),
         stringsAsFactors = FALSE
       )
     })

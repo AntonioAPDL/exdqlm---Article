@@ -18,7 +18,7 @@ and recommended rerun entry points, see
 - Rebuilds Example 4 sparse static exAL simulation figure + summary table under the regularized horseshoe (RHS) prior.
 - Adds LDVB-focused support artifacts for Example 2 and Example 3 (figures + diagnostics/scan tables).
 - Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.
-- Adds an optional support-only Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds before promoting one seed into the tracked static example.
+- Adds an optional support-only Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds and selects the tracked dataset seed using the \(p_0 = 0.50\) MCMC full-coverage criterion for the plotted slope coefficients.
 - Writes a reproducibility tracker with per-artifact status notes.
 - Writes support tables describing the disclosed benchmark backend profiles and tracked benchmark environment.
 
@@ -54,7 +54,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4screen --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit --skip-tests
@@ -72,7 +72,7 @@ package instead. Source mode remains the default.
 ## Outputs
 
 - `analysis/manuscript/outputs/figures/`: generated figure files.
-- `analysis/manuscript/outputs/tables/`: diagnostics summaries + reproducibility tracker.
+- `analysis/manuscript/outputs/tables/`: diagnostics summaries + reproducibility tracker, including the Example 4 \(p_0 = 0.50\) seed-screen selection table.
 - `analysis/manuscript/outputs/logs/`: compact textual outputs and session metadata.
 - `analysis/manuscript/outputs/cache/`: cached fitted objects to support fast targeted reruns.
 

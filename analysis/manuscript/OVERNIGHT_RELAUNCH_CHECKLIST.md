@@ -21,7 +21,7 @@ and the alternative monthly Example 3 sandbox against the current article-facing
   workflow.
 - Example 3: use monthly USGS flow aggregated from the staged daily USGS file.
 - Example 3: use package `nino34`.
-- Example 4: rerun as-is under the updated package.
+- Example 4: run the support-only seed screen first, then rerun the tracked example using the screen-selected dataset seed.
 - Alternative Example 3: rerun the reduced-6 monthly sandbox separately after
   the main manuscript Example 3 rerun.
 
@@ -46,11 +46,18 @@ Expected:
 
 Run in this order so we surface the highest-risk package changes first.
 
-### 1. Example 4
+### 1. Example 4 seed screen + tracked rerun
 
 ```bash
 ARTICLE=/home/jaguir26/local/src/exdqlm---Article
 PKG=/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
+
+Rscript $ARTICLE/analysis/run_all.R \
+  --stage manuscript \
+  --pkg-path "$PKG" \
+  --targets ex4screen \
+  --force-refit \
+  --skip-tests
 
 Rscript $ARTICLE/analysis/run_all.R \
   --stage manuscript \

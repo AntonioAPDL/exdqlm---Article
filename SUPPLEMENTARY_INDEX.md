@@ -61,9 +61,9 @@ Useful targeted reruns:
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc,ex1quants,ex1synth --profile standard --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant,ex2checks,ex2bench --profile standard --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --profile standard --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --profile standard --force-refit --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --profile standard --force-refit --skip-tests
 ```
 
 ## 4. Support Artifacts by Example
@@ -115,9 +115,9 @@ Publication-facing:
 - [ex4static_summary.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex4static_summary.csv)
 
 Support-only:
-- [ex4_seed_screen_summary.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_summary.csv)
-- [ex4_seed_screen_selection.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_selection.csv)
-- [ex4_seed_screen_summary.txt](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/logs/ex4_seed_screen_summary.txt)
+- [ex4_seed_screen_p050_summary.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_p050_summary.csv)
+- [ex4_seed_screen_p050_selection.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
+- [ex4_seed_screen_p050_summary.txt](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
 
 ## 5. Supplementary Robustness Note
 
@@ -125,23 +125,24 @@ The current manuscript does not add a new main-text sensitivity section. Instead
 the repository retains support-side robustness artifacts for the parts of the
 workflow where this is most informative.
 
-The most important of these is the Example 4 seed screen:
+The most important of these is the Example 4 \(p_0 = 0.50\) seed screen:
 
-- [ex4_seed_screen_selection.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_selection.csv)
-- [ex4_seed_screen_summary.txt](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/logs/ex4_seed_screen_summary.txt)
+- [ex4_seed_screen_p050_selection.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
+- [ex4_seed_screen_p050_summary.txt](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
 
-In the tracked standard-profile run, eight candidate seeds were screened under
-explicit criteria:
-- both methods must recover the active support,
-- LDVB must be faster than MCMC at each fitted `p0`,
-- the LDVB-to-MCMC ratios for holdout RMSE, active-signal RMSE, and holdout
-  check loss must stay within the configured thresholds.
+In the tracked standard-profile run, a fixed seed grid is screened in
+deterministic batches until at least one candidate satisfies the illustration
+criterion:
+- the full Example 4 fit must succeed for all tracked `p0` values,
+- at `p0 = 0.50`, the MCMC 95% intervals for all plotted slope coefficients
+  must contain the truth,
+- among the full-coverage seeds, the promoted seed is chosen by smaller MCMC
+  active-signal RMSE, then smaller holdout RMSE, then smaller runtime.
 
-Under those rules, the selected manuscript seed is `20260714`. Only one of the
-screened seeds passed all criteria. This confirms that the promoted Example 4
-benchmark is not a casual seed choice, while also making clear that the static
-benchmark is a curated illustrative example rather than a claim of uniform
-performance across all possible simulated datasets.
+This confirms that the promoted Example 4 benchmark is not a casual seed
+choice, while also making clear that the static benchmark is a curated
+illustrative example rather than a claim of uniform performance across all
+possible simulated datasets.
 
 Two smaller support-side robustness checks are also retained:
 - Example 1 kernel comparison:

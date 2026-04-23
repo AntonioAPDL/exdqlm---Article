@@ -7,220 +7,294 @@ if (!need_ex4screen) {
   source(file.path(repo_root, "analysis", "manuscript", "scripts", "04_ex4_helpers.R"), local = TRUE)
 
   cfg_ex4 <- cfg_profile$ex4
-  screen_seeds <- as.integer(unlist(cfg_ex4$screen_seeds %||% (seed_value + 500L + seq_len(8L))))
+  target_p0 <- ex4_screen_target_p0(cfg_ex4)
+  target_key <- ex4_p_key(target_p0)
   n_samp <- as.integer(cfg_ex4$n_samp %||% 200L)
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
-  holdout_ratio_max <- as.numeric(cfg_ex4$screen_holdout_ratio_max %||% 1.25)
-  active_ratio_max <- as.numeric(cfg_ex4$screen_active_ratio_max %||% 1.35)
-  check_ratio_max <- as.numeric(cfg_ex4$screen_check_ratio_max %||% 1.05)
+  screen_stem <- ex4_screen_file_stem(cfg_ex4)
+  screen_batches <- ex4_screen_candidate_batches(cfg_ex4, seed_value)
 
-  if (length(screen_seeds) < 2L) {
-    stop("Example 4 seed screen requires at least two candidate seeds.", call. = FALSE)
-  }
-
-  seed_results <- lapply(screen_seeds, function(dataset_seed) {
-    cache_key <- sprintf(
-      "ex4_seed_screen_seed_%d_ns%d_b%d_k%d_v2",
-      as.integer(dataset_seed),
-      n_samp,
-      n_burn,
-      n_mcmc
-    )
+  evaluate_seed <- function(dataset_seed) {
+    cache_key <- ex4_seed_screen_cache_key(dataset_seed, cfg_ex4)
     ex4_load_or_fit_cache_safe(
       cache_key,
       ex4_fit_seed(dataset_seed, cfg_ex4, stop_on_failure = FALSE),
       note = cache_key
     )
-  })
+  }
 
-  detail_rows <- do.call(
-    rbind,
-    lapply(seed_results, function(res) {
-      if (!isTRUE(res$ok)) {
-        return(
-          data.frame(
-            seed = res$seed,
-            p0 = NA_real_,
-            status = "error",
-            error = res$error,
-            ldvb_runtime_sec = NA_real_,
-            mcmc_runtime_sec = NA_real_,
-            runtime_ratio = NA_real_,
-            ldvb_active_rmse = NA_real_,
-            mcmc_active_rmse = NA_real_,
-            active_ratio = NA_real_,
-            ldvb_holdout_rmse = NA_real_,
-            mcmc_holdout_rmse = NA_real_,
-            holdout_ratio = NA_real_,
-            ldvb_check_loss = NA_real_,
-            mcmc_check_loss = NA_real_,
-            check_ratio = NA_real_,
-            ldvb_topk_support_ok = NA,
-            ldvb_sign_support_ok = NA,
-            mcmc_topk_support_ok = NA,
-            mcmc_sign_support_ok = NA,
-            stringsAsFactors = FALSE
+  build_detail_rows <- function(seed_results) {
+    do.call(
+      rbind,
+      lapply(seed_results, function(res) {
+        if (!isTRUE(res$ok)) {
+          return(
+            data.frame(
+              seed = res$seed,
+              p0 = NA_real_,
+              status = "error",
+              error = res$error,
+              ldvb_runtime_sec = NA_real_,
+              mcmc_runtime_sec = NA_real_,
+              runtime_ratio = NA_real_,
+              ldvb_active_rmse = NA_real_,
+              mcmc_active_rmse = NA_real_,
+              active_ratio = NA_real_,
+              ldvb_holdout_rmse = NA_real_,
+              mcmc_holdout_rmse = NA_real_,
+              holdout_ratio = NA_real_,
+              ldvb_check_loss = NA_real_,
+              mcmc_check_loss = NA_real_,
+              check_ratio = NA_real_,
+              ldvb_topk_support_ok = NA,
+              ldvb_sign_support_ok = NA,
+              mcmc_topk_support_ok = NA,
+              mcmc_sign_support_ok = NA,
+              ldvb_truth_cover_n = NA_integer_,
+              ldvb_truth_cover_total = NA_integer_,
+              ldvb_truth_cover_all = NA,
+              mcmc_truth_cover_n = NA_integer_,
+              mcmc_truth_cover_total = NA_integer_,
+              mcmc_truth_cover_all = NA,
+              stringsAsFactors = FALSE
+            )
           )
+        }
+
+        do.call(
+          rbind,
+          lapply(names(res$fits), function(nm) {
+            fit <- res$fits[[nm]]
+            ldvb_cov <- ex4_resolve_slope_coverage(fit$ldvb, res$beta_slopes)
+            mcmc_cov <- ex4_resolve_slope_coverage(fit$mcmc, res$beta_slopes)
+            data.frame(
+              seed = res$seed,
+              p0 = fit$p0,
+              status = "ok",
+              error = "",
+              ldvb_runtime_sec = fit$ldvb$runtime,
+              mcmc_runtime_sec = fit$mcmc$runtime,
+              runtime_ratio = fit$ldvb$runtime / fit$mcmc$runtime,
+              ldvb_active_rmse = fit$ldvb$active_rmse,
+              mcmc_active_rmse = fit$mcmc$active_rmse,
+              active_ratio = fit$ldvb$active_rmse / fit$mcmc$active_rmse,
+              ldvb_holdout_rmse = fit$ldvb$holdout_ref_rmse,
+              mcmc_holdout_rmse = fit$mcmc$holdout_ref_rmse,
+              holdout_ratio = fit$ldvb$holdout_ref_rmse / fit$mcmc$holdout_ref_rmse,
+              ldvb_check_loss = fit$ldvb$holdout_check_loss,
+              mcmc_check_loss = fit$mcmc$holdout_check_loss,
+              check_ratio = fit$ldvb$holdout_check_loss / fit$mcmc$holdout_check_loss,
+              ldvb_topk_support_ok = fit$ldvb$support$topk_support_ok,
+              ldvb_sign_support_ok = fit$ldvb$support$sign_support_ok,
+              mcmc_topk_support_ok = fit$mcmc$support$topk_support_ok,
+              mcmc_sign_support_ok = fit$mcmc$support$sign_support_ok,
+              ldvb_truth_cover_n = ldvb_cov$n_contains,
+              ldvb_truth_cover_total = ldvb_cov$n_total,
+              ldvb_truth_cover_all = ldvb_cov$all_contains,
+              mcmc_truth_cover_n = mcmc_cov$n_contains,
+              mcmc_truth_cover_total = mcmc_cov$n_total,
+              mcmc_truth_cover_all = mcmc_cov$all_contains,
+              stringsAsFactors = FALSE
+            )
+          })
         )
-      }
+      })
+    )
+  }
 
-      do.call(
-        rbind,
-        lapply(names(res$fits), function(nm) {
-          fit <- res$fits[[nm]]
-          data.frame(
-            seed = res$seed,
-            p0 = fit$p0,
-            status = "ok",
-            error = "",
-            ldvb_runtime_sec = fit$ldvb$runtime,
-            mcmc_runtime_sec = fit$mcmc$runtime,
-            runtime_ratio = fit$ldvb$runtime / fit$mcmc$runtime,
-            ldvb_active_rmse = fit$ldvb$active_rmse,
-            mcmc_active_rmse = fit$mcmc$active_rmse,
-            active_ratio = fit$ldvb$active_rmse / fit$mcmc$active_rmse,
-            ldvb_holdout_rmse = fit$ldvb$holdout_ref_rmse,
-            mcmc_holdout_rmse = fit$mcmc$holdout_ref_rmse,
-            holdout_ratio = fit$ldvb$holdout_ref_rmse / fit$mcmc$holdout_ref_rmse,
-            ldvb_check_loss = fit$ldvb$holdout_check_loss,
-            mcmc_check_loss = fit$mcmc$holdout_check_loss,
-            check_ratio = fit$ldvb$holdout_check_loss / fit$mcmc$holdout_check_loss,
-            ldvb_topk_support_ok = fit$ldvb$support$topk_support_ok,
-            ldvb_sign_support_ok = fit$ldvb$support$sign_support_ok,
-            mcmc_topk_support_ok = fit$mcmc$support$topk_support_ok,
-            mcmc_sign_support_ok = fit$mcmc$support$sign_support_ok,
-            stringsAsFactors = FALSE
+  build_seed_rows <- function(detail_rows) {
+    seeds <- sort(unique(detail_rows$seed))
+    do.call(
+      rbind,
+      lapply(seeds, function(dataset_seed) {
+        seed_detail <- detail_rows[detail_rows$seed == dataset_seed, , drop = FALSE]
+        if (!all(seed_detail$status == "ok")) {
+          return(
+            data.frame(
+              seed = as.integer(dataset_seed),
+              pass = FALSE,
+              fail_reason = unique(seed_detail$error[seed_detail$status != "ok"])[1],
+              target_p0 = target_p0,
+              target_mcmc_truth_cover_n = NA_integer_,
+              target_mcmc_truth_cover_total = NA_integer_,
+              target_mcmc_truth_cover_all = NA,
+              target_mcmc_active_rmse = NA_real_,
+              target_mcmc_holdout_rmse = NA_real_,
+              target_mcmc_runtime_sec = NA_real_,
+              target_mcmc_topk_support_ok = NA,
+              target_mcmc_sign_support_ok = NA,
+              stringsAsFactors = FALSE
+            )
           )
-        })
-      )
-    })
-  )
+        }
 
-  seed_rows <- do.call(
-    rbind,
-    lapply(screen_seeds, function(dataset_seed) {
-      seed_detail <- detail_rows[detail_rows$seed == dataset_seed, , drop = FALSE]
-      if (!all(seed_detail$status == "ok")) {
-        return(
-          data.frame(
-            seed = as.integer(dataset_seed),
-            pass = FALSE,
-            fail_reason = unique(seed_detail$error[seed_detail$status != "ok"])[1],
-            mean_runtime_ratio = NA_real_,
-            max_holdout_ratio = NA_real_,
-            max_active_ratio = NA_real_,
-            max_check_ratio = NA_real_,
-            stringsAsFactors = FALSE
+        target_detail <- seed_detail[abs(seed_detail$p0 - target_p0) < 1e-8, , drop = FALSE]
+        if (nrow(target_detail) != 1L) {
+          return(
+            data.frame(
+              seed = as.integer(dataset_seed),
+              pass = FALSE,
+              fail_reason = sprintf("missing_target_p0_%0.2f", target_p0),
+              target_p0 = target_p0,
+              target_mcmc_truth_cover_n = NA_integer_,
+              target_mcmc_truth_cover_total = NA_integer_,
+              target_mcmc_truth_cover_all = NA,
+              target_mcmc_active_rmse = NA_real_,
+              target_mcmc_holdout_rmse = NA_real_,
+              target_mcmc_runtime_sec = NA_real_,
+              target_mcmc_topk_support_ok = NA,
+              target_mcmc_sign_support_ok = NA,
+              stringsAsFactors = FALSE
+            )
           )
+        }
+
+        cover_ok <- isTRUE(target_detail$mcmc_truth_cover_all[[1L]])
+        data.frame(
+          seed = as.integer(dataset_seed),
+          pass = cover_ok,
+          fail_reason = if (cover_ok) "" else sprintf(
+            "mcmc_truth_coverage_%d_of_%d_at_p0_%0.2f",
+            as.integer(target_detail$mcmc_truth_cover_n[[1L]]),
+            as.integer(target_detail$mcmc_truth_cover_total[[1L]]),
+            target_p0
+          ),
+          target_p0 = target_p0,
+          target_mcmc_truth_cover_n = as.integer(target_detail$mcmc_truth_cover_n[[1L]]),
+          target_mcmc_truth_cover_total = as.integer(target_detail$mcmc_truth_cover_total[[1L]]),
+          target_mcmc_truth_cover_all = as.logical(target_detail$mcmc_truth_cover_all[[1L]]),
+          target_mcmc_active_rmse = as.numeric(target_detail$mcmc_active_rmse[[1L]]),
+          target_mcmc_holdout_rmse = as.numeric(target_detail$mcmc_holdout_rmse[[1L]]),
+          target_mcmc_runtime_sec = as.numeric(target_detail$mcmc_runtime_sec[[1L]]),
+          target_mcmc_topk_support_ok = as.logical(target_detail$mcmc_topk_support_ok[[1L]]),
+          target_mcmc_sign_support_ok = as.logical(target_detail$mcmc_sign_support_ok[[1L]]),
+          stringsAsFactors = FALSE
         )
-      }
+      })
+    )
+  }
 
-      support_ok <- all(
-        seed_detail$ldvb_topk_support_ok &
-          seed_detail$ldvb_sign_support_ok &
-          seed_detail$mcmc_topk_support_ok &
-          seed_detail$mcmc_sign_support_ok
-      )
-      runtime_ok <- all(seed_detail$ldvb_runtime_sec < seed_detail$mcmc_runtime_sec)
-      holdout_ok <- all(seed_detail$holdout_ratio <= holdout_ratio_max)
-      active_ok <- all(seed_detail$active_ratio <= active_ratio_max)
-      check_ok <- all(seed_detail$check_ratio <= check_ratio_max)
+  select_passing_seed <- function(seed_rows) {
+    passing_rows <- seed_rows[seed_rows$pass, , drop = FALSE]
+    if (nrow(passing_rows) == 0L) {
+      return(NULL)
+    }
+    passing_rows <- passing_rows[order(
+      passing_rows$target_mcmc_active_rmse,
+      passing_rows$target_mcmc_holdout_rmse,
+      passing_rows$target_mcmc_runtime_sec,
+      passing_rows$seed
+    ), , drop = FALSE]
+    as.integer(passing_rows$seed[[1L]])
+  }
 
-      fail_reason <- c()
-      if (!support_ok) fail_reason <- c(fail_reason, "support")
-      if (!runtime_ok) fail_reason <- c(fail_reason, "runtime")
-      if (!holdout_ok) fail_reason <- c(fail_reason, "holdout")
-      if (!active_ok) fail_reason <- c(fail_reason, "active")
-      if (!check_ok) fail_reason <- c(fail_reason, "check")
+  seed_results <- list()
+  selected_seed <- NA_integer_
+  evaluated_batches <- 0L
 
-      data.frame(
-        seed = as.integer(dataset_seed),
-        pass = length(fail_reason) == 0L,
-        fail_reason = if (length(fail_reason) == 0L) "" else paste(fail_reason, collapse = ";"),
-        mean_runtime_ratio = mean(seed_detail$runtime_ratio),
-        max_holdout_ratio = max(seed_detail$holdout_ratio),
-        max_active_ratio = max(seed_detail$active_ratio),
-        max_check_ratio = max(seed_detail$check_ratio),
-        stringsAsFactors = FALSE
-      )
-    })
-  )
+  for (batch_idx in seq_along(screen_batches)) {
+    batch_seeds <- as.integer(screen_batches[[batch_idx]])
+    batch_results <- lapply(batch_seeds, evaluate_seed)
+    names(batch_results) <- as.character(batch_seeds)
+    seed_results <- c(seed_results, batch_results)
+    evaluated_batches <- batch_idx
 
-  passing_rows <- seed_rows[seed_rows$pass, , drop = FALSE]
-  if (nrow(passing_rows) == 0L) {
+    detail_rows <- build_detail_rows(seed_results)
+    seed_rows <- build_seed_rows(detail_rows)
+    selected_seed <- select_passing_seed(seed_rows)
+    if (!is.na(selected_seed)) break
+  }
+
+  detail_rows <- build_detail_rows(seed_results)
+  seed_rows <- build_seed_rows(detail_rows)
+
+  if (is.na(selected_seed)) {
+    best_partial <- seed_rows[order(
+      -seed_rows$target_mcmc_truth_cover_n,
+      seed_rows$target_mcmc_active_rmse,
+      seed_rows$target_mcmc_holdout_rmse,
+      seed_rows$seed
+    ), , drop = FALSE]
     stop(
       sprintf(
         paste(
-          "No Example 4 screening seed satisfied the current criteria.",
-          "Checked %d seeds with thresholds holdout<=%.2f, active<=%.2f, check<=%.2f,",
-          "plus support recovery and LDVB<MCMC runtime at every fitted p0."
+          "No Example 4 seed satisfied the p0=%0.2f MCMC full-coverage criterion.",
+          "Evaluated %d seed(s) across %d batch(es).",
+          "Best observed coverage was %d/%d at seed %d."
         ),
-        length(screen_seeds),
-        holdout_ratio_max,
-        active_ratio_max,
-        check_ratio_max
+        target_p0,
+        nrow(seed_rows),
+        evaluated_batches,
+        as.integer(best_partial$target_mcmc_truth_cover_n[[1L]]),
+        as.integer(best_partial$target_mcmc_truth_cover_total[[1L]]),
+        as.integer(best_partial$seed[[1L]])
       ),
       call. = FALSE
     )
   }
 
-  passing_rows <- passing_rows[order(
-    passing_rows$max_holdout_ratio,
-    passing_rows$max_active_ratio,
-    passing_rows$max_check_ratio,
-    passing_rows$mean_runtime_ratio,
-    passing_rows$seed
-  ), , drop = FALSE]
-  selected_seed <- as.integer(passing_rows$seed[[1L]])
   seed_rows$selected <- seed_rows$seed == selected_seed
 
   save_table_csv(
     detail_rows,
-    filename = "ex4_seed_screen_summary.csv",
-    artifact_id = "tab_ex4_seed_screen_summary",
+    filename = sprintf("%s_summary.csv", screen_stem),
+    artifact_id = sprintf("tab_%s_summary", screen_stem),
     manuscript_target = "support: Example 4 seed screen metrics",
     status = "reproduced",
-    notes = "Per-seed, per-quantile comparison of LDVB and MCMC for the Example 4 screening run."
+    notes = sprintf(
+      "Per-seed, per-quantile comparison of the Example 4 static fits. Seed selection targets p0 = %0.2f and requires full MCMC 95%% slope-interval coverage.",
+      target_p0
+    )
   )
 
   save_table_csv(
     seed_rows,
-    filename = "ex4_seed_screen_selection.csv",
-    artifact_id = "tab_ex4_seed_screen_selection",
+    filename = sprintf("%s_selection.csv", screen_stem),
+    artifact_id = sprintf("tab_%s_selection", screen_stem),
     manuscript_target = "support: Example 4 seed screen selection",
     status = "reproduced",
-    notes = "Seed-level pass/fail summary for the Example 4 screening run."
+    notes = sprintf(
+      "Seed-level selection summary for the Example 4 screen. The selected seed is the first full-coverage p0 = %0.2f candidate after sorting by MCMC active RMSE, holdout RMSE, runtime, and seed.",
+      target_p0
+    )
   )
 
-  capture_output_file("ex4_seed_screen_summary.txt", {
+  capture_output_file(sprintf("%s_summary.txt", screen_stem), {
+    evaluated_seeds <- sort(unique(vapply(seed_results, function(x) x$seed, integer(1))))
     cat(sprintf("profile=%s\n", selected_profile))
-    cat(sprintf("candidate_seeds=%s\n", paste(screen_seeds, collapse = ", ")))
+    cat(sprintf("target_p0=%0.2f\n", target_p0))
+    cat(sprintf("candidate_batches=%s\n", paste(
+      vapply(screen_batches, function(x) paste(x, collapse = ","), character(1)),
+      collapse = " | "
+    )))
+    cat(sprintf("evaluated_seeds=%s\n", paste(evaluated_seeds, collapse = ", ")))
     cat(sprintf("n.samp=%d, n.burn=%d, n.mcmc=%d\n", n_samp, n_burn, n_mcmc))
     cat(sprintf(
       paste(
         "selection criteria:",
-        "support recovery for both methods;",
-        "LDVB runtime < MCMC runtime at each p0;",
-        "holdout ratio <= %.2f;",
-        "active ratio <= %.2f;",
-        "check ratio <= %.2f.\n"
+        "all Example 4 fits must run successfully;",
+        "the selected seed must have MCMC 95%% intervals covering all plotted slope coefficients at p0 = %0.2f;",
+        "ties are broken by smaller target-p0 MCMC active RMSE, then smaller holdout RMSE, then smaller runtime, then seed.\n"
       ),
-      holdout_ratio_max, active_ratio_max, check_ratio_max
+      target_p0
     ))
     cat(sprintf("selected_seed=%d\n\n", selected_seed))
     print(seed_rows, row.names = FALSE)
   })
 
   register_artifact(
-    artifact_id = "log_ex4_seed_screen_summary",
+    artifact_id = sprintf("log_%s_summary", screen_stem),
     artifact_type = "log",
-    relative_path = "analysis/manuscript/outputs/logs/ex4_seed_screen_summary.txt",
+    relative_path = sprintf("analysis/manuscript/outputs/logs/%s_summary.txt", screen_stem),
     manuscript_target = "support: Example 4 seed screen summary",
     status = "reproduced",
-    notes = "Selection criteria and final recommended seed for the Example 4 benchmark."
+    notes = sprintf(
+      "Selection criteria and chosen Example 4 dataset seed based on the p0 = %0.2f MCMC coverage screen.",
+      target_p0
+    )
   )
 
-  log_msg(sprintf("Example 4 seed screen: selected seed %d", selected_seed))
+  log_msg(sprintf("Example 4 seed screen: selected seed %d for p0=%0.2f", selected_seed, target_p0))
   log_msg("Example 4 seed screen: complete")
 }
