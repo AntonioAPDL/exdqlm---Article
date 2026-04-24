@@ -83,22 +83,22 @@ Most other \proglang{R} packages relevant here implement static quantile regress
 \textbf{Package} & \textbf{Main scope} & \textbf{Dynamic support} & \shortstack{\textbf{Fast inference}\\\textbf{method}} & \shortstack{\textbf{Cross-quantile}\\\textbf{handling}} \\
 \midrule
 \pkg{quantreg} & Frequentist general-purpose quantile regression & Regression-style interface via \code{dynrq()} & No & Separate fits; optional rearrangement \\
-\hline \\
+\addlinespace[1pt]
 \pkg{bayesQR} & Bayesian AL quantile regression & Static & No & Separate fits \\
-\hline \\
-\pkg{brms} & Bayesian multilevel/distributional regression (incl. quantiles) & AR/MA terms; not dedicated quantile state-space & No & Separate fits \\
-\hline \\
-\pkg{qgam} & Additive quantile regression with calibrated intervals & Static & Yes: calibrated generalized Bayes (MAP + Laplace/Gaussian) & Separate fits \\
-\hline \\
+\addlinespace[1pt]
+\pkg{brms} & Bayesian multilevel/distributional regression (including quantiles) & AR and MA terms; not a dedicated quantile state-space workflow & No & Separate fits \\
+\addlinespace[1pt]
+\pkg{qgam} & Additive quantile regression with calibrated intervals & Static & Yes: calibrated generalized-Bayes MAP with a Laplace-Gaussian approximation & Separate fits \\
+\addlinespace[1pt]
 \pkg{qrjoint} & Bayesian joint linear quantile regression & Static & No & Joint estimation \\
-\hline \\
+\addlinespace[1pt]
 \pkg{dlm} & Gaussian state-space time-series modeling & Latent-state Gaussian state space & No & Not quantile-specific \\
-\hline \\
-\pkg{exdqlm} & Bayesian quantile state-space modeling with forecasting & Latent-state quantile state space & Yes: VB (mean-field + Laplace-Delta block) & Post hoc predictive synthesis \\
+\addlinespace[1pt]
+\pkg{exdqlm} & Bayesian quantile state-space modeling with forecasting & Latent-state quantile state space & Yes: variational Bayes (mean-field with a Laplace-Delta block) & Post hoc predictive synthesis \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Representative \proglang{R} packages for quantile modeling. Columns summarize scope, temporal structure, fast-inference route (if available), and cross-quantile handling.}
+\caption{Representative \proglang{R} packages for quantile modeling. Columns summarize primary scope, temporal structure, fast-inference method (when available), and cross-quantile handling. For \pkg{qgam}, calibrated generalized Bayes denotes learning-rate calibration in a loss-based update rather than Gibbs-sampler MCMC.}
 \label{table:software}
 \end{table}
 
