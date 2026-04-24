@@ -74,26 +74,30 @@ Most other \proglang{R} packages relevant here implement static quantile regress
 \begin{table}[t!]
 \centering
 \TableStyle
+\begingroup
 \setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\textwidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
-\toprule
-Package & Main scope & Dynamic support & \shortstack{Fast scalable\\inference (method)} & \shortstack{Cross-quantile\\handling} \\
-\midrule
+\setlength{\arrayrulewidth}{0.25pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Package} & \textbf{Main scope} & \textbf{Dynamic support} & \shortstack{\textbf{Fast scalable}\\\textbf{inference (method)}} & \shortstack{\textbf{Cross-quantile}\\\textbf{handling}} \\
+\hline
 \pkg{quantreg} & Frequentist general-purpose quantile regression & Regression-style time-series interface via \code{dynrq()} & No & Separate fits; rearrangement available \\
-\addlinespace[2pt]
+\hline
 \pkg{bayesQR} & Bayesian quantile regression under the AL working likelihood & Static & No & Separate fits \\
-\addlinespace[2pt]
+\hline
 \pkg{brms} & Bayesian multilevel and distributional regression, including quantiles & Regression-level autocorrelation terms (e.g., AR/MA), but not a dedicated quantile state-space workflow & No & Separate fits \\
-\addlinespace[2pt]
+\hline
 \pkg{qgam} & Frequentist additive quantile regression with calibrated Bayesian intervals & Static & Yes: calibrated generalized Bayes (MAP + Laplace/Gaussian; tuned learning rate) & Separate fits \\
-\addlinespace[2pt]
+\hline
 \pkg{qrjoint} & Bayesian joint linear quantile regression across quantiles & Static & No & Joint estimation \\
-\addlinespace[2pt]
+\hline
 \pkg{dlm} & Bayesian/likelihood Gaussian time-series modeling & Latent-state Gaussian state space & No & Not quantile-specific \\
-\addlinespace[2pt]
+\hline
 \pkg{exdqlm} & Bayesian quantile time-series modeling with forecasting & Latent-state quantile state space & Yes: variational Bayes (mean-field + Laplace-Delta block) & Post hoc predictive synthesis \\
-\bottomrule
+\hline
 \end{tabularx}
+\endgroup
 \caption{Representative \proglang{R} packages spanning broad, static, joint multi-quantile, and dynamic/state-space workflows relevant to quantile modeling. Dynamic support distinguishes static packages, regression-style time-series interfaces, and latent-state state-space formulations. Fast scalable inference (method) identifies the explicit approximation mechanism used in place of full simulation-based inference (e.g., calibrated generalized-Bayes MAP/Laplace-Gaussian approximations versus variational Bayes). Cross-quantile handling records whether quantiles are fit separately, estimated jointly, or linked post hoc; these entries are not methodologically interchangeable. In particular, post hoc predictive synthesis is distinct from joint estimation across quantiles.}
 \label{table:software}
 \end{table}
