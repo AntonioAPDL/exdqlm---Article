@@ -83,11 +83,17 @@ Most other \proglang{R} packages relevant here implement static quantile regress
 \textbf{Package} & \textbf{Main scope} & \textbf{Dynamic support} & \shortstack{\textbf{Fast inference}\\\textbf{method}} & \shortstack{\textbf{Cross-quantile}\\\textbf{handling}} \\
 \midrule
 \pkg{quantreg} & Frequentist general-purpose quantile regression & Regression-style interface via \code{dynrq()} & No & Separate fits; optional rearrangement \\
+\hline \\
 \pkg{bayesQR} & Bayesian AL quantile regression & Static & No & Separate fits \\
+\hline \\
 \pkg{brms} & Bayesian multilevel/distributional regression (incl. quantiles) & AR/MA terms; not dedicated quantile state-space & No & Separate fits \\
+\hline \\
 \pkg{qgam} & Additive quantile regression with calibrated intervals & Static & Yes: calibrated generalized Bayes (MAP + Laplace/Gaussian) & Separate fits \\
+\hline \\
 \pkg{qrjoint} & Bayesian joint linear quantile regression & Static & No & Joint estimation \\
+\hline \\
 \pkg{dlm} & Gaussian state-space time-series modeling & Latent-state Gaussian state space & No & Not quantile-specific \\
+\hline \\
 \pkg{exdqlm} & Bayesian quantile state-space modeling with forecasting & Latent-state quantile state space & Yes: VB (mean-field + Laplace-Delta block) & Post hoc predictive synthesis \\
 \bottomrule
 \end{tabularx}
