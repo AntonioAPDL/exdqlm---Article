@@ -75,30 +75,36 @@ Most other \proglang{R} packages relevant here implement static quantile regress
 \centering
 \TableStyle
 \begingroup
-\setlength{\tabcolsep}{3pt}
-\setlength{\arrayrulewidth}{0.25pt}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
-\hline
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.13}
+\begin{tabularx}{\textwidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
 \textbf{Package} & \textbf{Main scope} & \textbf{Dynamic support} & \shortstack{\textbf{Fast scalable}\\\textbf{inference (method)}} & \shortstack{\textbf{Cross-quantile}\\\textbf{handling}} \\
-\hline
-\pkg{quantreg} & Frequentist general-purpose quantile regression & Regression-style time-series interface via \code{dynrq()} & No & Separate fits; rearrangement available \\
-\hline
+\midrule
+\multicolumn{5}{@{}l}{\textit{General-purpose baseline}} \\
+\addlinespace[1pt]
+\pkg{quantreg} & Frequentist general-purpose quantile regression & Regression-style time-series interface via \code{dynrq()} & No & Separate fits; optional rearrangement \\
+\addlinespace[2pt]
+\multicolumn{5}{@{}l}{\textit{Static Bayesian, additive, and joint quantile models}} \\
+\addlinespace[1pt]
 \pkg{bayesQR} & Bayesian quantile regression under the AL working likelihood & Static & No & Separate fits \\
-\hline
-\pkg{brms} & Bayesian multilevel and distributional regression, including quantiles & Regression-level autocorrelation terms (e.g., AR/MA), but not a dedicated quantile state-space workflow & No & Separate fits \\
-\hline
-\pkg{qgam} & Frequentist additive quantile regression with calibrated Bayesian intervals & Static & Yes: calibrated generalized Bayes (MAP + Laplace/Gaussian; tuned learning rate) & Separate fits \\
-\hline
+\addlinespace[1pt]
+\pkg{brms} & Bayesian multilevel/distributional regression (including quantiles) & Regression-level autocorrelation terms (e.g., AR/MA); not a dedicated quantile state-space workflow & No & Separate fits \\
+\addlinespace[1pt]
+\pkg{qgam} & Frequentist additive quantile regression with calibrated intervals & Static & Yes: calibrated generalized Bayes (MAP + Laplace/Gaussian) & Separate fits \\
+\addlinespace[1pt]
 \pkg{qrjoint} & Bayesian joint linear quantile regression across quantiles & Static & No & Joint estimation \\
-\hline
+\addlinespace[2pt]
+\multicolumn{5}{@{}l}{\textit{Dynamic/state-space models}} \\
+\addlinespace[1pt]
 \pkg{dlm} & Bayesian/likelihood Gaussian time-series modeling & Latent-state Gaussian state space & No & Not quantile-specific \\
-\hline
+\addlinespace[1pt]
 \pkg{exdqlm} & Bayesian quantile time-series modeling with forecasting & Latent-state quantile state space & Yes: variational Bayes (mean-field + Laplace-Delta block) & Post hoc predictive synthesis \\
-\hline
+\bottomrule
 \end{tabularx}
 \endgroup
-\caption{Representative \proglang{R} packages spanning broad, static, joint multi-quantile, and dynamic/state-space workflows relevant to quantile modeling. Dynamic support distinguishes static packages, regression-style time-series interfaces, and latent-state state-space formulations. Fast scalable inference (method) identifies the explicit approximation mechanism used in place of full simulation-based inference (e.g., calibrated generalized-Bayes MAP/Laplace-Gaussian approximations versus variational Bayes). Cross-quantile handling records whether quantiles are fit separately, estimated jointly, or linked post hoc; these entries are not methodologically interchangeable. In particular, post hoc predictive synthesis is distinct from joint estimation across quantiles.}
+\caption{Representative \proglang{R} packages spanning broad, static, joint multi-quantile, and dynamic/state-space workflows relevant to quantile modeling. Dynamic support distinguishes static packages, regression-style time-series interfaces, and latent-state state-space formulations. Fast scalable inference (method) identifies the explicit approximation route used in place of full simulation-based inference. Cross-quantile handling records whether quantiles are fit separately, estimated jointly, or linked post hoc; these entries are not methodologically interchangeable. In particular, post hoc predictive synthesis is distinct from joint estimation across quantiles. For \pkg{qgam}, calibrated generalized Bayes refers to learning-rate calibration in a loss-based update, not Gibbs-sampler MCMC.}
 \label{table:software}
 \end{table}
 
