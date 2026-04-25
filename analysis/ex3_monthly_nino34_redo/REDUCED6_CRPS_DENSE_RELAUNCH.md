@@ -44,11 +44,14 @@ bash analysis/ex3_monthly_nino34_redo/run_reduced6_crps_dense_background.sh
 ```
 
 The launcher records the package branch and commit, starts the run in a
-detached session, and writes runtime logs under the ignored output tree:
+detached session, and writes launch metadata under the ignored output tree:
 
 ```text
-analysis/ex3_monthly_nino34_redo/outputs/monthly_reduced6_crps_dense_p015_df099_iter200/logs/
+analysis/ex3_monthly_nino34_redo/outputs/monthly_reduced6_crps_dense_p015_df099_iter200/.run_state/
 ```
+
+The workflow progress log and final manifest are written under the same output
+tree's `logs/` directory.
 
 ## Monitoring Command
 

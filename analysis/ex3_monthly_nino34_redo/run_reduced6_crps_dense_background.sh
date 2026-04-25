@@ -6,10 +6,13 @@ PKG_ROOT="${EX3_MONTHLY_PKG_PATH:-/home/jaguir26/local/src/exdqlm__wt__rhs_ns_re
 CONFIG_PATH="$ARTICLE_ROOT/analysis/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml"
 OUTPUT_DIR="$ARTICLE_ROOT/analysis/ex3_monthly_nino34_redo/outputs/monthly_reduced6_crps_dense_p015_df099_iter200"
 LOG_DIR="$OUTPUT_DIR/logs"
-PID_FILE="$LOG_DIR/reduced6_crps_dense.pid"
-RUN_LOG="$LOG_DIR/reduced6_crps_dense_background.log"
+STATE_DIR="$OUTPUT_DIR/.run_state"
+PID_FILE="$STATE_DIR/reduced6_crps_dense.pid"
+RUN_LOG="$STATE_DIR/reduced6_crps_dense_background.log"
+LAUNCH_INFO="$STATE_DIR/reduced6_crps_dense_launch_info.txt"
 
 mkdir -p "$LOG_DIR"
+mkdir -p "$STATE_DIR"
 
 if [[ ! -f "$PKG_ROOT/DESCRIPTION" ]]; then
   echo "Could not find exdqlm package source at $PKG_ROOT" >&2
@@ -39,7 +42,7 @@ fi
   echo "package_commit=$pkg_commit"
   echo "config_path=$CONFIG_PATH"
   echo "output_dir=$OUTPUT_DIR"
-} > "$LOG_DIR/reduced6_crps_dense_launch_info.txt"
+} > "$LAUNCH_INFO"
 
 setsid env EX3_MONTHLY_PKG_PATH="$PKG_ROOT" \
   Rscript "$ARTICLE_ROOT/analysis/ex3_monthly_nino34_redo/run_all.R" \
