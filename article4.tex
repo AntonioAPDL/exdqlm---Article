@@ -131,7 +131,7 @@ Consider a set of scalar time-evolving responses, $y_t$, for times $t=1,\dots,T$
 Here ${\bf F}_t$ is the $q \times 1$ regression vector of the covariates corresponding to the $q \times 1$ parameter vector $\boldsymbol{\theta}_t$ at time $t$, ${\bf G}_t$ is the $q\times q$-dimensional evolution matrix defining the structure of the parameter vector evolution in time, and the normal distribution according to which the system error $\boldsymbol{\omega}_t$ evolves is $q$-variate. The observational errors $\epsilon_t$ of the exDQLM follow an exAL distribution for fixed quantile $p_0$, whose density is denoted as $\text{exAL}_{p_0}(\cdot)$, and it is such that $\int_{-\infty}^0 \text{exAL}_{p_0}(\epsilon_t |0,\sigma,\gamma) \mathrm{d}\epsilon_t = p_0$. Thus, the observation equation in Equation (\ref{EQ:exDLM}) implies that ${\bf F}'_t \boldsymbol{\theta}_t$ corresponds to the $p_0$-quantile of $y_t$,
 even if this is not made explicit in the notation above. Table \ref{table:priors} shows the function parameters that define the structure of the dynamic quantile, specifically ${\bf F}_t$ and ${\bf G}_t$ for $t=1,\ldots,T$.
 
-The exAL distribution, introduced by \cite{yan2025family}, extends the location-scale mixture representation of the AL \citep{kozumi2011gibbs}. For fixed $p_0$, the skewness parameter $\gamma$ is restricted to an interval $(L,U)$, where $L$ and $U$ are the negative and positive roots of $g(\gamma) = 1-p_0$ and $g(\gamma) = p_0$, respectively, with $g(\gamma) = 2\Phi(-|\gamma|)\exp(\gamma^2/2)$. \RB{The next two sentences feel abrupt. Is there a more natural place to put them? Or can we work them into the example section instead?} \aA{The package also exports direct distributional utilities for the exAL family.} These include \code{dexal()}, \code{pexal()}, \code{qexal()}, and \code{rexal()}, together with \code{get_gamma_bounds()} for recovering this admissible interval. This results in a mixture representation of $\text{exAL}_{p_0}(0,\sigma,\gamma)$ as follows:
+The exAL distribution, introduced by \cite{yan2025family}, extends the location-scale mixture representation of the AL \citep{kozumi2011gibbs}. For fixed $p_0$, the skewness parameter $\gamma$ is restricted to an interval $(L,U)$, where $L$ and $U$ are the negative and positive roots of $g(\gamma) = 1-p_0$ and $g(\gamma) = p_0$, respectively, with $g(\gamma) = 2\Phi(-|\gamma|)\exp(\gamma^2/2)$. This yields the following mixture representation of $\text{exAL}_{p_0}(0,\sigma,\gamma)$:
 \begin{equation}
 \label{EQ:exALmix}
 \int\int_{\mathbb{R}^+ \times \mathbb{R}^+} \text{N}(y_t |  C(p,\gamma) \sigma |\gamma| s_t + A(p) v_t, \sigma B(p) v_t) \text{Exp}(v_t | \sigma) \text{N}^+(s_t| 0,1) \mathrm{d}v_t \mathrm{d}s_t.
@@ -423,6 +423,8 @@ Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and th
 
 
 We begin by loading the \pkg{exdqlm} package used for all examples.
+
+The package also exports exAL utility functions (\code{dexal()}, \code{pexal()}, \code{qexal()}, \code{rexal()}, and \code{get_gamma_bounds()}) for direct distributional evaluation and simulation.
 
 \begin{CodeChunk}
 \begin{CodeInput}
