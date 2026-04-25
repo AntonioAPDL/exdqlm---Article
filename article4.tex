@@ -375,13 +375,13 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 	\toprule
 	Function & Output & Description \\
 	\midrule
-    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}\it{\RB{Dynamic model construction}}} \\
+    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}\it{Dynamic model construction}} \\
     \rule{0pt}{3ex}\code{polytrendMod()} & \code{exdqlm} & Create $n$-th order polynomial component.\\
     \code{seasMod()} & \code{exdqlm} & Create Fourier form periodic component.\\
     \code{regMod()} & \code{exdqlm} & Create standard regression component. \\
     \code{as.exdqlm()} & \code{exdqlm} & Coerce a \code{list} into an \code{exdqlm} object.\\
 	\addlinespace[2pt]
-    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it \RB{Dynamic model fitting}} -- Input \code{exdqlm} objects} \\
+    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic model fitting} -- Input \code{exdqlm} objects} \\
     \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Estimate the posterior with MCMC algorithm.\\
     \code{exdqlmLDVB()} & \code{exdqlmLDVB} & Estimate the posterior with a VB approximation.\\
     \code{exdqlmTransferLDVB()} & \code{exdqlmLDVB} & Estimate the transfer-function exDQLM with a VB approximation.\\
@@ -391,17 +391,17 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exalStaticLDVB} & Estimate static exAL regression with a VB approximation.\\
     \code{exalStaticMCMC()} & \code{exalStaticMCMC} & Estimate static exAL regression with MCMC.\\
     \addlinespace[2pt]
-    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it \RB{Dynamic model fit examination}} -- Input \code{exdqlmMCMC} or \code{exdqlmLDVB}  objects} \\
+    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic fit examination} -- Input \code{exdqlmMCMC}, \code{exdqlmLDVB}, or legacy \code{exdqlmISVB} objects} \\
     \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute $k$-step-ahead forecast quantiles.\\
     \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute \& plot model diagnostics. \\
     \code{exdqlmPlot()} & \code{list} & Plot posterior summary of dynamic quantile.\\
     \code{compPlot()} & \code{list} & Plot posterior summary of component/parameter.\\
     \addlinespace[2pt]
-    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}\RB{{\it Static model fit examination} -- Input \code{exdqlmStaticMCMC} or \code{exdqlmStaticLDVB}  objects}} \\
+    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticMCMC} or \code{exalStaticLDVB} objects} \\
     \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fit diagnostics and comparisons.\\
     \addlinespace[2pt]
-    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input posterior predictive draw lists \RB{-- from just the dynamic outputs? or both?}} \\
-    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{list} & Construct a unified posterior predictive distribution from anchor-specific predictive draws across fitted quantiles.\\
+    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input posterior predictive draw matrices} \\
+    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{list} & Construct a unified posterior predictive distribution from anchor-specific predictive draws (from dynamic outputs or user-supplied static/dynamic draw matrices).\\
     \bottomrule
 \end{tabular}
 \caption{Overview of the core workflow functions used in this paper. Generic S3 methods defined for the fitted objects listed in the table include \code{plot()}, \code{print()}, and \code{summary()}.}
@@ -419,7 +419,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 \section{Examples}
  \label{sec:exs}
 
-Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. We demonstrate the general workflow and key features of the package through several analyses on real datasets. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. \RB{All figures and tables are generated from scripts distributed with the article repository. These scripts build the example artifacts directly from the current \pkg{exdqlm} API. The accompanying reproducibility materials record the computing environment and outputs used in the paper.}
+Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. We demonstrate the general workflow and key features of the package through several analyses on real datasets. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. All figures and tables are generated from scripts distributed with the article repository. These scripts build the example artifacts directly from the current \pkg{exdqlm} API. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
 
 
 We begin by loading the \pkg{exdqlm} package used for all examples.
