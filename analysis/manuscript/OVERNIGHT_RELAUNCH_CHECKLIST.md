@@ -8,7 +8,7 @@ and the alternative monthly Example 3 sandbox against the current article-facing
 
 - Article repo: `/home/jaguir26/local/src/exdqlm---Article`
 - Package repo: `/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`
-- Required package commit before launch: `d10ab93`
+- Required package commit before launch: `ac245f1`
 - Load package source through `--pkg-path` for manuscript runs.
 - Use `--force-refit` for manuscript reruns so cached fits from older package
   snapshots are not reused.

@@ -86,3 +86,7 @@ Main tracker files:
 
 For the staged overnight relaunch sequence against the current package checkout,
 see `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.
+
+For merge provenance and issue-by-issue integration notes tied to Raquel's
+example review pass, see
+`analysis/manuscript/RAQUEL_EXAMPLES_MERGE_AUDIT.md`.
