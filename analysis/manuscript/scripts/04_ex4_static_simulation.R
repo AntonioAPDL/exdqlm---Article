@@ -212,7 +212,7 @@ if (!need_ex4) {
   }
   register_note(
     "ex4",
-    "Example 4 focuses on the general static exAL model; the AL special case remains available via dqlm.ind = TRUE."
+    "Example 4 focuses on the general static exAL model; the AL special case remains available via al.ind = TRUE (static alias of dqlm.ind = TRUE)."
   )
 
   log_msg("Example 4 (static RHS sparse simulation): complete")
