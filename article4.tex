@@ -180,7 +180,7 @@ Under a Bayesian formulation and given $p_0$, we specify priors for the initial 
 
 The hierarchical representation of the exDQLM facilitates posterior simulation using Markov Chain Monte Carlo (MCMC) algorithms. This is implemented in the function \code{exdqlmMCMC()}. Gibbs sampling steps are used to update the sets of latent variables $s_t$ and $v_t$ for $t=1,\dots,T$. The dynamic regression coefficients are sampled using a forward filtering backwards sampling algorithm \citep{carter1994gibbs,fruhwirth1994data}. The scale and skewness parameters are updated separately from the latent-state blocks. By default, the package uses a slice-sampling update for the $(\sigma,\gamma)$ block, while joint random-walk Metropolis-Hastings (MH) alternatives are also available. When desired, the chain can be warm-started from the variational approximation; this initialization is separate from the subsequent MCMC proposal kernel. An example of this functionality can be found in Section \ref{sec:ex1}. We perform a total of $N_{BURN} + N_{MCMC}$ MCMC iterations, discarding the first $N_{BURN}$ and retaining the remaining $N_{MCMC}$ posterior samples. The object created by \code{exdqlmMCMC()} includes posterior samples of all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$), filtered and smoothed summaries for the state vector $\boldsymbol{\theta}_{1:T}$, and diagnostics for the proposal kernel used in the $(\sigma,\gamma)$ update.
 
-For purposes of model selection or large time series data sets, posterior sampling with the MCMC algorithm can be computationally demanding. To address this, the package includes a variational Bayes (VB) routine for fast approximate posterior estimation. The default routine, \code{exdqlmLDVB()}, uses a mean-field approximation together with a Laplace-Delta treatment of the non-conjugate $(\sigma,\gamma)$ block. The variational Bayes (VB) framework approximates the posterior distribution with partitioned variational distributions \citep{ostwald2014tutorial,beal2003variational}. Under a mean-field factorization, this induces a blockwise coordinate-ascent variational inference scheme. For the exDQLM, the blocks associated with the dynamic coefficients and latent variables admit recognizable closed-form updates, while the joint variational distribution of $\sigma$ and $\gamma$ is non-conjugate. Following the non-conjugate VB strategy of \cite{wang2013nonconjugatevb}, we approximate this block on transformed coordinates and use a second-order Delta method to evaluate the expectations of functions of $(\sigma,\gamma)$ needed by the remaining variational updates. The dynamic regression coefficients are updated within each iteration using a forward filtering backwards smoothing algorithm. Convergence is assessed jointly through the state, scale, skewness, and ELBO diagnostics. After the algorithm reaches convergence with tolerance $\epsilon_{tol}$, $N_{SAMP}$ samples are drawn from the variational distributions, resulting in an approximate sample of the posterior distribution. The output of \code{exdqlmLDVB()} includes the approximate posterior samples as well as the parameters of the variational distributions for all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$). For the $(\gamma,\sigma)$ block, the return also contains the transformed mode, approximate covariance matrix, derived moments, and ELBO terms associated with the Laplace-Delta approximation. Selected state-space computations in the dynamic routines are implemented in \proglang{C++}, with corresponding \proglang{R} code retained for parity checks and fallback use. \RB{Mention appendix with backend options here - if you decide to add it.}
+For purposes of model selection or large time series data sets, posterior sampling with the MCMC algorithm can be computationally demanding. To address this, the package includes a variational Bayes (VB) routine for fast approximate posterior estimation. The default routine, \code{exdqlmLDVB()}, uses a mean-field approximation together with a Laplace-Delta treatment of the non-conjugate $(\sigma,\gamma)$ block. The variational Bayes (VB) framework approximates the posterior distribution with partitioned variational distributions \citep{ostwald2014tutorial,beal2003variational}. Under a mean-field factorization, this induces a blockwise coordinate-ascent variational inference scheme. For the exDQLM, the blocks associated with the dynamic coefficients and latent variables admit recognizable closed-form updates, while the joint variational distribution of $\sigma$ and $\gamma$ is non-conjugate. Following the non-conjugate VB strategy of \cite{wang2013nonconjugatevb}, we approximate this block on transformed coordinates and use a second-order Delta method to evaluate the expectations of functions of $(\sigma,\gamma)$ needed by the remaining variational updates. The dynamic regression coefficients are updated within each iteration using a forward filtering backwards smoothing algorithm. Convergence is assessed jointly through the state, scale, skewness, and ELBO diagnostics. After the algorithm reaches convergence with tolerance $\epsilon_{tol}$, $N_{SAMP}$ samples are drawn from the variational distributions, resulting in an approximate sample of the posterior distribution. The output of \code{exdqlmLDVB()} includes the approximate posterior samples as well as the parameters of the variational distributions for all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$). For the $(\gamma,\sigma)$ block, the return also contains the transformed mode, approximate covariance matrix, derived moments, and ELBO terms associated with the Laplace-Delta approximation. Selected state-space computations in the dynamic routines are implemented in \proglang{C++}, with corresponding \proglang{R} code retained for parity checks and fallback use. Global package-level runtime options for backend routing and ELBO monitoring are summarized in Appendix Table \ref{tab:backendopts}. These options are distinct from the function-specific inference inputs listed in Table \ref{table:post}.
 
 Table \ref{table:post} shows the input parameters of the fitting functions \code{exdqlmMCMC()} and \code{exdqlmLDVB()}, their mathematical symbols, and their default values. The argument \code{Sig.mh} is only used when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default slice-sampling update.
 
@@ -793,7 +793,7 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \end{CodeChunk}
 \aA{On this coarse grid, the CRPS and KL criteria agree and both select the seasonal discount factor \(0.85\), so the choice used above is retained.}
 
-\aA{The runtime comparisons below were obtained under the default implementation used by the dynamic routines. Exact hardware, software, seed, and dataset details are recorded in the accompanying reproducibility materials.}
+\aA{The runtime comparisons below were obtained under the manuscript backend profile. Global backend options and their defaults are summarized in Appendix Table \ref{tab:backendopts}; the exact active settings, together with hardware, software, seed, and dataset details, are recorded in the accompanying reproducibility materials.}
 
 \begin{table}[t!]
 \centering
@@ -1147,6 +1147,30 @@ Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference f
 
 
 %\section{Acknowledgments}
+
+\section*{Appendix: Global Backend Options}
+\begin{table}[!t]
+\centering
+\TableStyle
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}X>{\raggedleft\arraybackslash}p{0.12\textwidth}@{}}
+\toprule
+Option & Purpose & Default \\
+\midrule
+\code{exdqlm.use_cpp_kf} & Enables or disables the C++ Kalman-filter bridge in dynamic routines. & \code{TRUE} \\
+\code{exdqlm.compute_elbo} & Enables or disables ELBO computation in variational routines. & \code{TRUE} \\
+\code{exdqlm.tol_elbo} & Sets the ELBO stabilization tolerance when ELBO checks are enabled. & \code{1e-6} \\
+\code{exdqlm.use_cpp_builders} & Enables or disables C++ builders for state-space model blocks. & \code{FALSE} \\
+\code{exdqlm.use_cpp_samplers} & Enables or disables C++ latent-variable samplers in dynamic routines. & \code{FALSE} \\
+\code{exdqlm.use_cpp_postpred} & Enables or disables the C++ posterior-predictive sampling path. & \code{FALSE} \\
+\code{exdqlm.use_cpp_mcmc} & Enables or disables C++ backend routing in dynamic MCMC routines. & \code{TRUE} \\
+\code{exdqlm.cpp_mcmc_mode} & Chooses dynamic MCMC routing mode (\code{"strict"} for parity path, \code{"fast"} for accelerated path). & \code{"fast"} \\
+\code{exdqlm.cpp_threads} & Sets the thread cap for eligible OpenMP-enabled C++ paths. & \code{1L} \\
+\bottomrule
+\end{tabularx}
+\caption{Package-level runtime options exposed through \code{options(...)} for backend routing and ELBO monitoring in \pkg{exdqlm}. Function-level inference controls are documented separately in the function interfaces (for example, Table \ref{table:post}).}
+\label{tab:backendopts}
+\end{table}
 
 
 \bibliography{bibl}
