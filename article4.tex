@@ -1,7 +1,5 @@
 \documentclass[jss]{jss}
 \usepackage{thumbpdf,lmodern}
-\usepackage[normalem]{ulem}
-\usepackage{soul}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{bm}
@@ -1157,15 +1155,15 @@ Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference f
 \toprule
 Option & Purpose & Default \\
 \midrule
-\code{exdqlm.use_cpp_kf} & Enables or disables the C++ Kalman-filter bridge in dynamic routines. & \code{TRUE} \\
-\code{exdqlm.compute_elbo} & Enables or disables ELBO computation in variational routines. & \code{TRUE} \\
-\code{exdqlm.tol_elbo} & Sets the ELBO stabilization tolerance when ELBO checks are enabled. & \code{1e-6} \\
-\code{exdqlm.use_cpp_builders} & Enables or disables C++ builders for state-space model blocks. & \code{FALSE} \\
-\code{exdqlm.use_cpp_samplers} & Enables or disables C++ latent-variable samplers in dynamic routines. & \code{FALSE} \\
-\code{exdqlm.use_cpp_postpred} & Enables or disables the C++ posterior-predictive sampling path. & \code{FALSE} \\
-\code{exdqlm.use_cpp_mcmc} & Enables or disables C++ backend routing in dynamic MCMC routines. & \code{TRUE} \\
-\code{exdqlm.cpp_mcmc_mode} & Chooses dynamic MCMC routing mode (\code{"strict"} for parity path, \code{"fast"} for accelerated path). & \code{"fast"} \\
-\code{exdqlm.cpp_threads} & Sets the thread cap for eligible OpenMP-enabled C++ paths. & \code{1L} \\
+\code{exdqlm.use\_cpp\_kf} & Enables or disables the C++ Kalman-filter bridge in dynamic routines. & \code{TRUE} \\
+\code{exdqlm.compute\_elbo} & Enables or disables ELBO computation in variational routines. & \code{TRUE} \\
+\code{exdqlm.tol\_elbo} & Sets the ELBO stabilization tolerance when ELBO checks are enabled. & \code{1e-6} \\
+\code{exdqlm.use\_cpp\_builders} & Enables or disables C++ builders for state-space model blocks. & \code{FALSE} \\
+\code{exdqlm.use\_cpp\_samplers} & Enables or disables C++ latent-variable samplers in dynamic routines. & \code{FALSE} \\
+\code{exdqlm.use\_cpp\_postpred} & Enables or disables the C++ posterior-predictive sampling path. & \code{FALSE} \\
+\code{exdqlm.use\_cpp\_mcmc} & Enables or disables C++ backend routing in dynamic MCMC routines. & \code{TRUE} \\
+\code{exdqlm.cpp\_mcmc\_mode} & Chooses dynamic MCMC routing mode (\code{"strict"} for parity path, \code{"fast"} for accelerated path). & \code{"fast"} \\
+\code{exdqlm.cpp\_threads} & Sets the thread cap for eligible OpenMP-enabled C++ paths. & \code{1L} \\
 \bottomrule
 \end{tabularx}
 \caption{Package-level runtime options exposed through \code{options(...)} for backend routing and ELBO monitoring in \pkg{exdqlm}. Function-level inference controls are documented separately in the function interfaces (for example, Table \ref{table:post}).}
