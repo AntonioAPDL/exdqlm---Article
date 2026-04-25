@@ -835,7 +835,7 @@ if (!need_ex1) {
       notes = "Runtimes vary by hardware/profile; trace run intentionally uses higher iterations."
     )
 
-    register_note("ex1", "Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain.")
+    register_note("ex1", "Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary).")
   }
 
   log_msg("Example 1 (Lake Huron): complete")

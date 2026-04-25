@@ -3,7 +3,7 @@
 "api_update","Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls."
 "ex2_policy","Example 2 manuscript workflow now uses LDVB and MCMC only; ISVB support artifacts were retired."
 "backend","Benchmark Profile B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'."
-"ex1","Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain."
+"ex1","Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary)."
 "ex2_ldvb_diag","Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=200)."
 "ex2","Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it."
 "ex2_ldvb","Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it."
