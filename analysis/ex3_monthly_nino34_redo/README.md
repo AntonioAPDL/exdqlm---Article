@@ -106,6 +106,17 @@ Rscript analysis/ex3_monthly_nino34_redo/run_all.R --config analysis/ex3_monthly
 Rscript analysis/ex3_monthly_nino34_redo/run_all.R --config analysis/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml
 ```
 
+The reduced-6 dense CRPS run is long enough that the intended launcher is the
+background wrapper:
+
+```bash
+bash analysis/ex3_monthly_nino34_redo/run_reduced6_crps_dense_background.sh
+bash analysis/ex3_monthly_nino34_redo/check_reduced6_crps_dense_status.sh
+```
+
+The detailed relaunch contract for this support run is documented in
+[REDUCED6_CRPS_DENSE_RELAUNCH.md](/home/jaguir26/local/src/exdqlm---Article/analysis/ex3_monthly_nino34_redo/REDUCED6_CRPS_DENSE_RELAUNCH.md).
+
 The q7 launcher remains available for the paper-like profile:
 
 ```bash
