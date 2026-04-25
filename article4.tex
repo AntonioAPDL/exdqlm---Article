@@ -358,7 +358,7 @@ For an arbitrary time $\tilde{t}$, the $k$-step-ahead future marginal distributi
 {\bf F}'_{\tilde{t}+k} {\boldsymbol \theta}_{\tilde{t}+k}| y_1,\dots,y_{\tilde{t}} \sim \text{N}({\bf F}'_{\tilde{t}+k} a_{\tilde{t}}(k),{\bf F}'_{\tilde{t}+k}{\bf R}_{\tilde{t}}(k){\bf F}_{\tilde{t}+k})
 \end{equation}
 
-where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$, ${\bf R}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf R}_{\tilde{t}}(k-1) {\bf G}_{\tilde{t}+k}' + {\bf W}_{\tilde{t}+k}$, ${\bf a}_{\tilde{t}}(0) = {\bf m}_{\tilde{t}}$, and ${\bf R}_{\tilde{t}}(0) = {\bf C}_{\tilde{t}}$, with ${\bf m}_{\tilde{t}}$ and ${\bf C}_{\tilde{t}}$ denoting the filtered mean and covariance of $\boldsymbol{\theta}_{\tilde{t}}$, respectively. This distribution is implemented in the function \code{exdqlmForecast()}, which is compatible with the outputs from both the MCMC and VB algorithms. Table \ref{table:fore} shows the input parameters used in the function, as well as their mathematical symbols seen in this section. The output of \code{exdqlmForecast()} includes the parameters of the forecasted distribution as well as ${\bf a}_{\tilde{t}}(k)$ and ${\bf R}_{\tilde{t}}(k)$ for the $k$ steps.
+where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$, ${\bf R}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf R}_{\tilde{t}}(k-1) {\bf G}_{\tilde{t}+k}' + {\bf W}_{\tilde{t}+k}$, ${\bf a}_{\tilde{t}}(0) = {\bf m}_{\tilde{t}}$, and ${\bf R}_{\tilde{t}}(0) = {\bf C}_{\tilde{t}}$, with ${\bf m}_{\tilde{t}}$ and ${\bf C}_{\tilde{t}}$ denoting the filtered mean and covariance of $\boldsymbol{\theta}_{\tilde{t}}$, respectively. This distribution is implemented in the function \code{exdqlmForecast()}, which is compatible with the outputs from both the MCMC and VB algorithms. Table \ref{table:fore} shows the input parameters used in the function, as well as their mathematical symbols seen in this section. The output of \code{exdqlmForecast()} includes the parameters of the forecasted distribution as well as ${\bf a}_{\tilde{t}}(k)$ and ${\bf R}_{\tilde{t}}(k)$ for the $k$ steps, with optional posterior predictive draw matrices available when requested.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -392,7 +392,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \code{exalStaticMCMC()} & \code{exalStaticMCMC} & Estimate static exAL regression with MCMC.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic fit examination} -- Input \code{exdqlmMCMC}, \code{exdqlmLDVB}, or legacy \code{exdqlmISVB} objects} \\
-    \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute $k$-step-ahead forecast quantiles.\\
+    \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute $k$-step-ahead forecast quantiles, with optional predictive draws.\\
     \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute \& plot model diagnostics. \\
     \code{exdqlmPlot()} & \code{list} & Plot posterior summary of dynamic quantile.\\
     \code{compPlot()} & \code{list} & Plot posterior summary of component/parameter.\\
@@ -400,8 +400,8 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticMCMC} or \code{exalStaticLDVB} objects} \\
     \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fit diagnostics and comparisons.\\
     \addlinespace[2pt]
-    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input posterior predictive draw matrices} \\
-    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{list} & Construct a unified posterior predictive distribution from anchor-specific predictive draws (from dynamic outputs or user-supplied static/dynamic draw matrices).\\
+    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input dynamic fit/forecast objects or draw matrices} \\
+    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{list} & Construct a unified posterior predictive distribution from dynamic fit objects, forecast objects with stored draws, or user-supplied draw matrices.\\
     \bottomrule
 \end{tabular}
 \caption{Overview of the core workflow functions used in this paper. Generic S3 methods defined for the fitted objects listed in the table include \code{plot()}, \code{print()}, and \code{summary()}.}
@@ -584,60 +584,37 @@ We plot the time series data in a narrower range for closer examination and add 
 R> plot(LakeHuron,  xlim = c(1952,1980), ylim = c(575,581),
 +        col = "dark grey", main = "Forecasted quantiles",
 +           ylab = "forecast 95% CrIs")
-R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M95,
-+               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE)
-R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M50,
+R> fc95 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M95,
 +               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
-+               cols = c("blue","light blue"))
-R> exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M5,
++               return.draws = TRUE)
+R> fc50 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M50,
 +               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
-+               cols = c("forest green","green"))
++               cols = c("blue","light blue"), return.draws = TRUE)
+R> fc05 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M5,
++               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
++               cols = c("forest green","green"), return.draws = TRUE)
 \end{CodeInput}
 \end{CodeChunk}
 
 This generates a plot of the data with the forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (before 1972), for reference. Results can be seen in the top-right panel of Figure \ref{fig:ex1quants}. The percentage in the CrIs can be modified with the parameter \code{cr.percent}.
 
-When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{quantileSynthesis()}. Each fitted model contributes local predictive information near its target quantile, and the synthesis step interpolates across these anchor-specific draws to obtain one posterior predictive distribution. When independently fitted quantiles induce crossing, optional monotonicity corrections based on isotonic adjustment and monotone rearrangement are available \citep{barlow1972,chernozhukov2010}. For the Lake Huron example, we apply this routine to the posterior predictive samples stored in \code{M5}, \code{M50}, and \code{M95} over the observed period. \RB{Could we change quantileSynthesis() to accept the fitted objects?}
+When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{quantileSynthesis()}. Each fitted model contributes local predictive information near its target quantile, and the synthesis step interpolates across these anchor-specific draws to obtain one posterior predictive distribution. When independently fitted quantiles induce crossing, optional monotonicity corrections based on isotonic adjustment and monotone rearrangement are available \citep{barlow1972,chernozhukov2010}. For the Lake Huron example, we apply this routine directly to the fitted objects \code{M5}, \code{M50}, and \code{M95} over the observed period.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> syn.obs = quantileSynthesis(
-+               draws_list = list(M5$samp.post.pred, M50$samp.post.pred,
-+                                  M95$samp.post.pred),
++               draws_list = list(M5, M50, M95),
 +               p = c(0.05, 0.50, 0.95),
 +               T_expected = length(LakeHuron))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{For the eight-step forecast horizon, we first generate future predictive draws from each fitted model using the corresponding forecasted quantile distributions together with posterior draws of $\sigma$ and $\gamma$,} \RB{Why don't we just add this to the output from exdqlmForecast()? If we want to sell it as a feature of the package, we should make it a real feature!} and then apply the same synthesis step. This provides a single predictive envelope while preserving the separate quantile-specific fits.
-
-\aA{The function \code{exdqlmForecast()} returns the forecast summaries, but not matrices of future observations. To construct those, we first sample future quantile values from the forecast distribution and then map them through \code{rexal()} using matched posterior draws of $\sigma$ and $\gamma$. For example, for the $p_0 = 0.05$ fit:}
-\RB{This code chunk isn't working for me. I think you need to add n.samp = M5\$n.mcmc and name the forecast objects (fc05?). BUT if you just make this part of the forecast routine you wont need it anyway...}
-\begin{CodeChunk}
-\begin{CodeInput}
-R> q.fore = sweep(matrix(rnorm(8 * n.samp), 8, n.samp), 1,
-+                 sqrt(fc05$fQ), "*") + fc05$ff
-R> future.M5$ydraw = vapply(1:n.samp, function(j)
-+                 rexal(8, p0 = M5$p0, mu = q.fore[, j],
-+                       sigma = sigma.draws[j], gamma = gamma.draws[j]),
-+                 numeric(8))
-\end{CodeInput}
-\end{CodeChunk}
-
-\aA{Here \code{sigma.draws} and \code{gamma.draws} denote matched retained posterior draws from the fitted model. Analogous matrices are generated for \code{M50} and \code{M95}.}
-
-We then collect these matrices into \code{future.draws} and synthesize them in the same way:
-\begin{CodeChunk}
-\begin{CodeInput}
-R> future.draws = list(future.M5$ydraw, future.M50$ydraw,
-+                      future.M95$ydraw)
-\end{CodeInput}
-\end{CodeChunk}
+For the eight-step forecast horizon, we then apply the same synthesis step to the forecast objects. Because \code{return.draws = TRUE} was used above, each forecast object stores posterior predictive forecast draws in \code{samp.fore}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> syn.fore = quantileSynthesis(
-+               draws_list = future.draws,
++               draws_list = list(fc05, fc50, fc95),
 +               p = c(0.05, 0.50, 0.95),
 +               T_expected = 8)
 \end{CodeInput}
