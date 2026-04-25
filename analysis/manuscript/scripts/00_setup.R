@@ -601,60 +601,33 @@ plot_component_summary <- function(csum, add = TRUE, col = "purple", lwd = 1.5) 
   graphics::lines(csum$x, csum$ub, col = col, lwd = 0.8, lty = 2)
 }
 
-forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRUE, add = FALSE, cols = c("purple", "magenta"), cr.percent = 0.95, y_data = NULL) {
-  y_series <- if (!is.null(y_data)) y_data else m1$y
-  y_numeric <- as.numeric(y_series)
-  if (length(y_numeric) == 0L) stop("y_data must be provided when fitted object has no y series.", call. = FALSE)
-  p <- dim(m1$model$GG)[1]
-  TT <- dim(m1$model$GG)[3]
-  if (cr.percent <= 0 || cr.percent >= 1) {
-    stop("cr.percent must be between 0 and 1", call. = FALSE)
-  }
-  if (is.null(fFF)) {
-    if (TT - start.t < k) {
-      stop("fFF and fGG must be provided for forecasts extending past the length of the estimated model", call. = FALSE)
+forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRUE, add = FALSE,
+                              cols = c("purple", "magenta"), cr.percent = 0.95, y_data = NULL,
+                              return.draws = FALSE, n.samp = NULL, seed = NULL) {
+  m1_input <- m1
+  if (!is.null(y_data)) {
+    if (length(as.numeric(y_data)) == 0L) {
+      stop("y_data must contain at least one observation.", call. = FALSE)
     }
-    fFF <- m1$model$FF[, (start.t + 1):(start.t + k)]
-    fGG <- m1$model$GG[, , (start.t + 1):(start.t + k)]
-  } else {
-    fFF <- as.matrix(fFF)
-    if (nrow(fFF) != p) stop("dimension of fFF must match fitted model", call. = FALSE)
-    if (!any(ncol(fFF) == c(1, k))) stop("fFF must have 1 or k columns", call. = FALSE)
-    fGG <- as.array(fGG)
-    if (any(dim(fGG)[1:2] != p)) stop("dimension of fGG must match fitted model", call. = FALSE)
-    if (!is.na(dim(fGG)[3]) && dim(fGG)[3] != k) {
-      stop("fGG must be matrix or array of depth k", call. = FALSE)
-    }
+    m1_input$y <- y_data
+  } else if (length(as.numeric(m1$y)) == 0L) {
+    stop("y_data must be provided when fitted object has no y series.", call. = FALSE)
   }
-  fFF <- matrix(fFF, p, k)
-  fGG <- array(fGG, c(p, p, TT))
 
-  df.mat <- exdqlm:::make_df_mat(m1$df, m1$dim.df, p)
-  fm <- m1$theta.out$fm[, start.t]
-  fC <- m1$theta.out$fC[, , start.t]
-  fa <- matrix(NA_real_, p, k)
-  fR <- array(NA_real_, c(p, p, k))
-  ff <- rep(NA_real_, k)
-  fQ <- rep(NA_real_, k)
-  for (i in seq_len(k)) {
-    if (i == 1L) {
-      fa[, 1] <- fGG[, , i] %*% fm
-      fR[, , 1] <- fGG[, , i] %*% fC %*% t(fGG[, , i]) + df.mat * fC
-      ff[1] <- t(fFF[, i]) %*% fa[, 1]
-      fQ[1] <- t(fFF[, i]) %*% fR[, , 1] %*% fFF[, i]
-    } else {
-      fa[, i] <- fGG[, , i] %*% fa[, i - 1]
-      fR[, , i] <- fGG[, , i] %*% fR[, , i - 1] %*% t(fGG[, , i]) + df.mat * fR[, , i - 1]
-      ff[i] <- t(fFF[, i]) %*% fa[, i]
-      fQ[i] <- t(fFF[, i]) %*% fR[, , i] %*% fFF[, i]
-    }
-  }
-  m1_plot <- m1
-  m1_plot$y <- y_series
-  retlist <- list(start.t = start.t, k = k, cr.percent = cr.percent, m1 = m1_plot, fa = fa, fR = fR, ff = ff, fQ = fQ)
-  class(retlist) <- "exdqlmForecast"
-  if (plot) plot(retlist, cols = cols, add = add)
-  invisible(retlist)
+  exdqlm::exdqlmForecast(
+    start.t = start.t,
+    k = k,
+    m1 = m1_input,
+    fFF = fFF,
+    fGG = fGG,
+    plot = plot,
+    add = add,
+    cols = cols,
+    cr.percent = cr.percent,
+    return.draws = return.draws,
+    n.samp = n.samp,
+    seed = seed
+  )
 }
 
 diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "blue"), ref = NULL, y_data = NULL) {

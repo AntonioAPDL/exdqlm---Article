@@ -78,47 +78,6 @@ if (!need_ex1) {
     eval.parent(substitute(expr))
   }
 
-  evenly_spaced_idx <- function(n, target_n) {
-    target_n <- min(as.integer(target_n), as.integer(n))
-    unique(pmax(1L, pmin(as.integer(n), round(seq.int(1L, n, length.out = target_n)))))
-  }
-
-  subset_draw_matrix <- function(M, target_n) {
-    M <- as.matrix(M)
-    idx <- evenly_spaced_idx(ncol(M), target_n)
-    M[, idx, drop = FALSE]
-  }
-
-  subset_draw_vector <- function(x, target_n, fill = 0) {
-    x <- as.numeric(x)
-    if (!length(x)) return(rep(fill, target_n))
-    idx <- evenly_spaced_idx(length(x), target_n)
-    x[idx]
-  }
-
-  sample_forecast_predictive_draws <- function(mfit, fc, target_n, seed) {
-    target_n <- min(as.integer(target_n), max(1L, ncol(as.matrix(mfit$samp.post.pred))))
-    sigma_draws <- subset_draw_vector(mfit$samp.sigma, target_n)
-    gamma_draws <- if (length(mfit$samp.gamma)) subset_draw_vector(mfit$samp.gamma, target_n) else rep(0, target_n)
-    qdraw <- with_local_seed(seed, {
-      Z <- matrix(stats::rnorm(length(fc$ff) * target_n), nrow = length(fc$ff), ncol = target_n)
-      sweep(Z, 1L, sqrt(pmax(fc$fQ, 0)), `*`) + fc$ff
-    })
-    ydraw <- matrix(NA_real_, nrow = nrow(qdraw), ncol = ncol(qdraw))
-    for (j in seq_len(ncol(qdraw))) {
-      ydraw[, j] <- with_local_seed(seed + j, {
-        exdqlm::rexal(
-          nrow(qdraw),
-          p0 = mfit$p0,
-          mu = qdraw[, j],
-          sigma = sigma_draws[j],
-          gamma = gamma_draws[j]
-        )
-      })
-    }
-    list(qdraw = qdraw, ydraw = ydraw, sigma = sigma_draws, gamma = gamma_draws)
-  }
-
   add_predictive_band <- function(x, lower95, upper95,
                                   fill95 = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)) {
     graphics::polygon(c(x, rev(x)), c(lower95, rev(upper95)), col = fill95, border = NA)
@@ -267,9 +226,21 @@ if (!need_ex1) {
   xlim_synth_obs <- c(synth_window_start, t_end)
 
   if (need_ex1_quants_models) {
-    fc95 <- forecast_from_fit(start.t = length(y), k = k_fore, m1 = M95_plot, fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts)
-    fc50 <- forecast_from_fit(start.t = length(y), k = k_fore, m1 = M50_dqlm_plot, fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts)
-    fc05 <- forecast_from_fit(start.t = length(y), k = k_fore, m1 = M5_plot, fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts)
+    fc95 <- forecast_from_fit(
+      start.t = length(y), k = k_fore, m1 = M95_plot,
+      fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts,
+      return.draws = TRUE, n.samp = synth_source_draws, seed = seed_value + 195L
+    )
+    fc50 <- forecast_from_fit(
+      start.t = length(y), k = k_fore, m1 = M50_dqlm_plot,
+      fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts,
+      return.draws = TRUE, n.samp = synth_source_draws, seed = seed_value + 250L
+    )
+    fc05 <- forecast_from_fit(
+      start.t = length(y), k = k_fore, m1 = M5_plot,
+      fFF = fFF, fGG = fGG, plot = FALSE, y_data = y_ts,
+      return.draws = TRUE, n.samp = synth_source_draws, seed = seed_value + 305L
+    )
   }
 
   if (need_ex1_runtime) {
@@ -331,15 +302,10 @@ if (!need_ex1) {
   }
 
   if (need_ex1_synthesis) {
-    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v3_main_window", {
-      obs_draws <- list(
-        subset_draw_matrix(M5$samp.post.pred, synth_source_draws),
-        subset_draw_matrix(M50_dqlm$samp.post.pred, synth_source_draws),
-        subset_draw_matrix(M95$samp.post.pred, synth_source_draws)
-      )
+    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v4_object_api", {
       syn_obs <- with_local_seed(seed_value + 111L, {
         exdqlm::quantileSynthesis(
-          draws_list = obs_draws,
+          draws_list = list(M5, M50_dqlm, M95),
           p = c(0.05, 0.50, 0.95),
           T_expected = length(y),
           n_samp = synth_n_samp,
@@ -347,12 +313,9 @@ if (!need_ex1) {
         )
       })
 
-      future_M5 <- sample_forecast_predictive_draws(M5, fc05, synth_source_draws, seed_value + 205L)
-      future_M50 <- sample_forecast_predictive_draws(M50_dqlm, fc50, synth_source_draws, seed_value + 250L)
-      future_M95 <- sample_forecast_predictive_draws(M95, fc95, synth_source_draws, seed_value + 295L)
       syn_future <- with_local_seed(seed_value + 333L, {
         exdqlm::quantileSynthesis(
-          draws_list = list(future_M5$ydraw, future_M50$ydraw, future_M95$ydraw),
+          draws_list = list(fc05, fc50, fc95),
           p = c(0.05, 0.50, 0.95),
           T_expected = k_fore,
           n_samp = synth_n_samp,
@@ -364,7 +327,7 @@ if (!need_ex1) {
         syn_obs = syn_obs,
         syn_future = syn_future
       )
-    }, note = "ex1_synthesis_v3_main_window")
+    }, note = "ex1_synthesis_v4_object_api")
   }
 
   if (need_ex1quants) {
