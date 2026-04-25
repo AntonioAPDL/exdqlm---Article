@@ -317,12 +317,12 @@ Using this estimated sequence $\{\hat u_t\}$, we can assess the model performanc
 \end{align}
 can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-In addition to the calibration-based diagnostics above, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. \RB{Can we change this to level $p_0$?} \aA{Let $\rho_p(x)=x[p-I(x<0)]$ denote the check loss at level $p$.} For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
+In addition to the calibration-based diagnostics above, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. \aA{Let $\rho_p(x)=x[p-I(x<0)]$ denote the check loss at level $p$.} For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
 \[
 \text{CRPS}(y,G)=\mathbb{E}_{Y\sim G}|Y-y|-\frac{1}{2}\mathbb{E}_{Y,Y'\sim G}|Y-Y'|
 =2\int_0^1 \rho_p\!\left(y-G^{-1}(p)\right)\,dp,
 \]
-This representation shows that the CRPS aggregates check-loss performance over all quantile levels, so it evaluates the full predictive distribution rather than a single target quantile. \RB{I am not sure what this sentence is saying - maybe instead something like: This diagnostic rewards forecast that are both sharp and well calibrated with smaller values indicating better predictive performance. For deterministic forecast such as this, after averaging it is equivalent to the absolute error (i.e. the mean absolute error (MAE)).} \aA{It rewards forecasts that are both sharp and well calibrated, and it reduces to the absolute error, and hence to the MAE after averaging, for deterministic forecasts. Smaller values indicate better predictive performance.}
+which shows that CRPS integrates check loss across all quantile levels and therefore evaluates the full predictive distribution rather than a single target level \(p_0\). \aA{Smaller CRPS values indicate better calibrated and sharper predictive performance. For deterministic forecasts, CRPS reduces to the absolute error, so the sample mean CRPS equals the MAE.}
 
 For a final diagnostic, we include \cite{gelfand1998model} posterior predictive loss criterion (pplc), which evaluates the posterior predictive distribution under the target-level check loss $\rho_{p_0}$. That is,
 \begin{align}
