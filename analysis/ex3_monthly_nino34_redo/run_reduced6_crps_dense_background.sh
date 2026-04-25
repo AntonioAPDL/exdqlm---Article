@@ -41,11 +41,11 @@ fi
   echo "output_dir=$OUTPUT_DIR"
 } > "$LOG_DIR/reduced6_crps_dense_launch_info.txt"
 
-EX3_MONTHLY_PKG_PATH="$PKG_ROOT" \
-nohup Rscript "$ARTICLE_ROOT/analysis/ex3_monthly_nino34_redo/run_all.R" \
+setsid env EX3_MONTHLY_PKG_PATH="$PKG_ROOT" \
+  Rscript "$ARTICLE_ROOT/analysis/ex3_monthly_nino34_redo/run_all.R" \
   --config "$CONFIG_PATH" \
   --targets prep,fit,figures,manifest \
-  > "$RUN_LOG" 2>&1 &
+  > "$RUN_LOG" 2>&1 < /dev/null &
 
 pid="$!"
 echo "$pid" > "$PID_FILE"
