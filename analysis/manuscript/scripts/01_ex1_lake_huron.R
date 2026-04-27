@@ -78,11 +78,6 @@ if (!need_ex1) {
     eval.parent(substitute(expr))
   }
 
-  add_predictive_band <- function(x, lower95, upper95,
-                                  fill95 = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)) {
-    graphics::polygon(c(x, rev(x)), c(lower95, rev(upper95)), col = fill95, border = NA)
-  }
-
   summarize_smoothed_quantile <- function(mfit, cr.percent = 0.95) {
     y_ref <- mfit$y
     half.alpha <- (1 - cr.percent) / 2
@@ -302,7 +297,7 @@ if (!need_ex1) {
   }
 
   if (need_ex1_synthesis) {
-    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v4_object_api", {
+    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v5_s3_plot", {
       syn_obs <- with_local_seed(seed_value + 111L, {
         exdqlm::quantileSynthesis(
           draws_list = list(M5, M50_dqlm, M95),
@@ -327,7 +322,7 @@ if (!need_ex1) {
         syn_obs = syn_obs,
         syn_future = syn_future
       )
-    }, note = "ex1_synthesis_v4_object_api")
+    }, note = "ex1_synthesis_v5_s3_plot")
   }
 
   if (need_ex1quants) {
@@ -337,11 +332,12 @@ if (!need_ex1) {
       idx_obs <- idx_obs_synth[1]:idx_obs_synth[2]
       x_obs_full <- ts_xy$x
       x_future <- seq(from = t_end, by = dt, length.out = k_fore + 1L)
+      x_future_fore <- x_future[-1L]
 
       obs_q025_full <- ex1_synthesis$syn_obs$summary$q025
       obs_q975_full <- ex1_synthesis$syn_obs$summary$q975
-      fut_q025 <- c(ex1_synthesis$syn_obs$summary$q025[length(y)], ex1_synthesis$syn_future$summary$q025)
-      fut_q975 <- c(ex1_synthesis$syn_obs$summary$q975[length(y)], ex1_synthesis$syn_future$summary$q975)
+      fut_q025 <- ex1_synthesis$syn_future$summary$q025
+      fut_q975 <- ex1_synthesis$syn_future$summary$q975
 
       y_lim_obs_synth <- range(
         y[idx_obs],
@@ -374,14 +370,18 @@ if (!need_ex1) {
       add_forecast_overlay(fc05, cols = c(ex1_quant_cols$q05, ex1_quant_cols$q05_future))
       graphics::title(main = "(b) Forecasted quantiles", cex.main = 0.95)
 
-      stats::plot.ts(
-        y_ts,
+      plot(
+        ex1_synthesis$syn_obs,
+        y = y_ts,
+        time = x_obs_full,
         xlim = xlim_synth_obs,
         ylim = y_lim_obs_synth,
-        col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
-        ylab = "predictive synthesis"
+        show.median = FALSE,
+        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42),
+        y.col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
+        ylab = "predictive synthesis",
+        main = "(c) Observed-period synthesis"
       )
-      add_predictive_band(x_obs_full, obs_q025_full, obs_q975_full)
       graphics::legend(
         "bottomleft",
         legend = c("Synthesized posterior predictive interval (95%)"),
@@ -397,17 +397,26 @@ if (!need_ex1) {
         x.intersp = 0.9,
         inset = c(0.015, 0.015)
       )
-      graphics::title(main = "(c) Observed-period synthesis", cex.main = 0.95)
 
-      stats::plot.ts(
-        y_ts,
+      plot(
+        ex1_synthesis$syn_obs,
+        y = y_ts,
+        time = x_obs_full,
         xlim = xlim_fore,
         ylim = y_lim_zoom_synth,
-        col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
-        ylab = "predictive synthesis"
+        show.median = FALSE,
+        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42),
+        y.col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
+        ylab = "predictive synthesis",
+        main = "(d) Forecast synthesis"
       )
-      add_predictive_band(x_obs_full, obs_q025_full, obs_q975_full)
-      add_predictive_band(x_future, fut_q025, fut_q975)
+      plot(
+        ex1_synthesis$syn_future,
+        time = x_future_fore,
+        add = TRUE,
+        show.median = FALSE,
+        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+      )
       graphics::abline(v = t_end, lty = 3, col = "grey45")
       graphics::legend(
         "bottomleft",
@@ -424,7 +433,6 @@ if (!need_ex1) {
         x.intersp = 0.9,
         inset = c(0.015, 0.015)
       )
-      graphics::title(main = "(d) Forecast synthesis", cex.main = 0.95)
     })
     register_artifact(
       artifact_id = "fig_ex1quants",
@@ -461,12 +469,13 @@ if (!need_ex1) {
       idx_obs <- idx_window[1]:idx_window[2]
       x_obs_full <- ts_xy$x
       x_future <- seq(from = t_end, by = dt, length.out = k_fore + 1L)
+      x_future_fore <- x_future[-1L]
 
       obs_q025_full <- ex1_synthesis$syn_obs$summary$q025
       obs_q975_full <- ex1_synthesis$syn_obs$summary$q975
 
-      fut_q025 <- c(ex1_synthesis$syn_obs$summary$q025[length(y)], ex1_synthesis$syn_future$summary$q025)
-      fut_q975 <- c(ex1_synthesis$syn_obs$summary$q975[length(y)], ex1_synthesis$syn_future$summary$q975)
+      fut_q025 <- ex1_synthesis$syn_future$summary$q025
+      fut_q975 <- ex1_synthesis$syn_future$summary$q975
 
       y_lim <- range(
         y[idx_obs],
@@ -475,15 +484,24 @@ if (!need_ex1) {
         na.rm = TRUE
       )
 
-      stats::plot.ts(
-        y_ts,
+      plot(
+        ex1_synthesis$syn_obs,
+        y = y_ts,
+        time = x_obs_full,
         xlim = xlim_fore,
         ylim = y_lim,
-        col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
+        show.median = FALSE,
+        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42),
+        y.col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
         ylab = "predictive synthesis"
       )
-      add_predictive_band(x_obs_full, obs_q025_full, obs_q975_full)
-      add_predictive_band(x_future, fut_q025, fut_q975)
+      plot(
+        ex1_synthesis$syn_future,
+        time = x_future_fore,
+        add = TRUE,
+        show.median = FALSE,
+        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+      )
       graphics::abline(v = t_end, lty = 3, col = "grey45")
 
       graphics::legend(

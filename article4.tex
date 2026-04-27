@@ -399,10 +399,10 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fit diagnostics and comparisons.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input dynamic fit/forecast objects or draw matrices} \\
-    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{list} & Construct a unified posterior predictive distribution from dynamic fit objects, forecast objects with stored draws, or user-supplied draw matrices.\\
+    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{exdqlmSynthesis} & Construct a plot-ready unified posterior predictive distribution from dynamic fit objects, forecast objects with stored draws, or user-supplied draw matrices.\\
     \bottomrule
 \end{tabular}
-\caption{Overview of the core workflow functions used in this paper. Generic S3 methods defined for the fitted objects listed in the table include \code{plot()}, \code{print()}, and \code{summary()}.}
+\caption{Overview of the core workflow functions used in this paper. Generic S3 methods defined for the returned objects listed in the table include \code{plot()}, \code{print()}, and \code{summary()}.}
 \label{table:flow}
 \end{table}
 
@@ -475,7 +475,7 @@ $GG
 \end{CodeOutput}
 \end{CodeChunk}
 
-To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown above (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}. \RB{Here is a good spot to reference the back-end appendix with respect to the code output below (specifically "mcmc backend" and "GIG backend").}
+To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown above (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}. The first lines of the console output report the active MCMC and GIG-sampling backends; the global backend options that control this routing are summarized in Appendix Table \ref{tab:backendopts}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -606,7 +606,7 @@ R> syn.obs = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-\RB{Because the argument \code{return.draws = TRUE} was used when producing the forecast objects (\code{fc05}, \code{fc50}, \code{fc95}) above, each object stores posterior predictive forecast draws in the return value \code{samp.fore}. This allows us to apply the same synthesis step for the eight-step forecast horizon. }
+Because the argument \code{return.draws = TRUE} was used when producing the forecast objects (\code{fc05}, \code{fc50}, \code{fc95}) above, each object stores posterior predictive forecast draws in the return value \code{samp.fore}. This allows us to apply the same synthesis step to the eight-step forecast horizon.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -617,7 +617,22 @@ R> syn.fore = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-The lower panels of Figure \ref{fig:ex1quants} display the synthesized posterior predictive 95\% interval over the observed and forecast windows. \RB{Are these plots suppose to automatically generated with quantileSynthesis()? If not, I think we should add the code for the plots. }
+The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows.
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> synth.col = adjustcolor("#F7D6DE", alpha.f = 0.42)
+R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
++       xlim = c(1952, 1972), ylab = "predictive synthesis",
++       show.median = FALSE, band.col = synth.col)
+R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
++       xlim = c(1952, 1980), ylab = "predictive synthesis",
++       show.median = FALSE, band.col = synth.col)
+R> plot(syn.fore, time = seq(1973, 1980), add = TRUE,
++       show.median = FALSE, band.col = synth.col)
+R> abline(v = 1972, lty = 3)
+\end{CodeInput}
+\end{CodeChunk}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
