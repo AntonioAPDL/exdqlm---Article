@@ -5,9 +5,10 @@ the `exdqlm` software article. It is intended to complement the manuscript by
 identifying the publication artifacts, the main support-only artifacts, and the
 tracked rerun paths used to regenerate them from the current `0.4.0` package.
 
-Current references:
-- Package commit: `b8bd6db`
-- Article commit: `6bfec69`
+Current snapshot references are recorded in the generated reproducibility
+tracker and rerun logs. When regenerating artifacts, use the checked-out article
+commit together with the current CRAN-facing package branch
+`cransub/0.4.0`, or override the package path explicitly with `--pkg-path`.
 
 ## 1. Publication Artifacts
 
@@ -36,6 +37,13 @@ The manuscript-facing workflow is organized under the article repository:
 - [analysis/manuscript/README.md](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/README.md)
 - [analysis/run_all.R](/home/jaguir26/local/src/exdqlm---Article/analysis/run_all.R)
 - [article4.tex](/home/jaguir26/local/src/exdqlm---Article/article4.tex)
+
+The canonical executable scripts for the paper examples are under
+`analysis/manuscript/scripts/`. Manuscript figures are generated into
+`analysis/manuscript/outputs/figures/`, which is the first path searched by
+`article4.tex`. Top-level `Figures/` files are promoted copies. Inline LaTeX
+tables in `article4.tex` should be synchronized with the corresponding generated
+CSV/log outputs whenever a model is rerun.
 
 The main reproducibility outputs written by the manuscript stage are:
 

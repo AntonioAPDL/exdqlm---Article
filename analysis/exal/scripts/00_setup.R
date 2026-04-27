@@ -41,7 +41,7 @@ set.seed(seed_value)
 resolve_pkg_path <- function() {
   env_pkg_path <- Sys.getenv("EXDQLM_PKG_PATH", unset = "")
   env_pkg_path <- if (nzchar(env_pkg_path)) env_pkg_path else NULL
-  default_pkg_path <- "/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main"
+  default_pkg_path <- "/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile"
 
   selected_path <- pkg_path %||% env_pkg_path %||% default_pkg_path
   selected_source <- if (!is.null(pkg_path) && nzchar(pkg_path)) {

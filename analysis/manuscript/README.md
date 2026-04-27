@@ -8,6 +8,35 @@ For a reader-facing index of the publication artifacts, support-only outputs,
 and recommended rerun entry points, see
 `/home/jaguir26/local/src/exdqlm---Article/SUPPLEMENTARY_INDEX.md`.
 
+## Canonical Example Workflow
+
+The scripts under `analysis/manuscript/scripts/` are the canonical source for
+the paper examples. They are the only maintained executable workflow for
+regenerating the manuscript-facing figures, support tables, logs, and
+reproducibility tracker.
+
+Standalone collaborator scripts, including temporary `examples.R` files, should
+be treated as review input rather than as a second maintained source. When a
+standalone script contains a useful correction or improvement, merge that logic
+into the appropriate canonical script here, rerun the affected target, and commit
+the script/output/article changes together. This keeps the manuscript text,
+displayed code, generated figures, generated tables, and reproducibility logs
+from drifting apart.
+
+The intended update cycle is:
+
+1. Edit the relevant script in `analysis/manuscript/scripts/`.
+2. Run the narrowest useful target with `analysis/run_all.R --stage manuscript`.
+3. Update any inline manuscript table/text in `article4.tex` from the generated
+   CSV/log output.
+4. Run the manuscript tests or a focused validation pass.
+5. Commit the script, regenerated artifacts, manuscript text, and tracker updates
+   together.
+
+Collaborators who prefer to work through Overleaf can edit these canonical
+scripts there. Those edits should then be pulled locally, validated through this
+workflow, and pushed back to keep the article repository and Overleaf in sync.
+
 ## Scope
 
 - Rebuilds Example 1 (Lake Huron) figures.
@@ -61,7 +90,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit 
 ```
 
 By default, this stage loads local `exdqlm` source from
-`/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`. Override that with
+`/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`. Override that with
 `--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
 If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
 For constrained environments where rebuilding local source is not feasible,
@@ -75,6 +104,13 @@ package instead. Source mode remains the default.
 - `analysis/manuscript/outputs/tables/`: diagnostics summaries + reproducibility tracker, including the Example 4 \(p_0 = 0.50\) seed-screen selection table.
 - `analysis/manuscript/outputs/logs/`: compact textual outputs and session metadata.
 - `analysis/manuscript/outputs/cache/`: cached fitted objects to support fast targeted reruns.
+
+Figures cited by `article4.tex` are resolved first from
+`analysis/manuscript/outputs/figures/` through the manuscript `\graphicspath`.
+Top-level `Figures/` files are promoted copies for compatibility and archival
+use, not the primary source during local manuscript builds. Tables in
+`article4.tex` are inline LaTeX, so their displayed values must be updated from
+the generated CSV/log files whenever a model is rerun.
 
 Main tracker files:
 

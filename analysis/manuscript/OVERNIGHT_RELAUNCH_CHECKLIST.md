@@ -7,8 +7,9 @@ and the alternative monthly Example 3 sandbox against the current article-facing
 ## Package + repo state
 
 - Article repo: `/home/jaguir26/local/src/exdqlm---Article`
-- Package repo: `/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`
-- Required package commit before launch: `ac245f1`
+- Package repo: `/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`
+- Required package state before launch: clean `cransub/0.4.0` HEAD, recorded
+  in the launch logs before rerunning.
 - Load package source through `--pkg-path` for manuscript runs.
 - Use `--force-refit` for manuscript reruns so cached fits from older package
   snapshots are not reused.
@@ -32,8 +33,8 @@ Run from the article repo root:
 ```bash
 git status --short
 git rev-parse HEAD
-Rscript -e "pkg <- '/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main'; cat(normalizePath(pkg), '\n')"
-Rscript -e "pkgload::load_all('/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main', quiet = TRUE); cat(formals(exdqlm::exdqlmLDVB)$fix.sigma, '\n')"
+Rscript -e "pkg <- '/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile'; cat(normalizePath(pkg), '\n')"
+Rscript -e "pkgload::load_all('/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile', quiet = TRUE); cat(formals(exdqlm::exdqlmLDVB)$fix.sigma, '\n')"
 ```
 
 Expected:
@@ -50,7 +51,7 @@ Run in this order so we surface the highest-risk package changes first.
 
 ```bash
 ARTICLE=/home/jaguir26/local/src/exdqlm---Article
-PKG=/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main
+PKG=/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile
 
 Rscript $ARTICLE/analysis/run_all.R \
   --stage manuscript \
