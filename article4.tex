@@ -315,12 +315,12 @@ Using this estimated sequence $\{\hat u_t\}$, we can assess the model performanc
 \end{align}
 can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-In addition to the calibration-based diagnostics above, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. \aA{Let $\rho_p(x)=x[p-I(x<0)]$ denote the check loss at level $p$.} For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
+In addition to the calibration-based diagnostics above, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. Let $\rho_p(x)=x[p-I(x<0)]$ denote the check loss at level $p$. For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
 \[
 \text{CRPS}(y,G)=\mathbb{E}_{Y\sim G}|Y-y|-\frac{1}{2}\mathbb{E}_{Y,Y'\sim G}|Y-Y'|
 =2\int_0^1 \rho_p\!\left(y-G^{-1}(p)\right)\,dp,
 \]
-which shows that CRPS integrates check loss across all quantile levels and therefore evaluates the full predictive distribution rather than a single target level \(p_0\). \aA{Smaller CRPS values indicate better calibrated and sharper predictive performance. For deterministic forecasts, CRPS reduces to the absolute error, so the sample mean CRPS equals the MAE.}
+which shows that CRPS integrates check loss across all quantile levels and therefore evaluates the full predictive distribution rather than a single target level \(p_0\). Smaller CRPS values indicate better calibrated and sharper predictive performance. For deterministic forecasts, CRPS reduces to the absolute error, so the sample mean CRPS equals the MAE.
 
 For a final diagnostic, we include \cite{gelfand1998model} posterior predictive loss criterion (pplc), which evaluates the posterior predictive distribution under the target-level check loss $\rho_{p_0}$. That is,
 \begin{align}
@@ -417,12 +417,11 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 \section{Examples}
  \label{sec:exs}
 
-Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. We demonstrate the general workflow and key features of the package through several analyses on real datasets. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. All figures and tables are generated from scripts distributed with the article repository. These scripts build the example artifacts directly from the current \pkg{exdqlm} API. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
-
+We demonstrate the general workflow and key features of the package through several analyses on real datasets. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. All figures and tables are generated from scripts distributed with the article repository. These scripts build the example artifacts directly from the current \pkg{exdqlm} API. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
 
 We begin by loading the \pkg{exdqlm} package used for all examples.
 
-The package also exports exAL utility functions (\code{dexal()}, \code{pexal()}, \code{qexal()}, \code{rexal()}, and \code{get_gamma_bounds()}) for direct distributional evaluation and simulation.
+\aA{ The package also exports exAL utility functions }(\code{dexal()}, \code{pexal()}, \code{qexal()}, \code{rexal()}, and \code{get_gamma_bounds()}) for direct distributional evaluation and simulation. 
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -476,7 +475,7 @@ $GG
 \end{CodeOutput}
 \end{CodeChunk}
 
-To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown above (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}.
+To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix ${\bf W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown above (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}. \RB{Here is a good spot to reference the back-end appendix with respect to the code output below (specifically "mcmc backend" and "GIG backend").}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -500,16 +499,16 @@ MCMC backend: C++ (mode=fast)
 running LDVB algorithm to initialize mcmc
 GIG backend: C++ Devroye (required)
 MCMC start | burn=2000.00 | keep=3000.00 | kernel=slice | warm_start=ldvb 
-MCMC progress | model=exDQLM | phase=burn | iter=1000/5000 | sigma=0.212 | gamma=3.934 | kernel=slice 
-MCMC progress | model=exDQLM | phase=burn | iter=2000/5000 | sigma=0.24 | gamma=3.902 | kernel=slice 
-MCMC progress | model=exDQLM | phase=keep | iter=3000/5000 | sigma=0.196 | gamma=5.004 | kernel=slice 
-MCMC progress | model=exDQLM | phase=keep | iter=4000/5000 | sigma=0.198 | gamma=5.623 | kernel=slice 
-MCMC progress | model=exDQLM | phase=keep | iter=5000/5000 | sigma=0.228 | gamma=4.548 | kernel=slice 
-MCMC done | model=exDQLM | status=complete | iter=5000.00 | runtime_sec=25.548 | sigma=0.232 | gamma=4.579 | kernel=slice 
+MCMC progress | model=exDQLM | phase=burn | iter=1000/5000 | kept=0/3000 
+MCMC progress | model=exDQLM | phase=burn | iter=2000/5000 | kept=0/3000 
+MCMC progress | model=exDQLM | phase=keep | iter=3000/5000 | kept=1000/3000 
+MCMC progress | model=exDQLM | phase=keep | iter=4000/5000 | kept=2000/3000 
+MCMC progress | model=exDQLM | phase=keep | iter=5000/5000 | kept=3000/3000 
+MCMC done | model=exDQLM | status=complete | iter=5000.00 | runtime_sec=26.292 
 \end{CodeOutput}
 \end{CodeChunk}
 
-For this time series of length 98, the dedicated free-\(\sigma\) median trace run used for Figure \ref{fig:ex1mcmc} (2000 burn-in iterations and 3000 retained draws) takes about 199 seconds under our standard manuscript profile; runtimes vary across hardware and backend settings. By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain, and this initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). Consistent with this, the posterior mean of \(\gamma\) is \(-0.082\) with a 95\% credible interval \((-0.573, 0.371)\), while the posterior mean of \(\sigma\) is \(0.365\) with a 95\% credible interval \((0.253, 0.469)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
+For this time series of length 98, the dedicated free-\(\sigma\) median trace run (2000 burn-in iterations and 3000 retained draws) takes about 199 seconds under our standard manuscript profile; runtimes vary across hardware and backend settings. By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). Consistent with this, the posterior mean of \(\gamma\) is \(-0.082\) with a 95\% credible interval \((-0.573, 0.371)\), while the posterior mean of \(\sigma\) is \(0.365\) with a 95\% credible interval \((0.253, 0.469)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
@@ -527,8 +526,8 @@ R> keep.idx = seq(1, length(M50$samp.sigma), by = 10)
 R> sigma.trace = coda::mcmc(M50$samp.sigma[keep.idx], thin = 10)
 R> gamma.trace = coda::mcmc(M50$samp.gamma[keep.idx], thin = 10)
 R> coda::traceplot(sigma.trace, main = expression(sigma), ylab="trace")
-R> coda::densplot(sigma.trace, main = "")
-R> coda::traceplot(gamma.trace, main = "")
+R> coda::densplot(sigma.trace, main = "", ylab = "density")
+R> coda::traceplot(gamma.trace, main = expression(gamma))
 R> coda::densplot(gamma.trace, main = "")
 \end{CodeInput}
 \end{CodeChunk}
@@ -554,7 +553,7 @@ The results are \code{exdqlmMCMC} objects that can be used for analysis and fore
 R> plot(M95); title("Dynamic quantiles")
 R> exdqlmPlot(M50, add = TRUE, col = "blue")
 R> exdqlmPlot(M5, add = TRUE, col = "forest green")
-R> legend("topright", lty = 1, col = c("purple","blue","forest green"),
+R> legend("topright", lty = 1, bty = "n", col = c("purple","blue","forest green"),
 +        legend = c(expression('p'[0]*'=0.95'),expression('p'[0]*'=0.50'),
 +                   expression('p'[0]*'=0.05')))
 \end{CodeInput}
@@ -607,7 +606,7 @@ R> syn.obs = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-For the eight-step forecast horizon, we then apply the same synthesis step to the forecast objects. Because \code{return.draws = TRUE} was used above, each forecast object stores posterior predictive forecast draws in \code{samp.fore}.
+\RB{Because the argument \code{return.draws = TRUE} was used when producing the forecast objects (\code{fc05}, \code{fc50}, \code{fc95}) above, each object stores posterior predictive forecast draws in the return value \code{samp.fore}. This allows us to apply the same synthesis step for the eight-step forecast horizon. }
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -618,7 +617,7 @@ R> syn.fore = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-The lower panels of Figure \ref{fig:ex1quants} display the synthesized posterior predictive 95\% interval over the observed and forecast windows.
+The lower panels of Figure \ref{fig:ex1quants} display the synthesized posterior predictive 95\% interval over the observed and forecast windows. \RB{Are these plots suppose to automatically generated with quantileSynthesis()? If not, I think we should add the code for the plots. }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -627,7 +626,7 @@ The lower panels of Figure \ref{fig:ex1quants} display the synthesized posterior
 \subsection{Sunspots}
 \label{sec:ex2}
 
-For our next example, we use the yearly Sunspot time series from the package \pkg{datasets}. The data are yearly counts for sunspots from 1700 to 1988, shown in Figure \ref{fig:ex2quant}. \aA{In this example we show how to use the \pkg{dlm} package to create the state-space model, combine blocks of a state-space model, apply the VB approximation through \code{exdqlmLDVB()}, perform visual model diagnostics to compare the exDQLM with the DQLM, and use those diagnostics for discount-factor selection.}
+For our next example, we use the yearly Sunspot time series from the package \pkg{datasets}. The data are yearly counts for sunspots from 1700 to 1988, shown in Figure \ref{fig:ex2quant}. In this example we show how to: use the \pkg{dlm} package to create the state-space model, combine blocks of a state-space model, apply the VB approximation through \code{exdqlmLDVB()}, perform visual model diagnostics to compare the exDQLM with the DQLM, and use those diagnostics for discount-factor selection.
 
 The solar cycle impacts astronauts in space as well as lives and technology on earth. Of particular interest to scientists is the solar max, or period in which the sun is most active \cite{sunspot}, therefore we will explore the $0.85$ quantile in this example. Again, we begin by building the state-space structure used to estimate the quantile. Here we choose to model the quantile with a first order polynomial trend component as well as a Fourier form seasonal component that incorporates a fundamental period every 11 observations (years), as well as some of its corresponding harmonics. This results in a dynamic model with a total of 9 state parameters, 1 for the first order polynomial component and 8 for the seasonal component. The \pkg{exdqlm} functions are compatible with time-invariant \code{dlm} objects from the \pkg{dlm} package. For example, we create the first order trend component with the function \code{dlmModPoly()} from the \pkg{dlm} package, then use \code{as.exdqlm()} to turn the output into an \code{exdqlm} object.
 \begin{CodeChunk}
@@ -676,47 +675,54 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \label{fig:ex2quant}
 \end{figure}
 
-\aA{We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. In this example we set \code{n.samp = 3000}. The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after fitting using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 23 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 104 seconds.}
+We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. In this example we set \code{n.samp = 3000}. 
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M1 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = c(0.9,0.85), dim.df = c(1,8),
 +                  dqlm.ind = TRUE, fix.sigma = FALSE,
-+                  n.samp = 3000,
-+                  verbose = FALSE)
++                  n.samp = 3000, verbose = FALSE)     
 R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = c(0.9,0.85), dim.df = c(1,8),
 +                  fix.sigma = FALSE,
-+                  n.samp = 3000,
-+                  verbose = FALSE)
++                  n.samp = 3000, verbose = FALSE)  
+\end{CodeInput}
+\end{CodeChunk}
+
+The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after fitting using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 6 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 31 seconds.
+
+\begin{CodeChunk}
+\begin{CodeInput}
 R> summary(M1)
 \end{CodeInput}
 \begin{CodeOutput}
 Bayesian Dynamic Quantile Regression Model (DQLM)
-Number of Observations: 289
-State Dimension: 9
-Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
-
+Number of Observations: 289 
+State Dimension: 9 
+Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 ) 
+ 
 DQLM fitted using VB
-Iterations until convergence: 67
-Run-time: 22.891 seconds
+Iterations until convergence: 69 
+Run-time: 6.427 seconds
 \end{CodeOutput}
 \begin{CodeInput}
 R> summary(M2)
 \end{CodeInput}
 \begin{CodeOutput}
 Bayesian Dynamic Quantile Regression Model (exDQLM)
-Number of Observations: 289
-State Dimension: 9
-Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
-
+Number of Observations: 289 
+State Dimension: 9 
+Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 ) 
+ 
 exDQLM fitted using LDVB
-Parameters estimated with LD: gamma sigma
-Iterations until convergence: 200
-Run-time: 104.092 seconds
+Parameters estimated with LD: gamma sigma  
+Iterations until convergence: 200 
+Run-time: 30.589 seconds
 \end{CodeOutput}
 \end{CodeChunk}
+
+
 
 We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1750 to 1850.
 % fig:ex1quant w850 h275
@@ -728,6 +734,7 @@ R> plot(sunspot.year, xlim = c(1750,1850), col = "dark grey",
 +       ylab = "quantile 95% CrIs")
 R> exdqlmPlot(M1, add = TRUE, col = "red")
 R> exdqlmPlot(M2, add = TRUE, col = "blue")
+R> legend("topleft", lty = 1, , bty = "n", col = c("red","blue"),legend = c("DQLM","exDQLM"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -738,24 +745,34 @@ R> exdqlmPlot(M2, add = TRUE, col = "blue")
 \label{fig:ex2checks}
 \end{figure}
 
-To examine whether the added flexibility of the exDQLM is significant, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}.
+To examine whether the added flexibility of the exDQLM is significant, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}.The approximate distribution is clearly distinct from zero, thus we expect a better model fit from the exDQLM.
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> hist(M2$samp.gamma,xlab=expression(gamma),main="")
+R> hist(M2$samp.gamma, xlab=expression(gamma), main="")
+R> abline(v = mean(M2$samp.gamma), col="blue")
 \end{CodeInput}
 \end{CodeChunk}
-The approximate distribution is clearly distinct from zero, thus we expect a better model fit from the exDQLM.
 
-\aA{To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. The QQ-plot and the ACF of the standard forecast errors both favor the exDQLM.}
+To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. \RB{We can also use the \code{print()} generic function on the diagnostic object to create a table comparison of the two models. The numerical diagnostics discussed in Section \ref{sec:diags} clearly favor the exDQLM.}
 % fig:ex2checks
 % R> par(mfrow=c(2,3))
 \begin{CodeChunk}
 \begin{CodeInput}
-R> exdqlmDiagnostics(M1, M2, cols = c("red","blue"))
+R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red","blue"))
+R> print(diagM1M2)
 \end{CodeInput}
+\begin{CodeOutput}
+   Diagnostic       M1        M2
+           KL    0.132    0.1050
+ KL (flipped)    0.125    0.0451
+         CRPS    8.611    6.4412
+         pplc 3919.293 2348.5556
+ run-time (s)    6.427   30.5890
+\end{CodeOutput}
 \end{CodeChunk}
 
-\aA{Finally, the function \code{exdqlmDiagnostics()} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the VB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. A simple example is seen below.}
+Finally, the function \code{exdqlmDiagnostics()} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the VB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. A simple example is seen below.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -789,9 +806,9 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 [1] 0.90 0.85
 \end{CodeOutput}
 \end{CodeChunk}
-\aA{On this coarse grid, the CRPS and KL criteria agree and both select the seasonal discount factor \(0.85\), so the choice used above is retained.}
+On this coarse grid, the CRPS and KL criteria agree and both select the seasonal discount factor \(0.85\), so the choice used above is retained.
 
-\aA{The runtime comparisons below were obtained under the manuscript backend profile. Global backend options and their defaults are summarized in Appendix Table \ref{tab:backendopts}; the exact active settings, together with hardware, software, seed, and dataset details, are recorded in the accompanying reproducibility materials.}
+\RB{Runtimes below where?? In the table? I am not sure what you are trying to say here. I think some (all?) of this should be moved to example 1 where we see the backend options in the MCMC output. }\aA{The runtime comparisons below were obtained under the manuscript backend profile. Global backend options and their defaults are summarized in Appendix Table \ref{tab:backendopts}; the exact active settings, together with hardware, software, seed, and dataset details, are recorded in the accompanying reproducibility materials.} 
 
 \begin{table}[t!]
 \centering
@@ -800,10 +817,10 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & pplc \\
  \midrule
- \tworowcell{DQLM} & \aA{VB} & \textbf{22.89} & \textbf{0.144} & 8.624 & 3906.5 \\
+ \tworowcell{DQLM} & VB & \textbf{22.89} & \textbf{0.144} & 8.624 & 3906.5 \\
  & MCMC & 273.68 & 0.153 & \textbf{7.708} & \textbf{3051.2} \\
  \midrule
- \tworowcell{exDQLM} & \aA{VB} & \textbf{104.09} & \textbf{0.078} & 6.416 & 2350.3 \\
+ \tworowcell{exDQLM} & VB & \textbf{104.09} & \textbf{0.078} & 6.416 & 2350.3 \\
  & MCMC & 343.14 & 0.126 & \textbf{5.075} & \textbf{2189.8} \\
  \bottomrule
 \end{tabular}
@@ -811,7 +828,21 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \label{tab:ex2bench}
 \end{table}
 
-\aA{Table \ref{tab:ex2bench} gives a compact dynamic runtime-and-quality comparison under matched 3000-draw summaries. For the simpler DQLM, the VB fit remains much faster than MCMC and attains the smaller KL divergence, whereas the MCMC fit achieves smaller values for the CRPS and the pplc. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is again mixed: the VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone: the practical tradeoff depends on both the model and the inferential method being compared.}
+\RB{Finally, we fit the both the DQLM and exDQLM with the MCMC algorithm for dynamic runtime-and-quality comparison under matched 3000-draw summaries.}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
++                df = c(0.9,0.85), dim.df = c(1,8),
++                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
++                dqlm.ind = TRUE,)
+R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
++                df = c(0.9,0.85), dim.df = c(1,8),
++                n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
+\end{CodeInput}
+\end{CodeChunk}
+
+\RB{Table \ref{tab:ex2bench} gives a compact comparison.} For the simpler DQLM, the VB fit remains much faster than MCMC and attains the smaller KL divergence, whereas the MCMC fit achieves smaller values for the CRPS and the pplc. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is again mixed. The VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone. The practical tradeoff depends on both the model and the inferential method being compared.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -827,28 +858,11 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \label{fig:ex3data}
 \end{figure}
 
-For our final example, we consider the average monthly natural water flow (cubic feet per second) at the Big Tree gauge of the San Lorenzo river in Santa Cruz County, CA, obtained by averaging daily USGS observations within each calendar month \citep{btflow}. In the article workflow we construct this monthly series directly from the staged daily USGS file rather than relying on a packaged monthly flow dataset. To keep the covariate structure of the original example, we pair this monthly USGS-derived series with the monthly Ni\~no 3.4 index \citep{nino34} supplied by the package. Because the package \code{nino34} series ends in April 2021, we restrict attention to the overlapping window from January 1987 through April 2021, for a total of 412 observations. With this example we show how to build a state-space structure manually for a dynamic quantile regression, apply our transfer-function exDQLM, examine individual components of the estimated quantiles, and perform quantitative model diagnostics to compare models.
-\begin{CodeChunk}
-\begin{CodeInput}
-R> bt.daily = read.csv("big_trees_daily_usgs_ppt_soil.csv")
-R> bt.daily$date = as.Date(bt.daily$date)
-R> bt.daily = bt.daily[order(bt.daily$date), c("date","usgs_cfs")]
-R> month.id = format(bt.daily$date, "%Y-%m")
-R> flow.monthly.df = aggregate(bt.daily["usgs_cfs"],
-+                             by = list(month = month.id), FUN = mean)
-R> flow.monthly = ts(flow.monthly.df$usgs_cfs, start = c(1980,1),
-+                   frequency = 12)
-R> flow.monthly = window(flow.monthly, end = c(2021,4))
-R> nino.monthly = window(nino34, start = start(flow.monthly),
-+                      end = end(flow.monthly))
-R> flow.fit = flow.monthly
-R> nino.input = nino.monthly
-\end{CodeInput}
-\end{CodeChunk}
+For next example, we consider the average monthly natural water flow (cubic feet per second) at the Big Tree gauge of the San Lorenzo river in Santa Cruz County, CA, from January 1937 through March 2026 \citep{btflow}, for a total of 471 observations. With this example we show how to build a state-space structure for dynamic quantile regression, apply our transfer-function exDQLM, examine individual components of the estimated quantiles, and perform quantitative model diagnostics to compare models.
 
-For this particular dataset, the interest is in low quantiles as a possible indicator of drought, thus we consider the $p_0=0.15$ quantile. To investigate climatological influence on this low quantile, we include the monthly Ni\~no 3.4 index as an input covariate in both models. The dynamic regression specification uses Ni\~no 3.4 directly as a time-varying regressor, while the transfer-function model uses the same contemporaneous monthly input and lets the transfer-function structure capture persistence through \(\zeta_t\) and \(\lambda\). The fitted comparison below therefore uses the full overlapping sample from January 1987 through April 2021, for a total of 412 observations. To avoid modeling problems caused by the scale and extremes in the Big Tree dataset, we fit the following models to the log monthly flow series shown in Figure \ref{fig:ex3data}.
+For this particular dataset, the interest is in low quantiles as a possible indicator of drought, thus we consider the $p_0=0.15$ quantile. To investigate any climatological influence on this low quantile, we include the Ni\~no 3.4 index \citep{nino34} as in input to our models. The Ni\~no 3.4 index is a measure of how anomalously warm or cool the average sea surface temperature is in the Ni\~no 3.4 region ($5^\circ$S-$5^\circ$N, $170^\circ$W-$120^\circ$W) of the Pacific Ocean. It is one of the most commonly used indices to define El Ni\~no and La Ni\~na events. The monthly Ni\~no 3.4 dataset used in our analysis is also included in the package as \code{nino34}; a time-series spanning January 1987 through March 2026, for a total of 471 observations. We model the relationship between Ni\~no 3.4 and the quantile with two model structures: a dynamic quantile regression and a transfer function as seen in Section \ref{sec:tf}. To avoid modeling problems caused by the scale and extremes in the Big Tree dataset, we fit the following models to the log monthly flow series shown in Figure \ref{fig:ex3data}.
 
-In addition to the component that captures the relationship with the Ni\~no 3.4 input, we include a first-order polynomial trend component together with a Fourier-form seasonal component with period 12. To mirror the annualized seasonal structure used in the daily redesign, we include harmonics \(h = 1\), \(h = 2\), and \(h = 0.1469118636\), corresponding to annual, semiannual, and approximately 6.8-year cycles on the monthly scale.
+In addition to the component that captures the relationship with the Ni\~no 3.4 input, we include a first-order polynomial trend component together with a Fourier-form seasonal component with period 12. We include harmonics \(h = 1\), \(h = 2\), and \(h = 0.1469118636\), corresponding to annual, semiannual, and approximately 6.8-year cycles on the monthly scale.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> trend.comp = polytrendMod(1, m0 = 3, C0 = 0.1)
@@ -861,38 +875,35 @@ R> model = trend.comp + seas.comp
 Next, we create the dynamic regression component for our first model using the monthly Ni\~no 3.4 series directly. Combining this with the trend and seasonal components gives our complete state-space structure for the dynamic quantile regression model.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> reg.comp = regMod(nino.input, m0 = 0, C0 = matrix(1,1,1))
+R> reg.comp = regMod(nino34, m0 = 0, C0 = matrix(1,1,1))
 R> model.w.reg = model + reg.comp
 \end{CodeInput}
 \end{CodeChunk}
 
-To allow all components to evolve gradually over time while keeping the fitted paths smooth, we set every discount factor in both models to 0.97. In particular, we use 0.97 for the trend block, the seasonal block, the monthly Ni\~no 3.4 regression block, and the transfer-function block.
+To allow all components to evolve gradually over time while keeping the fitted paths smooth, we set every discount factor in both models to 0.97. In particular, we use 0.97 for the trend, the seasonal, the monthly Ni\~no 3.4 regression, and the transfer-function components. This is done via the parameter \code{df} in \code{exdqlmLDVB()} and the parameter \code{tf.df} in \code{exdqlmTransferLDVB()}.
 
-The transfer-function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{exdqlmTransferLDVB()} to obtain a fast approximate fit on the monthly series, although the corresponding exact posterior workflow is also available through \code{exdqlmTransferMCMC()}. On the coarse candidate grid used here, we use the KL divergence as a calibration-oriented screening criterion to select the transfer-function decay rate, and then assess the resulting fitted models with the broader diagnostic comparison reported below. This screen selects a decay rate of 0.50.
+The transfer-function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{exdqlmTransferLDVB()} to obtain a fast approximate fit on the monthly series. The corresponding exact posterior estimation is also available through \code{exdqlmTransferMCMC()}. On the coarse candidate grid used in this illustration, optimization using the CRPS suggests the effects of the Ni\~no 3.4 index decay at an optimal transfer function rate of $\lambda = 0.9$.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> possible.lams = c(0.1,0.3,0.5,0.7,0.85)
-R> KLs <- vector("numeric")
-R> ref.samp = rnorm(length(flow.fit))
+R> possible.lams = seq(0.1,0.9,0.1)
+R> metrics <- matrix(NA_real_, length(possible.lams), 3,
++                  dimnames = list(NULL, c("CRPS","KL","pplc")))
+R> ref.samp = rnorm(length(BTflow))
 R> for(i in 1:length(possible.lams)){
-R>   temp.M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
++  temp.M2 = exdqlmTransferLDVB(y = log(BTflow), p0 = 0.15, model = model,
 +                               df = c(0.97,0.97), dim.df = c(1,6),
-+                               X = nino.input, tf.df = c(0.97),
-+                               lam = possible.lams[i],
-+                               tf.m0 = c(0,0),
-+                               tf.C0 = diag(c(0.1,0.005),2),
-+                               sig.init = 0.1, gam.init = - 0.1,
-+                               fix.sigma = FALSE,
++                               X = nino34, tf.df = c(0.95), lam = possible.lams[i],
++                               tf.m0 = c(0,0), tf.C0 = diag(c(0.1,0.005),2),
++                               sig.init = 0.1, gam.init = -0.1,
 +                               tol = 0.05, verbose = FALSE)
-R>   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
-+                            ref = ref.samp)
-R>   KLs = c(KLs,temp.check$m1.KL)
+R>   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE, ref = ref.samp)
+R>   metrics[i,] = c(temp.check$m1.CRPS, temp.check$m1.KL,temp.check$m1.pplc)
 R> }
-R> # optimal lambda based off KL divergence
-R> possible.lams[which.min(KLs)]
+R> # optimal lambda based off CRPS
+R> possible.lams[which.min(metrics[, "CRPS"])]
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 0.5
+[1] 0.9
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -907,10 +918,9 @@ With these discount factors and optimal $\lambda$, we estimate the dynamic quant
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> M1 = exdqlmLDVB(y = log(flow.fit), p0 = 0.15, model = model.w.reg,
+R> M1 = exdqlmLDVB(y = log(BTflow), p0 = 0.15, model = model.w.reg,
 +                df = c(0.97,0.97,0.97), dim.df = c(1,6,1),
 +                sig.init = 0.1, gam.init = - 0.1,
-+                fix.sigma = FALSE,
 +                tol = 0.05, verbose = FALSE)
 R> M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
 +                        df = c(0.97,0.97), dim.df = c(1,6),
@@ -918,16 +928,15 @@ R> M2 = exdqlmTransferLDVB(y = log(flow.fit), p0 = 0.15, model = model,
 +                        tf.m0 = c(0,0),
 +                        tf.C0 = diag(c(0.1,0.005),2),
 +                        sig.init = 0.1, gam.init = - 0.1,
-+                        fix.sigma = FALSE,
 +                        tol = 0.05, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
-To visualize the differences between the two resulting dynamic quantiles we use the function \code{exdqlmPlot}, the results of which are found in Figure \ref{fig:ex3quant}. For clarity we limit the figure to the period 1995 to 2015.
+To visualize the differences between the two resulting dynamic quantiles we use the function \code{exdqlmPlot}, the results of which are found in Figure \ref{fig:ex3quant}. For clarity we limit the figure to the period 1990 to 2010.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(log(flow.fit), col = "grey", ylim = c(1,8), xlim=c(1995,2015),
+R> plot(log(BTflow), col = "grey", ylim = c(1,8), xlim=c(1990,2010),
 +       ylab = "quantile 95% CrIs")
 R> exdqlmPlot(M1, add = TRUE)
 R> exdqlmPlot(M2, add = TRUE, col = "forest green")
@@ -941,19 +950,19 @@ R> exdqlmPlot(M2, add = TRUE, col = "forest green")
 \label{fig:ex3tftheta}
 \end{figure}
 
-The resulting quantiles exhibit visible differences. To identify from where these differences arise, we can use the function \code{compPlot} to examine the model components more closely. We examine the combined seasonal block first. Because the seasonal structure now contains three harmonics, the seasonal contribution is formed by the second through seventh elements of the state vector. The result is seen in Figure \ref{fig:ex3quant}, again limited to the years 1995 to 2015.
+The resulting quantiles exhibit visible differences. To identify from where these differences arise, we can use the function \code{compPlot} to examine the model components more closely. We examine the combined seasonal block first. Because the seasonal structure now contains three harmonics, the seasonal contribution is formed by the second through seventh elements of the state vector. The result is seen in Figure \ref{fig:ex3quant}, again limited to the years 1990 to 2010.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-2,2), xlim = c(1995,2015),
+R> plot(NA, ylim = c(-2,2), xlim = c(1990,2010),
 +         ylab = "seasonal components")
 R> compPlot(M1, index = 2:7, add = TRUE)
 R> compPlot(M2, index = 2:7, add = TRUE, col = "forest green")
 \end{CodeInput}
 \end{CodeChunk}
-Although the seasonal components of the two models exhibit differences in amplitude, more substantial differences appear in the Ni\~no 3.4-related components. Again, we use the function \code{compPlot} to visualize these components seen in Figure \ref{fig:ex3quant} from 1995 to 2015. For the regression model, the plotted contribution is simply the dynamic regression contribution of the monthly Ni\~no 3.4 covariate.
+Although the seasonal components of the two models exhibit differences in amplitude, more substantial differences appear in the Ni\~no 3.4-related components. Again, we use the function \code{compPlot} to visualize these components seen in Figure \ref{fig:ex3quant} from 1990 to 2010. For the regression model, the plotted contribution is simply the dynamic regression contribution of the monthly Ni\~no 3.4 covariate.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-2,2), xlim = c(1995,2015),
+R> plot(NA, ylim = c(-2,2), xlim = c(1990,2010),
 +          ylab = "Nino 3.4 components")
 R> compPlot(M1, index = 8, add = TRUE)
 R> compPlot(M2, index = 8:9, add = TRUE, col = "forest green")
@@ -976,23 +985,22 @@ R> title(expression(psi[t]))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{To further understand these transfer-function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here the effect is \(|\psi_{t-1} X_t|\), where \(X_t\) denotes the contemporaneous monthly Ni\~no 3.4 input. A median value of about \(3.76\) suggests that the transfer effect lasts on the order of four months.}
+To further understand these transfer-function parameters, we examine the median number of time steps until the effect of Ni\~no 3.4 on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here the effect is \(|\psi_{t-1} X_t|\), where \(X_t\) denotes the contemporaneous monthly Ni\~no 3.4 input. A median value of about \(11.32\) suggests that the transfer effect lasts on the order of eighteen months.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 3.758485
+[1] 18.14513
 \end{CodeOutput}
 \end{CodeChunk}
 
-Because the Ni\~no 3.4 series is available through April 2021, we use the final 18 months of the overlapping sample to illustrate the forecasting workflow; the results are shown in Figure \ref{fig:ex3forecast}.
+Because the Ni\~no 3.4 series is available through March 2026, we use the final 18 months of the overlapping sample to illustrate the forecasting workflow; the results are shown in Figure \ref{fig:ex3forecast}.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.6\textwidth]{ex3forecast.png}
-\caption{Example 3: Big Tree water flow. 18-step-ahead quantile forecast beginning October 2019 and extending through April 2021, overlaid on the log Big Tree water flow time series. The vertical dot-dashed line marks the start of the forecast period. Solid lines indicate mean estimates and dotted lines 95\% CrI, with the filtered estimates shown before the forecast origin and the forecast estimates beyond it.
-Estimates from $M_1$, the quantile regression model, are seen in purple/pink. Estimates from $M_2$, the transfer function model, are seen in green.}
+\caption{Example 3: Big Tree water flow. 18-step-ahead quantile forecast beginning September 2024 and extending through March 2026, overlaid on the log Big Tree water flow time series. The vertical dot-dashed line marks the start of the forecast period. Solid lines indicate mean estimates and dotted lines 95\% CrI, with the filtered estimates shown before the forecast origin and the forecast estimates beyond it. Estimates from $M_1$, the quantile regression model, are seen in purple/pink. Estimates from $M_2$, the transfer function model, are seen in green.}
 \label{fig:ex3forecast}
 \end{figure}
 
@@ -1030,7 +1038,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2,
 +                              cols = c("purple","orange"), plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-\aA{With this simpler monthly Ni\~no 3.4 specification, the resulting diagnostics are again not unanimous. The direct regression model attains the smaller KL divergence and CRPS, whereas the transfer-function model achieves the smaller pplc. The differences are fairly modest, so we view the two specifications as offering closely competing summaries of the same low-quantile dynamics: the direct regression is slightly favored by the calibration-oriented and full-distribution criteria, while the transfer-function model is favored by the target-quantile loss criterion.}
+\RB{Might need to redo this paragraph when we finalize the values in Table 8.} \aA{The resulting diagnostics are not unanimous. The direct regression model attains the smaller KL divergence and CRPS, whereas the transfer-function model achieves the smaller pplc. The differences are fairly modest, so we view the two specifications as offering closely competing summaries of the same low-quantile dynamics: the direct regression is slightly favored by the calibration-oriented and full-distribution criteria, while the transfer-function model is favored by the target-quantile loss criterion.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1047,7 +1055,7 @@ with sparse signal
 \[
 \boldsymbol{\beta}^\star = (3,\,1.5,\,0,\,0,\,2,\,0,\,0,\,0)^\top.
 \]
-\aA{We use the following benchmark data-generating mechanism.}
+We use the following benchmark data-generating mechanism.
 For each target quantile level \(p_0\), we generate
 \[
 Y_i^{(p_0)} = {\bf x}_i^\top \boldsymbol{\beta}^\star + \sigma_\varepsilon \{Z_i - \Phi^{-1}(p_0)\},
@@ -1106,11 +1114,11 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth]{ex4static.png}
-\caption{Example 4: sparse static exAL regression under the correlated Gaussian benchmark with the RHS prior. Black diamonds denote the true non-intercept coefficients, orange intervals denote \aA{VB} 95\% posterior intervals, and blue intervals denote MCMC 95\% posterior intervals. Panels correspond to p0 = 0.05, 0.25, and 0.50.}
+\caption{Example 4: sparse static exAL regression under the correlated Gaussian benchmark with the RHS prior. Black diamonds denote the true non-intercept coefficients, orange intervals denote VB 95\% posterior intervals, and blue intervals denote MCMC 95\% posterior intervals. Panels correspond to p0 = 0.05, 0.25, and 0.50.}
 \label{fig:ex4static}
 \end{figure}
 
-\aA{Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. The median panel is especially clean, with the MCMC reference intervals covering all plotted coefficients, while the VB fit remains visually close for the active signals.}
+Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. The median panel is especially clean, with the MCMC reference intervals covering all plotted coefficients, while the VB fit remains visually close for the active signals.
 
 \begin{table}[t!]
 \centering
@@ -1120,13 +1128,13 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & \aA{VB} & \textbf{22.50} & 0.267 & 0.128 & 0.714 \\
+ \tworowcell{0.05} & VB & \textbf{22.50} & 0.267 & 0.128 & 0.714 \\
  & MCMC & 156.91 & \textbf{0.201} & \textbf{0.085} & \textbf{0.515} \\
  \midrule
- \tworowcell{0.25} & \aA{VB} & \textbf{13.33} & 0.112 & 0.079 & 0.302 \\
+ \tworowcell{0.25} & VB & \textbf{13.33} & 0.112 & 0.079 & 0.302 \\
  & MCMC & 149.08 & \textbf{0.082} & \textbf{0.070} & \textbf{0.267} \\
  \midrule
- \tworowcell{0.50} & \aA{VB} & \textbf{2.51} & 0.110 & 0.101 & 0.382 \\
+ \tworowcell{0.50} & VB & \textbf{2.51} & 0.110 & 0.101 & 0.382 \\
  & MCMC & 155.25 & \textbf{0.013} & \textbf{0.074} & \textbf{0.367} \\
  \bottomrule
 \end{tabular}}
@@ -1139,14 +1147,15 @@ Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference f
 \section{Conclusion}
 \label{sec:summary}
 
-\aA{In this paper we presented the \proglang{R} package \pkg{exdqlm} for Bayesian estimation and analysis of flexible dynamic quantile linear models. The package provides exact posterior inference via MCMC and fast approximate posterior inference via VB for dynamic state-space quantile models, while also supporting transfer-function exDQLMs, static exAL quantile regression with shrinkage priors, forecasting, model diagnostics, and post hoc posterior-predictive synthesis across separately fitted quantiles. Together, these functions provide a practical framework for dynamic and static quantile modeling beyond the AL special case while preserving a computationally convenient latent-variable representation.}
+In this paper we presented the \proglang{R} package \pkg{exdqlm} for Bayesian estimation and analysis of flexible dynamic quantile linear models. The package provides exact posterior inference via MCMC and fast approximate posterior inference via VB for dynamic state-space quantile models, while also supporting transfer-function exDQLMs, static exAL quantile regression with shrinkage priors, forecasting, model diagnostics, and post hoc posterior-predictive synthesis across separately fitted quantiles. Together, these functions provide a practical framework for dynamic and static quantile modeling beyond the AL special case while preserving a computationally convenient latent-variable representation.
 
-\aA{The examples illustrate the main workflows supported by the package. The dynamic examples show how \pkg{exdqlm} can be used to construct state-space models, estimate dynamic quantiles, compare the exDQLM with its AL special case, examine transfer function effects, and evaluate model fit through diagnostics and forecasting. The static example shows how the same framework can be used for sparse quantile regression with both VB and MCMC, with VB serving as a fast first-pass approximation and MCMC providing the reference analysis when more faithful posterior uncertainty quantification is required. Viewed together, these examples highlight the two software contributions that most clearly distinguish the package within the current ecosystem: Bayesian dynamic state-space quantile modeling and a unified workflow that extends from static regularized exAL regression to post hoc predictive synthesis.}
+The examples illustrate the main workflows supported by the package. The dynamic examples show how \pkg{exdqlm} can be used to construct state-space models, estimate dynamic quantiles, compare the exDQLM with its AL special case, examine transfer function effects, and evaluate model fit through diagnostics and forecasting. The static example shows how the same framework can be used for sparse quantile regression with both VB and MCMC, with VB serving as a fast first-pass approximation and MCMC providing the reference analysis when more faithful posterior uncertainty quantification is required. Viewed together, these examples highlight the two software contributions that most clearly distinguish the package within the current ecosystem: Bayesian dynamic state-space quantile modeling and a unified workflow that extends from static regularized exAL regression to post hoc predictive synthesis.
 
 
 %\section{Acknowledgments}
 
 \section*{Appendix: Global Backend Options}
+\RB{Does the appendix go after the references??}
 \begin{table}[!t]
 \centering
 \TableStyle
