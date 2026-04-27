@@ -76,7 +76,7 @@ run_step "ex3_manuscript" \
   Rscript "$ARTICLE_ROOT/analysis/run_all.R" \
     --stage manuscript \
     --pkg-path "$PKG_ROOT" \
-    --targets ex3data,ex3quantcomps,ex3quantcomps_ldvb,ex3zetapsi,ex3zetapsi_ldvb,ex3forecast,ex3forecast_ldvb,ex3tables,ex3tables_ldvb \
+    --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables \
     --force-refit \
     --skip-tests
 

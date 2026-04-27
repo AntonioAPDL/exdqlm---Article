@@ -20,8 +20,10 @@ and the alternative monthly Example 3 sandbox against the current article-facing
 - Example 2: manuscript workflow uses LDVB and MCMC only.
 - Example 2: no ISVB figures, tables, or comparison artifacts in the article
   workflow.
-- Example 3: use monthly USGS flow aggregated from the staged daily USGS file.
-- Example 3: use package `nino34`.
+- Example 3: use the observed monthly USGS `BTflow` series shipped by the package.
+- Example 3: use standardized `NOI` and `AMO` columns from package `climateIndices`;
+  do not use local precipitation, soil moisture, or the old `nino34`-only
+  manuscript specification.
 - Example 4: run the support-only seed screen first, then rerun the tracked example using the screen-selected dataset seed.
 - Alternative Example 3: rerun the reduced-6 monthly sandbox separately after
   the main manuscript Example 3 rerun.
@@ -85,7 +87,7 @@ Rscript $ARTICLE/analysis/run_all.R \
 Rscript $ARTICLE/analysis/run_all.R \
   --stage manuscript \
   --pkg-path "$PKG" \
-  --targets ex3data,ex3quantcomps,ex3quantcomps_ldvb,ex3zetapsi,ex3zetapsi_ldvb,ex3forecast,ex3forecast_ldvb,ex3tables,ex3tables_ldvb \
+  --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables \
   --force-refit \
   --skip-tests
 ```

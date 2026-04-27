@@ -1,6 +1,6 @@
 example_id: ex3_big_tree
 article_section: sec:ex3
-title: Big Tree monthly flow dynamic regression and transfer function
+title: Big Tree monthly flow with NOI/AMO dynamic regression and transfer function
 script: run.R
 parameter_source: analysis/config/params_manuscript.yml#profiles.*.ex3
 primary_target: ex3
@@ -11,9 +11,11 @@ targets:
   transfer_states: ex3zetapsi
   forecast: ex3forecast
   manuscript_tables: ex3tables
-  ldvb_support: ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb
+  legacy_ldvb_aliases: ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb
 notes:
   - This is the only manuscript-facing Big Tree workflow.
+  - The response is the observed USGS monthly-average BTflow dataset shipped by exdqlm.
+  - The manuscript covariates are standardized NOI and AMO from the package climateIndices dataset.
   - Older Big Tree alternatives are preserved under analysis/support/.
   - Keep precipitation and soil moisture out of the manuscript workflow unless the paper decision changes.
 run_commands:

@@ -92,7 +92,6 @@ Rscript analysis/run_all.R --stage manuscript --targets ex2bench --profile stand
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4screen --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --force-refit --skip-tests

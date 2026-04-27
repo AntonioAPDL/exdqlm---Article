@@ -111,11 +111,9 @@ Publication-facing:
 - [ex3_diagnostics_summary.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv)
 
 Support-only:
-- [ex3_lambda_scan_kl.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_lambda_scan_kl.csv)
-- [ex3quantcomps_ldvb.png](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/figures/ex3quantcomps_ldvb.png)
-- [ex3zetapsi_ldvb.png](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/figures/ex3zetapsi_ldvb.png)
-- [ex3forecast_ldvb.png](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/figures/ex3forecast_ldvb.png)
-- [ex3_diagnostics_summary_ldvb.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_diagnostics_summary_ldvb.csv)
+- [ex3_lambda_scan.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_lambda_scan.csv)
+- [ex3_model_dataset.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_model_dataset.csv)
+- [ex3_covariate_scaling.csv](/home/jaguir26/local/src/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv)
 
 ### Example 4: Static exAL benchmark
 

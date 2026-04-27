@@ -66,20 +66,4 @@ testthat::test_that("key figure overlays are present (color checks)", {
     testthat::expect_gt(count_near_color(ex3f, forestgreen), 40)
   }
 
-  ex3q_ld <- read_img("analysis/manuscript/outputs/figures/ex3quantcomps_ldvb.png")
-  if (!is.null(ex3q_ld)) {
-    testthat::expect_gt(count_near_color(ex3q_ld, ldvb_m1), 30)
-    testthat::expect_gt(count_near_color(ex3q_ld, ldvb_m2), 20)
-  }
-
-  ex3z_ld <- read_img("analysis/manuscript/outputs/figures/ex3zetapsi_ldvb.png")
-  if (!is.null(ex3z_ld)) {
-    testthat::expect_gt(count_near_color(ex3z_ld, ldvb_m2), 20)
-  }
-
-  ex3f_ld <- read_img("analysis/manuscript/outputs/figures/ex3forecast_ldvb.png")
-  if (!is.null(ex3f_ld)) {
-    testthat::expect_gt(count_near_color(ex3f_ld, ldvb_m1), 30)
-    testthat::expect_gt(count_near_color(ex3f_ld, ldvb_m2), 20)
-  }
 })

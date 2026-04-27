@@ -5,17 +5,13 @@ article_figures:
   - ex3zetapsi.png
   - ex3forecast.png
 support_figures:
-  - ex3quantcomps_ldvb.png
-  - ex3zetapsi_ldvb.png
-  - ex3forecast_ldvb.png
 tables:
   - ex3_diagnostics_summary.csv
-  - ex3_lambda_scan_kl.csv
-  - ex3_diagnostics_summary_ldvb.csv
-  - ex3_lambda_scan_kl_ldvb.csv
+  - ex3_lambda_scan.csv
+  - ex3_model_dataset.csv
+  - ex3_covariate_scaling.csv
 logs:
   - ex3_run_summary.txt
-  - ex3_run_summary_ldvb.txt
 cache_prefixes:
   - ex3_
 article_targets:

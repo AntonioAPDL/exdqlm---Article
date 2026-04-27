@@ -172,6 +172,11 @@ Nishimura A, Suchard MA (2023).
 \newblock \emph{Bayesian Analysis}, \textbf{18}(2), 367--390.
 \newblock \doi{10.1214/22-BA1308}.
 
+\bibitem[{{NOAA Physical Sciences Laboratory}(2026)}]{noaaClimateIndices}
+{NOAA Physical Sciences Laboratory} (2026).
+\newblock \enquote{Climate Indices: Monthly Atmospheric and Ocean Time Series.}
+\newblock \urlprefix\url{https://psl.noaa.gov/data/climateindices/}.
+
 \bibitem[{Ostwald \emph{et~al.}(2014)Ostwald, Kirilina, Starke, and
   Blankenburg}]{ostwald2014tutorial}
 Ostwald D, Kirilina E, Starke L, Blankenburg F (2014).
@@ -200,15 +205,6 @@ Prado R, Molina F, Huerta G (2006).
   hierarchical VAR mixtures.}
 \newblock \emph{Computational Statistics \& Data Analysis}, \textbf{51}(3),
   1445--1462.
-
-\bibitem[{Rayner \emph{et~al.}(2003)Rayner, Parker, Horton, Folland, Alexander,
-  Rowell, Kent, and Kaplan}]{nino34}
-Rayner N, Parker DE, Horton E, Folland CK, Alexander LV, Rowell D, Kent EC,
-  Kaplan A (2003).
-\newblock \enquote{Global analyses of sea surface temperature, sea ice, and
-  night marine air temperature since the late nineteenth century.}
-\newblock \emph{Journal of Geophysical Research: Atmospheres},
-  \textbf{108}(D14).
 
 \bibitem[{Reich \emph{et~al.}(2009)Reich, Bondell, and
   Wang}]{reich2009flexible}

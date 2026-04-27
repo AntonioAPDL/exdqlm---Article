@@ -39,7 +39,7 @@ Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
 ```
