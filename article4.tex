@@ -1170,8 +1170,10 @@ The examples illustrate the main workflows supported by the package. The dynamic
 
 %\section{Acknowledgments}
 
-\section*{Appendix: Global Backend Options}
-\RB{Does the appendix go after the references??}
+\bibliography{bibl}
+
+\appendix
+\section{Global backend options}
 \begin{table}[!t]
 \centering
 \TableStyle
@@ -1194,9 +1196,6 @@ Option & Purpose & Default \\
 \caption{Package-level runtime options exposed through \code{options(...)} for backend routing and ELBO monitoring in \pkg{exdqlm}. Function-level inference controls are documented separately in the function interfaces (for example, Table \ref{table:post}).}
 \label{tab:backendopts}
 \end{table}
-
-
-\bibliography{bibl}
 
 
 \end{document}
