@@ -862,19 +862,19 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Big Tree water flows}
+\subsection{Big Tree water flow}
 \label{sec:ex3}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=1\textwidth]{ex3data.png}
-\caption{Example 3: Big Tree water flow. Top: observed average monthly water flow at the Big Tree gauge of the San Lorenzo river in Santa Cruz County, CA, plotted on the log scale. Bottom: standardized monthly values of the Northern Oscillation Index (NOI) and Atlantic Multidecadal Oscillation (AMO) index. The displayed modeling window spans January 1987 through December 2022.}
+\caption{Example 3: Big Tree water flow. Top: observed average monthly water flow at the Big Tree gauge of the San Lorenzo River in Santa Cruz County, CA, plotted on the log scale. Bottom: standardized monthly values of the Northern Oscillation Index (NOI) and Atlantic Multidecadal Oscillation (AMO) index. The displayed modeling window spans January 1987 through December 2022.}
 \label{fig:ex3data}
 \end{figure}
 
-\aA{For the next example, we consider the observed average monthly natural water flow (cubic feet per second) at the Big Tree gauge of the San Lorenzo river in Santa Cruz County, CA \citep{btflow}. The \pkg{exdqlm} package includes the monthly \code{BTflow} series through March 2026. For the analysis below, we use the overlap between \code{BTflow} and the package \code{climateIndices} data frame, which gives 432 complete monthly observations from January 1987 through December 2022. With this example we show how to build a state-space structure for dynamic quantile regression, apply our transfer-function exDQLM, examine individual components of the estimated quantiles, and perform quantitative model diagnostics to compare models.}
+\aA{For the next example, we consider observed average monthly water flow (cubic feet per second) at the Big Tree gauge of the San Lorenzo River in Santa Cruz County, CA \citep{btflow}. The \pkg{exdqlm} package includes these measurements as the monthly time series \code{BTflow}, which extends through March 2026. In the analysis below, we use the complete overlap between \code{BTflow} and the package data frame \code{climateIndices}, giving 432 monthly observations from January 1987 through December 2022. This example illustrates how to construct a dynamic quantile model with external covariates, fit the transfer-function extension, examine fitted components, and compare models using the diagnostics introduced above.}
 
-\aA{For this particular dataset, the interest is in low quantiles as a possible indicator of drought, so we consider the $p_0=0.15$ quantile. To investigate broader climatological associations without reusing local precipitation or soil-moisture inputs, we use two monthly indices from \code{climateIndices}: the Northern Oscillation Index (NOI) and the Atlantic Multidecadal Oscillation (AMO) index. These were selected from a broader screening analysis of monthly climate indices compiled from the NOAA Physical Sciences Laboratory climate-index collection \citep{noaaClimateIndices}. We model their relationship with the low-flow quantile using two model structures: a dynamic quantile regression and the transfer-function exDQLM from Section \ref{sec:tf}. To avoid modeling problems caused by the scale and extremes in the Big Tree dataset, we fit the following models to the log monthly flow series shown in Figure \ref{fig:ex3data}.}
+\aA{Because low-flow behavior is the main hydrological feature of interest, we focus on the \(p_0=0.15\) quantile. As predictors, we use two standardized monthly climate indices from \code{climateIndices}: the Northern Oscillation Index (NOI) and the Atlantic Multidecadal Oscillation (AMO) index. These indices were selected from a broader screen of monthly climate indices compiled from the NOAA Physical Sciences Laboratory climate-index collection \citep{noaaClimateIndices}. We use only two indices, rather than a larger screened set, so that the section remains focused on the package workflow. Both models are fit to the log monthly flow series shown in Figure \ref{fig:ex3data}.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -893,7 +893,7 @@ R> X.input = scale(as.matrix(ex3.df[, c("noi", "amo")]))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{In addition to the components that capture the relationship with the standardized NOI and AMO inputs, we include a first-order polynomial trend component together with a Fourier-form seasonal component with period 12. We include harmonics \(h = 1\), \(h = 2\), and \(h = 0.1469118636\), corresponding to annual, semiannual, and approximately 6.8-year cycles on the monthly scale.}
+\aA{The baseline state-space model contains a first-order polynomial trend and a Fourier-form seasonal component with period 12. The seasonal block includes \(h = 1\), \(h = 2\), and \(h = 0.1469118636\), corresponding to annual, semiannual, and approximately 6.8-year cycles on the monthly scale.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> trend.comp = polytrendMod(1, m0 = quantile(y.fit, 0.15), C0 = 0.1)
@@ -903,7 +903,7 @@ R> model = trend.comp + seas.comp
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{Next, we create the dynamic regression component for our first model using the standardized monthly NOI and AMO series directly. Combining this with the trend and seasonal components gives our complete state-space structure for the dynamic quantile regression model.}
+\aA{Our first model, \(M_1\), adds NOI and AMO as contemporaneous dynamic regression effects. Combining this regression block with the trend and seasonal blocks gives the complete state-space structure for the dynamic quantile regression model.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> reg.comp = regMod(X.input, m0 = rep(0, 2), C0 = diag(1, 2))
@@ -911,37 +911,51 @@ R> model.w.reg = model + reg.comp
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{To allow all components to evolve gradually over time while keeping the fitted paths smooth, we set every discount factor in both models to 0.99. In particular, we use 0.99 for the trend, the seasonal block, the two dynamic regression coefficients, and the transfer-function components. This is done via the parameter \code{df} in \code{exdqlmLDVB()} and the parameter \code{tf.df} in \code{exdqlmTransferLDVB()}.}
+\aA{To allow the components to evolve gradually over time while keeping the fitted paths smooth, all discount factors are set to 0.99. Thus the same discounting level is used for the trend, seasonal block, dynamic regression coefficients, and transfer-function components. In the package interface, these choices are passed through \code{df} for the base state-space model and through \code{tf.df} for the transfer-function states.}
 
-\aA{The transfer-function model follows the structure detailed in Section \ref{sec:tf}. For this illustration we use \code{exdqlmTransferLDVB()} to obtain a fast approximate fit on the monthly series. The corresponding exact posterior estimation is also available through \code{exdqlmTransferMCMC()}. On the candidate grid used in this illustration, optimization using the CRPS selects a transfer-function rate of $\lambda = 0.4$. The screening loop records failed or non-finite fits separately before selecting the best finite CRPS value; all candidate values in this run completed successfully.}
+\aA{The second model, \(M_2\), uses the transfer-function structure from Section \ref{sec:tf}. We use \code{exdqlmTransferLDVB()} for a fast approximate fit to the monthly series; the corresponding MCMC routine, \code{exdqlmTransferMCMC()}, is available when exact posterior simulation is desired. The transfer rate \(\lambda\) is selected by scanning the grid \(0.1,0.2,\ldots,0.9\) and choosing the fitted value with the smallest finite CRPS. The code below records failed fits and non-finite diagnostic values explicitly, which is useful in grid searches where some candidate specifications may be numerically unstable. In this run, all candidate values completed successfully and CRPS selected \(\lambda = 0.4\).}
 \begin{CodeChunk}
 \begin{CodeInput}
-R> possible.lams = seq(0.1,0.9,0.1)
-R> metrics <- matrix(NA_real_, length(possible.lams), 3,
-+                  dimnames = list(NULL, c("CRPS","KL","pplc")))
+R> possible.lams = seq(0.1, 0.9, 0.1)
+R> metrics = data.frame(lambda = possible.lams, CRPS = NA_real_,
++                      KL = NA_real_, pplc = NA_real_, status = "not_run")
 R> ref.samp = rnorm(length(y.fit))
-R> for(i in 1:length(possible.lams)){
-+    temp.M2 = exdqlmTransferLDVB(y = y.fit, p0 = 0.15, model = model,
-+                                 df = c(0.99,0.99), dim.df = c(1,6),
-+                                 X = X.input, tf.df = c(0.99,0.99),
-+                                 lam = possible.lams[i],
-+                                 tf.m0 = rep(0,3),
-+                                 tf.C0 = diag(c(0.1,0.005,0.005),3),
-+                                 sig.init = 0.1, gam.init = -0.1,
-+                                 tol = 0.05, verbose = FALSE)
-+    temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE, ref = ref.samp)
-+    metrics[i,] = c(temp.check$m1.CRPS, temp.check$m1.KL,
-+                    temp.check$m1.pplc)
+R> for(i in seq_along(possible.lams)){
++    temp.M2 = tryCatch(
++      exdqlmTransferLDVB(y = y.fit, p0 = 0.15, model = model,
++                         df = c(0.99,0.99), dim.df = c(1,6),
++                         X = X.input, tf.df = c(0.99,0.99),
++                         lam = possible.lams[i],
++                         tf.m0 = rep(0,3),
++                         tf.C0 = diag(c(0.1,0.005,0.005),3),
++                         sig.init = 0.1, gam.init = -0.1,
++                         tol = 0.05, verbose = FALSE),
++      error = identity)
++    if(inherits(temp.M2, "error")) {
++      metrics$status[i] = "fit_error"
++      next
++    }
++    temp.check = tryCatch(
++      exdqlmDiagnostics(temp.M2, plot = FALSE, ref = ref.samp),
++      error = identity)
++    if(inherits(temp.check, "error")) {
++      metrics$status[i] = "diagnostic_error"
++      next
++    }
++    metrics[i, c("CRPS","KL","pplc")] =
++      c(temp.check$m1.CRPS, temp.check$m1.KL, temp.check$m1.pplc)
++    metrics$status[i] = "ok"
 +  }
-R> # optimal lambda based off CRPS
-R> possible.lams[which.min(metrics[, "CRPS"])]
+R> ok = metrics$status == "ok" & is.finite(metrics$CRPS)
+R> if(!any(ok)) stop("No finite CRPS values were produced.")
+R> metrics$lambda[which(ok)[which.min(metrics$CRPS[ok])]]
 \end{CodeInput}
 \begin{CodeOutput}
 [1] 0.4
 \end{CodeOutput}
 \end{CodeChunk}
 
-\aA{With these discount factors and the CRPS-selected $\lambda$, we estimate the dynamic quantile regression model (\code{M1}) and transfer function model (\code{M2}).}
+\aA{With these discount factors and the CRPS-selected value of \(\lambda\), we estimate the dynamic regression model \code{M1} and the transfer-function model \code{M2}.}
 
 \begin{figure}[!t]
 \centering
@@ -966,7 +980,7 @@ R> M2 = exdqlmTransferLDVB(y = y.fit, p0 = 0.15, model = model,
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{To visualize the differences between the two resulting dynamic quantiles we use the function \code{exdqlmPlot}, the results of which are found in Figure \ref{fig:ex3quant}. For clarity we limit the figure to the period 1995 to 2015.}
+\aA{The upper panel of Figure \ref{fig:ex3quant} compares the fitted \(0.15\) quantiles from the two models over 1995--2015. The package function \code{exdqlmPlot()} displays the MAP estimate together with pointwise 95\% CrIs and can be used with \code{add = TRUE} to overlay fitted quantiles from several models.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -984,7 +998,7 @@ R> exdqlmPlot(M2, add = TRUE, col = "forest green")
 \label{fig:ex3tftheta}
 \end{figure}
 
-\aA{The resulting quantiles exhibit visible differences. To identify from where these differences arise, we can use the function \code{compPlot} to examine the model components more closely. We examine the combined seasonal block first. Because the seasonal structure contains three harmonics, the seasonal contribution is formed by the second through seventh elements of the state vector. The result is seen in Figure \ref{fig:ex3quant}, again limited to the years 1995 to 2015.}
+\aA{The fitted quantiles differ most clearly during periods of low flow. To see which parts of the state-space model drive these differences, we use \code{compPlot()} to examine selected model components. We begin with the combined seasonal contribution. Because the seasonal block contains three harmonics, this contribution is formed from the second through seventh elements of the state vector. The middle panel of Figure \ref{fig:ex3quant} shows the resulting seasonal estimates for the two models over the same 1995--2015 window.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(NA, ylim = c(-2,2), xlim = c(1995,2015),
@@ -993,7 +1007,7 @@ R> compPlot(M1, index = 2:7, add = TRUE)
 R> compPlot(M2, index = 2:7, add = TRUE, col = "forest green")
 \end{CodeInput}
 \end{CodeChunk}
-\aA{Although the seasonal components of the two models exhibit differences in amplitude, more substantial differences appear in the climate-index components. Again, we use the function \code{compPlot} to visualize these components seen in Figure \ref{fig:ex3quant} from 1995 to 2015. For the regression model, the plotted contribution is the combined direct dynamic regression contribution of the standardized NOI and AMO covariates.}
+\aA{The lower panel of Figure \ref{fig:ex3quant} compares the climate-index contribution. For \code{M1}, this is the combined direct regression contribution of the standardized NOI and AMO covariates. For \code{M2}, this is the transfer-function contribution induced by the same covariates. This view is useful because it separates differences in the fitted low-flow quantile into seasonal and covariate-driven components.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(NA, ylim = c(-2,2), xlim = c(1995,2015),
@@ -1004,7 +1018,7 @@ R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{For the transfer-function model, \code{M2}, it is also of interest to look at the estimates of parameters \(\zeta_t\) and \(\psi_t\) directly. Because these parameters augment the state-space model as discussed in Section \ref{sec:tf}, the function \code{compPlot} can also be used to look at them directly via the parameter \code{just.theta = TRUE}. This setting returns the dynamic posterior estimates of a single index of the state vector \(\boldsymbol{\theta}_t\) (or \(\tilde{\boldsymbol{\theta}}_t\) in the case of the transfer-function model). Here the indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and \(\psi_{\mathrm{AMO},t}\), respectively. Results can be found in Figure \ref{fig:ex3tftheta}.}
+\aA{For the transfer-function model, it is also informative to inspect the augmented transfer states directly. As described in Section \ref{sec:tf}, \(\zeta_t\) controls the dynamic transfer effect and the \(\psi_t\) states determine how the contemporaneous covariates enter that transfer term. Setting \code{just.theta = TRUE} in \code{compPlot()} plots a single element of the state vector \(\boldsymbol{\theta}_t\), or \(\tilde{\boldsymbol{\theta}}_t\) for the transfer-function model. In this fitted model, indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and \(\psi_{\mathrm{AMO},t}\), respectively; these states are shown in Figure \ref{fig:ex3tftheta}.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1028,7 +1042,7 @@ R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{To further understand these transfer-function parameters, we examine the median number of time steps until the transfer effect on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here the effect is computed from the fitted transfer state and the standardized contemporaneous climate-index inputs. A median value of about \(5.53\) suggests that the transfer effect lasts on the order of five to six months.}
+\aA{The fitted object also reports \code{median.kt}, the median number of time steps until the transfer effect on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. In this example, the value is approximately 5.53, suggesting that the transfer effect persists for about five to six months.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
@@ -1038,7 +1052,7 @@ R> M2$median.kt
 \end{CodeOutput}
 \end{CodeChunk}
 
-\aA{We use the final 18 months of the aligned \code{BTflow}/\code{climateIndices} sample to illustrate the forecasting workflow; the results are shown in Figure \ref{fig:ex3forecast}.}
+\aA{We next hold out the final 18 months of the aligned \code{BTflow}/\code{climateIndices} sample to illustrate the forecasting workflow. Figure \ref{fig:ex3forecast} overlays the filtered estimates before the forecast origin and the 18-step-ahead forecasts after it.}
 
 \begin{figure}[!t]
 \centering
@@ -1058,7 +1072,7 @@ R> exdqlmForecast(start.t = length(flow.fit)-18, k = 18, m1 = M2,
 % R> abline(v = xy.coords(log(flow.fit))$x[length(flow.fit)-18],
 % +           col = "orange", lty = 5)
 
-\aA{Finally, we use the function \code{exdqlmDiagnostics()} to compute the KL divergence, CRPS, and pplc discussed in Section \ref{sec:diags}. Table \ref{tab:ex3} summarizes the resulting diagnostic comparison.}
+\aA{Finally, we use \code{exdqlmDiagnostics()} to compute the KL divergence, CRPS, and pplc discussed in Section \ref{sec:diags}. Table \ref{tab:ex3} summarizes the resulting diagnostic comparison.}
 
 \begin{table}[t!]
 \centering
@@ -1078,10 +1092,11 @@ R> exdqlmForecast(start.t = length(flow.fit)-18, k = 18, m1 = M2,
 \begin{CodeChunk}
 \begin{CodeInput}
 R> checks.out = exdqlmDiagnostics(M1, M2, ref = ref.samp,
-+                              cols = c("purple","orange"), plot = FALSE)
++                              cols = c("purple","forest green"),
++                              plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-\aA{The resulting diagnostics are not unanimous. The direct regression model attains the smaller KL divergence and CRPS, whereas the transfer-function model achieves the smaller pplc. The CRPS values are especially close, so we view the two specifications as offering closely competing summaries of the same low-quantile dynamics: the direct regression is slightly favored by the calibration-oriented and full-distribution criteria, while the transfer-function model is favored by the target-quantile loss criterion.}
+\aA{The diagnostics give a mixed but useful comparison. The direct regression model has the smaller KL divergence and CRPS, whereas the transfer-function model has the smaller pplc. The CRPS values are nearly identical, so we do not interpret the table as selecting a single clearly dominant model. Instead, the example illustrates how the package diagnostics expose different aspects of fit: the direct regression is slightly favored by calibration-oriented and full-distribution criteria, while the transfer-function model is favored by the target-quantile loss criterion.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
