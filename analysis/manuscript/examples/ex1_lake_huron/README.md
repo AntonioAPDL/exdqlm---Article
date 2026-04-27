@@ -24,3 +24,7 @@ Rscript analysis/run_all.R --stage manuscript --tests-only
 
 The article currently uses `ex1mcmc.png` and `ex1quants.png`; `ex1synth.png`
 is a support figure.
+
+`ex1_synthesis_bridge_check.csv` records the observed-period synthesis endpoint
+and the first forecast synthesis time. This is a lightweight audit for the
+visual bridge used at the forecast origin in Figure 2(d).

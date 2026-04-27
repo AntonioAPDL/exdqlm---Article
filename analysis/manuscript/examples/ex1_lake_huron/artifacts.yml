@@ -6,6 +6,7 @@ support_figures:
   - ex1synth.png
   - ex1_kernel_compare.png
 tables:
+  - ex1_synthesis_bridge_check.csv
   - ex1_runtime_summary.csv
   - ex1_kernel_summary.csv
   - ex1_kernel_chain_stability.csv

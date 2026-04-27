@@ -58,6 +58,7 @@ if (!need_ex1) {
   fc50 <- NULL
   fc05 <- NULL
   ex1_synthesis <- NULL
+  ex1_synthesis_bridge_check <- NULL
   sigma_trace <- NULL
   gamma_trace <- NULL
   thin_idx <- integer(0)
@@ -143,6 +144,49 @@ if (!need_ex1) {
     graphics::lines(x_future, c(qmap[fc$start.t], fc$ff), col = cols[2], lwd = lwd_main)
     graphics::lines(x_future, c(qub[fc$start.t], fqub), col = cols[2], lty = 3, lwd = lwd_ci)
     graphics::lines(x_future, c(qlb[fc$start.t], fqlb), col = cols[2], lty = 3, lwd = lwd_ci)
+  }
+
+  synthesis_forecast_origin_check <- function(syn_obs, syn_future, y_ts) {
+    ts_xy <- grDevices::xy.coords(y_ts)
+    dt_local <- 1 / stats::frequency(y_ts)
+    observed_end_time <- tail(ts_xy$x, 1L)
+    first_forecast_time <- observed_end_time + dt_local
+
+    data.frame(
+      observed_end_time = observed_end_time,
+      first_forecast_time = first_forecast_time,
+      data_time_step = dt_local,
+      time_gap = first_forecast_time - observed_end_time,
+      observed_q025 = tail(as.numeric(syn_obs$summary$q025), 1L),
+      forecast_q025 = as.numeric(syn_future$summary$q025[1L]),
+      q025_jump = as.numeric(syn_future$summary$q025[1L]) - tail(as.numeric(syn_obs$summary$q025), 1L),
+      observed_q500 = tail(as.numeric(syn_obs$summary$q500), 1L),
+      forecast_q500 = as.numeric(syn_future$summary$q500[1L]),
+      q500_jump = as.numeric(syn_future$summary$q500[1L]) - tail(as.numeric(syn_obs$summary$q500), 1L),
+      observed_q975 = tail(as.numeric(syn_obs$summary$q975), 1L),
+      forecast_q975 = as.numeric(syn_future$summary$q975[1L]),
+      q975_jump = as.numeric(syn_future$summary$q975[1L]) - tail(as.numeric(syn_obs$summary$q975), 1L),
+      stringsAsFactors = FALSE
+    )
+  }
+
+  add_synthesis_forecast_bridge <- function(check, band.col, border = NA) {
+    graphics::polygon(
+      x = c(
+        check$observed_end_time,
+        check$first_forecast_time,
+        check$first_forecast_time,
+        check$observed_end_time
+      ),
+      y = c(
+        check$observed_q025,
+        check$forecast_q025,
+        check$forecast_q975,
+        check$observed_q975
+      ),
+      col = band.col,
+      border = border
+    )
   }
 
   ex1_quant_cols <- list(
@@ -323,6 +367,19 @@ if (!need_ex1) {
         syn_future = syn_future
       )
     }, note = sprintf("ex1_synthesis_v5_s3_plot_seed%s", seed_value))
+
+    ex1_synthesis_bridge_check <- synthesis_forecast_origin_check(
+      ex1_synthesis$syn_obs,
+      ex1_synthesis$syn_future,
+      y_ts
+    )
+    save_table_csv(
+      ex1_synthesis_bridge_check,
+      filename = "ex1_synthesis_bridge_check.csv",
+      artifact_id = "tab_ex1_synthesis_bridge",
+      manuscript_target = "support: Example 1 synthesis forecast-origin check",
+      notes = "Checks that the forecast synthesis begins one Lake Huron time step after the observed-period synthesis endpoint; Figure 2(d) uses these endpoints for the visual interval bridge."
+    )
   }
 
   if (need_ex1quants) {
@@ -410,6 +467,10 @@ if (!need_ex1) {
         ylab = "predictive synthesis",
         main = "(d) Forecast synthesis"
       )
+      add_synthesis_forecast_bridge(
+        ex1_synthesis_bridge_check,
+        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+      )
       plot(
         ex1_synthesis$syn_future,
         time = x_future_fore,
@@ -440,7 +501,7 @@ if (!need_ex1) {
       relative_path = "analysis/manuscript/outputs/figures/ex1quants.png",
       manuscript_target = "fig:ex1quants",
       status = "reproduced",
-      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row."
+      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row. Panel (d) bridges the observed synthesis endpoint to the first forecast synthesis endpoint for visual continuity on the annual time scale."
     )
   }
 
@@ -449,6 +510,9 @@ if (!need_ex1) {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("source_draws=%d | synthesized_draws=%d\n", synth_source_draws, synth_n_samp))
       cat(sprintf("window_start=%s | forecast_horizon=%d\n\n", format(synth_window_start), k_fore))
+      cat("Forecast-origin synthesis alignment:\n")
+      print(ex1_synthesis_bridge_check)
+      cat("\n")
       cat("Observed-period synthesis summary:\n")
       print(summary(ex1_synthesis$syn_obs$summary$q500))
       cat("\nForecast-period synthesis summary:\n")
@@ -495,6 +559,10 @@ if (!need_ex1) {
         y.col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
         ylab = "predictive synthesis"
       )
+      add_synthesis_forecast_bridge(
+        ex1_synthesis_bridge_check,
+        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+      )
       plot(
         ex1_synthesis$syn_future,
         time = x_future_fore,
@@ -526,7 +594,7 @@ if (!need_ex1) {
       relative_path = "analysis/manuscript/outputs/figures/ex1synth.png",
       manuscript_target = "support: Example 1 standalone synthesis figure",
       status = "reproduced",
-      notes = "Standalone support figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon."
+      notes = "Standalone support figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon, with a one-step visual bridge at the forecast origin."
     )
   }
 

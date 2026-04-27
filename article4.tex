@@ -560,7 +560,7 @@ R> legend("topright", lty = 1, bty = "n", col = c("purple","blue","forest green"
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.9\textwidth]{ex1quants.png}
-\caption{Example 1: Lake Huron. Top-left: MAP estimates and 95\% CrIs of the estimated quantiles, plotted with the data (grey). Top-right: forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (seen from 1952 to 1972). Bottom-left: synthesized posterior predictive 95\% interval over the observed period. Bottom-right: synthesized posterior predictive 95\% interval over the forecast window.}
+\caption{Example 1: Lake Huron. Top-left: MAP estimates and 95\% CrIs of the estimated quantiles, plotted with the data (grey). Top-right: forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (seen from 1952 to 1972). Bottom-left: synthesized posterior predictive 95\% interval over the observed period. Bottom-right: observed-period synthesis near the forecast origin and synthesized posterior predictive 95\% interval over the eight-step forecast window; the vertical dotted line marks the forecast origin.}
 \label{fig:ex1quants}
 \end{figure}
 
@@ -616,20 +616,26 @@ R> syn.fore = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows.}
+\aA{The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. In the forecast panel, we draw a small visual bridge from the final observed-period synthesis point to the first one-step-ahead forecast point so that the observed and forecast intervals are displayed on the same annual time scale.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> synth.col = adjustcolor("#F7D6DE", alpha.f = 0.42)
+R> t.end = tail(time(LakeHuron), 1)
+R> t.fore = seq(t.end + 1, t.end + 8)
 R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
-+       xlim = c(1952, 1972), ylab = "predictive synthesis",
++       xlim = c(1952, t.end), ylab = "predictive synthesis",
 +       show.median = FALSE, band.col = synth.col)
 R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
-+       xlim = c(1952, 1980), ylab = "predictive synthesis",
++       xlim = c(1952, max(t.fore)), ylab = "predictive synthesis",
 +       show.median = FALSE, band.col = synth.col)
-R> plot(syn.fore, time = seq(1973, 1980), add = TRUE,
+R> polygon(c(t.end, t.fore[1], t.fore[1], t.end),
++          c(tail(syn.obs$summary$q025, 1), syn.fore$summary$q025[1],
++            syn.fore$summary$q975[1], tail(syn.obs$summary$q975, 1)),
++          col = synth.col, border = NA)
+R> plot(syn.fore, time = t.fore, add = TRUE,
 +       show.median = FALSE, band.col = synth.col)
-R> abline(v = 1972, lty = 3)
+R> abline(v = t.end, lty = 3)
 \end{CodeInput}
 \end{CodeChunk}
 
