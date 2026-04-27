@@ -760,7 +760,7 @@ R> legend("topleft", lty = 1, , bty = "n", col = c("red","blue"),legend = c("DQL
 \label{fig:ex2checks}
 \end{figure}
 
-To examine whether the added flexibility of the exDQLM is significant, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}.The approximate distribution is clearly distinct from zero, thus we expect a better model fit from the exDQLM.
+To examine whether the added flexibility of the exDQLM is significant, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}. \aA{The approximate distribution is clearly distinct from zero, so the additional skewness flexibility is useful for this upper-quantile fit.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -769,21 +769,24 @@ R> abline(v = mean(M2$samp.gamma), col="blue")
 \end{CodeInput}
 \end{CodeChunk}
 
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. \RB{We can also use the \code{print()} generic function on the diagnostic object to create a table comparison of the two models. The numerical diagnostics discussed in Section \ref{sec:diags} clearly favor the exDQLM.}
+To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. \aA{For reproducibility, we fix the normal reference sample used in the KL calculations and reuse it below in the discount-factor scan. The returned \code{exdqlmDiagnostic} object can also be passed to the \code{print()} generic to display the numerical comparison. Smaller values indicate better fit for the KL, CRPS, and pplc criteria; in this LDVB comparison, all reported fit-quality diagnostics favor the exDQLM, while the DQLM is faster.}
 % fig:ex2checks
 % R> par(mfrow=c(2,3))
 \begin{CodeChunk}
 \begin{CodeInput}
-R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red","blue"))
+R> set.seed(20260503)
+R> ref.samp = rnorm(length(sunspot.year))
+R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red","blue"),
++                               ref = ref.samp)
 R> print(diagM1M2)
 \end{CodeInput}
 \begin{CodeOutput}
    Diagnostic       M1        M2
-           KL    0.132    0.1050
- KL (flipped)    0.125    0.0451
-         CRPS    8.611    6.4412
-         pplc 3919.293 2348.5556
- run-time (s)    6.427   30.5890
+           KL    0.144    0.0782
+ KL (flipped)    0.159    0.0390
+         CRPS    8.616    6.4309
+         pplc 3924.038 2350.4807
+ run-time (s)   29.828  128.9230
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -804,7 +807,6 @@ R> possible.dfs
 \begin{CodeInput}
 R> metrics <- matrix(NA_real_, nrow(possible.dfs), 2,
 +                    dimnames = list(NULL, c("CRPS","KL")))
-R> ref.samp = rnorm(length(sunspot.year))
 R> for(i in 1:nrow(possible.dfs)){
 +   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 +                  df = possible.dfs[i,], dim.df = c(1,8),
@@ -823,7 +825,20 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 \end{CodeChunk}
 On this coarse grid, the CRPS and KL criteria agree and both select the seasonal discount factor \(0.85\), so the choice used above is retained.
 
-\RB{Runtimes below where?? In the table? I am not sure what you are trying to say here. I think some (all?) of this should be moved to example 1 where we see the backend options in the MCMC output. }\aA{The runtime comparisons below were obtained under the manuscript backend profile. Global backend options and their defaults are summarized in Appendix Table \ref{tab:backendopts}; the exact active settings, together with hardware, software, seed, and dataset details, are recorded in the accompanying reproducibility materials.} 
+\aA{Finally, to compare the fast variational approximation with posterior simulation, we fit matched DQLM and exDQLM specifications with \code{exdqlmMCMC()}. The MCMC fits use the same state-space model, quantile level, and discount factors as the LDVB fits, with 2000 burn-in iterations and 3000 retained draws.}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
++                df = c(0.9,0.85), dim.df = c(1,8),
++                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
++                dqlm.ind = TRUE, fix.sigma = FALSE)
+R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
++                df = c(0.9,0.85), dim.df = c(1,8),
++                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
++                fix.sigma = FALSE)
+\end{CodeInput}
+\end{CodeChunk}
 
 \begin{table}[t!]
 \centering
@@ -832,32 +847,18 @@ On this coarse grid, the CRPS and KL criteria agree and both select the seasonal
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & pplc \\
  \midrule
- \tworowcell{DQLM} & VB & \textbf{22.89} & \textbf{0.144} & 8.624 & 3906.5 \\
- & MCMC & 273.68 & 0.153 & \textbf{7.708} & \textbf{3051.2} \\
+ \tworowcell{DQLM} & VB & \textbf{29.83} & 0.144 & 8.616 & 3924.0 \\
+ & MCMC & 361.82 & \textbf{0.109} & \textbf{7.655} & \textbf{3022.4} \\
  \midrule
- \tworowcell{exDQLM} & VB & \textbf{104.09} & \textbf{0.078} & 6.416 & 2350.3 \\
- & MCMC & 343.14 & 0.126 & \textbf{5.075} & \textbf{2189.8} \\
+ \tworowcell{exDQLM} & VB & \textbf{128.92} & \textbf{0.078} & 6.431 & 2350.5 \\
+ & MCMC & 452.56 & 0.157 & \textbf{5.057} & \textbf{2184.2} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
-\RB{Finally, we fit the both the DQLM and exDQLM with the MCMC algorithm for dynamic runtime-and-quality comparison under matched 3000-draw summaries.}
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
-+                df = c(0.9,0.85), dim.df = c(1,8),
-+                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
-+                dqlm.ind = TRUE,)
-R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
-+                df = c(0.9,0.85), dim.df = c(1,8),
-+                n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
-\end{CodeInput}
-\end{CodeChunk}
-
-\RB{Table \ref{tab:ex2bench} gives a compact comparison.} For the simpler DQLM, the VB fit remains much faster than MCMC and attains the smaller KL divergence, whereas the MCMC fit achieves smaller values for the CRPS and the pplc. For the more flexible exDQLM, the VB fit is also faster than the corresponding MCMC run, but the comparison is again mixed. The VB fit attains the smallest KL divergence in the table, while the MCMC fit is preferred by both the CRPS and the pplc. Within each inferential method, the exDQLM improves the reported diagnostics relative to the DQLM. These results again reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone. The practical tradeoff depends on both the model and the inferential method being compared.
+\aA{Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. Within each model class, VB is substantially faster. For the simpler DQLM, MCMC gives smaller KL, CRPS, and pplc values. For the more flexible exDQLM, VB gives the smaller KL value, while MCMC gives smaller CRPS and pplc values. Comparing model classes within each inferential method, the exDQLM improves the LDVB diagnostics relative to the DQLM, and under MCMC it improves the predictive-score criteria CRPS and pplc. These results reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
