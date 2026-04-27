@@ -137,3 +137,6 @@ see `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.
 For merge provenance and issue-by-issue integration notes tied to Raquel's
 example review pass, see
 `analysis/manuscript/RAQUEL_EXAMPLES_MERGE_AUDIT.md`.
+
+For the final figure/table readability pass, see
+`analysis/manuscript/PLOT_POLISH_CHECKLIST.md`.
