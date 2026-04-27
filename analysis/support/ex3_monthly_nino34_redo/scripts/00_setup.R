@@ -1,0 +1,1330 @@
+suppressWarnings(suppressMessages({
+  if (!requireNamespace("yaml", quietly = TRUE)) {
+    stop("Package 'yaml' is required for analysis/support/ex3_monthly_nino34_redo.")
+  }
+  if (!requireNamespace("pkgload", quietly = TRUE)) {
+    stop("Package 'pkgload' is required for analysis/support/ex3_monthly_nino34_redo.")
+  }
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("Package 'ggplot2' is required for analysis/support/ex3_monthly_nino34_redo.")
+  }
+  if (!requireNamespace("gridExtra", quietly = TRUE)) {
+    stop("Package 'gridExtra' is required for analysis/support/ex3_monthly_nino34_redo.")
+  }
+}))
+
+if (!exists("redo_root", inherits = FALSE)) {
+  stop("redo_root not defined. Run this workflow through analysis/support/ex3_monthly_nino34_redo/run_all.R")
+}
+if (!exists("config_path", inherits = FALSE)) {
+  config_path <- file.path(redo_root, "config.yml")
+}
+
+config <- yaml::read_yaml(config_path)
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+config_tag <- config$runtime$output_tag %||%
+  tools::file_path_sans_ext(basename(config_path))
+config_tag <- gsub("[^A-Za-z0-9_-]+", "_", config_tag)
+
+output_root <- file.path(redo_root, "outputs", config_tag)
+figure_dir <- file.path(output_root, "figures")
+table_dir <- file.path(output_root, "tables")
+log_dir <- file.path(output_root, "logs")
+cache_dir <- file.path(output_root, "cache")
+progress_log_path <- file.path(log_dir, "ex3_monthly_progress.log")
+
+ensure_runtime_dir <- function(dir_path, keep_local = FALSE) {
+  dir.create(dir_path, recursive = TRUE, showWarnings = FALSE)
+  if (isTRUE(keep_local)) {
+    gitignore_path <- file.path(dir_path, ".gitignore")
+    if (!file.exists(gitignore_path)) {
+      writeLines(c("*", "!.gitignore"), con = gitignore_path)
+    }
+  }
+}
+
+ensure_runtime_dir(output_root)
+ensure_runtime_dir(figure_dir, keep_local = TRUE)
+ensure_runtime_dir(table_dir, keep_local = TRUE)
+ensure_runtime_dir(log_dir, keep_local = TRUE)
+ensure_runtime_dir(cache_dir, keep_local = TRUE)
+
+pkg_path <- Sys.getenv("EX3_MONTHLY_PKG_PATH", unset = config$runtime$pkg_path)
+daily_input_path <- Sys.getenv(
+  "EX3_MONTHLY_DAILY_INPUT_PATH",
+  unset = config$data$daily_input_path
+)
+
+if (!file.exists(file.path(pkg_path, "DESCRIPTION"))) {
+  stop("Could not locate exdqlm source at: ", pkg_path)
+}
+if (!file.exists(daily_input_path)) {
+  stop("Could not locate staged daily dataset at: ", daily_input_path)
+}
+
+pkgload::load_all(pkg_path, quiet = TRUE, export_all = FALSE)
+
+options(
+  exdqlm.use_cpp_kf = TRUE,
+  exdqlm.use_cpp_builders = FALSE,
+  exdqlm.use_cpp_samplers = FALSE,
+  exdqlm.use_cpp_postpred = FALSE,
+  exdqlm.max_iter = as.integer(config$model$ldvb$max_iter %||% 50L)
+)
+
+seed_base <- as.integer(config$runtime$seed)
+set.seed(seed_base)
+
+validate_ldvb_gamma_init <- function() {
+  gam_init <- config$model$ldvb$gam_init
+  if (is.null(gam_init) || is.na(gam_init)) {
+    return(invisible(NULL))
+  }
+  p_levels <- as.numeric(config$model$p_levels)
+  bad_rows <- lapply(p_levels, function(p0) {
+    bounds <- exdqlm::get_gamma_bounds(p0)
+    if (gam_init < bounds[["L"]] || gam_init > bounds[["U"]]) {
+      data.frame(
+        p0 = p0,
+        lower = as.numeric(bounds[["L"]]),
+        upper = as.numeric(bounds[["U"]]),
+        stringsAsFactors = FALSE
+      )
+    } else {
+      NULL
+    }
+  })
+  bad_rows <- Filter(Negate(is.null), bad_rows)
+  if (!length(bad_rows)) {
+    return(invisible(NULL))
+  }
+  bad <- do.call(rbind, bad_rows)
+  msg <- paste(
+    sprintf(
+      "  p0=%.2f requires gam.init in [%.6f, %.6f]",
+      bad$p0, bad$lower, bad$upper
+    ),
+    collapse = "\n"
+  )
+  stop(
+    sprintf(
+      "Configured gam.init=%.6f is incompatible with the requested quantile grid.\n%s",
+      as.numeric(gam_init),
+      msg
+    ),
+    call. = FALSE
+  )
+}
+
+validate_ldvb_gamma_init()
+
+save_png_plot <- function(filename, expr, width = config$plots$width,
+                          height = config$plots$height, res = config$plots$res,
+                          pointsize = config$plots$pointsize) {
+  path <- file.path(figure_dir, filename)
+  grDevices::png(path, width = width, height = height, units = "in",
+                 res = res, pointsize = pointsize)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  force(expr)
+  invisible(path)
+}
+
+save_gg_plot <- function(filename, plot_obj, width = config$plots$width,
+                         height = config$plots$height, res = config$plots$res,
+                         bg = "white") {
+  path <- file.path(figure_dir, filename)
+  ggplot2::ggsave(
+    filename = path,
+    plot = plot_obj,
+    width = width,
+    height = height,
+    units = "in",
+    dpi = res,
+    bg = bg
+  )
+  invisible(path)
+}
+
+write_csv <- function(x, filename, row.names = FALSE) {
+  utils::write.csv(x, file.path(table_dir, filename), row.names = row.names)
+}
+
+write_text <- function(lines, filename) {
+  writeLines(lines, con = file.path(log_dir, filename))
+}
+
+reset_progress_log <- function() {
+  writeLines(character(), con = progress_log_path)
+}
+
+log_progress <- function(msg, console = TRUE) {
+  stamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  line <- sprintf("[%s] pid=%s | %s", stamp, Sys.getpid(), msg)
+  cat(line, "\n", file = progress_log_path, append = TRUE, sep = "")
+  if (isTRUE(console)) {
+    cat(line, "\n", sep = "")
+    flush(stdout())
+  }
+  invisible(line)
+}
+
+sha256_file <- function(path) {
+  out <- system2("sha256sum", shQuote(path), stdout = TRUE, stderr = FALSE)
+  sub("\\s+.*$", "", out[1])
+}
+
+git_ref <- function(path) {
+  out <- tryCatch(
+    system2("git", c("-C", path, "rev-parse", "--short", "HEAD"), stdout = TRUE, stderr = FALSE),
+    error = function(e) character()
+  )
+  if (length(out)) out[1] else NA_character_
+}
+
+cache_read <- function(name) {
+  path <- file.path(cache_dir, name)
+  if (!file.exists(path)) {
+    stop("Required cache file not found: ", path)
+  }
+  readRDS(path)
+}
+
+cache_write <- function(object, name) {
+  saveRDS(object, file = file.path(cache_dir, name))
+}
+
+cache_exists <- function(name) {
+  file.exists(file.path(cache_dir, name))
+}
+
+normalize_signature_object <- function(x) {
+  if (is.null(x)) return(NULL)
+  if (is.list(x)) return(lapply(x, normalize_signature_object))
+  if (is.integer(x) || is.numeric(x)) return(unname(as.numeric(x)))
+  if (is.logical(x)) return(unname(as.logical(x)))
+  if (inherits(x, "Date")) return(as.character(x))
+  if (is.character(x)) return(unname(as.character(x)))
+  x
+}
+
+signature_objects_equal <- function(current_obj, cached_obj) {
+  isTRUE(all.equal(
+    normalize_signature_object(current_obj),
+    normalize_signature_object(cached_obj),
+    check.attributes = FALSE,
+    tolerance = 1e-6
+  ))
+}
+
+signature_file_read <- function(path) {
+  if (!file.exists(path)) return(NULL)
+  txt <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  if (!nzchar(trimws(txt))) return(NULL)
+  yaml::yaml.load(txt)
+}
+
+fit_cache_path <- function() {
+  file.path(cache_dir, "ex3_monthly_fits_ldvb.rds")
+}
+
+fit_signature_path <- function() {
+  file.path(cache_dir, "ex3_monthly_fit_signature.txt")
+}
+
+configured_base_terms <- function() {
+  terms <- config$model$features$base_terms %||% c("nino34")
+  unique(as.character(terms))
+}
+
+configured_lag_terms <- function() {
+  terms <- config$model$features$lag_terms %||% character()
+  unique(as.character(terms))
+}
+
+feature_base_terms <- function() {
+  configured_base_terms()
+}
+
+feature_lag_terms <- function() {
+  configured_lag_terms()
+}
+
+feature_lag_months <- function() {
+  lag_months <- config$model$features$lag_months %||% integer()
+  lag_months <- sort(unique(as.integer(lag_months)))
+  lag_months[is.finite(lag_months) & lag_months > 0L]
+}
+
+transfer_lambda_grid <- function() {
+  vals <- config$model$transfer$lambda_grid %||% config$model$transfer$lam
+  vals <- sort(unique(as.numeric(vals)))
+  vals[vals >= 0 & vals <= 1]
+}
+
+transfer_selection_metric <- function() {
+  metric <- toupper(as.character(config$model$transfer$selection_metric %||% "KL"))
+  allowed <- c("KL", "CRPS", "PPLC")
+  if (!metric %in% allowed) {
+    stop(
+      sprintf(
+        "Unsupported transfer selection metric '%s'. Allowed values are: %s",
+        metric,
+        paste(allowed, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+  metric
+}
+
+covariate_source_name <- function() {
+  as.character(config$data$covariate_source %||% "package_nino34")
+}
+
+sanitize_feature_name <- function(x) {
+  x <- iconv(as.character(x), to = "ASCII//TRANSLIT")
+  x <- tolower(x)
+  x <- gsub("[^a-z0-9]+", "_", x)
+  x <- gsub("_+", "_", x)
+  x <- gsub("^_|_$", "", x)
+  x[!nzchar(x)] <- "x"
+  x
+}
+
+sanitize_feature_names_unique <- function(x) {
+  make.unique(sanitize_feature_name(x), sep = "_")
+}
+
+resolved_base_terms <- function(available_covariates) {
+  available_covariates <- unique(as.character(available_covariates))
+  if (isTRUE(config$model$features$use_all_covariates %||% FALSE)) {
+    return(available_covariates)
+  }
+  base_terms <- configured_base_terms()
+  if (!length(base_terms)) {
+    stop("No base_terms were configured and use_all_covariates is FALSE.")
+  }
+  missing_terms <- setdiff(base_terms, available_covariates)
+  if (length(missing_terms)) {
+    stop(
+      "Configured base_terms are not present in the available covariates: ",
+      paste(missing_terms, collapse = ", ")
+    )
+  }
+  base_terms
+}
+
+resolved_lag_terms <- function(base_terms) {
+  lag_terms <- configured_lag_terms()
+  if (!length(lag_terms)) {
+    return(character())
+  }
+  missing_terms <- setdiff(lag_terms, base_terms)
+  if (length(missing_terms)) {
+    stop(
+      "Configured lag_terms are not present in the resolved base feature set: ",
+      paste(missing_terms, collapse = ", ")
+    )
+  }
+  lag_terms
+}
+
+fit_signature_object <- function() {
+  lag_terms_sig <- configured_lag_terms()
+  if (!length(lag_terms_sig)) lag_terms_sig <- list()
+  lag_months_sig <- feature_lag_months()
+  if (!length(lag_months_sig)) lag_months_sig <- list()
+  normalize_signature_object(list(
+    pkg_ref = git_ref(pkg_path),
+    fit_start = as.character(config$data$fit_start),
+    fit_end = as.character(config$data$fit_end),
+    response_transform = config$data$response_transform,
+    response_col = config$data$response_col,
+    aggregation = config$data$aggregation,
+    covariate_source = covariate_source_name(),
+    climate_panel_path = as.character(config$data$climate_panel_path %||% ""),
+    climate_panel_date_col = as.character(config$data$climate_panel_date_col %||% "Date"),
+    p_levels = as.numeric(config$model$p_levels),
+    trend_order = as.integer(config$model$trend_order),
+    seasonal_period = as.numeric(config$model$seasonal_period),
+    seasonal_harmonics = as.numeric(config$model$seasonal_harmonics),
+    features = list(
+      use_all_covariates = isTRUE(config$model$features$use_all_covariates %||% FALSE),
+      base_terms = configured_base_terms(),
+      lag_terms = lag_terms_sig,
+      lag_months = lag_months_sig
+    ),
+    discounts = list(
+      trend = as.numeric(config$model$discounts$trend),
+      harmonics = as.numeric(config$model$discounts$harmonics),
+      covariates = as.numeric(config$model$discounts$covariates)
+    ),
+    transfer = list(
+      lam = as.numeric(config$model$transfer$lam),
+      lambda_grid = transfer_lambda_grid(),
+      tf_df = as.numeric(config$model$transfer$tf_df)
+    ),
+    ldvb = list(
+      tol = as.numeric(config$model$ldvb$tol),
+      n_samp = as.integer(config$model$ldvb$n_samp),
+      max_iter = as.integer(config$model$ldvb$max_iter),
+      gam_init = as.numeric(config$model$ldvb$gam_init),
+      sig_init = as.numeric(config$model$ldvb$sig_init)
+    ),
+    priors = list(
+      trend_c0 = as.numeric(config$model$priors$trend_c0),
+      seasonal_c0 = as.numeric(config$model$priors$seasonal_c0),
+      reg_c0 = as.numeric(config$model$priors$reg_c0),
+      transfer_zeta_c0 = as.numeric(config$model$priors$transfer_zeta_c0),
+      transfer_psi_c0 = as.numeric(config$model$priors$transfer_psi_c0)
+    )
+  ))
+}
+
+write_fit_signature <- function() {
+  writeLines(yaml::as.yaml(fit_signature_object()), con = fit_signature_path())
+}
+
+fit_cache_status <- function() {
+  if (!isTRUE(config$runtime$reuse_fit_cache %||% TRUE)) {
+    return(list(can_reuse = FALSE, reason = "reuse_disabled"))
+  }
+  if (!cache_exists("ex3_monthly_fits_ldvb.rds")) {
+    return(list(can_reuse = FALSE, reason = "cache_missing"))
+  }
+  cached_sig_obj <- signature_file_read(fit_signature_path())
+  if (is.null(cached_sig_obj)) {
+    return(list(can_reuse = FALSE, reason = "signature_missing"))
+  }
+  if (signature_objects_equal(fit_signature_object(), cached_sig_obj)) {
+    return(list(can_reuse = TRUE, reason = "signature_match"))
+  }
+  list(can_reuse = FALSE, reason = "signature_mismatch")
+}
+
+transform_response <- function(x) {
+  x <- as.numeric(x)
+  transform_name <- as.character(config$data$response_transform %||% "log")
+  if (identical(transform_name, "log")) {
+    return(log(x))
+  }
+  stop("Unsupported response transform: ", transform_name)
+}
+
+feature_term_vector <- function(df, term, available_covariates) {
+  if (term %in% available_covariates) {
+    return(as.numeric(df[[term]]))
+  }
+  if (grepl("_sq$", term)) {
+    base_name <- sub("_sq$", "", term)
+    if (!base_name %in% available_covariates) {
+      stop("Unsupported squared feature term: ", term)
+    }
+    return(as.numeric(df[[base_name]])^2)
+  }
+  if (grepl("_abs$", term)) {
+    base_name <- sub("_abs$", "", term)
+    if (!base_name %in% available_covariates) {
+      stop("Unsupported absolute-value feature term: ", term)
+    }
+    return(abs(as.numeric(df[[base_name]])))
+  }
+  if (grepl("_x_", term)) {
+    parts <- strsplit(term, "_x_", fixed = TRUE)[[1]]
+    if (length(parts) != 2L || any(!parts %in% available_covariates)) {
+      stop("Unsupported interaction feature term: ", term)
+    }
+    return(as.numeric(df[[parts[1]]]) * as.numeric(df[[parts[2]]]))
+  }
+  stop("Unsupported feature term: ", term)
+}
+
+compute_feature_matrix <- function(df, available_covariates) {
+  base_terms <- resolved_base_terms(available_covariates)
+  base_df <- setNames(
+    data.frame(
+      lapply(base_terms, function(term) feature_term_vector(df, term, available_covariates)),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    ),
+    base_terms
+  )
+
+  lag_months <- feature_lag_months()
+  lag_terms <- resolved_lag_terms(names(base_df))
+  if (!length(lag_months) || !length(lag_terms)) {
+    return(as.matrix(base_df))
+  }
+
+  lagged_list <- lapply(lag_months, function(lag_i) {
+    lagged_df <- data.frame(
+      lapply(base_df[lag_terms], function(x) c(rep(NA_real_, lag_i), head(as.numeric(x), -lag_i))),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    )
+    names(lagged_df) <- sprintf("%s_lag%d", names(lagged_df), lag_i)
+    lagged_df
+  })
+
+  as.matrix(do.call(cbind, c(list(base_df), lagged_list)))
+}
+
+scale_feature_matrix <- function(X_train) {
+  center <- colMeans(X_train)
+  scale <- apply(X_train, 2, stats::sd)
+  if (any(!is.finite(scale) | scale <= 0)) {
+    stop("Feature scaling produced a non-positive standard deviation.")
+  }
+  list(
+    X_train = scale(X_train, center = center, scale = scale),
+    center = center,
+    scale = scale
+  )
+}
+
+make_base_model <- function(y_train, p0) {
+  h <- as.numeric(config$model$seasonal_harmonics)
+  trend_c0 <- diag(as.numeric(config$model$priors$trend_c0), as.integer(config$model$trend_order))
+  seasonal_c0 <- diag(as.numeric(config$model$priors$seasonal_c0), 2L * length(h))
+
+  trend_comp <- exdqlm::polytrendMod(
+    order = as.integer(config$model$trend_order),
+    m0 = as.numeric(stats::quantile(y_train, probs = p0)),
+    C0 = trend_c0
+  )
+  seas_comp <- exdqlm::seasMod(
+    p = as.numeric(config$model$seasonal_period),
+    h = h,
+    C0 = seasonal_c0
+  )
+  trend_comp + seas_comp
+}
+
+make_direct_spec <- function(y_train, p0, X_train_scaled) {
+  base_model <- make_base_model(y_train, p0)
+  reg_c0 <- diag(as.numeric(config$model$priors$reg_c0), ncol(X_train_scaled))
+  reg_model <- exdqlm::regMod(X_train_scaled, m0 = rep(0, ncol(X_train_scaled)), C0 = reg_c0)
+
+  list(
+    model = base_model + reg_model,
+    df = c(
+      as.numeric(config$model$discounts$trend),
+      as.numeric(config$model$discounts$harmonics),
+      as.numeric(config$model$discounts$covariates)
+    ),
+    dim.df = c(
+      as.integer(config$model$trend_order),
+      rep(2L, length(config$model$seasonal_harmonics)),
+      ncol(X_train_scaled)
+    ),
+    base_model = base_model
+  )
+}
+
+make_transfer_spec <- function(y_train, p0, X_train_scaled) {
+  base_model <- make_base_model(y_train, p0)
+  k <- ncol(X_train_scaled)
+  tf_dim <- k + 1L
+  tf_diag <- c(
+    as.numeric(config$model$priors$transfer_zeta_c0),
+    rep(as.numeric(config$model$priors$transfer_psi_c0), k)
+  )
+
+  list(
+    model = base_model,
+    df = c(
+      as.numeric(config$model$discounts$trend),
+      as.numeric(config$model$discounts$harmonics)
+    ),
+    dim.df = c(
+      as.integer(config$model$trend_order),
+      rep(2L, length(config$model$seasonal_harmonics))
+    ),
+    lam = as.numeric(config$model$transfer$lam),
+    tf.df = as.numeric(config$model$transfer$tf_df),
+    tf.m0 = rep(0, tf_dim),
+    tf.C0 = diag(tf_diag, tf_dim),
+    base_model = base_model
+  )
+}
+
+fit_model_pair <- function(p0, prep, fit_seed) {
+  set.seed(fit_seed)
+  direct_spec <- make_direct_spec(prep$y_train, p0, prep$X_train_scaled)
+  transfer_spec <- make_transfer_spec(prep$y_train, p0, prep$X_train_scaled)
+  fit_verbose <- isTRUE(config$model$ldvb$verbose %||% FALSE)
+
+  ldvb_args <- list(
+    fix.gamma = FALSE,
+    gam.init = as.numeric(config$model$ldvb$gam_init),
+    fix.sigma = FALSE,
+    sig.init = as.numeric(config$model$ldvb$sig_init),
+    tol = as.numeric(config$model$ldvb$tol),
+    n.samp = as.integer(config$model$ldvb$n_samp),
+    verbose = fit_verbose
+  )
+
+  log_progress(sprintf("fit_start | p0=%.2f | model=direct_regression | seed=%s", p0, fit_seed))
+  direct_fit <- tryCatch(
+    do.call(exdqlm::exdqlmLDVB, c(list(
+      y = prep$y_train, p0 = p0,
+      model = direct_spec$model,
+      df = direct_spec$df, dim.df = direct_spec$dim.df
+    ), ldvb_args)),
+    error = function(e) e
+  )
+  if (fit_ok(direct_fit)) {
+    log_progress(sprintf(
+      "fit_done | p0=%.2f | model=direct_regression | iter=%s | converged=%s | runtime=%.3f",
+      p0,
+      direct_fit$iter %||% NA_integer_,
+      isTRUE(direct_fit$converged),
+      as.numeric(direct_fit$run.time)
+    ))
+  } else {
+    log_progress(sprintf(
+      "fit_error | p0=%.2f | model=direct_regression | message=%s",
+      p0, conditionMessage(direct_fit)
+    ))
+  }
+
+  lambda_grid <- transfer_lambda_grid()
+  selection_metric <- transfer_selection_metric()
+  lambda_screen <- data.frame(
+    p0 = numeric(),
+    lambda = numeric(),
+    KL = numeric(),
+    CRPS = numeric(),
+    pplc = numeric(),
+    selection_metric = character(),
+    selection_value = numeric(),
+    runtime = numeric(),
+    status = character(),
+    stringsAsFactors = FALSE
+  )
+  selected_lambda <- as.numeric(transfer_spec$lam)
+
+  if (length(lambda_grid) > 1L) {
+    lambda_fit_fun <- function(ii) {
+      lam_i <- lambda_grid[ii]
+      lambda_seed <- fit_seed + 1000L + ii
+      log_progress(sprintf(
+        "lambda_screen_start | p0=%.2f | lambda=%.3f | seed=%s",
+        p0, lam_i, lambda_seed
+      ))
+      set.seed(lambda_seed)
+      fit_i <- tryCatch(
+        do.call(exdqlm::exdqlmTransferLDVB, c(list(
+          y = prep$y_train, p0 = p0,
+          model = transfer_spec$model,
+          X = prep$X_train_scaled,
+          df = transfer_spec$df, dim.df = transfer_spec$dim.df,
+          lam = lam_i, tf.df = transfer_spec$tf.df,
+          tf.m0 = transfer_spec$tf.m0, tf.C0 = transfer_spec$tf.C0
+        ), ldvb_args)),
+        error = function(e) e
+      )
+
+      if (fit_ok(fit_i)) {
+        di_i <- diagnostics_summary(fit_i, prep$ref_sample)
+        metric_value <- switch(
+          selection_metric,
+          KL = di_i$KL,
+          CRPS = di_i$CRPS,
+          PPLC = di_i$pplc
+        )
+        log_progress(sprintf(
+          "lambda_screen_done | p0=%.2f | lambda=%.3f | KL=%.6f | CRPS=%.6f | pplc=%.6f | metric=%s | metric_value=%.6f | runtime=%.3f",
+          p0, lam_i, di_i$KL, di_i$CRPS, di_i$pplc, selection_metric, metric_value, as.numeric(fit_i$run.time)
+        ))
+        data.frame(
+          p0 = p0,
+          lambda = lam_i,
+          KL = di_i$KL,
+          CRPS = di_i$CRPS,
+          pplc = di_i$pplc,
+          selection_metric = selection_metric,
+          selection_value = metric_value,
+          runtime = as.numeric(fit_i$run.time),
+          status = "ok",
+          stringsAsFactors = FALSE
+        )
+      } else {
+        log_progress(sprintf(
+          "lambda_screen_error | p0=%.2f | lambda=%.3f | message=%s",
+          p0, lam_i, conditionMessage(fit_i)
+        ))
+        data.frame(
+          p0 = p0,
+          lambda = lam_i,
+          KL = NA_real_,
+          CRPS = NA_real_,
+          pplc = NA_real_,
+          selection_metric = selection_metric,
+          selection_value = NA_real_,
+          runtime = NA_real_,
+          status = "error",
+          stringsAsFactors = FALSE
+        )
+      }
+    }
+
+    lambda_parallel_ok <- isTRUE(config$runtime$parallel) &&
+      .Platform$OS.type != "windows" &&
+      length(as.numeric(config$model$p_levels)) == 1L &&
+      max(1L, as.integer(config$runtime$workers %||% 1L)) > 1L
+
+    screen_rows <- if (lambda_parallel_ok) {
+      parallel::mclapply(
+        seq_along(lambda_grid),
+        lambda_fit_fun,
+        mc.cores = min(length(lambda_grid), max(1L, as.integer(config$runtime$workers %||% 1L)))
+      )
+    } else {
+      lapply(seq_along(lambda_grid), lambda_fit_fun)
+    }
+
+    lambda_screen <- do.call(rbind, screen_rows)
+    if (any(is.finite(lambda_screen$selection_value))) {
+      selected_lambda <- lambda_screen$lambda[which.min(lambda_screen$selection_value)]
+    }
+    log_progress(sprintf(
+      "lambda_screen_selected | p0=%.2f | lambda=%.3f | metric=%s",
+      p0, selected_lambda, selection_metric
+    ))
+  }
+
+  log_progress(sprintf(
+    "fit_start | p0=%.2f | model=transfer_function | lambda=%.3f | seed=%s",
+    p0, selected_lambda, fit_seed
+  ))
+  transfer_fit <- tryCatch(
+    do.call(exdqlm::exdqlmTransferLDVB, c(list(
+      y = prep$y_train, p0 = p0,
+      model = transfer_spec$model,
+      X = prep$X_train_scaled,
+      df = transfer_spec$df, dim.df = transfer_spec$dim.df,
+      lam = selected_lambda, tf.df = transfer_spec$tf.df,
+      tf.m0 = transfer_spec$tf.m0, tf.C0 = transfer_spec$tf.C0
+    ), ldvb_args)),
+    error = function(e) e
+  )
+  if (fit_ok(transfer_fit)) {
+    log_progress(sprintf(
+      "fit_done | p0=%.2f | model=transfer_function | lambda=%.3f | iter=%s | converged=%s | runtime=%.3f | median.kt=%.5f",
+      p0,
+      selected_lambda,
+      transfer_fit$iter %||% NA_integer_,
+      isTRUE(transfer_fit$converged),
+      as.numeric(transfer_fit$run.time),
+      as.numeric(transfer_fit$median.kt)
+    ))
+  } else {
+    log_progress(sprintf(
+      "fit_error | p0=%.2f | model=transfer_function | message=%s",
+      p0, conditionMessage(transfer_fit)
+    ))
+  }
+
+  list(
+    p0 = p0,
+    direct = direct_fit,
+    transfer = transfer_fit,
+    direct_spec = direct_spec,
+    transfer_spec = transfer_spec,
+    lambda_grid = lambda_grid,
+    lambda_selection_metric = selection_metric,
+    lambda_selected = selected_lambda,
+    lambda_screen = lambda_screen
+  )
+}
+
+fit_ok <- function(x) !inherits(x, "error")
+
+fit_hit_iter_cap <- function(fit) {
+  max_iter <- as.integer(config$model$ldvb$max_iter %||% NA_integer_)
+  if (!fit_ok(fit) || !is.finite(max_iter) || is.null(fit$iter)) {
+    return(NA)
+  }
+  isFALSE(fit$converged) && as.integer(fit$iter) >= max_iter
+}
+
+fit_status_row <- function(p0, label, fit, median_kt = NA_real_,
+                           selected_lambda = NA_real_) {
+  if (!fit_ok(fit)) {
+    return(data.frame(
+      p0 = p0,
+      model = label,
+      status = "error",
+      runtime = NA_real_,
+      iter = NA_integer_,
+      converged = NA,
+      hit_iter_cap = NA,
+      median_kt = median_kt,
+      selected_lambda = selected_lambda,
+      error_message = conditionMessage(fit),
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  data.frame(
+    p0 = p0,
+    model = label,
+    status = "ok",
+    runtime = as.numeric(fit$run.time),
+    iter = as.integer(fit$iter %||% NA_integer_),
+    converged = isTRUE(fit$converged),
+    hit_iter_cap = fit_hit_iter_cap(fit),
+    median_kt = as.numeric(median_kt),
+    selected_lambda = as.numeric(selected_lambda),
+    error_message = "",
+    stringsAsFactors = FALSE
+  )
+}
+
+ldvb_convergence_row <- function(p0, label, fit) {
+  if (!fit_ok(fit)) {
+    return(data.frame(
+      p0 = p0,
+      model = label,
+      iter = NA_integer_,
+      converged = NA,
+      stop_reason = "error",
+      delta_state = NA_real_,
+      delta_sigma = NA_real_,
+      delta_gamma = NA_real_,
+      delta_s = NA_real_,
+      delta_elbo = NA_real_,
+      committed_local_pass = NA,
+      committed_grad_inf = NA_real_,
+      committed_min_eig = NA_real_,
+      candidate_local_pass = NA,
+      candidate_grad_inf = NA_real_,
+      candidate_min_eig = NA_real_,
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  conv <- fit$diagnostics$convergence %||% list()
+  final <- conv$final %||% list()
+  mode_quality <- fit$diagnostics$ld_block$mode_quality %||% list()
+  ld_final <- fit$diagnostics$ld_block$final %||% list()
+
+  data.frame(
+    p0 = p0,
+    model = label,
+    iter = as.integer(fit$iter %||% NA_integer_),
+    converged = isTRUE(fit$converged),
+    stop_reason = as.character(conv$stop_reason %||% NA_character_),
+    delta_state = as.numeric(final$delta_state %||% NA_real_),
+    delta_sigma = as.numeric(final$delta_sigma %||% NA_real_),
+    delta_gamma = as.numeric(final$delta_gamma %||% NA_real_),
+    delta_s = as.numeric(final$delta_s %||% NA_real_),
+    delta_elbo = as.numeric(final$delta_elbo %||% NA_real_),
+    committed_local_pass = as.logical(mode_quality$local_mode_pass %||% NA),
+    committed_grad_inf = as.numeric(mode_quality$grad_inf_norm %||% NA_real_),
+    committed_min_eig = as.numeric(mode_quality$neg_hess_min_eig %||% NA_real_),
+    candidate_local_pass = as.logical(ld_final$ld_mode_local_pass_candidate %||% NA),
+    candidate_grad_inf = as.numeric(ld_final$ld_mode_grad_inf_norm_candidate %||% NA_real_),
+    candidate_min_eig = as.numeric(ld_final$ld_mode_neg_hess_min_eig_candidate %||% NA_real_),
+    stringsAsFactors = FALSE
+  )
+}
+
+diagnostics_summary <- function(fit, ref) {
+  di <- exdqlm::exdqlmDiagnostics(fit, plot = FALSE, ref = ref)
+  list(
+    KL = as.numeric(di$m1.KL),
+    CRPS = as.numeric(di$m1.CRPS),
+    pplc = as.numeric(di$m1.pplc),
+    runtime = as.numeric(fit$run.time)
+  )
+}
+
+forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRUE,
+                              add = FALSE, cols = c("purple", "magenta"),
+                              cr.percent = 0.95, y_data = NULL) {
+  y_series <- if (!is.null(y_data)) y_data else m1$y
+  y_numeric <- as.numeric(y_series)
+  if (length(y_numeric) == 0L) {
+    stop("y_data must be provided when fitted object has no y series.", call. = FALSE)
+  }
+  p <- dim(m1$model$GG)[1]
+  TT <- dim(m1$model$GG)[3]
+  if (cr.percent <= 0 || cr.percent >= 1) {
+    stop("cr.percent must be between 0 and 1", call. = FALSE)
+  }
+  if (is.null(fFF)) {
+    if (TT - start.t < k) {
+      stop("fFF and fGG must be provided for forecasts extending past the fitted model length.", call. = FALSE)
+    }
+    fFF <- m1$model$FF[, (start.t + 1):(start.t + k), drop = FALSE]
+    fGG <- m1$model$GG[, , (start.t + 1):(start.t + k), drop = FALSE]
+  } else {
+    fFF <- as.matrix(fFF)
+    if (nrow(fFF) != p) stop("dimension of fFF must match fitted model", call. = FALSE)
+    if (!any(ncol(fFF) == c(1L, k))) stop("fFF must have 1 or k columns", call. = FALSE)
+    fGG <- as.array(fGG)
+    if (any(dim(fGG)[1:2] != p)) stop("dimension of fGG must match fitted model", call. = FALSE)
+    if (!is.na(dim(fGG)[3]) && dim(fGG)[3] != k) {
+      stop("fGG must be matrix or array of depth k", call. = FALSE)
+    }
+  }
+  fFF <- matrix(fFF, p, k)
+  fGG <- array(fGG, c(p, p, k))
+
+  df.mat <- exdqlm:::make_df_mat(m1$df, m1$dim.df, p)
+  fm <- m1$theta.out$fm[, start.t]
+  fC <- m1$theta.out$fC[, , start.t]
+  fa <- matrix(NA_real_, p, k)
+  fR <- array(NA_real_, c(p, p, k))
+  ff <- rep(NA_real_, k)
+  fQ <- rep(NA_real_, k)
+  for (i in seq_len(k)) {
+    if (i == 1L) {
+      fa[, 1] <- fGG[, , 1] %*% fm
+      fR[, , 1] <- fGG[, , 1] %*% fC %*% t(fGG[, , 1]) + df.mat * fC
+    } else {
+      fa[, i] <- fGG[, , i] %*% fa[, i - 1L]
+      fR[, , i] <- fGG[, , i] %*% fR[, , i - 1L] %*% t(fGG[, , i]) + df.mat * fR[, , i - 1L]
+    }
+    ff[i] <- as.numeric(t(fFF[, i]) %*% fa[, i])
+    fQ[i] <- as.numeric(t(fFF[, i]) %*% fR[, , i] %*% fFF[, i])
+  }
+  m1_plot <- m1
+  m1_plot$y <- y_series
+  retlist <- list(
+    start.t = start.t, k = k, cr.percent = cr.percent,
+    m1 = m1_plot, fa = fa, fR = fR, ff = ff, fQ = fQ
+  )
+  class(retlist) <- "exdqlmForecast"
+  if (plot) plot(retlist, cols = cols, add = add)
+  invisible(retlist)
+}
+
+format_p0_label <- function(p0) sprintf("tau = %.2f", p0)
+
+model_label <- function(label) {
+  switch(
+    label,
+    direct_regression = "Direct regression",
+    transfer_function = "Transfer function",
+    label
+  )
+}
+
+uncertainty_level <- function() {
+  as.numeric(config$plots$uncertainty_level %||% 0.95)
+}
+
+posterior_ci_probs <- function(level = uncertainty_level()) {
+  c((1 - level) / 2, 1 - (1 - level) / 2)
+}
+
+period_definitions <- function() {
+  periods_cfg <- config$plots$periods %||% list(
+    enso = list(label = "Strong El Nino (1997-1999)", start = "1997-01-01", end = "1999-12-01"),
+    drought = list(label = "Dry / drought (2012-2016)", start = "2012-01-01", end = "2016-12-01")
+  )
+  rows <- lapply(names(periods_cfg), function(name) {
+    period <- periods_cfg[[name]]
+    data.frame(
+      period = name,
+      period_label = as.character(period$label %||% name),
+      start = as.Date(period$start),
+      end = as.Date(period$end),
+      stringsAsFactors = FALSE
+    )
+  })
+  do.call(rbind, rows)
+}
+
+convergence_trim_start_iter <- function() {
+  as.integer(config$plots$convergence_trim_start_iter %||% 20L)
+}
+
+historical_obs_color <- function() as.character(config$plots$historical_obs_color %||% "grey60")
+historical_obs_point_size <- function() as.numeric(config$plots$historical_obs_point_size %||% 0.65)
+state_zero_line_color <- function() as.character(config$plots$state_zero_line_color %||% "#8c6d1f")
+state_zero_line_linewidth <- function() as.numeric(config$plots$state_zero_line_linewidth %||% 0.55)
+quantile_line_alpha <- function() as.numeric(config$plots$quantile_line_alpha %||% 0.72)
+quantile_ribbon_alpha <- function() as.numeric(config$plots$quantile_ribbon_alpha %||% 0.07)
+full_state_batch_size <- function() as.integer(config$plots$full_state_batch_size %||% 6L)
+full_state_ylim <- function() {
+  vals <- config$plots$full_state_ylim
+  if (is.null(vals)) return(NULL)
+  vals <- as.numeric(vals)
+  if (length(vals) != 2L || any(!is.finite(vals))) return(NULL)
+  vals
+}
+
+quantile_palette <- function(p_levels = as.numeric(config$model$p_levels)) {
+  labels <- vapply(p_levels, format_p0_label, character(1))
+  cols <- config$plots$quantile_palette %||%
+    c("#7f0000", "#b2182b", "#6b3f3f", "#111111", "#3e5f8a", "#2166ac", "#053061")
+  cols <- as.character(cols)
+  if (length(cols) != length(labels)) {
+    cols <- grDevices::colorRampPalette(cols)(length(labels))
+  }
+  stats::setNames(cols, labels)
+}
+
+single_quantile_run <- function() {
+  length(as.numeric(config$model$p_levels)) == 1L
+}
+
+ex3_palette <- function() {
+  defaults <- list(
+    m1 = "#7D4FA8",
+    m1_aux = "#C7A9DF",
+    m2 = "#2F7A60",
+    m2_aux = "#9AC8AD",
+    cov = "#3D7297",
+    ref = "#C98A2D",
+    obs = historical_obs_color()
+  )
+  custom <- config$plots$example3_palette %||% list()
+  modifyList(defaults, custom)
+}
+
+model_line_color <- function(model_type) {
+  pal <- ex3_palette()
+  switch(
+    model_type,
+    direct = pal$m1,
+    direct_regression = pal$m1,
+    transfer = pal$m2,
+    transfer_function = pal$m2,
+    "Direct regression" = pal$m1,
+    "Transfer function" = pal$m2,
+    pal$m1
+  )
+}
+
+model_fill_color <- function(model_type) {
+  pal <- ex3_palette()
+  switch(
+    model_type,
+    direct = pal$m1_aux,
+    direct_regression = pal$m1_aux,
+    transfer = pal$m2_aux,
+    transfer_function = pal$m2_aux,
+    "Direct regression" = pal$m1_aux,
+    "Transfer function" = pal$m2_aux,
+    pal$m1_aux
+  )
+}
+
+theme_ex3 <- function(base_size = config$plots$pointsize %||% 11) {
+  ggplot2::theme_minimal(base_size = base_size) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(face = "bold", size = base_size + 1),
+      plot.subtitle = ggplot2::element_text(color = "grey25"),
+      axis.title = ggplot2::element_text(face = "bold"),
+      strip.text = ggplot2::element_text(face = "bold"),
+      legend.position = "bottom",
+      legend.title = ggplot2::element_text(face = "bold"),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_line(color = "grey88"),
+      panel.grid.major.y = ggplot2::element_line(color = "grey90")
+    )
+}
+
+subset_idx <- function(dates, start, end) {
+  which(dates >= as.Date(start) & dates <= as.Date(end))
+}
+
+state_sd_from_sC <- function(sC, index, idx) {
+  vals <- vapply(idx, function(tt) sC[index, index, tt], numeric(1))
+  sqrt(pmax(vals, 0))
+}
+
+posterior_quantile_draw_matrix <- function(fit, idx) {
+  idx <- as.integer(idx)
+  FF <- as.matrix(fit$model$FF)[, idx, drop = FALSE]
+  theta <- fit$samp.theta[, idx, , drop = FALSE]
+  ns <- dim(theta)[3]
+  draws <- vapply(seq_len(ns), function(s) {
+    colSums(FF * theta[, , s])
+  }, numeric(length(idx)))
+  if (is.null(dim(draws))) {
+    draws <- matrix(draws, nrow = length(idx), ncol = 1L)
+  }
+  draws
+}
+
+summarize_draw_matrix <- function(draws, level = uncertainty_level()) {
+  probs <- posterior_ci_probs(level)
+  data.frame(
+    estimate = rowMeans(draws),
+    lower = apply(draws, 1, stats::quantile, probs = probs[1], names = FALSE),
+    upper = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE),
+    stringsAsFactors = FALSE
+  )
+}
+
+quantile_summary_from_fit <- function(fit, cr.percent = uncertainty_level()) {
+  draws <- posterior_quantile_draw_matrix(fit, seq_len(length(fit$y)))
+  probs <- posterior_ci_probs(cr.percent)
+  x_vals <- grDevices::xy.coords(fit$y)$x
+  list(
+    x = x_vals,
+    map = rowMeans(draws),
+    lb = apply(draws, 1, stats::quantile, probs = probs[1], names = FALSE),
+    ub = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE)
+  )
+}
+
+plot_quantile_summary <- function(qsum, col = "#7D4FA8", add = TRUE, lwd = 1.5) {
+  if (!add) {
+    graphics::plot(qsum$x, qsum$map, type = "n")
+  }
+  graphics::lines(qsum$x, qsum$map, col = col, lwd = lwd)
+  graphics::lines(qsum$x, qsum$lb, col = col, lwd = 0.9, lty = 2)
+  graphics::lines(qsum$x, qsum$ub, col = col, lwd = 0.9, lty = 2)
+}
+
+component_summary_from_fit <- function(fit, index, just.theta = FALSE,
+                                       cr.percent = uncertainty_level()) {
+  theta <- fit$samp.theta
+  d <- dim(theta)
+  if (length(d) != 3L) {
+    stop("samp.theta must be a 3D array.", call. = FALSE)
+  }
+  TT <- d[2]
+  n_samp <- d[3]
+  probs <- posterior_ci_probs(cr.percent)
+
+  if (!just.theta) {
+    p <- length(index)
+    FF <- array(fit$model$FF[index, ], dim = c(p, TT, n_samp))
+    theta_sub <- array(theta[index, , ], dim = c(p, TT, n_samp))
+    draws <- colSums(FF * theta_sub)
+  } else {
+    if (length(index) != 1L) {
+      stop("when just.theta=TRUE, index must have length 1", call. = FALSE)
+    }
+    draws <- matrix(theta[index, , ], nrow = TT, ncol = n_samp)
+  }
+
+  x_vals <- if (!is.null(fit$y) && length(fit$y) == TT) grDevices::xy.coords(fit$y)$x else seq_len(TT)
+  list(
+    x = x_vals,
+    map = rowMeans(draws),
+    lb = apply(draws, 1, stats::quantile, probs = probs[1], names = FALSE),
+    ub = apply(draws, 1, stats::quantile, probs = probs[2], names = FALSE)
+  )
+}
+
+plot_component_summary <- function(csum, add = TRUE, col = "#7D4FA8", lwd = 1.5) {
+  if (!add) {
+    graphics::plot(
+      csum$x, csum$map, type = "n", xlab = "time", ylab = "component",
+      ylim = range(c(csum$lb, csum$ub), na.rm = TRUE)
+    )
+  }
+  graphics::lines(csum$x, csum$map, col = col, lwd = lwd)
+  graphics::lines(csum$x, csum$lb, col = col, lwd = 0.9, lty = 2)
+  graphics::lines(csum$x, csum$ub, col = col, lwd = 0.9, lty = 2)
+}
+
+fitted_path_summary <- function(fit, dates, idx, p0, model, period_label,
+                                level = uncertainty_level()) {
+  draws <- posterior_quantile_draw_matrix(fit, idx)
+  summary_df <- summarize_draw_matrix(draws, level = level)
+  data.frame(
+    date = dates[idx],
+    period_label = period_label,
+    model = model,
+    model_label = model_label(model),
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    phase = "fit",
+    summary_df,
+    stringsAsFactors = FALSE
+  )
+}
+
+state_series_summary <- function(fit, state_index, state_name, state_label,
+                                 dates, idx, p0, period_label,
+                                 level = uncertainty_level()) {
+  mu <- as.numeric(fit$theta.out$sm[state_index, idx])
+  sd <- state_sd_from_sC(fit$theta.out$sC, state_index, idx)
+  zcrit <- stats::qnorm((1 + level) / 2)
+  data.frame(
+    date = dates[idx],
+    period_label = period_label,
+    state = state_name,
+    state_label = state_label,
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    estimate = mu,
+    lower = mu - zcrit * sd,
+    upper = mu + zcrit * sd,
+    stringsAsFactors = FALSE
+  )
+}
+
+transfer_state_indices <- function(res, prep) {
+  k <- ncol(prep$X_train_scaled)
+  base_p <- length(res$transfer$model$m0) - (k + 1L)
+  if (!is.finite(base_p) || base_p < 1L) {
+    stop("Could not resolve transfer-model base state dimension from fitted object.", call. = FALSE)
+  }
+  k <- ncol(prep$X_train_scaled)
+  list(
+    zeta = base_p + 1L,
+    psi = seq.int(base_p + 2L, base_p + k + 1L),
+    psi_names = colnames(prep$X_train_scaled)
+  )
+}
+
+direct_state_indices <- function(res, prep) {
+  k <- ncol(prep$X_train_scaled)
+  base_p <- length(res$direct$model$m0) - k
+  if (!is.finite(base_p) || base_p < 1L) {
+    stop("Could not resolve direct-model base state dimension from fitted object.", call. = FALSE)
+  }
+  k <- ncol(prep$X_train_scaled)
+  list(
+    beta = seq.int(base_p + 1L, base_p + k),
+    beta_names = colnames(prep$X_train_scaled)
+  )
+}
+
+base_state_indices <- function(fit, prep, model = c("direct", "transfer")) {
+  model <- match.arg(model)
+  k <- ncol(prep$X_train_scaled)
+  base_p <- if (identical(model, "direct")) {
+    length(fit$model$m0) - k
+  } else {
+    length(fit$model$m0) - (k + 1L)
+  }
+  if (!is.finite(base_p) || base_p < 1L) {
+    stop("Could not resolve base-state dimension from fitted object.", call. = FALSE)
+  }
+  h <- as.numeric(config$model$seasonal_harmonics)
+  seasonal_labels <- unlist(lapply(h, function(h_i) {
+    c(sprintf("Seasonal h=%s (cos)", format(h_i, digits = 3)),
+      sprintf("Seasonal h=%s (sin)", format(h_i, digits = 3)))
+  }), use.names = FALSE)
+  labels <- c("Trend", seasonal_labels)
+  if (length(labels) != base_p) {
+    labels <- c("Trend", sprintf("Base state %d", seq_len(max(0L, base_p - 1L))))
+  }
+  list(
+    indices = seq_len(base_p),
+    names = sanitize_feature_names_unique(labels),
+    labels = labels
+  )
+}
+
+state_label_map <- function(name) {
+  if (length(name) != 1L) {
+    return(vapply(name, state_label_map, character(1)))
+  }
+
+  label_lookup <- NULL
+  if (exists("prep", inherits = TRUE)) {
+    prep_obj <- get("prep", inherits = TRUE)
+    label_lookup <- prep_obj$covariate_label_lookup %||% NULL
+  }
+  if (grepl("_lag[0-9]+$", name)) {
+    base_name <- sub("_lag[0-9]+$", "", name)
+    lag_m <- sub("^.*_lag", "", name)
+    return(sprintf("%s (lag %s)", state_label_map(base_name), lag_m))
+  }
+  if (grepl("_sq$", name)) {
+    base_name <- sub("_sq$", "", name)
+    return(sprintf("%s^2", state_label_map(base_name)))
+  }
+  if (grepl("_abs$", name)) {
+    base_name <- sub("_abs$", "", name)
+    return(sprintf("|%s|", state_label_map(base_name)))
+  }
+  if (grepl("_x_", name)) {
+    parts <- strsplit(name, "_x_", fixed = TRUE)[[1]]
+    return(sprintf("%s x %s", state_label_map(parts[1]), state_label_map(parts[2])))
+  }
+  if (!is.null(label_lookup) && name %in% names(label_lookup)) {
+    return(as.character(label_lookup[[name]]))
+  }
+  switch(
+    name,
+    nino34 = "nino34",
+    nino34_sq = "nino34^2",
+    zeta = "Transfer state zeta",
+    name
+  )
+}
+
+convergence_trace_for_fit <- function(fit, p0, model) {
+  vb_trace <- fit$diagnostics$vb_trace %||% NULL
+  if (is.data.frame(vb_trace) && nrow(vb_trace) > 0L) {
+    out <- vb_trace
+    out$p0 <- p0
+    out$tau_label <- format_p0_label(p0)
+    out$model <- model
+    out$model_label <- model_label(model)
+    return(out)
+  }
+
+  elbo <- as.numeric(fit$diagnostics$elbo %||% fit$misc$elbo %||% numeric())
+  sigma <- as.numeric(fit$seq.sigma %||% numeric())
+  gamma <- as.numeric(fit$seq.gamma %||% rep(NA_real_, length(sigma)))
+  n_iter <- max(length(elbo), length(sigma), length(gamma), 0L)
+  if (n_iter < 1L) return(data.frame())
+
+  pad_to <- function(x, n) {
+    x <- as.numeric(x)
+    if (length(x) >= n) return(x[seq_len(n)])
+    c(x, rep(NA_real_, n - length(x)))
+  }
+
+  data.frame(
+    iter = seq_len(n_iter),
+    p0 = p0,
+    tau_label = format_p0_label(p0),
+    model = model,
+    model_label = model_label(model),
+    elbo = pad_to(elbo, n_iter),
+    sigma = pad_to(sigma, n_iter),
+    gamma = pad_to(gamma, n_iter),
+    stringsAsFactors = FALSE
+  )
+}
+
+build_convergence_trace_df <- function(fit_results) {
+  traces <- unlist(lapply(fit_results, function(res) {
+    out <- list()
+    if (fit_ok(res$direct)) {
+      out[[length(out) + 1L]] <- convergence_trace_for_fit(res$direct, res$p0, "direct_regression")
+    }
+    if (fit_ok(res$transfer)) {
+      out[[length(out) + 1L]] <- convergence_trace_for_fit(res$transfer, res$p0, "transfer_function")
+    }
+    out
+  }), recursive = FALSE)
+  if (!length(traces)) return(data.frame())
+  do.call(rbind, traces)
+}
+
+trim_convergence_trace_df <- function(df, trim_start = convergence_trim_start_iter()) {
+  out <- df
+  mask <- out$iter < trim_start
+  out$elbo[mask] <- NA_real_
+  out$sigma[mask] <- NA_real_
+  out$gamma[mask] <- NA_real_
+  out
+}
+
+legend_grob <- function(plot_obj) {
+  g <- ggplot2::ggplotGrob(plot_obj)
+  idx <- which(vapply(g$grobs, function(x) x$name %||% "", character(1)) == "guide-box")
+  if (length(idx)) g$grobs[[idx[1]]] else NULL
+}
+
+save_csv_if_rows <- function(df, filename) {
+  if (!is.null(df) && nrow(df) > 0) write_csv(df, filename)
+}

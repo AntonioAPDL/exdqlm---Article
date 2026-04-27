@@ -1,0 +1,13 @@
+example_id: _manifest
+article_figures: []
+support_figures: []
+tables:
+  - manuscript_repro_tracker.csv
+  - manuscript_repro_tracker.md
+  - manuscript_repro_notes.csv
+  - manuscript_api_migration_map.csv
+  - benchmark_backend_profiles.csv
+  - benchmark_environment.csv
+logs:
+  - sessionInfo.txt
+cache_prefixes: []

@@ -4,14 +4,17 @@ This folder contains reproducible analysis stages for the article.
 
 - `exal`: exAL distribution utilities/reproducibility assets.
 - `manuscript`: end-to-end regeneration of main manuscript example artifacts.
+  Canonical per-example scripts live under `analysis/manuscript/examples/`.
   This includes the sparse `rhs_ns` static benchmark used in Example 4.
+- `support`: preserved exploratory and alternative workflows that are useful for
+  audit/history but are not the manuscript source of truth.
 
 For a reader-facing map of the manuscript artifacts, support-only outputs, and
 rerun entry points, see
 `/home/jaguir26/local/src/exdqlm---Article/SUPPLEMENTARY_INDEX.md`.
 
 The canonical source for the paper examples is
-`analysis/manuscript/scripts/`, executed through `analysis/run_all.R --stage
+`analysis/manuscript/examples/`, executed through `analysis/run_all.R --stage
 manuscript`. Standalone example scripts should be merged into that stage rather
 than maintained separately, so manuscript text, displayed code, figures, tables,
 and reproducibility logs stay synchronized.
@@ -54,7 +57,9 @@ package instead. Source mode remains the default.
 
 - `config/`: stage parameter and plotting configuration.
 - `exal/`: exAL-focused scripts/tests/outputs.
-- `manuscript/`: manuscript examples scripts/tests/outputs.
+- `lib/`: shared analysis helpers used by the manuscript stage.
+- `manuscript/`: canonical manuscript example scripts/tests/outputs.
+- `support/`: non-canonical exploratory workflows retained for reference.
 
 ## Notes
 

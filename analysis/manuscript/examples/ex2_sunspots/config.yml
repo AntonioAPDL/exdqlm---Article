@@ -1,0 +1,19 @@
+example_id: ex2_sunspots
+article_section: sec:ex2
+title: Sunspots dynamic exDQLM diagnostics and backend benchmark
+script: run.R
+parameter_source: analysis/config/params_manuscript.yml#profiles.*.ex2
+primary_target: ex2
+targets:
+  all: ex2
+  quantile_figure: ex2quant
+  diagnostic_figure: ex2checks
+  benchmark_table: ex2bench
+  manuscript_tables: ex2tables
+  ldvb_support: ex2quant_ldvb,ex2checks_ldvb,ex2_ldvb_diagnostics,ex2tables_ldvb
+notes:
+  - Keep the benchmark profile disclosure synchronized with generated backend tables.
+  - Article table values are inline in article4.tex and must be updated from generated CSVs after reruns.
+run_commands:
+  standard: Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
+  tests: Rscript analysis/run_all.R --stage manuscript --tests-only

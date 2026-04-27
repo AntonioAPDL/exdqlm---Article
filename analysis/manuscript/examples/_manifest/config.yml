@@ -1,0 +1,7 @@
+example_id: _manifest
+title: Reproducibility tracker and support tables
+script: run.R
+primary_target: tracker
+notes:
+  - This step runs after the example scripts.
+  - It records artifact status and writes reproducibility support tables.

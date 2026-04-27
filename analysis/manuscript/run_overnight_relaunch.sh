@@ -82,8 +82,8 @@ run_step "ex3_manuscript" \
 
 run_step "ex3_alt_monthly" \
   env EX3_MONTHLY_PKG_PATH="$PKG_ROOT" \
-  Rscript "$ARTICLE_ROOT/analysis/ex3_monthly_nino34_redo/run_all.R" \
-    --config "$ARTICLE_ROOT/analysis/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml" \
+  Rscript "$ARTICLE_ROOT/analysis/support/ex3_monthly_nino34_redo/run_all.R" \
+    --config "$ARTICLE_ROOT/analysis/support/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml" \
     --targets prep,fit,figures,manifest
 
 run_step "ex2" \

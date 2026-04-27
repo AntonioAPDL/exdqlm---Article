@@ -1,0 +1,27 @@
+example_id: ex2_sunspots
+article_figures:
+  - ex2quant.png
+  - ex2checks.png
+support_figures:
+  - ex2quant_ldvb.png
+  - ex2quant_ldvb_p005.png
+  - ex2quant_ldvb_p099.png
+  - ex2checks_ldvb.png
+  - ex2_ldvb_diagnostics.png
+tables:
+  - ex2_dynamic_benchmark.csv
+  - ex2_df_scan_kl.csv
+  - ex2_diagnostics_summary.csv
+  - ex2_df_scan_kl_ldvb.csv
+  - ex2_diagnostics_summary_ldvb.csv
+logs:
+  - ex2_model_output.txt
+  - ex2_run_summary.txt
+  - ex2_benchmark_run_summary.txt
+  - ex2_ldvb_diagnostics_summary.txt
+cache_prefixes:
+  - ex2_
+article_targets:
+  fig:ex2quant: ex2quant.png
+  fig:ex2checks: ex2checks.png
+  tab:ex2bench: ex2_dynamic_benchmark.csv

@@ -1,7 +1,7 @@
 # Raquel Example Merge Audit
 
 This document records how Raquel's review-driven example updates were merged into
-the canonical manuscript workflow under `analysis/manuscript/scripts/`.
+the canonical manuscript workflow under `analysis/manuscript/examples/`.
 
 ## Scope
 
@@ -14,7 +14,7 @@ the canonical manuscript workflow under `analysis/manuscript/scripts/`.
 ## Canonical Workflow Decision
 
 As of the April 26 review pass, the canonical paper-example workflow is the
-article repository's `analysis/manuscript/scripts/` stage, run through
+article repository's `analysis/manuscript/examples/` stage, run through
 `analysis/run_all.R --stage manuscript`. Separate collaborator scripts, such as
 temporary `examples.R` files, are not maintained as parallel sources of truth.
 They should be used as review input and merged into the canonical scripts before
@@ -43,13 +43,13 @@ by maintaining separate example workflows.
 - Follow-up issue-resolution commits integrated on top of that base:
   `e81a304`, `68b1e5c`, `ba6230d`, `38960b9`, `0537871`, `b7dde88`, `3249a61`, `e93bd9f`
 - Canonical scripts that carry the merged example behavior:
-  - `analysis/manuscript/scripts/00_setup.R`
-  - `analysis/manuscript/scripts/01_ex1_lake_huron.R`
-  - `analysis/manuscript/scripts/02_ex2_sunspots.R`
-  - `analysis/manuscript/scripts/03_ex3_big_tree.R`
-  - `analysis/manuscript/scripts/04a_ex4_seed_screen.R`
-  - `analysis/manuscript/scripts/04_ex4_static_simulation.R`
-  - `analysis/manuscript/scripts/05_tracker_and_manifest.R`
+  - `analysis/lib/manuscript_setup.R`
+  - `analysis/manuscript/examples/ex1_lake_huron/run.R`
+  - `analysis/manuscript/examples/ex2_sunspots/run.R`
+  - `analysis/manuscript/examples/ex3_big_tree/run.R`
+  - `analysis/manuscript/examples/ex4_static/seed_screen.R`
+  - `analysis/manuscript/examples/ex4_static/run.R`
+  - `analysis/manuscript/examples/_manifest/run.R`
 
 ## Merge Decisions by Example
 
@@ -76,7 +76,7 @@ by maintaining separate example workflows.
 - Refit tracked seed outputs under current package source.
 
 5. Alternative Example 3 sandbox
-- Keep under `analysis/ex3_monthly_nino34_redo/` and rerun separately from
+- Keep under `analysis/support/ex3_monthly_nino34_redo/` and rerun separately from
   manuscript examples.
 
 ## Verification Checklist

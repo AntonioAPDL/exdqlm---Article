@@ -10,22 +10,33 @@ and recommended rerun entry points, see
 
 ## Canonical Example Workflow
 
-The scripts under `analysis/manuscript/scripts/` are the canonical source for
+The scripts under `analysis/manuscript/examples/` are the canonical source for
 the paper examples. They are the only maintained executable workflow for
 regenerating the manuscript-facing figures, support tables, logs, and
 reproducibility tracker.
 
+Each example has an isolated folder:
+
+- `examples/ex1_lake_huron/`
+- `examples/ex2_sunspots/`
+- `examples/ex3_big_tree/`
+- `examples/ex4_static/`
+
+Each folder contains a `run.R`, a short `README.md`, a collaborator-facing
+`config.yml`, and an `artifacts.yml` manifest. Shared setup and helper
+infrastructure lives in `analysis/lib/manuscript_setup.R`.
+
 Standalone collaborator scripts, including temporary `examples.R` files, should
 be treated as review input rather than as a second maintained source. When a
 standalone script contains a useful correction or improvement, merge that logic
-into the appropriate canonical script here, rerun the affected target, and commit
-the script/output/article changes together. This keeps the manuscript text,
+into the appropriate canonical example folder here, rerun the affected target,
+and commit the script/output/article changes together. This keeps the manuscript text,
 displayed code, generated figures, generated tables, and reproducibility logs
 from drifting apart.
 
 The intended update cycle is:
 
-1. Edit the relevant script in `analysis/manuscript/scripts/`.
+1. Edit the relevant script in `analysis/manuscript/examples/`.
 2. Run the narrowest useful target with `analysis/run_all.R --stage manuscript`.
 3. Update any inline manuscript table/text in `article4.tex` from the generated
    CSV/log output.
@@ -34,8 +45,9 @@ The intended update cycle is:
    together.
 
 Collaborators who prefer to work through Overleaf can edit these canonical
-scripts there. Those edits should then be pulled locally, validated through this
-workflow, and pushed back to keep the article repository and Overleaf in sync.
+example folders there. Those edits should then be pulled locally, validated
+through this workflow, and pushed back to keep the article repository and
+Overleaf in sync.
 
 ## Scope
 

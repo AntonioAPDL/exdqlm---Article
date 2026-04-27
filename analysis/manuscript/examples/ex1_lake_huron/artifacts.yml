@@ -1,0 +1,21 @@
+example_id: ex1_lake_huron
+article_figures:
+  - ex1mcmc.png
+  - ex1quants.png
+support_figures:
+  - ex1synth.png
+  - ex1_kernel_compare.png
+tables:
+  - ex1_runtime_summary.csv
+  - ex1_kernel_summary.csv
+  - ex1_kernel_chain_stability.csv
+logs:
+  - ex1_model_output.txt
+  - ex1_run_summary.txt
+  - ex1_synthesis_summary.txt
+  - ex1_kernel_compare_summary.txt
+cache_prefixes:
+  - ex1_
+article_targets:
+  fig:ex1mcmc: ex1mcmc.png
+  fig:ex1quants: ex1quants.png

@@ -1,0 +1,21 @@
+example_id: ex3_big_tree
+article_section: sec:ex3
+title: Big Tree monthly flow dynamic regression and transfer function
+script: run.R
+parameter_source: analysis/config/params_manuscript.yml#profiles.*.ex3
+primary_target: ex3
+targets:
+  all: ex3
+  data_figure: ex3data
+  quantile_components: ex3quantcomps
+  transfer_states: ex3zetapsi
+  forecast: ex3forecast
+  manuscript_tables: ex3tables
+  ldvb_support: ex3quantcomps_ldvb,ex3forecast_ldvb,ex3tables_ldvb
+notes:
+  - This is the only manuscript-facing Big Tree workflow.
+  - Older Big Tree alternatives are preserved under analysis/support/.
+  - Keep precipitation and soil moisture out of the manuscript workflow unless the paper decision changes.
+run_commands:
+  standard: Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard --skip-tests
+  tests: Rscript analysis/run_all.R --stage manuscript --tests-only

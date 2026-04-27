@@ -1,0 +1,16 @@
+example_id: ex4_static
+article_figures:
+  - ex4static.png
+support_figures: []
+tables:
+  - ex4static_summary.csv
+  - ex4_seed_screen_p050_summary.csv
+  - ex4_seed_screen_p050_selection.csv
+logs:
+  - ex4_run_summary.txt
+  - ex4_seed_screen_p050_summary.txt
+cache_prefixes:
+  - ex4_
+article_targets:
+  fig:ex4static: ex4static.png
+  tab:ex4static: ex4static_summary.csv

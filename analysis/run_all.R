@@ -100,13 +100,17 @@ main <- function() {
     stop(sprintf("Unknown stage '%s'. Valid stages: %s", args$stage, paste(valid_stages, collapse = ", ")), call. = FALSE)
   }
 
-  stage_scripts <- file.path(repo_root, "analysis", args$stage, "scripts")
   stage_tests <- file.path(repo_root, "analysis", args$stage, "tests")
-  if (!dir.exists(stage_scripts)) {
-    stop(sprintf("Stage scripts directory not found: %s", stage_scripts), call. = FALSE)
+  setup_path <- switch(
+    args$stage,
+    exal = file.path(repo_root, "analysis", "exal", "scripts", "00_setup.R"),
+    manuscript = file.path(repo_root, "analysis", "lib", "manuscript_setup.R")
+  )
+  if (!file.exists(setup_path)) {
+    stop(sprintf("Stage setup file not found: %s", setup_path), call. = FALSE)
   }
 
-  source(file.path(stage_scripts, "00_setup.R"), local = ctx)
+  source(setup_path, local = ctx)
 
   if (!args$tests_only) {
     skip_clear <- identical(args$stage, "manuscript") && length(args$targets) > 0L
@@ -119,7 +123,7 @@ main <- function() {
 
     run_order <- switch(
       args$stage,
-      exal = c(
+      exal = file.path(repo_root, "analysis", "exal", "scripts", c(
         "01_al_density_by_p0.R",
         "02_al_cdf_by_p0.R",
         "03_exal_density_by_gamma.R",
@@ -131,20 +135,24 @@ main <- function() {
         "09_qexal_p0_identity_checks.R",
         "10_rexal_density_overlay.R",
         "11_summary_tables.R"
-      ),
-      manuscript = c(
-        "01_ex1_lake_huron.R",
-        "02_ex2_sunspots.R",
-        "03_ex3_big_tree.R",
-        "04a_ex4_seed_screen.R",
-        "04_ex4_static_simulation.R",
-        "05_tracker_and_manifest.R"
-      )
+      )),
+      manuscript = file.path(repo_root, "analysis", "manuscript", "examples", c(
+        "ex1_lake_huron/run.R",
+        "ex2_sunspots/run.R",
+        "ex3_big_tree/run.R",
+        "ex4_static/seed_screen.R",
+        "ex4_static/run.R",
+        "_manifest/run.R"
+      ))
     )
 
     for (s in run_order) {
-      ctx$log_msg(sprintf("Running script: %s", s))
-      source(file.path(stage_scripts, s), local = ctx)
+      if (!file.exists(s)) {
+        stop(sprintf("Stage script not found: %s", s), call. = FALSE)
+      }
+      rel <- sub(paste0("^", normalizePath(repo_root, winslash = "/"), "/"), "", normalizePath(s, winslash = "/"))
+      ctx$log_msg(sprintf("Running script: %s", rel))
+      source(s, local = ctx)
     }
   }
 

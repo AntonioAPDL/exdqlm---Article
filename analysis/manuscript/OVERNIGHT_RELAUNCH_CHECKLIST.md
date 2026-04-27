@@ -94,8 +94,8 @@ Rscript $ARTICLE/analysis/run_all.R \
 
 ```bash
 EX3_MONTHLY_PKG_PATH="$PKG" \
-Rscript $ARTICLE/analysis/ex3_monthly_nino34_redo/run_all.R \
-  --config $ARTICLE/analysis/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml \
+Rscript $ARTICLE/analysis/support/ex3_monthly_nino34_redo/run_all.R \
+  --config $ARTICLE/analysis/support/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml \
   --targets prep,fit,figures,manifest
 ```
 

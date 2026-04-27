@@ -39,7 +39,7 @@ The manuscript-facing workflow is organized under the article repository:
 - [article4.tex](/home/jaguir26/local/src/exdqlm---Article/article4.tex)
 
 The canonical executable scripts for the paper examples are under
-`analysis/manuscript/scripts/`. Manuscript figures are generated into
+`analysis/manuscript/examples/`. Manuscript figures are generated into
 `analysis/manuscript/outputs/figures/`, which is the first path searched by
 `article4.tex`. Top-level `Figures/` files are optional local export copies
 created by `--promote`; they are ignored by git and are not used by the
