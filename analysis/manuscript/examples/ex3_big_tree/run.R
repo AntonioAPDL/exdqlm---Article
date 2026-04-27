@@ -564,18 +564,28 @@ if (!need_ex3) {
 
     if (need_ex3zetapsi) {
       save_png_plot("ex3zetapsi.png", {
-        old_par <- graphics::par(mfrow = c(1, k_cov + 1L), mar = c(3.8, 4.2, 2.0, 0.8), oma = c(0, 0, 0, 0))
+        old_par <- graphics::par(no.readonly = TRUE)
         on.exit(graphics::par(old_par), add = TRUE)
 
+        if (k_cov == 2L) {
+          graphics::layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE), heights = c(1.05, 1))
+        } else {
+          graphics::par(mfrow = c(1, k_cov + 1L))
+        }
+        psi_ylim_by_index <- list(noi = c(-0.3, 0), amo = c(0, 0.3))
+
+        graphics::par(mar = c(3.0, 4.2, 2.1, 0.8), oma = c(0, 0, 0, 0))
         zeta <- component_summary_from_fit(M2, index = transfer_zeta_idx, just.theta = TRUE)
-        plot_component_summary(zeta, col = ex3_cols$m2, add = FALSE)
+        plot_component_summary(zeta, col = ex3_cols$m2, add = FALSE, xlab = "")
         graphics::grid(col = "grey90")
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
         graphics::title(expression(zeta[t]))
 
+        graphics::par(mar = c(3.8, 4.2, 2.1, 0.8))
         for (j in seq_len(k_cov)) {
           psi <- component_summary_from_fit(M2, index = transfer_psi_idx[[j]], just.theta = TRUE)
-          plot_component_summary(psi, col = index_cols[[j]], add = FALSE)
+          psi_ylim <- psi_ylim_by_index[[selected_indices[[j]]]]
+          plot_component_summary(psi, col = index_cols[[j]], add = FALSE, ylim = psi_ylim)
           graphics::grid(col = "grey90")
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
           graphics::title(climate_psi_title(selected_labels[[j]]))

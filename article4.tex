@@ -980,7 +980,7 @@ R> exdqlmPlot(M2, add = TRUE, col = "forest green")
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth]{ex3zetapsi.png}
-\caption{Example 3: Big Tree water flow. MAP estimates and 95\% CrIs of the transfer-function states \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and \(\psi_{\mathrm{AMO},t}\). Horizontal dotted orange lines are at zero for reference.}
+\caption{Example 3: Big Tree water flow. MAP estimates and 95\% CrIs of the transfer-function states. The top panel shows \(\zeta_t\) in green. The bottom-left panel shows \(\psi_{\mathrm{NOI},t}\) in blue with y-axis range \([-0.3,0]\), and the bottom-right panel shows \(\psi_{\mathrm{AMO},t}\) in orange with y-axis range \([0,0.3]\). Horizontal dotted orange lines mark zero.}
 \label{fig:ex3tftheta}
 \end{figure}
 
@@ -1008,16 +1008,21 @@ R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 
 \begin{CodeChunk}
 \begin{CodeInput}
+R> layout(matrix(c(1,1,2,3), nrow = 2, byrow = TRUE))
 R> compPlot(M2, index = 8, col= "forest green",
 +             add = FALSE, just.theta = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(zeta[t]))
-R> compPlot(M2, index = 9, col = "forest green",
-+             add = FALSE, just.theta = TRUE)
+R> plot(y.fit, type = "n", ylim = c(-0.3, 0),
++       xlab = "time", ylab = "component CrIs")
+R> compPlot(M2, index = 9, col = "steelblue",
++             add = TRUE, just.theta = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[list(NOI, t)]))
-R> compPlot(M2, index = 10, col = "steelblue",
-+             add = FALSE, just.theta = TRUE)
+R> plot(y.fit, type = "n", ylim = c(0, 0.3),
++       xlab = "time", ylab = "component CrIs")
+R> compPlot(M2, index = 10, col = "darkorange",
++             add = TRUE, just.theta = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}

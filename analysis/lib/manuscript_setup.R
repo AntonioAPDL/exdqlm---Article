@@ -592,9 +592,13 @@ component_summary_from_fit <- function(mfit, index, just.theta = FALSE, cr.perce
   )
 }
 
-plot_component_summary <- function(csum, add = TRUE, col = "purple", lwd = 1.5) {
+plot_component_summary <- function(csum, add = TRUE, col = "purple", lwd = 1.5,
+                                   ylim = NULL, xlab = "time", ylab = "component CrIs") {
   if (!add) {
-    graphics::plot(csum$x, csum$map, type = "n", xlab = "time", ylab = "component CrIs", ylim = range(c(csum$lb, csum$ub), na.rm = TRUE))
+    if (is.null(ylim)) {
+      ylim <- range(c(csum$lb, csum$ub), na.rm = TRUE)
+    }
+    graphics::plot(csum$x, csum$map, type = "n", xlab = xlab, ylab = ylab, ylim = ylim)
   }
   graphics::lines(csum$x, csum$map, col = col, lwd = lwd)
   graphics::lines(csum$x, csum$lb, col = col, lwd = 0.8, lty = 2)
