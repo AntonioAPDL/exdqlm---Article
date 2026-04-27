@@ -87,9 +87,10 @@ generated artifact.
 ## Table Queue
 
 - [x] Introductory software-positioning table
-  - Current status: Table 1 was rewritten as a selective roadmap of
-    representative quantile/state-space packages, with columns aligned to the
-    manuscript's positioning argument.
+  - Current status: Table 1 was rewritten and re-audited cell-by-cell against
+    package documentation and CRAN metadata for the representative
+    quantile/state-space packages, with columns aligned to the manuscript's
+    positioning argument.
   - Polish focus: placement, acronym clarity, and readable contrast between
     general quantile-regression software, state-space software, and
     `exdqlm`.

@@ -64,41 +64,43 @@
 
 Quantile regression has become a widely used alternative to mean-based modeling in static settings. However, dynamic quantile methods and accompanying software remain comparatively limited. In Bayesian parametric quantile regression, the asymmetric Laplace (AL) likelihood has played a central role because it is linked to the check-loss function used in classical quantile regression \citep{yu2001bayesian,koenkerquantile} and admits convenient mixture representations for posterior computation. These computational advantages have made AL-based models attractive, even though the AL can be restrictive as an error model. More flexible error distributions have been studied extensively in the Bayesian nonparametric literature \citep{kottas2009bayesian,reich2009flexible,taddy2010bayesian}, however the resulting methods can be computationally demanding for dynamic models and longer time series. \cite{yan2025family} introduce the extended asymmetric Laplace (exAL); a parametric extension of the AL that preserves its computational advantages while relaxing some of its restrictive features. \cite{me} use this family to develop a flexible dynamic quantile linear model (exDQLM), which is the model implemented in our \proglang{R} package \pkg{exdqlm}.
 
-\aA{The current \proglang{R} software ecosystem for quantile regression is broad, but the capabilities most relevant to this paper are distributed across software with different aims. Table \ref{table:software} gives a compact roadmap of representative packages using the distinctions most important for positioning \pkg{exdqlm}: modeling scope, temporal or latent-state structure, inference strategy, and cross-quantile handling. The table is selective rather than exhaustive; its purpose is to identify the software gap addressed by a dedicated Bayesian dynamic quantile state-space workflow.}
+\aA{The current \proglang{R} software ecosystem for quantile regression is broad, but the capabilities most relevant to this paper are distributed across software with different aims. Table \ref{table:software} gives a compact roadmap of representative packages using the distinctions most important for positioning \pkg{exdqlm}: modeling scope, temporal or latent-state structure, inference strategy, and handling of multiple quantile levels. The table is selective rather than exhaustive; its purpose is to identify the software gap addressed by a dedicated Bayesian dynamic quantile state-space workflow.}
 
 \begin{table}[!htbp]
 \centering
 \begingroup
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
-\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.02}
 \begin{tabularx}{\textwidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
 \toprule
-\textbf{Package} & \textbf{Main scope} & \shortstack{\textbf{Temporal/dynamic}\\\textbf{structure}} & \textbf{Inference strategy} & \shortstack{\textbf{Cross-quantile}\\\textbf{handling}} \\
+\textbf{Package} & \textbf{Main scope} & \shortstack{\textbf{Time-series or}\\\textbf{state-space role}} & \shortstack{\textbf{Inference or}\\\textbf{computation}} & \shortstack{\textbf{Multiple-quantile}\\\textbf{handling}} \\
 \midrule
-\pkg{quantreg} & Frequentist general-purpose quantile regression & Regression formulas via \code{dynrq()}; no latent-state summaries & Optimization; resampling-based uncertainty summaries & Separate fits; rearrangement available \\
+\pkg{quantreg} & Frequentist quantile regression for linear, nonlinear, nonparametric, and censored-response models & Time-series formulas through \code{dynrq()}; dynamic terms enter as regressors, not latent states & Optimization-based estimation; frequentist summaries and bootstrap options & Vector-valued quantile levels; post hoc rearrangement \\
 \addlinespace[1pt]
-\pkg{bayesQR} & Bayesian AL quantile regression & Static regression & MCMC under the AL working likelihood & Separate fits \\
+\pkg{bayesQR} & Bayesian AL quantile regression for continuous or binary responses & Static regression & MCMC under the AL likelihood; optional adaptive-lasso variant & Scalar or vector quantile input; output organized by fitted quantile \\
 \addlinespace[1pt]
-\pkg{brms} & Bayesian regression framework, including AL quantiles & Regression-level AR/MA structures; no quantile state-space workflow & Stan MCMC & Separate fits \\
+\pkg{pqrBayes} & Bayesian penalized quantile regression for sparse linear, binary, group-lasso, and varying-coefficient models & Static or varying-coefficient regression; no latent state-space filtering & MCMC with spike-and-slab, Laplace, and horseshoe-family shrinkage priors & One target quantile per fit \\
 \addlinespace[1pt]
-\pkg{qgam} & Additive quantile regression with calibrated intervals & Static additive smooths & Calibrated loss-based fitting with a Laplace-Gaussian approximation & Separate fits \\
+\pkg{brms} & General Bayesian regression framework; \code{asym\_laplace()} supports AL quantile regression & Autocorrelation structures are available; not organized as a quantile state-space workflow & Stan-based posterior inference & AL quantile parameter selects the target; joint noncrossing quantile planes are outside the main interface \\
 \addlinespace[1pt]
-\pkg{qrjoint} & Bayesian joint linear quantile regression & Static regression & MCMC & Joint estimation \\
+\pkg{qgam} & Smooth additive quantile regression using GAM-style formulas & Static additive smooths; no latent state-space filtering & Automatic smoothing and learning-rate calibration; PIRLS or Newton fitting & \code{qgam()} fits one quantile; \code{mqgam()} fits several \\
 \addlinespace[1pt]
-\pkg{dlm} & Gaussian state-space time-series modeling & Latent-state Gaussian state space & Kalman filtering and smoothing & Not quantile-specific \\
+\pkg{qrjoint} & Bayesian joint estimation of linear quantile planes, including censored-response options & Static regression over a predictor domain; no time-series or state-space component & Adaptive MCMC for intercept and slope functions over quantile levels & Joint noncrossing quantile planes over the specified domain \\
+\addlinespace[1pt]
+\pkg{dlm} & Gaussian dynamic linear models & Latent Gaussian state-space models with Kalman filtering and smoothing & Maximum likelihood and Bayesian analysis for normal state-space models & Not a quantile-regression package \\
 \addlinespace[1pt]
 \midrule
-\pkg{exdqlm} & Bayesian exAL quantile state-space modeling with forecasting & Latent-state quantile state space; transfer functions & MCMC; Laplace-Delta VB approximation & Separate fits; posterior-predictive synthesis \\
+\pkg{exdqlm} & Bayesian quantile regression under the exAL family, with dynamic and static routines & Latent quantile state-space models, forecasting, and transfer-function covariate effects & MCMC and variational Bayes approximation; static shrinkage-prior options & Separately fitted quantiles can be combined by posterior-predictive synthesis \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Columns emphasize the distinctions used to position \pkg{exdqlm}: modeling scope, temporal or latent-state structure, inference strategy, and cross-quantile handling. AL denotes asymmetric Laplace, exAL its extended version, and VB variational Bayes.}
+\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Columns emphasize the distinctions used to position \pkg{exdqlm}: modeling scope, time-series or state-space support, inference or computation, and handling of multiple quantile levels. The entries summarize the packages' documented primary interfaces rather than every possible user extension. AL denotes asymmetric Laplace, exAL its extended version, GAM generalized additive model, PIRLS penalized iteratively reweighted least squares, and VB variational Bayes.}
 \label{table:software}
 \end{table}
 
 
-The package \pkg{exdqlm} provides a unified workflow for Bayesian inference, forecasting, and model assessment for quantile models fitted one quantile at a time. Its core functionality is dynamic state-space quantile modeling, supported by exact posterior simulation via MCMC and a faster variational Bayes (VB) approximation. The package also includes transfer-function exDQLMs for nonlinear input effects at a given quantile, static exAL quantile regression with shrinkage priors, and a synthesis step that combines anchor-specific posterior predictive draws from separately fitted quantile models into a unified posterior predictive distribution. Forecasting and a range of visual and quantitative diagnostics are available throughout. The package is released under the MIT License and is available from the Comprehensive R Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=exdqlm}.
+The package \pkg{exdqlm} provides a unified workflow for Bayesian inference, forecasting, and model assessment for quantile models fitted one quantile at a time. Its core functionality is dynamic state-space quantile modeling, supported by exact posterior simulation via MCMC and a faster variational Bayes (VB) approximation. The package also includes transfer-function exDQLMs for nonlinear input effects at a given quantile, static exAL quantile regression with shrinkage priors, and a synthesis step that combines quantile-specific posterior predictive draws from separately fitted quantile models into a unified posterior predictive distribution. Forecasting and a range of visual and quantitative diagnostics are available throughout. The package is released under the MIT License and is available from the Comprehensive R Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=exdqlm}.
 
 \aA{The frequentist package \pkg{quantreg} \citep{quantreg} remains the broad general-purpose baseline, covering linear, nonlinear, nonparametric, censored, and dynamic quantile regression, together with bootstrap-based and related uncertainty summaries. Its \code{dynrq()} function supports dynamic linear quantile regression through time-series regression formulas involving lags, differences, trends, seasonal factors, and harmonic terms, while preserving time-series attributes. However, the dynamic structure enters through the design matrix rather than through latent states: once these regressors are constructed, estimation proceeds through the standard \pkg{quantreg} fitting routines for a fixed coefficient vector. In that sense, \code{dynrq()} is a regression-style time-series interface rather than a latent-state state-space model, so it does not provide filtered or smoothed state summaries.}
 
@@ -596,7 +598,7 @@ R> fc05 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M5,
 
 This generates a plot of the data with the forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (before 1972), for reference. Results can be seen in the top-right panel of Figure \ref{fig:ex1quants}. The percentage in the CrIs can be modified with the parameter \code{cr.percent}.
 
-When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{quantileSynthesis()}. Each fitted model contributes local predictive information near its target quantile, and the synthesis step interpolates across these anchor-specific draws to obtain one posterior predictive distribution. When independently fitted quantiles induce crossing, optional monotonicity corrections based on isotonic adjustment and monotone rearrangement are available \citep{barlow1972,chernozhukov2010}. For the Lake Huron example, we apply this routine directly to the fitted objects \code{M5}, \code{M50}, and \code{M95} over the observed period.
+When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{quantileSynthesis()}. Each fitted model contributes local predictive information near its target quantile, and the synthesis step interpolates across these quantile-specific draws to obtain one posterior predictive distribution. When independently fitted quantiles induce crossing, optional monotonicity corrections based on isotonic adjustment and monotone rearrangement are available \citep{barlow1972,chernozhukov2010}. For the Lake Huron example, we apply this routine directly to the fitted objects \code{M5}, \code{M50}, and \code{M95} over the observed period.
 
 \begin{CodeChunk}
 \begin{CodeInput}
