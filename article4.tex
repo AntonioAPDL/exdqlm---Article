@@ -417,11 +417,9 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 \section{Examples}
  \label{sec:exs}
 
-We demonstrate the general workflow and key features of the package through several analyses on real datasets. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. All figures and tables are generated from scripts distributed with the article repository. These scripts build the example artifacts directly from the current \pkg{exdqlm} API. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
+We demonstrate the general workflow and key features of the package through several analyses on real datasets. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. \aA{The functions in Table \ref{table:flow} cover the high-level modeling workflow used in the examples. The package also exposes distribution-level utilities for the exAL error family: \code{dexal()}, \code{pexal()}, \code{qexal()}, and \code{rexal()} evaluate the density, distribution function, quantile function, and random generator, respectively, and \code{get\_gamma\_bounds()} returns the admissible interval for $\gamma$ at a specified $p_0$. These utilities are useful for simulation, prior calibration, and direct checks of the exAL distribution, but are not needed for the main fitting, forecasting, diagnostic, or synthesis workflows illustrated below.} All figures and tables are generated from scripts distributed with the article repository. These scripts build the example artifacts directly from the current \pkg{exdqlm} API. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
 
 We begin by loading the \pkg{exdqlm} package used for all examples.
-
-\aA{ The package also exports exAL utility functions }(\code{dexal()}, \code{pexal()}, \code{qexal()}, \code{rexal()}, and \code{get_gamma_bounds()}) for direct distributional evaluation and simulation. 
 
 \begin{CodeChunk}
 \begin{CodeInput}
