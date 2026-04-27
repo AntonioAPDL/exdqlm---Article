@@ -477,6 +477,7 @@ To allow variability in the dynamic quantile, we select a single discount factor
 
 \begin{CodeChunk}
 \begin{CodeInput}
+R> set.seed(20260427)
 R> M95 = exdqlmMCMC(y = LakeHuron, p0 = 0.95, model = model,
 +                 df = 0.9, dim.df = 2,
 +                 PriorGamma = list(m_gam = -1, s_gam = 0.1, df_gam = 1),
@@ -506,7 +507,7 @@ MCMC done | model=exDQLM | status=complete | iter=5000.00 | runtime_sec=26.292
 \end{CodeOutput}
 \end{CodeChunk}
 
-For this time series of length 98, the dedicated free-\(\sigma\) median trace run (2000 burn-in iterations and 3000 retained draws) takes about 199 seconds under our standard manuscript profile; runtimes vary across hardware and backend settings. By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). Consistent with this, the posterior mean of \(\gamma\) is \(-0.082\) with a 95\% credible interval \((-0.573, 0.371)\), while the posterior mean of \(\sigma\) is \(0.365\) with a 95\% credible interval \((0.253, 0.469)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
+\aA{For this time series of length 98, the dedicated free-\(\sigma\) median trace run (2000 burn-in iterations and 3000 retained draws) takes about 133 seconds under our standard manuscript profile with seed \code{20260427}; runtimes vary across hardware and backend settings.} By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). \aA{Consistent with this, the posterior mean of \(\gamma\) is \(-0.119\) with a 95\% credible interval \((-0.578, 0.298)\), while the posterior mean of \(\sigma\) is \(0.362\) with a 95\% credible interval \((0.259, 0.468)\).} All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
@@ -1081,8 +1082,8 @@ R> exdqlmForecast(start.t = length(flow.fit)-18, k = 18, m1 = M2,
  \toprule
  Model & KL & CRPS & pplc \\
  \midrule
- \code{M1} regression & \textbf{0.0881} & \textbf{0.3517} & 151.79 \\
- \code{M2} transfer function & 0.1199 & 0.3531 & \textbf{146.57} \\
+ \code{M1} regression & 0.0668 & \textbf{0.3517} & 151.79 \\
+ \code{M2} transfer function & \textbf{0.0283} & 0.3531 & \textbf{146.57} \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, pplc assesses target-quantile posterior predictive loss, and KL summarizes one-step-ahead calibration discrepancy. Because the columns are the comparison metrics, bold entries indicate the smaller value within each column; displayed ties are left unbolded.}
@@ -1096,7 +1097,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2, ref = ref.samp,
 +                              plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-\aA{The diagnostics give a mixed but useful comparison. The direct regression model has the smaller KL divergence and CRPS, whereas the transfer-function model has the smaller pplc. The CRPS values are nearly identical, so we do not interpret the table as selecting a single clearly dominant model. Instead, the example illustrates how the package diagnostics expose different aspects of fit: the direct regression is slightly favored by calibration-oriented and full-distribution criteria, while the transfer-function model is favored by the target-quantile loss criterion.}
+\aA{The diagnostics give a mixed but useful comparison. The transfer-function model has the smaller KL divergence and pplc, whereas the direct regression model has the slightly smaller CRPS. The CRPS values are nearly identical, so we do not interpret the table as selecting a single clearly dominant model. Instead, the example illustrates how the package diagnostics expose different aspects of fit: the transfer-function model is favored by the calibration-oriented and target-quantile loss criteria, while the direct regression is slightly favored by the full-distribution CRPS criterion.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

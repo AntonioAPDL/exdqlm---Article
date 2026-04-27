@@ -155,7 +155,7 @@ if (!need_ex1) {
   )
 
   if (need_ex1_quants_models) {
-    ex1_quants <- load_or_fit_cache("ex1_quants_models_v3_main_2000_3000", {
+    ex1_quants <- load_or_fit_cache(sprintf("ex1_quants_models_v3_main_2000_3000_seed%s", seed_value), {
       M95 <- exdqlm::exdqlmMCMC(
         y = y, p0 = 0.95, model = model,
         df = 0.9, dim.df = 2,
@@ -178,7 +178,7 @@ if (!need_ex1) {
         verbose = FALSE
       )
       list(model = model, M95 = M95, M50_dqlm = M50_dqlm, M5 = M5)
-    }, note = "ex1_quants_models_v3_main_2000_3000")
+    }, note = sprintf("ex1_quants_models_v3_main_2000_3000_seed%s", seed_value))
 
     M95 <- ex1_quants$M95
     M50_dqlm <- ex1_quants$M50_dqlm
@@ -193,7 +193,7 @@ if (!need_ex1) {
   }
 
   if (need_ex1_trace_model) {
-    ex1_trace <- load_or_fit_cache("ex1_trace_model_v5_slice_2000_3000", {
+    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v5_slice_2000_3000_seed%s", seed_value), {
       M50_trace <- exdqlm::exdqlmMCMC(
         y = y, p0 = 0.50, model = model,
         df = 0.9, dim.df = 2,
@@ -202,7 +202,7 @@ if (!need_ex1) {
         verbose = FALSE
       )
       list(M50_trace = M50_trace)
-    }, note = "ex1_trace_model_v5_slice_2000_3000")
+    }, note = sprintf("ex1_trace_model_v5_slice_2000_3000_seed%s", seed_value))
 
     M50_trace <- ex1_trace$M50_trace
     sigma_trace <- as.numeric(M50_trace$samp.sigma)
@@ -297,7 +297,7 @@ if (!need_ex1) {
   }
 
   if (need_ex1_synthesis) {
-    ex1_synthesis <- load_or_fit_cache("ex1_synthesis_v5_s3_plot", {
+    ex1_synthesis <- load_or_fit_cache(sprintf("ex1_synthesis_v5_s3_plot_seed%s", seed_value), {
       syn_obs <- with_local_seed(seed_value + 111L, {
         exdqlm::quantileSynthesis(
           draws_list = list(M5, M50_dqlm, M95),
@@ -322,7 +322,7 @@ if (!need_ex1) {
         syn_obs = syn_obs,
         syn_future = syn_future
       )
-    }, note = "ex1_synthesis_v5_s3_plot")
+    }, note = sprintf("ex1_synthesis_v5_s3_plot_seed%s", seed_value))
   }
 
   if (need_ex1quants) {
