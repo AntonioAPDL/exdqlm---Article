@@ -14,7 +14,7 @@ commit together with the current CRAN-facing package branch
 
 These are the figures and tables cited directly in the manuscript.
 
-| Manuscript target | Tracked output | Promoted file |
+| Manuscript target | Tracked output | Optional local export |
 | --- | --- | --- |
 | `fig:ex1mcmc` | `analysis/manuscript/outputs/figures/ex1mcmc.png` | `Figures/ex1mcmc.png` |
 | `fig:ex1quants` | `analysis/manuscript/outputs/figures/ex1quants.png` | `Figures/ex1quants.png` |
@@ -41,9 +41,10 @@ The manuscript-facing workflow is organized under the article repository:
 The canonical executable scripts for the paper examples are under
 `analysis/manuscript/scripts/`. Manuscript figures are generated into
 `analysis/manuscript/outputs/figures/`, which is the first path searched by
-`article4.tex`. Top-level `Figures/` files are promoted copies. Inline LaTeX
-tables in `article4.tex` should be synchronized with the corresponding generated
-CSV/log outputs whenever a model is rerun.
+`article4.tex`. Top-level `Figures/` files are optional local export copies
+created by `--promote`; they are ignored by git and are not used by the
+manuscript build. Inline LaTeX tables in `article4.tex` should be synchronized
+with the corresponding generated CSV/log outputs whenever a model is rerun.
 
 The main reproducibility outputs written by the manuscript stage are:
 

@@ -105,12 +105,12 @@ package instead. Source mode remains the default.
 - `analysis/manuscript/outputs/logs/`: compact textual outputs and session metadata.
 - `analysis/manuscript/outputs/cache/`: cached fitted objects to support fast targeted reruns.
 
-Figures cited by `article4.tex` are resolved first from
+Figures cited by `article4.tex` are resolved from
 `analysis/manuscript/outputs/figures/` through the manuscript `\graphicspath`.
-Top-level `Figures/` files are promoted copies for compatibility and archival
-use, not the primary source during local manuscript builds. Tables in
-`article4.tex` are inline LaTeX, so their displayed values must be updated from
-the generated CSV/log files whenever a model is rerun.
+Top-level `Figures/` files are optional local export copies created by
+`--promote`; they are ignored by git and are not searched by the manuscript
+build. Tables in `article4.tex` are inline LaTeX, so their displayed values
+must be updated from the generated CSV/log files whenever a model is rerun.
 
 Main tracker files:
 

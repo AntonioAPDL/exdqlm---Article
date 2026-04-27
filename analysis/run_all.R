@@ -160,7 +160,7 @@ main <- function() {
   }
 
   if (args$promote) {
-    ctx$log_msg("Promoting approved figures to Figures/")
+    ctx$log_msg("Promoting approved figures to ignored local Figures/ export mirror")
     ctx$promote_publication_figures()
   }
 

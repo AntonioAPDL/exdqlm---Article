@@ -17,13 +17,12 @@ testthat::test_that("manuscript figures resolve from canonical generated outputs
   graphicspath <- grep("\\\\graphicspath", tex, value = TRUE)
   testthat::expect_true(length(graphicspath) > 0)
   testthat::expect_true(any(grepl("analysis/manuscript/outputs/figures", graphicspath, fixed = TRUE)))
+  testthat::expect_false(any(grepl("Figures/", graphicspath, fixed = TRUE)))
 
   included <- extract_includegraphics(tex_path)
   testthat::expect_gt(length(included), 0)
 
   generated_paths <- file.path(repo_root, "analysis", "manuscript", "outputs", "figures", included)
-  fallback_paths <- file.path(repo_root, "Figures", included)
-
   missing_generated <- included[!file.exists(generated_paths)]
   testthat::expect_equal(
     length(missing_generated),
@@ -31,12 +30,6 @@ testthat::test_that("manuscript figures resolve from canonical generated outputs
     info = paste("These manuscript figures are not in analysis/manuscript/outputs/figures:", paste(missing_generated, collapse = ", "))
   )
 
-  fallback_only <- included[!file.exists(generated_paths) & file.exists(fallback_paths)]
-  testthat::expect_equal(
-    length(fallback_only),
-    0L,
-    info = paste("These manuscript figures would fall back to stale Figures/ copies:", paste(fallback_only, collapse = ", "))
-  )
 })
 
 testthat::test_that("included manuscript figures are recorded in the reproducibility tracker", {

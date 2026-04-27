@@ -60,6 +60,8 @@ package instead. Source mode remains the default.
 
 - Deterministic seeds are stage-specific (`config/params_*.yml`).
 - Output filenames are stable for repeatable manuscript linkage.
-- Promotion copies selected figures into top-level `Figures/`.
+- The optional `--promote` flag copies selected figures into top-level
+  `Figures/` as a local export mirror. That directory is ignored by git and is
+  not used by `article4.tex`.
 - The staged overnight manuscript relaunch plan is documented in
   `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.

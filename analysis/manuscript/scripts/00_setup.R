@@ -830,7 +830,7 @@ promote_publication_figures <- function() {
     copy_binary_file(src, dst)
   }
 
-  log_msg(sprintf("Promoted %d manuscript figure(s) to Figures/", length(promote)))
+  log_msg(sprintf("Promoted %d manuscript figure(s) to ignored local Figures/ export mirror", length(promote)))
 }
 
 register_note("api_update", "Deprecated exdqlmChecks replaced with exdqlmDiagnostics.")

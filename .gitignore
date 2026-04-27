@@ -10,5 +10,8 @@ analysis/manuscript/outputs/logs/*
 analysis/manuscript/outputs/cache/*
 !analysis/manuscript/outputs/cache/.gitkeep
 
+# Optional local figure-export mirror produced by --promote
+Figures/
+
 # OS/editor artifacts
 .DS_Store
