@@ -76,22 +76,22 @@ Quantile regression has become a widely used alternative to mean-based modeling 
 \toprule
 \textbf{Package} & \textbf{Main scope} & \shortstack{\textbf{Time-series or}\\\textbf{state-space role}} & \shortstack{\textbf{Inference or}\\\textbf{computation}} & \shortstack{\textbf{Multiple-quantile}\\\textbf{handling}} \\
 \midrule
-\pkg{quantreg} & Frequentist quantile regression for linear, nonlinear, nonparametric, and censored-response models & Time-series formulas through \code{dynrq()}; dynamic terms enter as regressors, not latent states & Optimization-based estimation; frequentist summaries and bootstrap options & Vector-valued quantile levels; post hoc rearrangement \\
+\pkg{quantreg} & General frequentist quantile regression & Formula-based time-series regressors via \code{dynrq()}; no latent states & Optimization-based fitting; frequentist and bootstrap summaries & Vector-valued quantile levels; post hoc rearrangement \\
 \addlinespace[1pt]
-\pkg{bayesQR} & Bayesian AL quantile regression for continuous or binary responses & Static regression & MCMC under the AL likelihood; optional adaptive-lasso variant & Scalar or vector quantile input; output organized by fitted quantile \\
+\pkg{bayesQR} & Bayesian AL quantile regression & Static regression; no temporal or state-space component & MCMC under the AL likelihood; optional adaptive lasso & Vector-valued quantile levels; output organized by fitted quantile \\
 \addlinespace[1pt]
-\pkg{pqrBayes} & Bayesian penalized quantile regression for sparse linear, binary, group-lasso, and varying-coefficient models & Static or varying-coefficient regression; no latent state-space filtering & MCMC with spike-and-slab, Laplace, and horseshoe-family shrinkage priors & One target quantile per fit \\
+\pkg{pqrBayes} & Bayesian penalized quantile regression & Static or varying-coefficient regression; no state-space component & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
 \addlinespace[1pt]
-\pkg{brms} & General Bayesian regression framework; \code{asym\_laplace()} supports AL quantile regression & Autocorrelation structures are available; not organized as a quantile state-space workflow & Stan-based posterior inference & AL quantile parameter selects the target; joint noncrossing quantile planes are outside the main interface \\
+\pkg{brms} & General Bayesian regression with an AL family & Autocorrelation structures available; no dedicated quantile state-space workflow & Stan-based posterior inference & Target quantile set through the AL quantile parameter \\
 \addlinespace[1pt]
-\pkg{qgam} & Smooth additive quantile regression using GAM-style formulas & Static additive smooths; no latent state-space filtering & Automatic smoothing and learning-rate calibration; PIRLS or Newton fitting & \code{qgam()} fits one quantile; \code{mqgam()} fits several \\
+\pkg{qgam} & Smooth additive quantile regression & Static additive smooths; no state-space component & Automatic smoothing and learning-rate calibration; PIRLS or Newton fitting & Single-quantile \code{qgam()}; multi-quantile \code{mqgam()} \\
 \addlinespace[1pt]
-\pkg{qrjoint} & Bayesian joint estimation of linear quantile planes, including censored-response options & Static regression over a predictor domain; no time-series or state-space component & Adaptive MCMC for intercept and slope functions over quantile levels & Joint noncrossing quantile planes over the specified domain \\
+\pkg{qrjoint} & Bayesian joint linear quantile regression & Static regression over a predictor domain; no state-space component & Adaptive MCMC for quantile-level coefficient functions & Joint noncrossing quantile planes \\
 \addlinespace[1pt]
-\pkg{dlm} & Gaussian dynamic linear models & Latent Gaussian state-space models with Kalman filtering and smoothing & Maximum likelihood and Bayesian analysis for normal state-space models & Not a quantile-regression package \\
+\pkg{dlm} & Gaussian dynamic linear models & Latent Gaussian state-space models & Maximum likelihood, Kalman filtering/smoothing, and Bayesian analysis & Not a quantile-regression package \\
 \addlinespace[1pt]
 \midrule
-\pkg{exdqlm} & Bayesian quantile regression under the exAL family, with dynamic and static routines & Latent quantile state-space models, forecasting, and transfer-function covariate effects & MCMC and variational Bayes approximation; static shrinkage-prior options & Separately fitted quantiles can be combined by posterior-predictive synthesis \\
+\pkg{exdqlm} & Bayesian exAL quantile regression & Latent quantile state-space models, forecasting, and transfer-function effects & MCMC and variational Bayes; static shrinkage-prior options & Posterior-predictive synthesis from separately fitted quantiles \\
 \bottomrule
 \end{tabularx}
 \endgroup
