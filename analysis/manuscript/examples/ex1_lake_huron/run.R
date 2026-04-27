@@ -198,6 +198,9 @@ if (!need_ex1) {
     q05_future = "#85B89A"
   )
 
+  synth_obs_col <- grDevices::adjustcolor("#F7D6DE", alpha.f = 0.40)
+  synth_fore_col <- grDevices::adjustcolor("#C96F83", alpha.f = 0.48)
+
   if (need_ex1_quants_models) {
     ex1_quants <- load_or_fit_cache(sprintf("ex1_quants_models_v3_main_2000_3000_seed%s", seed_value), {
       M95 <- exdqlm::exdqlmMCMC(
@@ -434,7 +437,7 @@ if (!need_ex1) {
         xlim = xlim_synth_obs,
         ylim = y_lim_obs_synth,
         show.median = FALSE,
-        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42),
+        band.col = synth_obs_col,
         y.col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
         ylab = "predictive synthesis",
         main = "(c) Observed-period synthesis"
@@ -442,7 +445,7 @@ if (!need_ex1) {
       graphics::legend(
         "bottomleft",
         legend = c("Synthesized posterior predictive interval (95%)"),
-        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)),
+        fill = c(synth_obs_col),
         border = c(NA),
         lty = c(NA),
         lwd = c(NA),
@@ -462,37 +465,38 @@ if (!need_ex1) {
         xlim = xlim_fore,
         ylim = y_lim_zoom_synth,
         show.median = FALSE,
-        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42),
+        band.col = synth_obs_col,
         y.col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
         ylab = "predictive synthesis",
         main = "(d) Forecast synthesis"
       )
       add_synthesis_forecast_bridge(
         ex1_synthesis_bridge_check,
-        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+        band.col = synth_fore_col
       )
       plot(
         ex1_synthesis$syn_future,
         time = x_future_fore,
         add = TRUE,
         show.median = FALSE,
-        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+        band.col = synth_fore_col
       )
       graphics::abline(v = t_end, lty = 3, col = "grey45")
       graphics::legend(
-        "bottomleft",
-        legend = c("Synthesized posterior predictive interval (95%)"),
-        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)),
-        border = c(NA),
-        lty = c(NA),
-        lwd = c(NA),
-        col = c(NA),
-        bty = "n",
-        bg = grDevices::adjustcolor("white", alpha.f = 0.82),
-        cex = 0.68,
+        "topright",
+        legend = c("Observed-period synthesis (95%)", "Forecast synthesis (95%)"),
+        fill = c(synth_obs_col, synth_fore_col),
+        border = c(NA, NA),
+        lty = c(NA, NA),
+        lwd = c(NA, NA),
+        col = c(NA, NA),
+        bty = "o",
+        bg = grDevices::adjustcolor("white", alpha.f = 0.86),
+        box.lty = 0,
+        cex = 0.66,
         y.intersp = 0.82,
         x.intersp = 0.9,
-        inset = c(0.015, 0.015)
+        inset = c(0.015, 0.025)
       )
     })
     register_artifact(
@@ -501,7 +505,7 @@ if (!need_ex1) {
       relative_path = "analysis/manuscript/outputs/figures/ex1quants.png",
       manuscript_target = "fig:ex1quants",
       status = "reproduced",
-      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row. Panel (d) bridges the observed synthesis endpoint to the first forecast synthesis endpoint for visual continuity on the annual time scale."
+      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row. Panel (d) uses a darker forecast synthesis band and bridges the observed synthesis endpoint to the first forecast synthesis endpoint for visual continuity on the annual time scale."
     )
   }
 
@@ -555,37 +559,38 @@ if (!need_ex1) {
         xlim = xlim_fore,
         ylim = y_lim,
         show.median = FALSE,
-        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42),
+        band.col = synth_obs_col,
         y.col = grDevices::adjustcolor("grey30", alpha.f = 0.62),
         ylab = "predictive synthesis"
       )
       add_synthesis_forecast_bridge(
         ex1_synthesis_bridge_check,
-        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+        band.col = synth_fore_col
       )
       plot(
         ex1_synthesis$syn_future,
         time = x_future_fore,
         add = TRUE,
         show.median = FALSE,
-        band.col = grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)
+        band.col = synth_fore_col
       )
       graphics::abline(v = t_end, lty = 3, col = "grey45")
 
       graphics::legend(
-        "bottomleft",
-        legend = c("Synthesized posterior predictive interval (95%)"),
-        fill = c(grDevices::adjustcolor("#F7D6DE", alpha.f = 0.42)),
-        border = c(NA),
-        lty = c(NA),
-        lwd = c(NA),
-        col = c(NA),
-        bty = "n",
-        bg = grDevices::adjustcolor("white", alpha.f = 0.82),
-        cex = 0.7,
-        y.intersp = 0.85,
+        "topright",
+        legend = c("Observed-period synthesis (95%)", "Forecast synthesis (95%)"),
+        fill = c(synth_obs_col, synth_fore_col),
+        border = c(NA, NA),
+        lty = c(NA, NA),
+        lwd = c(NA, NA),
+        col = c(NA, NA),
+        bty = "o",
+        bg = grDevices::adjustcolor("white", alpha.f = 0.86),
+        box.lty = 0,
+        cex = 0.66,
+        y.intersp = 0.82,
         x.intersp = 0.9,
-        inset = c(0.015, 0.02)
+        inset = c(0.015, 0.025)
       )
     })
     register_artifact(
@@ -594,7 +599,7 @@ if (!need_ex1) {
       relative_path = "analysis/manuscript/outputs/figures/ex1synth.png",
       manuscript_target = "support: Example 1 standalone synthesis figure",
       status = "reproduced",
-      notes = "Standalone support figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon, with a one-step visual bridge at the forecast origin."
+      notes = "Standalone support figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon, with a darker forecast synthesis band and one-step visual bridge at the forecast origin."
     )
   }
 
