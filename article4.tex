@@ -503,11 +503,11 @@ MCMC progress | model=exDQLM | phase=burn | iter=2000/5000 | kept=0/3000
 MCMC progress | model=exDQLM | phase=keep | iter=3000/5000 | kept=1000/3000 
 MCMC progress | model=exDQLM | phase=keep | iter=4000/5000 | kept=2000/3000 
 MCMC progress | model=exDQLM | phase=keep | iter=5000/5000 | kept=3000/3000 
-MCMC done | model=exDQLM | status=complete | iter=5000.00 | runtime_sec=26.292 
+MCMC done | model=exDQLM | status=complete | iter=5000.00
 \end{CodeOutput}
 \end{CodeChunk}
 
-\aA{For this time series of length 98, the dedicated free-\(\sigma\) median trace run (2000 burn-in iterations and 3000 retained draws) takes about 133 seconds under our standard manuscript profile with seed \code{20260427}; runtimes vary across hardware and backend settings.} By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). \aA{Consistent with this, the posterior mean of \(\gamma\) is \(-0.119\) with a 95\% credible interval \((-0.578, 0.298)\), while the posterior mean of \(\sigma\) is \(0.362\) with a 95\% credible interval \((0.259, 0.468)\).} All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
+By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). \aA{Consistent with this, the posterior mean of \(\gamma\) is \(-0.119\) with a 95\% credible interval \((-0.578, 0.298)\), while the posterior mean of \(\sigma\) is \(0.362\) with a 95\% credible interval \((0.259, 0.468)\).} All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
@@ -704,7 +704,7 @@ R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 \end{CodeInput}
 \end{CodeChunk}
 
-The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after fitting using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes in about 6 seconds. The corresponding exDQLM VB fit is more computationally demanding and takes about 31 seconds.
+The output is suppressed using input \code{verbose = FALSE}, however we check the run-time of each model after fitting using the \code{summary()} generic function. For this dataset of length 289, the DQLM VB fit completes quickly, while the corresponding exDQLM VB fit is more computationally demanding because the skewness parameter is estimated rather than fixed.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1124,7 +1124,7 @@ Then
 \[
 Q_Y(p_0 \mid {\bf x}_i) = {\bf x}_i^\top \boldsymbol{\beta}^\star,
 \]
-so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit a VB approximation with \code{exalStaticLDVB()} using \code{n.samp = 3000}, and an MCMC fit with \code{exalStaticMCMC()} using \code{n.burn = 2000} and \code{n.mcmc = 3000}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the VB fit. The lower-tail VB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger VB iteration budget there. For reproducibility, we screen a fixed candidate set of seeds and retain \code{20260718}, the selected seed under the support-side \(p_0 = 0.50\) MCMC full-coverage criterion for the plotted coefficients. Setting \code{al.ind = TRUE} (or equivalently \code{dqlm.ind = TRUE}) would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
+so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. We use \(n = 160\) training observations and an independent holdout sample of size \(800\), and fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). Both fits use the regularized horseshoe (RHS) prior of \cite{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit a VB approximation with \code{exalStaticLDVB()} using \code{n.samp = 3000}, and an MCMC fit with \code{exalStaticMCMC()} using \code{n.burn = 2000} and \code{n.mcmc = 3000}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the VB fit. The lower-tail VB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger VB iteration budget there. Setting \code{al.ind = TRUE} (or equivalently \code{dqlm.ind = TRUE}) would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse RHS shrinkage.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> Sigma.x = 0.5 ^ as.matrix(dist(1:8))
