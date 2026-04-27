@@ -483,7 +483,7 @@ if (!need_ex1) {
       )
       graphics::abline(v = t_end, lty = 3, col = "grey45")
       graphics::legend(
-        "topright",
+        "bottomleft",
         legend = c("Observed-period synthesis (95%)", "Forecast synthesis (95%)"),
         fill = c(synth_obs_col, synth_fore_col),
         border = c(NA, NA),
@@ -577,7 +577,7 @@ if (!need_ex1) {
       graphics::abline(v = t_end, lty = 3, col = "grey45")
 
       graphics::legend(
-        "topright",
+        "bottomleft",
         legend = c("Observed-period synthesis (95%)", "Forecast synthesis (95%)"),
         fill = c(synth_obs_col, synth_fore_col),
         border = c(NA, NA),
