@@ -86,6 +86,13 @@ generated artifact.
 
 ## Table Queue
 
+- [x] Introductory software-positioning table
+  - Current status: Table 1 was rewritten as a selective roadmap of
+    representative quantile/state-space packages, with columns aligned to the
+    manuscript's positioning argument.
+  - Polish focus: placement, acronym clarity, and readable contrast between
+    general quantile-regression software, state-space software, and
+    `exdqlm`.
 - [ ] Example 2 benchmark/diagnostic tables
   - Confirm rounding, labels, and manuscript text match generated CSV files.
 - [ ] Example 3 diagnostics/lambda tables
@@ -123,4 +130,3 @@ pdflatex -interaction=nonstopmode article4.tex
 pdflatex -interaction=nonstopmode article4.tex
 pdflatex -interaction=nonstopmode article4.tex
 ```
-
