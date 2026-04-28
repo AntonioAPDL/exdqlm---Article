@@ -377,40 +377,40 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.28\textwidth}>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.40\textwidth}@{}}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X@{}}
 	\toprule
-	Function & Output & Description \\
+	Function & Returned object & Role in the workflow \\
 	\midrule
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}\it{Dynamic model construction}} \\
-    \rule{0pt}{3ex}\code{polytrendMod()} & \code{exdqlm} & Create $n$-th order polynomial component.\\
-    \code{seasMod()} & \code{exdqlm} & Create Fourier form periodic component.\\
-    \code{regMod()} & \code{exdqlm} & Create standard regression component. \\
-    \code{as.exdqlm()} & \code{exdqlm} & Coerce a \code{list} into an \code{exdqlm} object.\\
+    \rule{0pt}{3ex}\code{polytrendMod()} & \code{exdqlm} & Create polynomial trend component.\\
+    \code{seasMod()} & \code{exdqlm} & Create Fourier-form seasonal or periodic component.\\
+    \code{regMod()} & \code{exdqlm} & Create regression component from covariates. \\
+    \code{as.exdqlm()} & \code{exdqlm} & Coerce a compatible list or time-invariant \code{dlm} object.\\
 	\addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic model fitting} -- Input \code{exdqlm} objects} \\
-    \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Estimate the posterior with MCMC algorithm.\\
-    \code{exdqlmLDVB()} & \code{exdqlmLDVB} & Estimate the posterior with a VB approximation.\\
-    \code{exdqlmTransferLDVB()} & \code{exdqlmLDVB} & Estimate the transfer-function exDQLM with a VB approximation.\\
-    \code{exdqlmTransferMCMC()} & \code{exdqlmMCMC} & Estimate the transfer-function exDQLM with MCMC.\\
+    \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Fit dynamic exDQLM/DQLM with MCMC.\\
+    \code{exdqlmLDVB()} & \code{exdqlmLDVB} & Fit dynamic exDQLM/DQLM with the LDVB approximation.\\
+    \code{exdqlmTransferLDVB()} & \code{exdqlmLDVB} & Fit transfer-function exDQLM with the LDVB approximation.\\
+    \code{exdqlmTransferMCMC()} & \code{exdqlmMCMC} & Fit transfer-function exDQLM with MCMC.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static model fitting} -- Input design matrix and response} \\
-    \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exalStaticLDVB} & Estimate static exAL regression with a VB approximation.\\
-    \code{exalStaticMCMC()} & \code{exalStaticMCMC} & Estimate static exAL regression with MCMC.\\
+    \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exalStaticLDVB} & Fit static exAL/AL regression with the LDVB approximation.\\
+    \code{exalStaticMCMC()} & \code{exalStaticMCMC} & Fit static exAL/AL regression with MCMC.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic fit examination} -- Input \code{exdqlmMCMC}, \code{exdqlmLDVB}, or legacy \code{exdqlmISVB} objects} \\
     \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute $k$-step-ahead forecast quantiles, with optional predictive draws.\\
-    \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute \& plot model diagnostics. \\
-    \code{exdqlmPlot()} & \code{list} & Plot posterior summary of dynamic quantile.\\
-    \code{compPlot()} & \code{list} & Plot posterior summary of component/parameter.\\
+    \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics, with optional plots. \\
+    \code{exdqlmPlot()} & Invisible \code{list} & Plot fitted dynamic quantile MAP and CrI summaries.\\
+    \code{compPlot()} & Invisible \code{list} & Plot component or state-level MAP and CrI summaries.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticMCMC} or \code{exalStaticLDVB} objects} \\
-    \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fit diagnostics and comparisons.\\
+    \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fitted-quantile diagnostics and comparisons.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input dynamic fit/forecast objects or draw matrices} \\
-    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{exdqlmSynthesis} & Construct a plot-ready unified posterior predictive distribution from dynamic fit objects, forecast objects with stored draws, or user-supplied draw matrices.\\
+    \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{exdqlmSynthesis} & Synthesize posterior predictive draws across separately fitted quantile levels.\\
     \bottomrule
-\end{tabular}
-\caption{Overview of the core workflow functions used in this paper. Generic S3 methods defined for the returned objects listed in the table include \code{plot()}, \code{print()}, and \code{summary()}.}
+\end{tabularx}
+\caption{Overview of the core workflow functions used in the examples. Model-construction functions return \code{exdqlm} state-space components; fitting, diagnostic, forecast, static, and synthesis routines return the S3 objects shown in the table. The plotting helpers \code{exdqlmPlot()} and \code{compPlot()} return invisible summary lists.}
 \label{table:flow}
 \end{table}
 
