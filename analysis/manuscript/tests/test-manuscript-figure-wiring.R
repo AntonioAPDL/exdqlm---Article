@@ -36,6 +36,14 @@ testthat::test_that("included manuscript figures are recorded in the reproducibi
   tex_path <- file.path(repo_root, "article4.tex")
   included <- extract_includegraphics(tex_path)
   tracker <- utils::read.csv(tracker_csv, stringsAsFactors = FALSE)
+  notes_csv <- file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "manuscript_repro_notes.csv")
+
+  if (file.exists(notes_csv)) {
+    notes <- utils::read.csv(notes_csv, stringsAsFactors = FALSE)
+    if (any(notes$topic == "coverage" & grepl("^Targeted run;", notes$detail))) {
+      testthat::skip("Tracker appears to come from a targeted run; full included-figure tracker check skipped.")
+    }
+  }
 
   expected_relpaths <- file.path("analysis", "manuscript", "outputs", "figures", included)
   missing_tracker <- setdiff(expected_relpaths, tracker$relative_path)

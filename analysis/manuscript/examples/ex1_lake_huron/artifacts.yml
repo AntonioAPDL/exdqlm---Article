@@ -4,6 +4,7 @@ article_figures:
   - ex1quants.png
 support_figures:
   - ex1synth.png
+  - ex1_mcmc_traces_all.png
   - ex1_kernel_compare.png
 tables:
   - ex1_synthesis_bridge_check.csv

@@ -5,6 +5,7 @@ article_figures:
   - ex3zetapsi.png
   - ex3forecast.png
 support_figures:
+  - ex3_vb_convergence.png
 tables:
   - ex3_diagnostics_summary.csv
   - ex3_lambda_scan.csv

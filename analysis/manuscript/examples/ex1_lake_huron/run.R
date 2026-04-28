@@ -33,6 +33,7 @@ if (!need_ex1) {
   nmcmc <- as.integer(cfg_profile$ex1$n_mcmc)
   nburn_trace <- as.integer(cfg_profile$ex1$n_burn_trace %||% nburn)
   nmcmc_trace <- as.integer(cfg_profile$ex1$n_mcmc_trace %||% nmcmc)
+  trace_seed <- as.integer(cfg_profile$ex1$trace_seed %||% seed_value)
   thin_trace <- max(1L, as.integer(cfg_profile$ex1$thin_trace %||% 1L))
   n_chains_kernel <- as.integer(cfg_profile$ex1$n_chains_kernel %||% 4L)
   nburn_kernel <- as.integer(cfg_profile$ex1$n_burn_kernel %||% nburn)
@@ -240,8 +241,8 @@ if (!need_ex1) {
   }
 
   if (need_ex1_trace_model) {
-    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v6_slice_2000_3000_seed%s", seed_value), {
-      M50_trace <- with_local_seed(seed_value, {
+    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v7_slice_2000_3000_seed%s", trace_seed), {
+      M50_trace <- with_local_seed(trace_seed, {
         exdqlm::exdqlmMCMC(
           y = y, p0 = 0.50, model = model,
           df = 0.9, dim.df = 2,
@@ -251,7 +252,7 @@ if (!need_ex1) {
         )
       })
       list(M50_trace = M50_trace)
-    }, note = sprintf("ex1_trace_model_v6_slice_2000_3000_seed%s", seed_value))
+    }, note = sprintf("ex1_trace_model_v7_slice_2000_3000_seed%s", trace_seed))
 
     M50_trace <- ex1_trace$M50_trace
     sigma_trace <- as.numeric(M50_trace$samp.sigma)
@@ -290,6 +291,7 @@ if (!need_ex1) {
   if (need_ex1_runtime) {
     capture_output_file("ex1_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
+      cat(sprintf("global seed=%s, trace seed=%s\n", seed_value, trace_seed))
       cat(sprintf("quantile run settings: n.burn=%d, n.mcmc=%d\n", nburn, nmcmc))
       cat(sprintf("trace run settings: n.burn=%d, n.mcmc=%d, thin=%d, saved_for_plot=%d\n\n", nburn_trace, nmcmc_trace, thin_trace, length(thin_idx)))
       cat("M50_trace sigma summary:\n")
@@ -342,6 +344,24 @@ if (!need_ex1) {
       manuscript_target = "fig:ex1mcmc",
       status = "reproduced",
       notes = sprintf("Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=%d.", thin_trace)
+    )
+  }
+
+  if (need_ex1_runtime && all(vapply(list(M95, M50_dqlm, M5), Negate(is.null), logical(1L)))) {
+    save_png_plot("ex1_mcmc_traces_all.png", {
+      plot_mcmc_trace_grid(
+        fits = list(M95 = M95, M50_DQLM = M50_dqlm, M05 = M5),
+        labels = c("p0 = 0.95", "p0 = 0.50 DQLM", "p0 = 0.05"),
+        thin = thin_trace
+      )
+    }, width = 9, height = 7.5)
+    register_artifact(
+      artifact_id = "fig_ex1_mcmc_traces_all",
+      artifact_type = "figure",
+      relative_path = "analysis/manuscript/outputs/figures/ex1_mcmc_traces_all.png",
+      manuscript_target = "support: Example 1 MCMC traces for fitted quantile models",
+      status = "reproduced",
+      notes = sprintf("Support-only MCMC sigma/gamma trace plots for the Example 1 fitted quantile models, thinned by %d.", thin_trace)
     )
   }
 

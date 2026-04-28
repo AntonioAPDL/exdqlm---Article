@@ -3,11 +3,9 @@ article_figures:
   - ex2quant.png
   - ex2checks.png
 support_figures:
-  - ex2quant_ldvb.png
-  - ex2quant_ldvb_p005.png
-  - ex2quant_ldvb_p099.png
-  - ex2checks_ldvb.png
   - ex2_ldvb_diagnostics.png
+  - ex2_vb_convergence.png
+  - ex2_mcmc_traces.png
 tables:
   - ex2_dynamic_benchmark.csv
   - ex2_df_scan_kl.csv

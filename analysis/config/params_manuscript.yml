@@ -1,4 +1,4 @@
-seed: 20260501
+seed: 20260519
 
 manuscript_benchmark_profile: B
 
@@ -29,6 +29,7 @@ profiles:
       n_mcmc: 180
       n_burn_trace: 1500
       n_mcmc_trace: 800
+      trace_seed: 20260615
       thin_trace: 4
       n_chains_kernel: 4
       n_burn_kernel: 800
@@ -39,6 +40,11 @@ profiles:
       forecast_window_start: 1952
       synth_window_start: 1880
     ex2:
+      p0: 0.95
+      max_iter: 500
+      gam_init: -1.5
+      sig_init: 4.0
+      plot_window: [1750, 1850]
       n_is: 180
       n_samp: 140
       tol: 0.08
@@ -48,13 +54,13 @@ profiles:
       benchmark_n_mcmc: 150
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
-      p0: 0.15
+      p0: 0.05
       selected_indices: [noi, amo]
       fit_start: "1987-01-01"
       fit_end: "2022-12-01"
       forecast_horizon: 18
       focus_window: [2016, 2020]
-      forecast_plot_start: 2020
+      forecast_plot_start: 2019
       trend_order: 1
       seasonal_period: 12
       harmonics: [1.0, 2.0, 0.1469118636]
@@ -68,13 +74,13 @@ profiles:
       reg_c0: 1.0
       transfer_zeta_c0: 0.1
       transfer_psi_c0: 0.005
-      gam_init: -0.1
+      gam_init: 0.1
       sig_init: 0.1
-      max_iter: 120
+      max_iter: 500
       n_is: 200
-      n_samp: 80
+      n_samp: 3000
       tol: 0.05
-      lambda_grid: [0.30, 0.60, 0.90]
+      lambda_grid: [0.30, 0.40, 0.50]
     ex4:
       n_train: 160
       holdout_n: 450
@@ -107,6 +113,7 @@ profiles:
       n_mcmc: 3000
       n_burn_trace: 2000
       n_mcmc_trace: 3000
+      trace_seed: 20260615
       thin_trace: 10
       n_chains_kernel: 4
       n_burn_kernel: 2000
@@ -117,6 +124,11 @@ profiles:
       forecast_window_start: 1952
       synth_window_start: 1880
     ex2:
+      p0: 0.95
+      max_iter: 500
+      gam_init: -1.5
+      sig_init: 4.0
+      plot_window: [1750, 1850]
       n_is: 500
       n_samp: 3000
       tol: 0.05
@@ -126,13 +138,13 @@ profiles:
       benchmark_n_mcmc: 3000
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
-      p0: 0.15
+      p0: 0.05
       selected_indices: [noi, amo]
       fit_start: "1987-01-01"
       fit_end: "2022-12-01"
       forecast_horizon: 18
       focus_window: [2016, 2020]
-      forecast_plot_start: 2020
+      forecast_plot_start: 2019
       trend_order: 1
       seasonal_period: 12
       harmonics: [1.0, 2.0, 0.1469118636]
@@ -146,13 +158,13 @@ profiles:
       reg_c0: 1.0
       transfer_zeta_c0: 0.1
       transfer_psi_c0: 0.005
-      gam_init: -0.1
+      gam_init: 0.1
       sig_init: 0.1
-      max_iter: 220
+      max_iter: 500
       n_is: 500
-      n_samp: 1000
+      n_samp: 3000
       tol: 0.05
-      lambda_grid: [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]
+      lambda_grid: [0.30, 0.325, 0.35, 0.375, 0.40, 0.425, 0.45, 0.475, 0.50]
     ex4:
       n_train: 160
       holdout_n: 800
@@ -186,6 +198,7 @@ profiles:
       n_mcmc: 1000
       n_burn_trace: 7000
       n_mcmc_trace: 3500
+      trace_seed: 20260615
       thin_trace: 10
       n_chains_kernel: 4
       n_burn_kernel: 3000
@@ -196,6 +209,11 @@ profiles:
       forecast_window_start: 1952
       synth_window_start: 1880
     ex2:
+      p0: 0.95
+      max_iter: 500
+      gam_init: -1.5
+      sig_init: 4.0
+      plot_window: [1750, 1850]
       n_is: 700
       n_samp: 3000
       tol: 0.03
@@ -205,13 +223,13 @@ profiles:
       benchmark_n_mcmc: 3000
       df_grid: [0.85, 0.90, 0.95, 1.00]
     ex3:
-      p0: 0.15
+      p0: 0.05
       selected_indices: [noi, amo]
       fit_start: "1987-01-01"
       fit_end: "2022-12-01"
       forecast_horizon: 18
       focus_window: [2016, 2020]
-      forecast_plot_start: 2020
+      forecast_plot_start: 2019
       trend_order: 1
       seasonal_period: 12
       harmonics: [1.0, 2.0, 0.1469118636]
@@ -225,13 +243,13 @@ profiles:
       reg_c0: 1.0
       transfer_zeta_c0: 0.1
       transfer_psi_c0: 0.005
-      gam_init: -0.1
+      gam_init: 0.1
       sig_init: 0.1
-      max_iter: 300
+      max_iter: 500
       n_is: 700
-      n_samp: 1000
+      n_samp: 3000
       tol: 0.03
-      lambda_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
+      lambda_grid: [0.30, 0.325, 0.35, 0.375, 0.40, 0.425, 0.45, 0.475, 0.50]
     ex4:
       n_train: 160
       holdout_n: 1200

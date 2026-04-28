@@ -605,6 +605,99 @@ plot_component_summary <- function(csum, add = TRUE, col = "purple", lwd = 1.5,
   graphics::lines(csum$x, csum$ub, col = col, lwd = 0.8, lty = 2)
 }
 
+plot_mcmc_trace_grid <- function(fits, labels = NULL, thin = 1L,
+                                 parameters = c("sigma", "gamma"),
+                                 col = "#3F5F7F") {
+  if (!length(fits)) stop("fits must contain at least one fitted object.", call. = FALSE)
+  if (is.null(labels)) labels <- names(fits)
+  if (is.null(labels) || any(!nzchar(labels))) labels <- paste0("fit ", seq_along(fits))
+  thin <- max(1L, as.integer(thin))
+
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(mfrow = c(length(fits), length(parameters)), mar = c(3.4, 4.0, 2.2, 0.8))
+
+  for (i in seq_along(fits)) {
+    fit <- fits[[i]]
+    for (param in parameters) {
+      field <- paste0("samp.", param)
+      vals <- as.numeric(fit[[field]])
+      vals <- vals[is.finite(vals)]
+      ttl <- sprintf("%s: %s", labels[[i]], param)
+      if (!length(vals)) {
+        graphics::plot.new()
+        graphics::title(main = sprintf("%s unavailable", ttl), cex.main = 0.9)
+      } else {
+        idx <- seq.int(1L, length(vals), by = thin)
+        graphics::plot(
+          idx, vals[idx], type = "l", col = col, lwd = 0.8,
+          xlab = "retained draw", ylab = param, main = ttl
+        )
+        graphics::grid(col = "grey90")
+      }
+    }
+  }
+  invisible(NULL)
+}
+
+plot_vb_convergence_grid <- function(fits, labels = NULL, col = "#A45A2A") {
+  if (!length(fits)) stop("fits must contain at least one fitted object.", call. = FALSE)
+  if (is.null(labels)) labels <- names(fits)
+  if (is.null(labels) || any(!nzchar(labels))) labels <- paste0("fit ", seq_along(fits))
+
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(mfrow = c(length(fits), 4L), mar = c(3.4, 4.0, 2.2, 0.8))
+
+  plot_trace <- function(vals, main, ylab, log_y = FALSE) {
+    vals <- as.numeric(vals)
+    ok <- is.finite(vals)
+    if (!any(ok)) {
+      graphics::plot.new()
+      graphics::title(main = sprintf("%s unavailable", main), cex.main = 0.9)
+      return(invisible(NULL))
+    }
+    x <- seq_along(vals)[ok]
+    y <- vals[ok]
+    if (isTRUE(log_y)) {
+      y <- pmax(abs(y), .Machine$double.eps)
+      graphics::plot(x, y, type = "l", log = "y", col = col, lwd = 1.2,
+                     xlab = "iteration", ylab = ylab, main = main)
+    } else {
+      graphics::plot(x, y, type = "l", col = col, lwd = 1.2,
+                     xlab = "iteration", ylab = ylab, main = main)
+    }
+    graphics::grid(col = "grey90")
+    invisible(NULL)
+  }
+
+  max_delta <- function(fit) {
+    d <- fit$diagnostics$deltas
+    vals <- list(d$state, d$sigma, d$gamma, d$s, d$elbo)
+    vals <- vals[vapply(vals, length, integer(1L)) > 0L]
+    if (!length(vals)) return(numeric())
+    max_len <- max(vapply(vals, length, integer(1L)))
+    mat <- matrix(NA_real_, nrow = max_len, ncol = length(vals))
+    for (j in seq_along(vals)) {
+      mat[seq_along(vals[[j]]), j] <- abs(as.numeric(vals[[j]]))
+    }
+    apply(mat, 1L, function(z) {
+      z <- z[is.finite(z)]
+      if (!length(z)) NA_real_ else max(z)
+    })
+  }
+
+  for (i in seq_along(fits)) {
+    fit <- fits[[i]]
+    label <- labels[[i]]
+    plot_trace(fit$seq.sigma, sprintf("%s: sigma", label), "sigma")
+    plot_trace(fit$seq.gamma, sprintf("%s: gamma", label), "gamma")
+    plot_trace(fit$diagnostics$elbo, sprintf("%s: ELBO", label), "ELBO")
+    plot_trace(max_delta(fit), sprintf("%s: max delta", label), "max abs delta", log_y = TRUE)
+  }
+  invisible(NULL)
+}
+
 forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRUE, add = FALSE,
                               cols = c("purple", "magenta"), cr.percent = 0.95, y_data = NULL,
                               return.draws = FALSE, n.samp = NULL, seed = NULL) {

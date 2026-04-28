@@ -37,7 +37,6 @@ Rscript analysis/run_all.R --stage manuscript --skip-tests
 Rscript analysis/run_all.R --stage manuscript --promote
 Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
 Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
@@ -65,6 +64,9 @@ package instead. Source mode remains the default.
 
 - Deterministic seeds are stage-specific (`config/params_*.yml`).
 - Output filenames are stable for repeatable manuscript linkage.
+- Optional legacy support targets may generate additional files locally, but
+  manuscript-facing outputs should remain limited to the artifacts documented
+  in `SUPPLEMENTARY_INDEX.md`.
 - The optional `--promote` flag copies selected figures into top-level
   `Figures/` as a local export mirror. That directory is ignored by git and is
   not used by `article4.tex`.

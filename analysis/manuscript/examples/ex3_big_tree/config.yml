@@ -16,8 +16,9 @@ notes:
   - This is the only manuscript-facing Big Tree workflow.
   - The response is the observed USGS monthly-average BTflow dataset shipped by exdqlm.
   - The manuscript covariates are standardized NOI and AMO from the package climateIndices dataset.
+  - Quantile level, posterior sample size, and VB iteration budget are controlled from params_manuscript.yml.
   - The manuscript component figure focuses on 2016--2020, while the transfer-state figure keeps the full fitted span.
-  - The forecast figure displays the final holdout window from 2020 forward.
+  - The forecast figure displays the final holdout window from 2019 forward.
   - Older Big Tree alternatives are preserved under analysis/support/.
   - Keep precipitation and soil moisture out of the manuscript workflow unless the paper decision changes.
 run_commands:

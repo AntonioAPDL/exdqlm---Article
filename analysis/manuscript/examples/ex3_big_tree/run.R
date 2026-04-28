@@ -85,6 +85,8 @@ if (!need_ex3) {
 
   ex3_cfg <- cfg_profile$ex3
   p0 <- as.numeric(ex3_cfg$p0 %||% 0.15)
+  p0_label <- sprintf("%0.2f", p0)
+  p0_tag <- gsub("\\.", "p", p0_label)
   selected_indices <- tolower(as.character(ex3_cfg$selected_indices %||% c("noi", "amo")))
   selected_indices <- selected_indices[nzchar(selected_indices)]
   if (!length(selected_indices)) {
@@ -301,7 +303,9 @@ if (!need_ex3) {
     grid_tag <- paste(sprintf("%03d", round(100 * lambda_grid)), collapse = "_")
     window_tag <- paste(fmt_month(range(model_df$date)), collapse = "_")
     cache_key <- sprintf(
-      "ex3_models_ldvb_v12_%s_%s_%s_grid%s_nsamp%d_tol%s",
+      "ex3_models_ldvb_v13_p%s_iter%d_%s_%s_%s_grid%s_nsamp%d_tol%s",
+      p0_tag,
+      max_iter,
       paste(selected_indices, collapse = "_"),
       pkg_commit %||% "unknown",
       window_tag,
@@ -449,6 +453,21 @@ if (!need_ex3) {
       manuscript_target = "Example 3 textual outputs",
       status = "reproduced",
       notes = "Observed BTflow plus NOI/AMO Example 3 summary including CRPS lambda scan and transfer persistence."
+    )
+
+    save_png_plot("ex3_vb_convergence.png", {
+      plot_vb_convergence_grid(
+        fits = list(M1_dynamic_regression = M1, M2_transfer_function = M2),
+        labels = c("M1 dynamic regression", "M2 transfer function")
+      )
+    }, width = 10, height = 5.8)
+    register_artifact(
+      artifact_id = "fig_ex3_vb_convergence",
+      artifact_type = "figure",
+      relative_path = "analysis/manuscript/outputs/figures/ex3_vb_convergence.png",
+      manuscript_target = "support: Example 3 LDVB convergence traces",
+      status = "reproduced",
+      notes = sprintf("Support-only LDVB convergence traces for the Example 3 final fits (p0=%s, n.samp=%d, max_iter=%d).", p0_label, n_samp, max_iter)
     )
 
     model_dataset <- data.frame(

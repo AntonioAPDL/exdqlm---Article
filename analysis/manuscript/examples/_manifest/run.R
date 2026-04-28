@@ -40,12 +40,12 @@ if (targeted_run) {
     ex1synth = c("fig_ex1synth", "tab_ex1_synthesis_bridge", "log_ex1_synthesis_summary"),
     ex1kernel = c("fig_ex1_kernel_compare", "tab_ex1_kernel_summary", "tab_ex1_kernel_chain_stability", "log_ex1_kernel_compare"),
     ex2 = c(
-      "fig_ex2quant", "fig_ex2quant_ldvb",
-      "fig_ex2checks", "fig_ex2checks_ldvb",
+      "fig_ex2quant",
+      "fig_ex2checks",
       "tab_ex2_dynamic_benchmark",
       "fig_ex2_ldvb_diagnostics",
-      "tab_ex2_diagnostics", "tab_ex2_diagnostics_ldvb",
-      "tab_ex2_df_scan", "tab_ex2_df_scan_ldvb"
+      "tab_ex2_diagnostics",
+      "tab_ex2_df_scan"
     ),
     ex2quant = c("fig_ex2quant"),
     ex2quant_ldvb = c("fig_ex2quant_ldvb"),
