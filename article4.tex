@@ -233,7 +233,7 @@ y_t | \boldsymbol{\theta}_t,\zeta_t,\gamma,\sigma  & \sim \text{exAL}_{p_0}({\bf
 \label{EQ:end_transfer}
 \boldsymbol{\psi}_{t}|\boldsymbol{\psi}_{t-1},{\bf W}_{t}^{\psi} & \sim \text{N}(\boldsymbol{\psi}_{t-1},{\bf W}_{t}^{\psi}).
 \end{align}
-Here $\zeta_t \in \mathbb{R}$ denotes the accumulated transfer effect on the quantile at time $t$, while $\boldsymbol{\psi}_t \in \mathbb{R}^k$ is the vector of instantaneous transfer coefficients associated with the components of ${\bf x}_t$. The mean contribution of the transfer block is therefore $\lambda \zeta_{t-1} + {\bf x}'_t \boldsymbol{\psi}_{t-1}$: the inner product ${\bf x}'_t \boldsymbol{\psi}_{t-1}$ captures the contemporaneous effect of the current inputs, and the parameter $\lambda\in[0,1]$ controls how much of the previous accumulated effect is propagated forward. For $0<\lambda<1$, this propagated contribution decays geometrically. More explicitly, the contribution of ${\bf x}_t$ to the quantile at time $t+h$ is $\lambda^h {\bf x}'_t \boldsymbol{\psi}_{t-1}$. Therefore, for each $t$ and tolerance $\epsilon>0$, any
+Here $\zeta_t \in \mathbb{R}$ denotes the accumulated transfer effect on the quantile at time $t$, while $\boldsymbol{\psi}_t \in \mathbb{R}^k$ is the vector of instantaneous transfer coefficients associated with the components of ${\bf x}_t$. The mean contribution of the transfer block is therefore $\lambda \zeta_{t-1} + {\bf x}'_t \boldsymbol{\psi}_{t-1}$: the inner product ${\bf x}'_t \boldsymbol{\psi}_{t-1}$ captures the contemporaneous effect of the current inputs, and the parameter $\lambda\in(0,1)$ controls how much of the previous accumulated effect is propagated forward. For $0<\lambda<1$, this propagated contribution decays geometrically. More explicitly, the contribution of ${\bf x}_t$ to the quantile at time $t+h$ is $\lambda^h {\bf x}'_t \boldsymbol{\psi}_{t-1}$. Therefore, for each $t$ and tolerance $\epsilon>0$, any
 \[
 k_t \geq \frac{\log(\epsilon)-\log\!\left(|{\bf x}'_t \boldsymbol{\psi}_{t-1}|\right)}{\log(\lambda)}
 \]
@@ -259,19 +259,23 @@ and
 \]
 This augmentation, which extends the routines found in \code{exdqlmLDVB()} and \code{exdqlmMCMC()}, is implemented in the functions \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}.
 
-Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec:dfs}, discount factors are used to specify the transfer block variances $\omega_t$ and ${\bf W}_t^\psi$. In the package, \code{tf.df} can be supplied as a single shared discount factor, as a pair $(\delta_\zeta,\delta_\psi)$ with a shared value for the whole $\boldsymbol{\psi}_t$ block, or componentwise across $(\zeta_t,\psi_{1,t},\dots,\psi_{k,t})$. A conjugate normal prior on $(\zeta_{0},\boldsymbol{\psi}'_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$, with ${\bf m}_0^{tf}\in\mathbb{R}^{k+1}$ and ${\bf C}_0^{tf}\in\mathbb{R}^{(k+1)\times(k+1)}$, completes the transfer-function model extension. Table \ref{table:tf} shows the additional parameters used in the transfer-function fitting routines, as well as their mathematical symbols discussed in this section.
+Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec:dfs}, discount factors are used to specify the transfer block variances $\omega_t$ and ${\bf W}_t^\psi$. In the package, \code{tf.df} can be supplied as a single shared discount factor, as a pair $(\delta_\zeta,\delta_\psi)$ with a shared value for the whole $\boldsymbol{\psi}_t$ block, or componentwise across $(\zeta_t,\psi_{1,t},\dots,\psi_{k,t})$. A conjugate normal prior on $(\zeta_{0},\boldsymbol{\psi}'_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$, with ${\bf m}_0^{tf}\in\mathbb{R}^{k+1}$ and ${\bf C}_0^{tf}\in\mathbb{R}^{(k+1)\times(k+1)}$, completes the transfer-function model extension. Table \ref{table:tf} shows the additional transfer-function inputs, their mathematical symbols, and their accepted forms or defaults in the package interface.
 
-\begin{table}[t!]
+\begin{table}[!htb]
 \centering
 \TableStyle
-\begin{tabular}{@{}cccccc@{}}
+\begin{tabularx}{\textwidth}{@{}lclX@{}}
 	\toprule
-	symbol & ${\bf x}_t$ & $\tilde\lambda$ & $(\delta_\zeta,\boldsymbol{\delta}_\psi)$ & ${\bf m}_0^{tf}$ & ${\bf C}_0^{tf}$ \\
+	Quantity & Symbol & R argument & Accepted form/default \\
 	\midrule
-	\shortstack{transfer-function\\inputs} & \code{X} & \code{lam} & \code{tf.df} & \code{tf.m0} & \code{tf.C0} \\
+	Transfer inputs & ${\bf x}_t$ & \code{X} & Required numeric vector or matrix; matrices use one row per time point and one column per covariate. \\
+	Transfer rate & $\tilde\lambda$ & \code{lam} & Required scalar with $0<\tilde\lambda<1$. \\
+	Transfer discount factors & $(\delta_\zeta,\boldsymbol{\delta}_\psi)$ & \code{tf.df} & Required; length 1, 2, or $k+1$, corresponding to shared, blockwise, or componentwise transfer discounting. \\
+	Prior mean & ${\bf m}_0^{tf}$ & \code{tf.m0} & Optional; defaults to a zero vector of length $k+1$. \\
+	Prior covariance & ${\bf C}_0^{tf}$ & \code{tf.C0} & Optional; defaults to the $(k+1)\times(k+1)$ identity matrix. \\
 	\bottomrule
-\end{tabular}
-\caption{Translation from mathematical symbols to parameters used in the transfer-function fitting routines.}
+\end{tabularx}
+\caption{Translation from mathematical symbols to additional transfer-function inputs used by \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}.}
 \label{table:tf}
 \end{table}
 
