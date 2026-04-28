@@ -184,22 +184,22 @@ The hierarchical representation of the exDQLM facilitates posterior simulation u
 
 For purposes of model selection or large time series data sets, posterior sampling with the MCMC algorithm can be computationally demanding. To address this, the package includes a variational Bayes (VB) routine for fast approximate posterior estimation. The default routine, \code{exdqlmLDVB()}, uses a mean-field approximation together with a Laplace-Delta treatment of the non-conjugate $(\sigma,\gamma)$ block. The variational Bayes (VB) framework approximates the posterior distribution with partitioned variational distributions \citep{ostwald2014tutorial,beal2003variational}. Under a mean-field factorization, this induces a blockwise coordinate-ascent variational inference scheme. For the exDQLM, the blocks associated with the dynamic coefficients and latent variables admit recognizable closed-form updates, while the joint variational distribution of $\sigma$ and $\gamma$ is non-conjugate. Following the non-conjugate VB strategy of \cite{wang2013nonconjugatevb}, we approximate this block on transformed coordinates and use a second-order Delta method to evaluate the expectations of functions of $(\sigma,\gamma)$ needed by the remaining variational updates. The dynamic regression coefficients are updated within each iteration using a forward filtering backwards smoothing algorithm. Convergence is assessed jointly through the state, scale, skewness, and ELBO diagnostics. After the algorithm reaches convergence with tolerance $\epsilon_{tol}$, $N_{SAMP}$ samples are drawn from the variational distributions, resulting in an approximate sample of the posterior distribution. The output of \code{exdqlmLDVB()} includes the approximate posterior samples as well as the parameters of the variational distributions for all parameters ($\boldsymbol{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$). For the $(\gamma,\sigma)$ block, the return also contains the transformed mode, approximate covariance matrix, derived moments, and ELBO terms associated with the Laplace-Delta approximation. Selected state-space computations in the dynamic routines are implemented in \proglang{C++}, with corresponding \proglang{R} code retained for parity checks and fallback use. Global package-level runtime options for backend routing and ELBO monitoring are summarized in Appendix Table \ref{tab:backendopts}. These options are distinct from the function-specific inference inputs listed in Table \ref{table:post}.
 
-Table \ref{table:post} shows selected core inference controls for the fitting functions \code{exdqlmMCMC()} and \code{exdqlmLDVB()}, their mathematical symbols, and their default values when applicable. The argument \code{Sig.mh} is only used when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default slice-sampling update.
+Table \ref{table:post} shows selected core inference controls for the fitting functions \code{exdqlmMCMC()} and \code{exdqlmLDVB()}, their mathematical symbols, and their default values. The MCMC routine also accepts \code{Sig.mh} as an optional proposal covariance when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default slice-sampling update.
 
 \begin{table}[!htb]
 \centering
 \TableStyle
-\begin{tabular}{@{}lcccccc@{}}
+\begin{tabular}{@{}lccccc@{}}
  \toprule
- \shortstack{\pkg{exdqlm}\\function} & \multicolumn{4}{c}{\code{exdqlmMCMC()}} & \multicolumn{2}{c}{\code{exdqlmLDVB()}}  \\
- \cmidrule(lr){2-5}\cmidrule(l){6-7}
- Mathematical symbol & $\mathcal{K}_{\sigma,\gamma}$ & $\Sigma_{MH}$ & $N_{BURN}$ & $N_{MCMC}$ & $\epsilon_{tol}$ & $N_{SAMP}$\\
+ \shortstack{\pkg{exdqlm}\\function} & \multicolumn{3}{c}{\code{exdqlmMCMC()}} & \multicolumn{2}{c}{\code{exdqlmLDVB()}}  \\
+ \cmidrule(lr){2-4}\cmidrule(l){5-6}
+ Mathematical symbol & $\mathcal{K}_{\sigma,\gamma}$ & $N_{BURN}$ & $N_{MCMC}$ & $\epsilon_{tol}$ & $N_{SAMP}$\\
  \midrule
- R argument & \code{mh.proposal} & \code{Sig.mh} & \code{n.burn} & \code{n.mcmc} & \code{tol} & \code{n.samp} \\
- Default if omitted & \code{"slice"} & -- & 2000 & 1500 & 0.1 & 200 \\
+ R argument & \code{mh.proposal} & \code{n.burn} & \code{n.mcmc} & \code{tol} & \code{n.samp} \\
+ Default if omitted & \code{"slice"} & 2000 & 1500 & 0.1 & 200 \\
  \bottomrule
 \end{tabular}
-\caption{Translation from mathematical symbols to selected core inference controls in \code{exdqlmMCMC()} and \code{exdqlmLDVB()}. A dash indicates that there is no default used by the default workflow: \code{Sig.mh} is ignored when \code{mh.proposal = "slice"}, and a covariance is supplied internally or by the user only for random-walk MH kernels. Advanced control-list arguments and package-level backend options are documented separately.}
+\caption{Translation from mathematical symbols to selected core inference controls in \code{exdqlmMCMC()} and \code{exdqlmLDVB()}. Advanced control-list arguments, optional random-walk MH tuning inputs, and package-level backend options are documented separately.}
 \label{table:post}
 \end{table}
 
