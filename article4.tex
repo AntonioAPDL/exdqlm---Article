@@ -155,6 +155,8 @@ This hierarchical form is leveraged for the posterior inference implemented with
 \subsection{Prior specification}
 \label{sec:priors}
 
+Under a Bayesian formulation and given $p_0$, we specify priors for the initial state vector $\boldsymbol{\theta}_0$, scale parameter $\sigma$ and skewness parameter $\gamma$. For $\boldsymbol{\theta}_0$, we assume a $q$-variate conjugate normal prior $\boldsymbol{\theta}_0 \sim \text{N}({\bf m}_0,{\bf C}_0)$. For $\sigma$, we assume a conjugate inverse-gamma prior denoted as $\text{IG}(a_{\sigma},b_{\sigma})$. In many cases a strong prior on $\sigma$ is necessary to guarantee fast posterior convergence and estimation. This is illustrated in the examples of Section \ref{sec:exs}. The parameter $\gamma$ has bounded support over the interval $(L,U)$ where $L$ is the negative root of $g(\gamma) = 1-p_0$ and $U$ is the positive root of $g(\gamma) = p_0$ \citep{yan2025family}. In contrast to the flat prior suggested by \cite{yan2025family}, we find that using a proper prior on the skewness parameter promotes reliable posterior inference. Thus, we place a Student-t distribution truncated to the interval $(L,U)$ as the prior for $\gamma$, i.e. $\gamma \sim \text{t}_{(L,U)}(m_\gamma,s_\gamma)$ with $\nu_\gamma$ degrees of freedom. Table \ref{table:priors} gives the corresponding \pkg{exdqlm} input names and default values when applicable.
+
 \begin{table}[!htb]
 \centering
 \TableStyle
@@ -170,10 +172,6 @@ Default if omitted & -- & -- & ${\bf 0}_q$ & $10^3{\bf I}_q$ & 2.1 & 1.1 & 0 & 1
 \caption{Translation from the mathematical notation used in the exDQLM specification to the corresponding \pkg{exdqlm} function inputs. The \code{model} object stores the state-space components and initial-state prior, while \code{PriorSigma} and \code{PriorGamma} store prior hyperparameters for $\sigma$ and $\gamma$. A dash indicates that there is no generic default: \code{FF} and \code{GG} are determined by the chosen state-space component or supplied in a user-defined model. Here ${\bf 0}_q$ denotes a $q$-dimensional vector of zeros, and ${\bf I}_q$ denotes the $q$-dimensional identity matrix.}
 \label{table:priors}
 \end{table}
-
-Under a Bayesian formulation and given $p_0$, we specify priors for the initial state vector $\boldsymbol{\theta}_0$, scale parameter $\sigma$ and skewness parameter $\gamma$. For $\boldsymbol{\theta}_0$, we assume a $q$-variate conjugate normal prior $\boldsymbol{\theta}_0 \sim \text{N}({\bf m}_0,{\bf C}_0)$. For $\sigma$, we assume a conjugate inverse-gamma prior denoted as $\text{IG}(a_{\sigma},b_{\sigma})$. In many cases a strong prior on $\sigma$ is necessary to guarantee fast posterior convergence and estimation. This is illustrated in the examples of Section \ref{sec:exs}. The parameter $\gamma$ has bounded support over the interval $(L,U)$ where $L$ is the negative root of $g(\gamma) = 1-p_0$ and $U$ is the positive root of $g(\gamma) = p_0$ \citep{yan2025family}. In contrast to the flat prior suggested by \cite{yan2025family}, we find that using a proper prior on the skewness parameter promotes reliable posterior inference. Thus, we place a Student-t distribution truncated to the interval $(L,U)$ as the prior for $\gamma$, i.e. $\gamma \sim \text{t}_{(L,U)}(m_\gamma,s_\gamma)$ with $\nu_\gamma$ degrees of freedom. Table \ref{table:priors} gives the corresponding \pkg{exdqlm} input names and default values when applicable.
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -259,7 +257,7 @@ and
 \]
 This augmentation, which extends the routines found in \code{exdqlmLDVB()} and \code{exdqlmMCMC()}, is implemented in the functions \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}.
 
-Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec:dfs}, discount factors are used to specify the transfer block variances $\omega_t$ and ${\bf W}_t^\psi$. In the package, \code{tf.df} can be supplied as a single shared discount factor, as a pair $(\delta_\zeta,\delta_\psi)$ with a shared value for the whole $\boldsymbol{\psi}_t$ block, or componentwise across $(\zeta_t,\psi_{1,t},\dots,\psi_{k,t})$. A conjugate normal prior on $(\zeta_{0},\boldsymbol{\psi}'_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$, with ${\bf m}_0^{tf}\in\mathbb{R}^{k+1}$ and ${\bf C}_0^{tf}\in\mathbb{R}^{(k+1)\times(k+1)}$, completes the transfer-function model extension. Table \ref{table:tf} shows the additional transfer-function inputs, their mathematical symbols, and their accepted forms or defaults in the package interface.
+Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec:dfs}, discount factors are used to specify the transfer block variances $\omega_t$ and ${\bf W}_t^\psi$. In the package, \code{tf.df} can be supplied as a single shared discount factor, as a pair $(\delta_\zeta,\boldsymbol{\delta_\psi})$ with a shared value for the whole $\boldsymbol{\psi}_t$ block, or componentwise across $(\zeta_t,\psi_{1,t},\dots,\psi_{k,t})$. A conjugate normal prior on $(\zeta_{0},\boldsymbol{\psi}'_{0})' \sim N({\bf m}_0^{tf},{\bf C}_0^{tf})$, with ${\bf m}_0^{tf}\in\mathbb{R}^{k+1}$ and ${\bf C}_0^{tf}\in\mathbb{R}^{(k+1)\times(k+1)}$, completes the transfer-function model extension. Table \ref{table:tf} shows the additional transfer-function inputs, their mathematical symbols, and their accepted forms or defaults in the package interface.
 
 \begin{table}[!htb]
 \centering
@@ -270,7 +268,7 @@ Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec
 	\midrule
 	Transfer inputs & ${\bf x}_t$ & \code{X} & Required numeric vector or $T\times k$ matrix. \\
 	Transfer rate & $\tilde\lambda$ & \code{lam} & Required scalar in $(0,1)$. \\
-	Discount factors & $(\delta_\zeta,\boldsymbol{\delta}_\psi)$ & \code{tf.df} & Required numeric vector: length 1 (shared); length 2 ($\delta_\zeta$ and shared $\delta_\psi$); or length $k+1$ (componentwise). \\
+	Discount factors & $(\delta_\zeta,\boldsymbol{\delta_\psi})$ & \code{tf.df} & Required numeric vector: length 1 (shared); length 2 ($\delta_\zeta$ and shared $\boldsymbol{\delta_\psi}$); or length $k+1$ (componentwise). \\
 	Prior mean & ${\bf m}_0^{tf}$ & \code{tf.m0} & Optional vector of length $k+1$; default ${\bf 0}_{k+1}$. \\
 	Prior covariance & ${\bf C}_0^{tf}$ & \code{tf.C0} & Optional $(k+1)\times(k+1)$ covariance matrix; default ${\bf I}_{k+1}$. \\
 	\bottomrule
