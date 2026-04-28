@@ -336,24 +336,6 @@ where the expectation is with respect to the posterior predictive distribution o
 
 The function \code{exdqlmDiagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} and \code{exdqlmLDVB()} is passed to \code{exdqlmDiagnostics()}, the resulting object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence, the mean CRPS, pplc, the ordered pairs of the QQ-plot, and autocorrelations by lag. By default, the function also produces the QQ-plot, ACF plot and MAP standard forecast error plot.  Examples of the utility of \code{exdqlmDiagnostics()} can be found in the following Section \ref{sec:exs}.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{table}[t!]
-\centering
-\TableStyle
-\begin{tabular}{@{}ccccc@{}}
-	\toprule
-	symbol & $\tilde{t}$ & $k$ & ${\bf F}_{(\tilde{t}+1):(\tilde{t}+k)}$ & ${\bf G}_{(\tilde{t}+1):(\tilde{t}+k)}$  \\
-	\midrule
-	\shortstack{\code{exdqlmForecast()}\\input} & \code{start.t} & \code{k} & \code{fFF} & \code{fGG}  \\
-	\bottomrule
-\end{tabular}
-\caption{Translation from mathematical symbols to additional parameters used in function \code{exdqlmForecast()}.}
-\label{table:fore}
-\end{table}
-
 \subsection{k-step-ahead forecast}
 
 For an arbitrary time $\tilde{t}$, the $k$-step-ahead future marginal distribution of the quantile is
@@ -362,7 +344,27 @@ For an arbitrary time $\tilde{t}$, the $k$-step-ahead future marginal distributi
 {\bf F}'_{\tilde{t}+k} {\boldsymbol \theta}_{\tilde{t}+k}| y_1,\dots,y_{\tilde{t}} \sim \text{N}({\bf F}'_{\tilde{t}+k} a_{\tilde{t}}(k),{\bf F}'_{\tilde{t}+k}{\bf R}_{\tilde{t}}(k){\bf F}_{\tilde{t}+k})
 \end{equation}
 
-where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$, ${\bf R}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf R}_{\tilde{t}}(k-1) {\bf G}_{\tilde{t}+k}' + {\bf W}_{\tilde{t}+k}$, ${\bf a}_{\tilde{t}}(0) = {\bf m}_{\tilde{t}}$, and ${\bf R}_{\tilde{t}}(0) = {\bf C}_{\tilde{t}}$, with ${\bf m}_{\tilde{t}}$ and ${\bf C}_{\tilde{t}}$ denoting the filtered mean and covariance of $\boldsymbol{\theta}_{\tilde{t}}$, respectively. This distribution is implemented in the function \code{exdqlmForecast()}, which is compatible with the outputs from both the MCMC and VB algorithms. Table \ref{table:fore} shows the input parameters used in the function, as well as their mathematical symbols seen in this section. The output of \code{exdqlmForecast()} includes the parameters of the forecasted distribution as well as ${\bf a}_{\tilde{t}}(k)$ and ${\bf R}_{\tilde{t}}(k)$ for the $k$ steps, with optional posterior predictive draw matrices available when requested.
+where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$, ${\bf R}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf R}_{\tilde{t}}(k-1) {\bf G}_{\tilde{t}+k}' + {\bf W}_{\tilde{t}+k}$, ${\bf a}_{\tilde{t}}(0) = {\bf m}_{\tilde{t}}$, and ${\bf R}_{\tilde{t}}(0) = {\bf C}_{\tilde{t}}$, with ${\bf m}_{\tilde{t}}$ and ${\bf C}_{\tilde{t}}$ denoting the filtered mean and covariance of $\boldsymbol{\theta}_{\tilde{t}}$, respectively. This distribution is implemented in the function \code{exdqlmForecast()}, which is compatible with the outputs from both the MCMC and VB algorithms. The fitted object supplies the filtered posterior summaries at the forecast origin, while optional future observation and evolution matrices are supplied when the required forecast design is not already stored in the fitted model. Table \ref{table:fore} summarizes the forecast inputs and optional posterior predictive draw controls. The output of \code{exdqlmForecast()} includes the parameters of the forecasted distribution as well as ${\bf a}_{\tilde{t}}(k)$ and ${\bf R}_{\tilde{t}}(k)$ for the $k$ steps, with optional posterior predictive draw matrices available when requested.
+
+\begin{table}[!htb]
+\centering
+\TableStyle
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\centering\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}X@{}}
+	\toprule
+	Quantity & Mathematical symbol & \proglang{R} argument & Input form/default \\
+	\midrule
+	Fitted dynamic model & $({\bf m}_{\tilde{t}}, {\bf C}_{\tilde{t}})$ & \code{m1} & Required fitted dynamic object from \code{exdqlmMCMC()}, \code{exdqlmLDVB()}, or legacy \code{exdqlmISVB()}. \\
+	Forecast origin & $\tilde{t}$ & \code{start.t} & Required integer time index within the fitted model. \\
+	Forecast horizon & $k$ & \code{k} & Required positive integer number of forecast steps. \\
+	Future observation vectors & ${\bf F}_{(\tilde{t}+1):(\tilde{t}+k)}$ & \code{fFF} & Optional $q \times 1$ or $q \times k$ matrix; required with \code{fGG} when forecasting beyond the stored model matrices. \\
+	Future evolution matrices & ${\bf G}_{(\tilde{t}+1):(\tilde{t}+k)}$ & \code{fGG} & Optional $q \times q$ matrix or $q \times q \times k$ array; required with \code{fFF} when forecasting beyond the stored model matrices. \\
+	Credible interval mass & $1-\alpha$ & \code{cr.percent} & Optional scalar in $(0,1)$; default \code{0.95}. \\
+	Forecast draws & $Y^{rep}_{\tilde{t}+1:\tilde{t}+k}$ & \code{return.draws}; \code{n.samp}; \code{seed} & Optional posterior predictive draw controls. By default draws are not stored; when requested, \code{n.samp} controls the number of draw columns and \code{seed} makes draw generation reproducible. \\
+	\bottomrule
+\end{tabularx}
+\caption{Translation from forecast notation to the main \code{exdqlmForecast()} inputs and optional posterior predictive draw controls. Here $q$ denotes the state dimension.}
+\label{table:fore}
+\end{table}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
