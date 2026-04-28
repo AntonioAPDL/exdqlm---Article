@@ -499,14 +499,21 @@ if (!need_ex3) {
       fmt_month(max(model_df$date))
     ))
 
-    xlim_mid <- c(1995, 2015)
+    xlim_mid <- as.numeric(ex3_cfg$focus_window %||% c(2016, 2020))
+    if (length(xlim_mid) != 2L || any(!is.finite(xlim_mid)) || xlim_mid[[1L]] >= xlim_mid[[2L]]) {
+      stop("Example 3 focus_window must contain two increasing finite years.", call. = FALSE)
+    }
     forecast_horizon <- as.integer(ex3_cfg$forecast_horizon %||% 18L)
     if (!is.finite(forecast_horizon) || forecast_horizon < 1L || forecast_horizon >= length(y_log)) {
       stop("Example 3 forecast_horizon must be positive and smaller than the analysis sample.", call. = FALSE)
     }
     forecast_start_t <- length(y_log) - forecast_horizon
     tx <- grDevices::xy.coords(y_log_ts)$x
-    xlim_fore <- c(max(min(tx), tx[forecast_start_t] - 4), max(tx))
+    forecast_plot_start <- as.numeric(ex3_cfg$forecast_plot_start %||% (tx[forecast_start_t] - 4))
+    if (!is.finite(forecast_plot_start)) {
+      stop("Example 3 forecast_plot_start must be finite.", call. = FALSE)
+    }
+    xlim_fore <- c(max(min(tx), forecast_plot_start), max(tx))
 
     if (need_ex3quantcomps) {
       q1 <- quantile_summary_from_fit(M1, cr.percent = 0.95)

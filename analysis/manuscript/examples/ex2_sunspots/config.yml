@@ -14,6 +14,7 @@ targets:
 notes:
   - Keep the benchmark profile disclosure synchronized with generated backend tables.
   - Article table values are inline in article4.tex and must be updated from generated CSVs after reruns.
+  - The manuscript quantile-comparison panel focuses on 1780--1830 for readability.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
   tests: Rscript analysis/run_all.R --stage manuscript --tests-only

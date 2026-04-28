@@ -199,7 +199,7 @@ if (!need_ex1) {
   )
 
   synth_obs_col <- grDevices::adjustcolor("#F7D6DE", alpha.f = 0.40)
-  synth_fore_col <- grDevices::adjustcolor("#C96F83", alpha.f = 0.48)
+  synth_fore_col <- grDevices::adjustcolor("#D98A9B", alpha.f = 0.38)
 
   if (need_ex1_quants_models) {
     ex1_quants <- load_or_fit_cache(sprintf("ex1_quants_models_v3_main_2000_3000_seed%s", seed_value), {
@@ -240,16 +240,18 @@ if (!need_ex1) {
   }
 
   if (need_ex1_trace_model) {
-    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v5_slice_2000_3000_seed%s", seed_value), {
-      M50_trace <- exdqlm::exdqlmMCMC(
-        y = y, p0 = 0.50, model = model,
-        df = 0.9, dim.df = 2,
-        PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
-        n.burn = nburn_trace, n.mcmc = nmcmc_trace,
-        verbose = FALSE
-      )
+    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v6_slice_2000_3000_seed%s", seed_value), {
+      M50_trace <- with_local_seed(seed_value, {
+        exdqlm::exdqlmMCMC(
+          y = y, p0 = 0.50, model = model,
+          df = 0.9, dim.df = 2,
+          PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
+          n.burn = nburn_trace, n.mcmc = nmcmc_trace,
+          verbose = FALSE
+        )
+      })
       list(M50_trace = M50_trace)
-    }, note = sprintf("ex1_trace_model_v5_slice_2000_3000_seed%s", seed_value))
+    }, note = sprintf("ex1_trace_model_v6_slice_2000_3000_seed%s", seed_value))
 
     M50_trace <- ex1_trace$M50_trace
     sigma_trace <- as.numeric(M50_trace$samp.sigma)
@@ -412,7 +414,7 @@ if (!need_ex1) {
         na.rm = TRUE
       )
 
-      graphics::par(mfrow = c(2, 2), mar = c(3.6, 4.1, 2.2, 1.2), oma = c(0, 0, 0.8, 0))
+      graphics::par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2), oma = c(0, 0, 0.8, 0))
 
       exdqlm::exdqlmPlot(M95_plot, col = ex1_quant_cols$q95)
       exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = ex1_quant_cols$q50)
@@ -505,7 +507,7 @@ if (!need_ex1) {
       relative_path = "analysis/manuscript/outputs/figures/ex1quants.png",
       manuscript_target = "fig:ex1quants",
       status = "reproduced",
-      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row. Panel (d) uses a darker forecast synthesis band and bridges the observed synthesis endpoint to the first forecast synthesis endpoint for visual continuity on the annual time scale."
+      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row. Panel (d) uses a darker related forecast synthesis band and bridges the observed synthesis endpoint to the first forecast synthesis endpoint for visual continuity on the annual time scale."
     )
   }
 

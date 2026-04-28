@@ -484,7 +484,7 @@ To allow variability in the dynamic quantile, we select a single discount factor
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> set.seed(20260427)
+R> set.seed(20260501)
 R> M95 = exdqlmMCMC(y = LakeHuron, p0 = 0.95, model = model,
 +                 df = 0.9, dim.df = 2,
 +                 PriorGamma = list(m_gam = -1, s_gam = 0.1, df_gam = 1),
@@ -514,7 +514,7 @@ MCMC done | model=exDQLM | status=complete | iter=5000.00
 \end{CodeOutput}
 \end{CodeChunk}
 
-By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). \aA{Consistent with this, the posterior mean of \(\gamma\) is \(-0.119\) with a 95\% credible interval \((-0.578, 0.298)\), while the posterior mean of \(\sigma\) is \(0.362\) with a 95\% credible interval \((0.259, 0.468)\).} All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
+By default, \code{exdqlmMCMC()} uses the package's VB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). \aA{Consistent with this, the posterior mean of \(\gamma\) is \(-0.012\) with a 95\% credible interval \((-0.429, 0.462)\), while the posterior mean of \(\sigma\) is \(0.369\) with a 95\% credible interval \((0.282, 0.468)\).} All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
@@ -567,7 +567,7 @@ R> legend("topright", lty = 1, bty = "n", col = c("purple","blue","forest green"
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.9\textwidth]{ex1quants.png}
-\caption{Example 1: Lake Huron. Top-left: MAP estimates and 95\% CrIs of the estimated quantiles, plotted with the data (grey). Top-right: forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (seen from 1952 to 1972). Bottom-left: synthesized posterior predictive 95\% interval over the observed period. Bottom-right: observed-period synthesis near the forecast origin (lighter band) and synthesized posterior predictive 95\% interval over the eight-step forecast window (darker band); the vertical dotted line marks the forecast origin.}
+\caption{Example 1: Lake Huron. Top-left: MAP estimates and 95\% CrIs of the estimated quantiles, plotted with the data (grey). Top-right: forecasted quantile estimates and 95\% credible intervals (seen after 1972), along with the filtered quantile estimates and 95\% credible intervals (seen from 1952 to 1972). Bottom-left: synthesized posterior predictive 95\% interval over the observed period. Bottom-right: observed-period synthesis near the forecast origin (lighter band) and synthesized posterior predictive 95\% interval over the eight-step forecast window (slightly darker rose band); the vertical dotted line marks the forecast origin.}
 \label{fig:ex1quants}
 \end{figure}
 
@@ -623,12 +623,12 @@ R> syn.fore = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. In the forecast panel, we use a darker related fill for the forecast synthesis and draw a small visual bridge from the final observed-period synthesis point to the first one-step-ahead forecast point so that the observed and forecast intervals are displayed on the same annual time scale.}
+\aA{The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. In the forecast panel, we use a slightly darker related fill for the forecast synthesis and draw a small visual bridge from the final observed-period synthesis point to the first one-step-ahead forecast point so that the observed and forecast intervals are displayed on the same annual time scale.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> synth.obs.col = adjustcolor("#F7D6DE", alpha.f = 0.40)
-R> synth.fore.col = adjustcolor("#C96F83", alpha.f = 0.48)
+R> synth.fore.col = adjustcolor("#D98A9B", alpha.f = 0.38)
 R> t.end = tail(time(LakeHuron), 1)
 R> t.fore = seq(t.end + 1, t.end + 8)
 R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
@@ -699,7 +699,7 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \begin{figure}[t]
 \centering
 \includegraphics[width=1\textwidth]{ex2quant.png}
-\caption{Example 2: Sunspots. Top: The sunspot time series from 1700 to 1988. Bottom left: MAP estimates and 95\% CrIs of the estimated quantiles from the DQLM (red) and exDQLM (blue), plotted with the data (grey) from 1750 to 1850. Bottom right: Histogram of samples from the approximated posterior distribution of $\gamma$ under the exDQLM.}
+\caption{Example 2: Sunspots. Top: The sunspot time series from 1700 to 1988. Bottom left: MAP estimates and 95\% CrIs of the estimated quantiles from the DQLM (red) and exDQLM (blue), plotted with the data (grey) from 1780 to 1830. Bottom right: Histogram of samples from the approximated posterior distribution of $\gamma$ under the exDQLM.}
 \label{fig:ex2quant}
 \end{figure}
 
@@ -752,24 +752,25 @@ Run-time: 30.589 seconds
 
 
 
-We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1750 to 1850.
+We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1780 to 1830.
 % fig:ex1quant w850 h275
 % par(mfcol=c(1,3))
 % plot(sunspot.year, col="dark grey")
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(sunspot.year, xlim = c(1750,1850), col = "dark grey",
+R> plot(sunspot.year, xlim = c(1780,1830), col = "dark grey",
 +       ylab = "quantile 95% CrIs")
 R> exdqlmPlot(M1, add = TRUE, col = "red")
 R> exdqlmPlot(M2, add = TRUE, col = "blue")
-R> legend("topleft", lty = 1, , bty = "n", col = c("red","blue"),legend = c("DQLM","exDQLM"))
+R> legend("topleft", lty = 1, bty = "n", col = c("red","blue"),
++        legend = c("DQLM","exDQLM"))
 \end{CodeInput}
 \end{CodeChunk}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=1\textwidth]{ex2checks.png}
-\caption{Example 2: Sunspots. The QQ-plots (left column), ACF plots (center column) and standard forecast errors (right column) from the DQLM (red) and exDQLM (blue).}
+\caption{Example 2: Sunspots. The QQ plots (left column), ACF plots of the PIT sequence (center column), and MAP one-step-ahead standardized forecast errors (right column) from the DQLM (red) and exDQLM (blue).}
 \label{fig:ex2checks}
 \end{figure}
 
@@ -782,7 +783,7 @@ R> abline(v = mean(M2$samp.gamma), col="blue")
 \end{CodeInput}
 \end{CodeChunk}
 
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. \aA{For reproducibility, we fix the normal reference sample used in the KL calculations and reuse it below in the discount-factor scan. The returned \code{exdqlmDiagnostic} object can also be passed to the \code{print()} generic to display the numerical comparison. Smaller values indicate better fit for the KL, CRPS, and pplc criteria; in this LDVB comparison, all reported fit-quality diagnostics favor the exDQLM, while the DQLM is faster.}
+To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. \aA{These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. For reproducibility, we fix the normal reference sample used in the KL calculations and reuse it below in the discount-factor scan. The returned \code{exdqlmDiagnostic} object can also be passed to the \code{print()} generic to display the numerical comparison. Smaller values indicate better fit for the KL, CRPS, and pplc criteria; in this LDVB comparison, all reported fit-quality diagnostics favor the exDQLM, while the DQLM is faster.}
 % fig:ex2checks
 % R> par(mfrow=c(2,3))
 \begin{CodeChunk}
@@ -908,7 +909,7 @@ R> X.input = scale(as.matrix(ex3.df[, c("noi", "amo")]))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{The baseline state-space model contains a first-order polynomial trend and a Fourier-form seasonal component with period 12. The seasonal block includes \(h = 1\), \(h = 2\), and \(h = 0.1469118636\), corresponding to annual, semiannual, and approximately 6.8-year cycles on the monthly scale.}
+\aA{The baseline state-space model contains a first-order polynomial trend and a Fourier-form seasonal component with period 12. The seasonal block includes \(h = 1\), \(h = 2\), and \(h \approx 0.147\), corresponding to annual, semiannual, and approximately 7-year cycles on the monthly scale.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> trend.comp = polytrendMod(1, m0 = quantile(y.fit, 0.15), C0 = 0.1)
@@ -928,7 +929,7 @@ R> model.w.reg = model + reg.comp
 
 \aA{To allow the components to evolve gradually over time while keeping the fitted paths smooth, all discount factors are set to 0.99. Thus the same discounting level is used for the trend, seasonal block, dynamic regression coefficients, and transfer-function components. In the package interface, these choices are passed through \code{df} for the base state-space model and through \code{tf.df} for the transfer-function states.}
 
-\aA{The second model, \(M_2\), uses the transfer-function structure from Section \ref{sec:tf}. We use \code{exdqlmTransferLDVB()} for a fast approximate fit to the monthly series; the corresponding MCMC routine, \code{exdqlmTransferMCMC()}, is available when exact posterior simulation is desired. The transfer rate \(\lambda\) is selected by scanning the grid \(0.1,0.2,\ldots,0.9\) and choosing the fitted value with the smallest finite CRPS. The code below records failed fits and non-finite diagnostic values explicitly, which is useful in grid searches where some candidate specifications may be numerically unstable. In this run, all candidate values completed successfully and CRPS selected \(\lambda = 0.4\).}
+\aA{The second model, \(M_2\), uses the transfer-function structure from Section \ref{sec:tf}. We use the LDVB transfer-function implementation for a fast approximate fit to the monthly series; the corresponding MCMC implementation is available when exact posterior simulation is desired. The transfer rate \(\lambda\) is selected by scanning the grid \(0.1,0.2,\ldots,0.9\) and choosing the fitted value with the smallest finite CRPS. The code below records failed fits and non-finite diagnostic values explicitly, which is useful in grid searches where some candidate specifications may be numerically unstable. In this run, all candidate values returned finite diagnostics and CRPS selected \(\lambda = 0.5\).}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> possible.lams = seq(0.1, 0.9, 0.1)
@@ -944,7 +945,7 @@ R> for(i in seq_along(possible.lams)){
 +                         tf.m0 = rep(0,3),
 +                         tf.C0 = diag(c(0.1,0.005,0.005),3),
 +                         sig.init = 0.1, gam.init = -0.1,
-+                         tol = 0.05, verbose = FALSE),
++                         n.samp = 1000, tol = 0.05, verbose = FALSE),
 +      error = identity)
 +    if(inherits(temp.M2, "error")) {
 +      metrics$status[i] = "fit_error"
@@ -966,7 +967,7 @@ R> if(!any(ok)) stop("No finite CRPS values were produced.")
 R> metrics$lambda[which(ok)[which.min(metrics$CRPS[ok])]]
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 0.4
+[1] 0.5
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -975,7 +976,7 @@ R> metrics$lambda[which(ok)[which.min(metrics$CRPS[ok])]]
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth]{ex3quantcomps.png}
-\caption{Example 3: Big Tree water flow. Top: MAP estimates and 95\% CrIs of the estimated quantiles from the dynamic regression model (purple) and transfer-function model (green), plotted with the data (grey) from 1995 to 2015. Middle: MAP estimates and 95\% CrIs of the combined seasonal components implied by the annual, semiannual, and low-frequency harmonics. Bottom: MAP estimates and 95\% CrIs of the combined climate-index contribution from NOI and AMO. For \(M_1\), the purple curve is the direct dynamic regression contribution. For \(M_2\), the green curve is the transfer-function contribution. The horizontal orange dotted line is at zero for reference.}
+\caption{Example 3: Big Tree water flow. Top: MAP estimates and 95\% CrIs of the estimated quantiles from the dynamic regression model (purple) and transfer-function model (green), plotted with the data (grey) from 2016 to 2020. Middle: MAP estimates and 95\% CrIs of the combined seasonal components implied by the annual, semiannual, and low-frequency harmonics. Bottom: MAP estimates and 95\% CrIs of the combined climate-index contribution from NOI and AMO. For \(M_1\), the purple curve is the direct dynamic regression contribution. For \(M_2\), the green curve is the transfer-function contribution. The horizontal orange dotted line is at zero for reference.}
 \label{fig:ex3quant}
 \end{figure}
 
@@ -984,22 +985,22 @@ R> metrics$lambda[which(ok)[which.min(metrics$CRPS[ok])]]
 R> M1 = exdqlmLDVB(y = y.fit, p0 = 0.15, model = model.w.reg,
 +                df = c(0.99,0.99,0.99), dim.df = c(1,6,2),
 +                sig.init = 0.1, gam.init = - 0.1,
-+                tol = 0.05, verbose = FALSE)
++                n.samp = 1000, tol = 0.05, verbose = FALSE)
 R> M2 = exdqlmTransferLDVB(y = y.fit, p0 = 0.15, model = model,
 +                        df = c(0.99,0.99), dim.df = c(1,6),
-+                        X = X.input, tf.df = c(0.99,0.99), lam = 0.40,
++                        X = X.input, tf.df = c(0.99,0.99), lam = 0.50,
 +                        tf.m0 = rep(0,3),
 +                        tf.C0 = diag(c(0.1,0.005,0.005),3),
 +                        sig.init = 0.1, gam.init = - 0.1,
-+                        tol = 0.05, verbose = FALSE)
++                        n.samp = 1000, tol = 0.05, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{The upper panel of Figure \ref{fig:ex3quant} compares the fitted \(0.15\) quantiles from the two models over 1995--2015. The package function \code{exdqlmPlot()} displays the MAP estimate together with pointwise 95\% CrIs and can be used with \code{add = TRUE} to overlay fitted quantiles from several models.}
+\aA{The upper panel of Figure \ref{fig:ex3quant} compares the fitted \(0.15\) quantiles from the two models over 2016--2020, a wet period in the region that provides a more focused view of the fitted low-flow dynamics. The package function \code{exdqlmPlot()} displays the MAP estimate together with pointwise 95\% CrIs and can be used with \code{add = TRUE} to overlay fitted quantiles from several models.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(y.fit, col = "grey", ylim = c(1,8), xlim=c(1995,2015),
+R> plot(y.fit, col = "grey", ylim = c(1,8), xlim=c(2016,2020),
 +       ylab = "quantile 95% CrIs")
 R> exdqlmPlot(M1, add = TRUE)
 R> exdqlmPlot(M2, add = TRUE, col = "forest green")
@@ -1013,10 +1014,10 @@ R> exdqlmPlot(M2, add = TRUE, col = "forest green")
 \label{fig:ex3tftheta}
 \end{figure}
 
-\aA{The fitted quantiles differ most clearly during periods of low flow. To see which parts of the state-space model drive these differences, we use \code{compPlot()} to examine selected model components. We begin with the combined seasonal contribution. Because the seasonal block contains three harmonics, this contribution is formed from the second through seventh elements of the state vector. The middle panel of Figure \ref{fig:ex3quant} shows the resulting seasonal estimates for the two models over the same 1995--2015 window.}
+\aA{The fitted quantiles differ most clearly during periods of low flow. To see which parts of the state-space model drive these differences, we use \code{compPlot()} to examine selected model components. We begin with the combined seasonal contribution. Because the seasonal block contains three harmonics, this contribution is formed from the second through seventh elements of the state vector. The middle panel of Figure \ref{fig:ex3quant} shows the resulting seasonal estimates for the two models over the same 2016--2020 window.}
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-2,2), xlim = c(1995,2015),
+R> plot(NA, ylim = c(-2,2), xlim = c(2016,2020),
 +         ylab = "seasonal components")
 R> compPlot(M1, index = 2:7, add = TRUE)
 R> compPlot(M2, index = 2:7, add = TRUE, col = "forest green")
@@ -1025,7 +1026,7 @@ R> compPlot(M2, index = 2:7, add = TRUE, col = "forest green")
 \aA{The lower panel of Figure \ref{fig:ex3quant} compares the climate-index contribution. For \code{M1}, this is the combined direct regression contribution of the standardized NOI and AMO covariates. For \code{M2}, this is the transfer-function contribution induced by the same covariates. This view is useful because it separates differences in the fitted low-flow quantile into seasonal and covariate-driven components.}
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-2,2), xlim = c(1995,2015),
+R> plot(NA, ylim = c(-2,2), xlim = c(2016,2020),
 +          ylab = "climate-index components")
 R> compPlot(M1, index = 8:9, add = TRUE)
 R> compPlot(M2, index = 8, add = TRUE, col = "forest green")
@@ -1057,13 +1058,13 @@ R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
 \end{CodeChunk}
 
-\aA{The fitted object also reports \code{median.kt}, the median number of time steps until the transfer effect on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. In this example, the value is approximately 5.53, suggesting that the transfer effect persists for about five to six months.}
+\aA{The fitted object also reports \code{median.kt}, the median number of time steps until the transfer effect on the \(0.15\) quantile is less than or equal to \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. In this example, the value is approximately 7.14, suggesting that the transfer effect persists for about seven months.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M2$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 5.534237
+[1] 7.13966
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1096,8 +1097,8 @@ R> exdqlmForecast(start.t = length(flow.fit)-18, k = 18, m1 = M2,
  \toprule
  Model & KL & CRPS & pplc \\
  \midrule
- \code{M1} regression & 0.0668 & \textbf{0.3517} & 151.79 \\
- \code{M2} transfer function & \textbf{0.0283} & 0.3531 & \textbf{146.57} \\
+ \code{M1} regression & 0.161 & \textbf{0.350} & 152.0 \\
+ \code{M2} transfer function & \textbf{0.144} & 0.353 & \textbf{145.9} \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, pplc assesses target-quantile posterior predictive loss, and KL summarizes one-step-ahead calibration discrepancy. Because the columns are the comparison metrics, bold entries indicate the smaller value within each column; displayed ties are left unbolded.}
@@ -1170,7 +1171,7 @@ R> M.mcmc = lapply(p.grid, function(p0) exalStaticMCMC(
 \end{CodeInput}
 \end{CodeChunk}
 
-For static fits, the helper function \code{exalStaticDiagnostics()} summarizes fitted quantiles on a common design matrix and, when a reference quantile is supplied, reports truth-recovery metrics directly. For example, on an independent holdout design:
+\aA{For static fits, the helper function \code{exalStaticDiagnostics()} summarizes fitted quantiles on a common design matrix and, when holdout responses or a reference quantile are supplied, reports predictive evaluation metrics such as check loss and reference-quantile error. In this simulated example, the true coefficient vector is also known, so we separately compute the active-signal RMSE and null-coefficient MAE used in Table \ref{tab:ex4static}. For real data applications, these coefficient-recovery summaries would be replaced by posterior intervals and holdout predictive diagnostics. For example, on an independent holdout design:}
 
 \begin{CodeChunk}
 \begin{CodeInput}

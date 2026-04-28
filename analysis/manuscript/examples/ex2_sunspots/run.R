@@ -273,8 +273,8 @@ if (!need_ex2) {
     )
   }
 
-  xlim_idx <- time_window_to_index(y_ts, 1750, 1850)
-  xlim_time <- c(1750, 1850)
+  xlim_time <- c(1780, 1830)
+  xlim_idx <- time_window_to_index(y_ts, xlim_time[1], xlim_time[2])
   ex2_cols <- list(
     dqlm = "#C44E52",
     exdqlm = "#4C72B0",
@@ -291,11 +291,11 @@ if (!need_ex2) {
       m_exdqlm_plot$y <- y_ts
       save_png_plot(filename, {
         graphics::layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE), heights = c(0.9, 1.1))
-        graphics::par(mar = c(3.1, 4.1, 2.6, 1.2) + 0.1)
+        graphics::par(mar = c(3.9, 4.1, 2.6, 1.2) + 0.1)
         stats::plot.ts(y_ts, col = ex2_cols$obs, ylab = "sunspot count", xlab = "year")
         graphics::title(main = "Sunspot time series")
 
-        graphics::par(mar = c(3.6, 4.1, 2.6, 1.2) + 0.1)
+        graphics::par(mar = c(4.4, 4.1, 2.6, 1.2) + 0.1)
         stats::plot.ts(y_ts, xlim = xlim_time, col = ex2_cols$obs, ylab = "quantile and 95% CrI", xlab = "year")
         q_d <- quantile_summary_from_fit(m_dqlm_plot, cr.percent = 0.95)
         q_e <- quantile_summary_from_fit(m_exdqlm_plot, cr.percent = 0.95)
@@ -311,7 +311,7 @@ if (!need_ex2) {
         )
         graphics::title(main = sprintf("LDVB fit for p0 = %s", p0_label))
 
-        graphics::par(mar = c(3.6, 4.1, 2.6, 1.2) + 0.1)
+        graphics::par(mar = c(4.4, 4.1, 2.6, 1.2) + 0.1)
         graphics::hist(
           as.numeric(m_exdqlm_plot$samp.gamma),
           xlab = expression(gamma),
@@ -320,7 +320,7 @@ if (!need_ex2) {
           border = ex2_cols$hist_border
         )
         graphics::abline(v = stats::median(as.numeric(m_exdqlm_plot$samp.gamma), na.rm = TRUE), col = ex2_cols$exdqlm, lwd = 2)
-      }, height = 7)
+      }, height = 7.4)
     }
 
     if (ex2_ldvb_pair_ok && need_ex2quant) {
