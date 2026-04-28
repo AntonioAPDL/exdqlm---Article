@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  27 APR 2026 20:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  27 APR 2026 21:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -501,27 +501,27 @@ LaTeX Warning: Unused global option(s):
 (./article4.aux)
 \openout1 = `article4.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 60.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 60.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 61.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 61.
  (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Try loading font information for T1+lmr on input line 60.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Try loading font information for T1+lmr on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
@@ -557,7 +557,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box30
-Package hyperref Info: Link coloring ON on input line 60.
+Package hyperref Info: Link coloring ON on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -567,9 +567,9 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count124
 )
-LaTeX Info: Redefining \ref on input line 60.
-LaTeX Info: Redefining \pageref on input line 60.
-LaTeX Info: Redefining \nameref on input line 60.
+LaTeX Info: Redefining \ref on input line 61.
+LaTeX Info: Redefining \pageref on input line 61.
+LaTeX Info: Redefining \nameref on input line 61.
 
 (./article4.out) (./article4.out)
 \@outlinefile=\write4
@@ -578,55 +578,55 @@ LaTeX Info: Redefining \nameref on input line 60.
 <jsslogo.jpg, id=68, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
 <use jsslogo.jpg>
-Package pdftex.def Info: jsslogo.jpg  used on input line 60. on input line 60.
+Package pdftex.def Info: jsslogo.jpg  used on input line 61. on input line 61.
 Package pdftex.def Info: Requested size: 89.80768pt x 65.43607pt on input line 
-60.
-LaTeX Font Info:    Try loading font information for T1+pzc on input line 60.
+61.
+LaTeX Font Info:    Try loading font information for T1+pzc on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pzc.fd
 File: t1pzc.fd 2001/06/04 font definitions for T1/pzc.
 )
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <28> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 60.
-LaTeX Font Info:    Try loading font information for T1+lmss on input line 60.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 61.
+LaTeX Font Info:    Try loading font information for T1+lmss on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 60.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 60.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 60.
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 61.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 60.
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 61.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 60.
+(Font)              <10.95> on input line 61.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 60.
+(Font)              <8> on input line 61.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 60.
-LaTeX Font Info:    Try loading font information for U+msa on input line 60.
+(Font)              <6> on input line 61.
+LaTeX Font Info:    Try loading font information for U+msa on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 60.
+LaTeX Font Info:    Try loading font information for U+msb on input line 61.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -658,9 +658,6 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [5]
-Underfull \vbox (badness 4341) has occurred while \output is active []
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 6 []
  []
@@ -676,16 +673,16 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [8]
+LaTeX Font Info:    Try loading font information for OT1+lmss on input line 320
+.
+ (/usr/share/texlive/texmf-dist/tex/latex/lm/ot1lmss.fd
+File: ot1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 9
  []
 
 [9]
-LaTeX Font Info:    Try loading font information for OT1+lmss on input line 321
-.
- (/usr/share/texlive/texmf-dist/tex/latex/lm/ot1lmss.fd
-File: ot1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 10 []
  []
@@ -706,78 +703,78 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [13]
-<analysis/manuscript/outputs/figures/ex1mcmc.png, id=377, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex1mcmc.png, id=376, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex1mcmc.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex1mcmc.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex1mcmc.png  used 
-on input line 522. on input line 522.
+on input line 521. on input line 521.
 Package pdftex.def Info: Requested size: 309.85626pt x 185.91042pt on input lin
-e 522.
+e 521.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 14 []
  []
 
 [14 <./analysis/manuscript/outputs/figures/ex1mcmc.png>]
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 564
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 563
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<analysis/manuscript/outputs/figures/ex1quants.png, id=386, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex1quants.png, id=385, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex1quants.png Graphic file (type png)
 
 <use analysis/manuscript/outputs/figures/ex1quants.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex1quants.png  use
-d on input line 570. on input line 570.
+d on input line 569. on input line 569.
 Package pdftex.def Info: Requested size: 398.38567pt x 239.03429pt on input lin
-e 570.
+e 569.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 15
  []
 
-[15]
+[15 <./analysis/manuscript/outputs/figures/ex1quants.png (PNG copy)>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 16 []
  []
 
-[16 <./analysis/manuscript/outputs/figures/ex1quants.png (PNG copy)>]
+[16]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 17
  []
 
 [17]
-<analysis/manuscript/outputs/figures/ex2quant.png, id=414, 722.7pt x 505.89pt>
+<analysis/manuscript/outputs/figures/ex2quant.png, id=413, 722.7pt x 505.89pt>
 File: analysis/manuscript/outputs/figures/ex2quant.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex2quant.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex2quant.png  used
- on input line 702. on input line 702.
+ on input line 701. on input line 701.
 Package pdftex.def Info: Requested size: 442.65375pt x 309.8584pt on input line
- 702.
+ 701.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 18 []
  []
 
-[18]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 19
- []
-
-[19 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex2checks.png, id=425, 722.7pt x 433.62pt>
+[18 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
+<analysis/manuscript/outputs/figures/ex2checks.png, id=419, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
 
 <use analysis/manuscript/outputs/figures/ex2checks.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex2checks.png  use
-d on input line 772. on input line 772.
+d on input line 771. on input line 771.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 772.
+e 771.
 
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 19
+ []
+
+[19]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 20 []
  []
@@ -788,13 +785,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [21]
-<analysis/manuscript/outputs/figures/ex3data.png, id=440, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex3data.png, id=439, 722.7pt x 433.62pt>
 File: analysis/manuscript/outputs/figures/ex3data.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex3data.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3data.png  used 
-on input line 886. on input line 886.
+on input line 885. on input line 885.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 886.
+e 885.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 22 []
@@ -806,70 +803,72 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23 <./analysis/manuscript/outputs/figures/ex3data.png (PNG copy)>]
-Overfull \hbox (69.71652pt too wide) in paragraph at lines 932--934
+Overfull \hbox (69.71652pt too wide) in paragraph at lines 931--933
 [][]\T1/lmr/m/n/10.95 The sec-ond model, $\OML/lmm/m/it/10.95 M[]$\T1/lmr/m/n/1
 0.95 , uses the transfer-function struc-ture from Sec-tion [][]2.4[][]. We use 
 \T1/lmtt/m/n/10.95 exdqlmTransferLDVB()
  []
 
 
-Overfull \hbox (61.81528pt too wide) in paragraph at lines 932--934
+Overfull \hbox (61.81528pt too wide) in paragraph at lines 931--933
 \T1/lmr/m/n/10.95 for a fast ap-prox-i-mate fit to the monthly se-ries; the cor
 -re-spond-ing MCMC rou-tine, \T1/lmtt/m/n/10.95 exdqlmTransferMCMC()\T1/lmr/m/n
 /10.95 ,
  []
 
+<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=460, 722.7pt x 433.6
+2pt>
+File: analysis/manuscript/outputs/figures/ex3quantcomps.png Graphic file (type 
+png)
+<use analysis/manuscript/outputs/figures/ex3quantcomps.png>
+Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3quantcomps.png 
+ used on input line 977. on input line 977.
+Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
+e 977.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 24 []
  []
 
 [24]
-<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=465, 722.7pt x 433.6
-2pt>
-File: analysis/manuscript/outputs/figures/ex3quantcomps.png Graphic file (type 
-png)
-<use analysis/manuscript/outputs/figures/ex3quantcomps.png>
-Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3quantcomps.png 
- used on input line 978. on input line 978.
+<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=466, 722.7pt x 433.62pt
+>
+File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
+)
+<use analysis/manuscript/outputs/figures/ex3zetapsi.png>
+Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3zetapsi.png  us
+ed on input line 1011. on input line 1011.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 978.
+e 1011.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
  []
 
 [25 <./analysis/manuscript/outputs/figures/ex3quantcomps.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=473, 722.7pt x 433.62pt
->
-File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
-)
-<use analysis/manuscript/outputs/figures/ex3zetapsi.png>
-Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3zetapsi.png  us
-ed on input line 1012. on input line 1012.
-Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 1012.
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 26 []
  []
 
 [26 <./analysis/manuscript/outputs/figures/ex3zetapsi.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3forecast.png, id=485, 578.16pt x 397.48
+<analysis/manuscript/outputs/figures/ex3forecast.png, id=484, 578.16pt x 397.48
 5pt>
 File: analysis/manuscript/outputs/figures/ex3forecast.png Graphic file (type pn
 g)
 <use analysis/manuscript/outputs/figures/ex3forecast.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3forecast.png  u
-sed on input line 1075. on input line 1075.
+sed on input line 1074. on input line 1074.
 Package pdftex.def Info: Requested size: 265.59494pt x 182.59665pt on input lin
-e 1075.
+e 1074.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 27
  []
 
 [27]
+Underfull \vbox (badness 1755) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 28 []
  []
@@ -880,15 +879,15 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [29]
-<analysis/manuscript/outputs/figures/ex4static.png, id=506, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex4static.png, id=505, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex4static.png Graphic file (type png)
 
 <use analysis/manuscript/outputs/figures/ex4static.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex4static.png  use
-d on input line 1190. on input line 1190.
+d on input line 1189. on input line 1189.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 1190.
+e 1189.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 30 []
@@ -935,9 +934,9 @@ n/10.95 https : / / www . statsmodels . org / stable /
 
 )
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1259.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1258.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1259.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1258.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 34 []
@@ -949,23 +948,23 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [35]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1259.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1258.
  (./article4.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1259.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1259.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1258.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1258.
 
 Package rerunfilecheck Info: File `article4.out' has not changed.
 (rerunfilecheck)             Checksum: 117E6F6DA39079575695AB2DE674ACE5;1880.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1259.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1258.
  ) 
 Here is how much of TeX's memory you used:
- 8591 strings out of 494917
- 125687 string characters out of 6180699
- 218465 words of memory out of 5000000
- 11554 multiletter control sequences out of 15000+600000
+ 8592 strings out of 494917
+ 125704 string characters out of 6180699
+ 215896 words of memory out of 5000000
+ 11555 multiletter control sequences out of 15000+600000
  143670 words of font info for 96 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 35i,16n,34p,2457b,515s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,16n,34p,2457b,519s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texl
 ive/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texlive/texmf-dist/font
 s/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/
@@ -997,10 +996,10 @@ nts/type1/public/lm/lmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on article4.pdf (35 pages, 3280152 bytes).
+Output written on article4.pdf (35 pages, 3279937 bytes).
 PDF statistics:
- 722 PDF objects out of 1000 (max. 8388607)
- 635 compressed objects within 7 object streams
+ 721 PDF objects out of 1000 (max. 8388607)
+ 634 compressed objects within 7 object streams
  145 named destinations out of 1000 (max. 500000)
  179 words of extra memory for PDF output out of 10000 (max. 10000000)
 

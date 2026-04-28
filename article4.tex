@@ -14,6 +14,7 @@
 \newcommand{\BS}[1]{\textcolor{orange}{#1}}
 \newcommand{\tworowcell}[1]{\smash{\raisebox{-0.5\normalbaselineskip}{#1}}}
 \newcommand{\TableStyle}{\footnotesize\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.08}}
+\newcommand{\CompactTableStyle}{\footnotesize\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.04}}
 
 \author{Antonio Aguirre \\ University of California Santa Cruz \And
         Raquel Barata \\ University of California Santa Cruz \AND
@@ -69,9 +70,7 @@ Quantile regression has become a widely used alternative to mean-based modeling 
 \begin{table}[!htb]
 \centering
 \begingroup
-\footnotesize
-\setlength{\tabcolsep}{2.5pt}
-\renewcommand{\arraystretch}{1.04}
+\CompactTableStyle
 \begin{tabularx}{\textwidth}{@{}l@{\hspace{0.7em}} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
 \toprule
 \textbf{Package} & \textbf{Main scope} & \shortstack{\textbf{Time-series or}\\\textbf{state-space role}} & \shortstack{\textbf{Inference or}\\\textbf{computation}} & \shortstack{\textbf{Multiple-quantile}\\\textbf{handling}} \\
@@ -82,7 +81,7 @@ Quantile regression has become a widely used alternative to mean-based modeling 
 \addlinespace[1pt]
 \pkg{pqrBayes} & Bayesian penalized quantile regression & Static or varying-coefficient regression; no state-space component & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
 \addlinespace[1pt]
-\pkg{brms} & General Bayesian regression with an AL family & Autocorrelation structures available; no dedicated quantile state-space workflow & Stan-based posterior inference & Target quantile set through the AL quantile parameter \\
+\pkg{brms} & General Bayesian regression with an AL family & Autocorrelation structures available; no dedicated quantile state-space workflow & Stan-based posterior inference & Target quantile set through AL parameter \\
 \addlinespace[1pt]
 \pkg{qgam} & Smooth additive quantile regression & Static additive smooths; no state-space component & Automatic smoothing and learning-rate calibration; PIRLS or Newton fitting & Single-quantile \code{qgam()}; multi-quantile \code{mqgam()} \\
 \addlinespace[1pt]
@@ -95,7 +94,7 @@ Quantile regression has become a widely used alternative to mean-based modeling 
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Columns emphasize the distinctions used to position \pkg{exdqlm}: modeling scope, time-series or state-space support, inference or computation, and handling of multiple quantile levels. The entries summarize the packages' documented primary interfaces rather than every possible user extension. AL denotes asymmetric Laplace, exAL its extended version, GAM generalized additive model, PIRLS penalized iteratively reweighted least squares, and VB variational Bayes.}
+\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Entries summarize documented primary interfaces along the dimensions used to position \pkg{exdqlm}; they are selective rather than exhaustive. AL denotes asymmetric Laplace, exAL its extended version, PIRLS penalized iteratively reweighted least squares, and VB variational Bayes.}
 \label{table:software}
 \end{table}
 
@@ -162,14 +161,14 @@ Under a Bayesian formulation and given $p_0$, we specify priors for the initial 
 \TableStyle
 \begin{tabular}{@{}lccccccccc@{}}
 \toprule
-R input & \multicolumn{4}{c}{\code{model}} & \multicolumn{2}{c}{\code{PriorSigma}}    & \multicolumn{3}{c}{\code{PriorGamma}}  \\
+\proglang{R} input & \multicolumn{4}{c}{\code{model}} & \multicolumn{2}{c}{\code{PriorSigma}}    & \multicolumn{3}{c}{\code{PriorGamma}}  \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-7}\cmidrule(l){8-10}
 Mathematical symbol & ${\bf F}_{1:T}$ & ${\bf G}_{1:T}$ & ${\bf m}_0$ & ${\bf C}_0$ & $a_{\sigma}$ & $b_{\sigma}$ & $m_{\gamma}$ & $s_{\gamma}$ & $\nu_{\gamma}$ \\
-R component & \code{FF} & \code{GG} & \code{m0} & \code{C0} & \code{a_sig} & \code{b_sig} & \code{m_gam} & \code{s_gam} & \code{df_gam} \\
+\proglang{R} component & \code{FF} & \code{GG} & \code{m0} & \code{C0} & \code{a_sig} & \code{b_sig} & \code{m_gam} & \code{s_gam} & \code{df_gam} \\
 Default if omitted & -- & -- & ${\bf 0}_q$ & $10^3{\bf I}_q$ & 2.1 & 1.1 & 0 & 1 & 1 \\
 \bottomrule
 \end{tabular}
-\caption{Translation from the mathematical notation used in the exDQLM specification to the corresponding \pkg{exdqlm} function inputs. The \code{model} object stores the state-space components and initial-state prior, while \code{PriorSigma} and \code{PriorGamma} store prior hyperparameters for $\sigma$ and $\gamma$. A dash indicates that there is no generic default: \code{FF} and \code{GG} are determined by the chosen state-space component or supplied in a user-defined model. Here ${\bf 0}_q$ denotes a $q$-dimensional vector of zeros, and ${\bf I}_q$ denotes the $q$-dimensional identity matrix.}
+\caption{Translation from exDQLM notation to \pkg{exdqlm} function inputs. The \code{model} object stores state-space components and the initial-state prior; \code{PriorSigma} and \code{PriorGamma} store hyperparameters for $\sigma$ and $\gamma$. A dash indicates no generic default because \code{FF} and \code{GG} are determined by the chosen component or supplied model. Here ${\bf 0}_q$ and ${\bf I}_q$ denote a $q$-vector of zeros and the $q$-dimensional identity matrix.}
 \label{table:priors}
 \end{table}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -189,15 +188,15 @@ Table \ref{table:post} shows selected core inference controls for the fitting fu
 \TableStyle
 \begin{tabular}{@{}lccccc@{}}
  \toprule
- \shortstack{\pkg{exdqlm}\\function} & \multicolumn{3}{c}{\code{exdqlmMCMC()}} & \multicolumn{2}{c}{\code{exdqlmLDVB()}}  \\
+ Control & \multicolumn{3}{c}{\code{exdqlmMCMC()}} & \multicolumn{2}{c}{\code{exdqlmLDVB()}}  \\
  \cmidrule(lr){2-4}\cmidrule(l){5-6}
  Mathematical symbol & $\mathcal{K}_{\sigma,\gamma}$ & $N_{BURN}$ & $N_{MCMC}$ & $\epsilon_{tol}$ & $N_{SAMP}$\\
  \midrule
- R argument & \code{mh.proposal} & \code{n.burn} & \code{n.mcmc} & \code{tol} & \code{n.samp} \\
+ \proglang{R} argument & \code{mh.proposal} & \code{n.burn} & \code{n.mcmc} & \code{tol} & \code{n.samp} \\
  Default if omitted & \code{"slice"} & 2000 & 1500 & 0.1 & 200 \\
  \bottomrule
 \end{tabular}
-\caption{Translation from mathematical symbols to selected core inference controls in \code{exdqlmMCMC()} and \code{exdqlmLDVB()}. Advanced control-list arguments, optional random-walk MH tuning inputs, and package-level backend options are documented separately.}
+\caption{Selected core inference controls for \code{exdqlmMCMC()} and \code{exdqlmLDVB()}. Advanced control-list arguments, optional random-walk MH tuning inputs, and package-level backend options are documented separately.}
 \label{table:post}
 \end{table}
 
@@ -264,16 +263,16 @@ Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec
 \TableStyle
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\raggedright\arraybackslash}p{0.14\textwidth}>{\raggedright\arraybackslash}X@{}}
 	\toprule
-	Quantity & Mathematical symbol & \proglang{R} argument & Input form/default \\
+	Quantity & Mathematical symbol & \proglang{R} argument & Input/default \\
 	\midrule
 	Transfer inputs & ${\bf x}_t$ & \code{X} & Required numeric vector or $T\times k$ matrix. \\
 	Transfer rate & $\tilde\lambda$ & \code{lam} & Required scalar in $(0,1)$. \\
-	Discount factors & $(\delta_\zeta,\boldsymbol{\delta_\psi})$ & \code{tf.df} & Required numeric vector: length 1 (shared); length 2 ($\delta_\zeta$ and shared $\boldsymbol{\delta_\psi}$); or length $k+1$ (componentwise). \\
+	Discount factors & $(\delta_\zeta,\boldsymbol{\delta_\psi})$ & \code{tf.df} & Required vector: length 1 (shared); length 2 ($\delta_\zeta$ and shared $\boldsymbol{\delta_\psi}$); or length $k+1$ (componentwise). \\
 	Prior mean & ${\bf m}_0^{tf}$ & \code{tf.m0} & Optional vector of length $k+1$; default ${\bf 0}_{k+1}$. \\
 	Prior covariance & ${\bf C}_0^{tf}$ & \code{tf.C0} & Optional $(k+1)\times(k+1)$ covariance matrix; default ${\bf I}_{k+1}$. \\
 	\bottomrule
 \end{tabularx}
-\caption{Translation from mathematical symbols to additional transfer-function inputs used by \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}. Here $k$ denotes the number of transfer covariates.}
+\caption{Transfer-function inputs for \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}. Here $k$ denotes the number of transfer covariates.}
 \label{table:tf}
 \end{table}
 
@@ -351,7 +350,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 \TableStyle
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\centering\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}X@{}}
 	\toprule
-	Quantity & Mathematical symbol & \proglang{R} argument & Input form/default \\
+	Quantity & Mathematical symbol & \proglang{R} argument & Input/default \\
 	\midrule
 	Fitted dynamic model & $({\bf m}_{\tilde{t}}, {\bf C}_{\tilde{t}})$ & \code{m1} & Required fitted dynamic object from \code{exdqlmMCMC()}, \code{exdqlmLDVB()}, or legacy \code{exdqlmISVB()}. \\
 	Forecast origin & $\tilde{t}$ & \code{start.t} & Required integer time index within the fitted model. \\
@@ -359,10 +358,10 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
 	Future observation vectors & ${\bf F}_{(\tilde{t}+1):(\tilde{t}+k)}$ & \code{fFF} & Optional $q \times 1$ or $q \times k$ matrix; required with \code{fGG} when forecasting beyond the stored model matrices. \\
 	Future evolution matrices & ${\bf G}_{(\tilde{t}+1):(\tilde{t}+k)}$ & \code{fGG} & Optional $q \times q$ matrix or $q \times q \times k$ array; required with \code{fFF} when forecasting beyond the stored model matrices. \\
 	Credible interval mass & $1-\alpha$ & \code{cr.percent} & Optional scalar in $(0,1)$; default \code{0.95}. \\
-	Forecast draws & $Y^{rep}_{\tilde{t}+1:\tilde{t}+k}$ & \code{return.draws}; \code{n.samp}; \code{seed} & Optional posterior predictive draw controls. By default draws are not stored; when requested, \code{n.samp} controls the number of draw columns and \code{seed} makes draw generation reproducible. \\
+	Forecast draws & $Y^{rep}_{\tilde{t}+1:\tilde{t}+k}$ & \code{return.draws}; \code{n.samp}; \code{seed} & Optional controls; default \code{return.draws = FALSE}. When requested, \code{n.samp} sets the number of draw columns and \code{seed} makes generation reproducible. \\
 	\bottomrule
 \end{tabularx}
-\caption{Translation from forecast notation to the main \code{exdqlmForecast()} inputs and optional posterior predictive draw controls. Here $q$ denotes the state dimension.}
+\caption{Forecast notation and main \code{exdqlmForecast()} inputs. Here $q$ denotes the state dimension.}
 \label{table:fore}
 \end{table}
 
@@ -388,19 +387,19 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \code{as.exdqlm()} & \code{exdqlm} & Coerce a compatible list or time-invariant \code{dlm} object.\\
 	\addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic model fitting} -- Input \code{exdqlm} objects} \\
-    \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Fit dynamic exDQLM/DQLM with MCMC.\\
-    \code{exdqlmLDVB()} & \code{exdqlmLDVB} & Fit dynamic exDQLM/DQLM with the LDVB approximation.\\
-    \code{exdqlmTransferLDVB()} & \code{exdqlmLDVB} & Fit transfer-function exDQLM with the LDVB approximation.\\
-    \code{exdqlmTransferMCMC()} & \code{exdqlmMCMC} & Fit transfer-function exDQLM with MCMC.\\
+    \rule{0pt}{3ex}\code{exdqlmMCMC()} & \code{exdqlmMCMC} & Fit dynamic exDQLM/DQLM via MCMC.\\
+    \code{exdqlmLDVB()} & \code{exdqlmLDVB} & Fit dynamic exDQLM/DQLM via LDVB.\\
+    \code{exdqlmTransferLDVB()} & \code{exdqlmLDVB} & Fit transfer-function exDQLM via LDVB.\\
+    \code{exdqlmTransferMCMC()} & \code{exdqlmMCMC} & Fit transfer-function exDQLM via MCMC.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static model fitting} -- Input design matrix and response} \\
-    \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exalStaticLDVB} & Fit static exAL/AL regression with the LDVB approximation.\\
-    \code{exalStaticMCMC()} & \code{exalStaticMCMC} & Fit static exAL/AL regression with MCMC.\\
+    \rule{0pt}{3ex}\code{exalStaticLDVB()} & \code{exalStaticLDVB} & Fit static exAL/AL regression via LDVB.\\
+    \code{exalStaticMCMC()} & \code{exalStaticMCMC} & Fit static exAL/AL regression via MCMC.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic fit examination} -- Input \code{exdqlmMCMC}, \code{exdqlmLDVB}, or legacy \code{exdqlmISVB} objects} \\
-    \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute $k$-step-ahead forecast quantiles, with optional predictive draws.\\
-    \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics, with optional plots. \\
-    \code{exdqlmPlot()} & Invisible \code{list} & Plot fitted dynamic quantile MAP and CrI summaries.\\
+    \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute forecast quantiles and optional predictive draws.\\
+    \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics; optionally plot them. \\
+    \code{exdqlmPlot()} & Invisible \code{list} & Plot dynamic quantile MAP and CrI summaries.\\
     \code{compPlot()} & Invisible \code{list} & Plot component or state-level MAP and CrI summaries.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticMCMC} or \code{exalStaticLDVB} objects} \\
@@ -410,7 +409,7 @@ where ${\bf a}_{\tilde{t}}(k) = {\bf G}_{\tilde{t}+k} {\bf a}_{\tilde{t}}(k-1)$,
     \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{exdqlmSynthesis} & Synthesize posterior predictive draws across separately fitted quantile levels.\\
     \bottomrule
 \end{tabularx}
-\caption{Overview of the core workflow functions used in the examples. Model-construction functions return \code{exdqlm} state-space components; fitting, diagnostic, forecast, static, and synthesis routines return the S3 objects shown in the table. The plotting helpers \code{exdqlmPlot()} and \code{compPlot()} return invisible summary lists.}
+\caption{Core workflow functions supporting the examples. Fitting, diagnostic, forecast, static, and synthesis routines return the S3 objects shown; \code{exdqlmPlot()} and \code{compPlot()} return invisible summary lists.}
 \label{table:flow}
 \end{table}
 
