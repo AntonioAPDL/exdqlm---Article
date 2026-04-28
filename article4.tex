@@ -264,18 +264,18 @@ Similar to the specification of ${\bf W}_t^\theta$ discussed in Section \ref{sec
 \begin{table}[!htb]
 \centering
 \TableStyle
-\begin{tabularx}{\textwidth}{@{}lclX@{}}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\centering\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.14\textwidth}>{\raggedright\arraybackslash}X@{}}
 	\toprule
-	Quantity & Symbol & R argument & Accepted form/default \\
+	Quantity & Mathematical symbol & \proglang{R} argument & Input form/default \\
 	\midrule
-	Transfer inputs & ${\bf x}_t$ & \code{X} & Required numeric vector or matrix; matrices use one row per time point and one column per covariate. \\
-	Transfer rate & $\tilde\lambda$ & \code{lam} & Required scalar with $0<\tilde\lambda<1$. \\
-	Transfer discount factors & $(\delta_\zeta,\boldsymbol{\delta}_\psi)$ & \code{tf.df} & Required; length 1, 2, or $k+1$, corresponding to shared, blockwise, or componentwise transfer discounting. \\
-	Prior mean & ${\bf m}_0^{tf}$ & \code{tf.m0} & Optional; defaults to a zero vector of length $k+1$. \\
-	Prior covariance & ${\bf C}_0^{tf}$ & \code{tf.C0} & Optional; defaults to the $(k+1)\times(k+1)$ identity matrix. \\
+	Transfer inputs & ${\bf x}_t$ & \code{X} & Required numeric vector or $T\times k$ matrix. \\
+	Transfer rate & $\tilde\lambda$ & \code{lam} & Required scalar in $(0,1)$. \\
+	Discount factors & $(\delta_\zeta,\boldsymbol{\delta}_\psi)$ & \code{tf.df} & Required numeric vector: length 1 (shared); length 2 ($\delta_\zeta$ and shared $\delta_\psi$); or length $k+1$ (componentwise). \\
+	Prior mean & ${\bf m}_0^{tf}$ & \code{tf.m0} & Optional vector of length $k+1$; default ${\bf 0}_{k+1}$. \\
+	Prior covariance & ${\bf C}_0^{tf}$ & \code{tf.C0} & Optional $(k+1)\times(k+1)$ covariance matrix; default ${\bf I}_{k+1}$. \\
 	\bottomrule
 \end{tabularx}
-\caption{Translation from mathematical symbols to additional transfer-function inputs used by \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}.}
+\caption{Translation from mathematical symbols to additional transfer-function inputs used by \code{exdqlmTransferLDVB()} and \code{exdqlmTransferMCMC()}. Here $k$ denotes the number of transfer covariates.}
 \label{table:tf}
 \end{table}
 
