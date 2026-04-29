@@ -44,6 +44,8 @@ profiles:
       max_iter: 500
       gam_init: -1.5
       sig_init: 4.0
+      trend_df: 0.90
+      seasonal_df: 0.95
       plot_window: [1940, 1990]
       n_is: 180
       n_samp: 140
@@ -128,6 +130,8 @@ profiles:
       max_iter: 500
       gam_init: -1.5
       sig_init: 4.0
+      trend_df: 0.90
+      seasonal_df: 0.95
       plot_window: [1940, 1990]
       n_is: 500
       n_samp: 3000
@@ -213,6 +217,8 @@ profiles:
       max_iter: 500
       gam_init: -1.5
       sig_init: 4.0
+      trend_df: 0.90
+      seasonal_df: 0.95
       plot_window: [1940, 1990]
       n_is: 700
       n_samp: 3000

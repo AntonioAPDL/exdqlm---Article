@@ -690,7 +690,7 @@ R> model$GG
 \end{CodeOutput}
 \end{CodeChunk}
 
-We will apply discount factors by component, i.e. a discount factor of $0.9$ for the trend component of dimension $1$ and a discount factor of $0.85$ for the seasonal component of dimension $4$. This discounting strategy can be applied with arguments \code{df = c(0.9,0.85)} and \code{dim.df = c(1,4)}.
+We apply discount factors by component, using a discount factor of $0.9$ for the trend component of dimension $1$ and $0.95$ for the seasonal component of dimension $4$. The seasonal value is selected by the CRPS scan shown below. This discounting strategy can be applied with arguments \code{df = c(0.9,0.95)} and \code{dim.df = c(1,4)}.
 
 \begin{figure}[t]
 \centering
@@ -705,12 +705,12 @@ We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use
 \begin{CodeInput}
 R> options(exdqlm.max_iter = 500)
 R> M1 = exdqlmLDVB(y = sunspot.year, p0 = 0.95, model = model,
-+                  df = c(0.9,0.85), dim.df = c(1,4),
++                  df = c(0.9,0.95), dim.df = c(1,4),
 +                  dqlm.ind = TRUE, sig.init = 4,
 +                  fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
 R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.95, model = model,
-+                  df = c(0.9,0.85), dim.df = c(1,4),
++                  df = c(0.9,0.95), dim.df = c(1,4),
 +                  sig.init = 4, gam.init = -1.5,
 +                  fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
@@ -727,11 +727,11 @@ R> summary(M1)
 Bayesian Dynamic Quantile Regression Model (DQLM)
 Number of Observations: 289
 State Dimension: 5
-Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 4 )
+Discount factors ( dimensions ): 0.9 ( 1 ), 0.95 ( 4 )
 
 DQLM fitted using VB
-Iterations until convergence: 135
-Run-time: 43.253 seconds
+Iterations until convergence: 121
+Run-time: 38.094 seconds
 \end{CodeOutput}
 \begin{CodeInput}
 R> summary(M2)
@@ -740,12 +740,12 @@ R> summary(M2)
 Bayesian Dynamic Quantile Regression Model (exDQLM)
 Number of Observations: 289
 State Dimension: 5
-Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 4 )
+Discount factors ( dimensions ): 0.9 ( 1 ), 0.95 ( 4 )
 
 exDQLM fitted using LDVB
 Parameters estimated with LD: gamma sigma
-Iterations until convergence: 414
-Run-time: 144.596 seconds
+Iterations until convergence: 437
+Run-time: 154.457 seconds
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -795,11 +795,11 @@ R> print(diagM1M2)
 \end{CodeInput}
 \begin{CodeOutput}
    Diagnostic       M1        M2
-           KL    0.144    0.135
- KL (flipped)    0.128    0.098
-         CRPS   12.532   17.635
-         pplc 5002.316 9745.109
- run-time (s)   43.253  144.596
+           KL    0.250    0.254
+ KL (flipped)    0.262    0.295
+         CRPS   17.539   12.679
+         pplc 7107.653 6154.986
+ run-time (s)   38.094  154.457
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -837,20 +837,20 @@ R> possible.dfs[which.min(metrics[, "CRPS"]),]
 [1] 0.90 0.95
 \end{CodeOutput}
 \end{CodeChunk}
-On this coarse grid, CRPS selects seasonal discount factor \(0.95\), while KL selects \(0.90\). This illustrates how the diagnostics can be used to compare discount factors; for the backend comparison below, we keep the same discount factors used in the fitted models above so that the VB and MCMC rows differ only by inference method.
+On this coarse grid, CRPS selects seasonal discount factor \(0.95\), while KL selects \(0.90\). We use the CRPS-selected value in the primary fits above and in the backend comparison below; the VB and MCMC rows therefore differ only by inference method.
 
 \aA{Finally, to compare the fast variational approximation with posterior simulation, we fit matched DQLM and exDQLM specifications with \code{exdqlmMCMC()}. The MCMC fits use the same state-space model, quantile level, and discount factors as the LDVB fits, with 2000 burn-in iterations and 3000 retained draws.}
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.95, model = model,
-+                df = c(0.9,0.85), dim.df = c(1,4),
++                df = c(0.9,0.95), dim.df = c(1,4),
 +                sig.init = 4, init.from.vb = TRUE,
 +                mh.proposal = "slice",
 +                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
 +                dqlm.ind = TRUE, fix.sigma = FALSE)
 R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.95, model = model,
-+                df = c(0.9,0.85), dim.df = c(1,4),
++                df = c(0.9,0.95), dim.df = c(1,4),
 +                sig.init = 4, gam.init = -1.5,
 +                init.from.vb = TRUE, mh.proposal = "slice",
 +                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
@@ -865,18 +865,18 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.95, model = model,
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & pplc \\
  \midrule
- \tworowcell{DQLM} & VB & \textbf{43.25} & 0.144 & 12.532 & 5002.3 \\
- & MCMC & 188.12 & \textbf{0.136} & \textbf{11.935} & \textbf{4030.8} \\
+ \tworowcell{DQLM} & VB & \textbf{38.09} & 0.250 & 17.539 & 7107.7 \\
+ & MCMC & 185.81 & \textbf{0.238} & \textbf{17.497} & \textbf{6629.2} \\
  \midrule
- \tworowcell{exDQLM} & VB & \textbf{144.60} & \textbf{0.135} & 17.635 & 9745.1 \\
- & MCMC & 245.83 & 0.196 & \textbf{5.107} & \textbf{2297.2} \\
+ \tworowcell{exDQLM} & VB & \textbf{154.46} & \textbf{0.254} & 12.679 & 6155.0 \\
+ & MCMC & 246.20 & 0.341 & \textbf{8.012} & \textbf{3526.8} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.95\). Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws, are warm-started from the corresponding VB fit, and use the \code{slice} sampler. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
-\aA{Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. Within each model class, VB is substantially faster. For the simpler DQLM, MCMC gives smaller KL, CRPS, and pplc values. For the more flexible exDQLM, VB gives the smaller KL value, while MCMC gives smaller CRPS and pplc values. Comparing model classes within each inferential method, the exDQLM improves KL under LDVB but not the predictive-score criteria; under MCMC, it improves CRPS and pplc but not KL. These results reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone.}
+\aA{Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. Within each model class, VB is substantially faster. For the simpler DQLM, MCMC gives slightly smaller KL, CRPS, and pplc values. For the more flexible exDQLM, VB gives the smaller KL value, while MCMC gives smaller CRPS and pplc values. Comparing model classes within each inferential method, the exDQLM improves CRPS and pplc but not KL. These results reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

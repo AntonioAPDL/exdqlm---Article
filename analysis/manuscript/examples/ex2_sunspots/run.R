@@ -31,7 +31,16 @@ if (!need_ex2) {
   seasonal_h <- 1:2
   seasonal_dim <- 2L * length(seasonal_h)
   dim_df <- c(1L, seasonal_dim)
-  ex2_model_tag <- sprintf("h%s_dim%d_v6", paste(seasonal_h, collapse = "_"), seasonal_dim)
+  trend_df <- as.numeric(cfg_profile$ex2$trend_df %||% 0.9)
+  seasonal_df <- as.numeric(cfg_profile$ex2$seasonal_df %||% 0.95)
+  main_df <- c(trend_df, seasonal_df)
+  ex2_model_tag <- sprintf(
+    "h%s_dim%d_df%0.2f_%0.2f_v7",
+    paste(seasonal_h, collapse = "_"),
+    seasonal_dim,
+    trend_df,
+    seasonal_df
+  )
 
   dlm_trend_comp <- dlm::dlmModPoly(1, m0 = mean(y), C0 = 10)
   trend_comp <- exdqlm::as.exdqlm(dlm_trend_comp)
@@ -87,7 +96,7 @@ if (!need_ex2) {
         with_ex2_max_iter(
         exdqlm::exdqlmLDVB(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = dim_df,
+          df = main_df, dim.df = dim_df,
           dqlm.ind = TRUE, sig.init = sig_init, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
           verbose = FALSE
@@ -99,7 +108,7 @@ if (!need_ex2) {
         with_ex2_max_iter(
         exdqlm::exdqlmLDVB(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = dim_df,
+          df = main_df, dim.df = dim_df,
           dqlm.ind = TRUE, sig.init = sig_init, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
           verbose = FALSE
@@ -111,7 +120,7 @@ if (!need_ex2) {
         with_ex2_max_iter(
         exdqlm::exdqlmLDVB(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = dim_df,
+          df = main_df, dim.df = dim_df,
           sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
           verbose = FALSE
@@ -130,7 +139,11 @@ if (!need_ex2) {
 
   capture_output_file("ex2_run_summary.txt", {
     cat(sprintf("profile=%s\n", selected_profile))
-    cat(sprintf("p0=%s, sig.init=%s, gam.init=%s, n.samp=%d, tol=%s, max_iter=%d\n\n", p0_label, format(sig_init), format(gam_init), n_samp, format(tol), max_iter))
+    cat(sprintf(
+      "p0=%s, sig.init=%s, gam.init=%s, n.samp=%d, tol=%s, max_iter=%d, df=(%s,%s), dim.df=(%d,%d)\n\n",
+      p0_label, format(sig_init), format(gam_init), n_samp, format(tol), max_iter,
+      format(trend_df), format(seasonal_df), dim_df[1], dim_df[2]
+    ))
     if (fit_ok(M_sigma_ldvb)) {
       cat("Summary(M_sigma_ldvb$samp.sigma):\n")
       print(summary(M_sigma_ldvb$samp.sigma))
@@ -201,7 +214,7 @@ if (!need_ex2) {
       M1_mcmc <- with_backend_profile(selected_benchmark_profile, {
         exdqlm::exdqlmMCMC(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = dim_df,
+          df = main_df, dim.df = dim_df,
           dqlm.ind = TRUE, sig.init = sig_init, fix.sigma = FALSE,
           init.from.vb = TRUE, mh.proposal = "slice",
           vb_init_controls = list(max_iter = max_iter, n.samp = n_samp),
@@ -213,7 +226,7 @@ if (!need_ex2) {
       M2_mcmc <- with_backend_profile(selected_benchmark_profile, {
         exdqlm::exdqlmMCMC(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = dim_df,
+          df = main_df, dim.df = dim_df,
           sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
           init.from.vb = TRUE, mh.proposal = "slice",
           vb_init_controls = list(max_iter = max_iter, n.samp = n_samp),
@@ -237,8 +250,10 @@ if (!need_ex2) {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("backend_profile=%s\n", selected_benchmark_profile))
       cat(sprintf(
-        "p0=%s, sig.init=%s, gam.init=%s, vb_n.samp=%d, vb_max_iter=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d, init.from.vb=TRUE, mh.proposal=slice\n\n",
-        p0_label, format(sig_init), format(gam_init), n_samp, max_iter, benchmark_n_burn, benchmark_n_mcmc
+        "p0=%s, sig.init=%s, gam.init=%s, df=(%s,%s), dim.df=(%d,%d), vb_n.samp=%d, vb_max_iter=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d, init.from.vb=TRUE, mh.proposal=slice\n\n",
+        p0_label, format(sig_init), format(gam_init),
+        format(trend_df), format(seasonal_df), dim_df[1], dim_df[2],
+        n_samp, max_iter, benchmark_n_burn, benchmark_n_mcmc
       ))
       cat("VB benchmark diagnostics:\n")
       print(data.frame(
@@ -443,7 +458,7 @@ if (!need_ex2) {
       with_ex2_max_iter(
       exdqlm::exdqlmLDVB(
         y = y_ts, p0 = p0, model = model,
-        df = c(0.9, 0.85), dim.df = dim_df,
+        df = main_df, dim.df = dim_df,
         sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
         n.samp = ldvb_diag_n_samp, tol = ldvb_diag_tol,
         verbose = FALSE
