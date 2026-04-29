@@ -31,6 +31,7 @@ if (!need_ex1) {
 
   nburn <- as.integer(cfg_profile$ex1$n_burn)
   nmcmc <- as.integer(cfg_profile$ex1$n_mcmc)
+  trace_seed <- as.integer(cfg_profile$ex1$trace_seed %||% seed_value)
   nburn_trace <- as.integer(cfg_profile$ex1$n_burn_trace %||% nburn)
   nmcmc_trace <- as.integer(cfg_profile$ex1$n_mcmc_trace %||% nmcmc)
   thin_trace <- max(1L, as.integer(cfg_profile$ex1$thin_trace %||% 1L))
@@ -240,18 +241,21 @@ if (!need_ex1) {
   }
 
   if (need_ex1_trace_model) {
-    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v6_slice_2000_3000_seed%s", seed_value), {
-      M50_trace <- with_local_seed(seed_value, {
+    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v8_slice_vbinit_2000_3000_seed%s", trace_seed), {
+      M50_trace <- with_local_seed(trace_seed, {
         exdqlm::exdqlmMCMC(
           y = y, p0 = 0.50, model = model,
           df = 0.9, dim.df = 2,
           PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
+          init.from.vb = TRUE,
+          vb_init_controls = list(method = "ldvb", verbose = FALSE),
+          mh.proposal = "slice",
           n.burn = nburn_trace, n.mcmc = nmcmc_trace,
           verbose = FALSE
         )
       })
       list(M50_trace = M50_trace)
-    }, note = sprintf("ex1_trace_model_v6_slice_2000_3000_seed%s", seed_value))
+    }, note = sprintf("ex1_trace_model_v8_slice_vbinit_2000_3000_seed%s", trace_seed))
 
     M50_trace <- ex1_trace$M50_trace
     sigma_trace <- as.numeric(M50_trace$samp.sigma)
@@ -291,7 +295,7 @@ if (!need_ex1) {
     capture_output_file("ex1_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("quantile run settings: n.burn=%d, n.mcmc=%d\n", nburn, nmcmc))
-      cat(sprintf("trace run settings: n.burn=%d, n.mcmc=%d, thin=%d, saved_for_plot=%d\n\n", nburn_trace, nmcmc_trace, thin_trace, length(thin_idx)))
+      cat(sprintf("trace run settings: seed=%d, n.burn=%d, n.mcmc=%d, thin=%d, saved_for_plot=%d\n\n", trace_seed, nburn_trace, nmcmc_trace, thin_trace, length(thin_idx)))
       cat("M50_trace sigma summary:\n")
       print(summary(sigma_trace))
       cat("\nM50_trace sigma summary (thinned chain used in ex1mcmc.png):\n")

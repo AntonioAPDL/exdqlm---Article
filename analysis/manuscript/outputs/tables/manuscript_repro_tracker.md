@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-27 23:05:19
+Generated: 2026-04-29 03:44:16
 Profile: standard
 Seed: 20260501
 
@@ -34,11 +34,14 @@ Seed: 20260501
 - [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary including CRPS lambda scan and transfer persistence.
 - [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (support: Example 3 aligned model dataset). Aligned package BTflow and standardized climate-index inputs used by the canonical Example 3 fits.
 - [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (support: Example 3 covariate standardization). Centers and scales used to standardize the selected climate indices.
-- [reproduced] `tab_ex3_lambda_scan` -> `analysis/manuscript/outputs/tables/ex3_lambda_scan.csv` (Example 3 lambda selection output). Example 3 transfer-function lambda scan; best finite CRPS lambda=0.500.
+- [reproduced] `tab_ex3_lambda_scan` -> `analysis/manuscript/outputs/tables/ex3_lambda_scan.csv` (Example 3 lambda selection output). Example 3 transfer-function lambda scan; best finite CRPS lambda=0.400.
 - [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Example 3 quantile, seasonal, and combined NOI/AMO climate-contribution comparison.
 - [reproduced] `fig_ex3zetapsi` -> `analysis/manuscript/outputs/figures/ex3zetapsi.png` (fig:ex3tftheta). Transfer-function zeta state and NOI/AMO psi states for the canonical Example 3 fit.
 - [reproduced] `fig_ex3forecast` -> `analysis/manuscript/outputs/figures/ex3forecast.png` (fig:ex3forecast). Example 3 18-step forecast over the final observed overlap window ending 2022-12.
 - [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (tab:ex3). Example 3 diagnostics table generated from the canonical NOI/AMO manuscript workflow.
+- [reproduced] `tab_ex4_seed_screen_p050_summary` -> `analysis/manuscript/outputs/tables/ex4_seed_screen_p050_summary.csv` (support: Example 4 seed screen metrics). Per-seed, per-quantile comparison of the Example 4 static fits. Seed selection targets p0 = 0.50 and requires full MCMC 95% slope-interval coverage.
+- [reproduced] `tab_ex4_seed_screen_p050_selection` -> `analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv` (support: Example 4 seed screen selection). Seed-level selection summary for the Example 4 screen. The selected seed is the first full-coverage p0 = 0.50 candidate after sorting by MCMC active RMSE, holdout RMSE, runtime, and seed.
+- [reproduced] `log_ex4_seed_screen_p050_summary` -> `analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt` (support: Example 4 seed screen summary). Selection criteria and chosen Example 4 dataset seed based on the p0 = 0.50 MCMC coverage screen.
 - [reproduced] `log_ex4_run_summary` -> `analysis/manuscript/outputs/logs/ex4_run_summary.txt` (Example 4 textual outputs). Sparse RHS static simulation settings and recovery metrics for Example 4.
 - [reproduced] `tab_ex4static_summary` -> `analysis/manuscript/outputs/tables/ex4static_summary.csv` (new: Example 4 static simulation summary). Runtime and sparse-signal recovery metrics for LDVB and MCMC under the RHS prior.
 - [reproduced] `fig_ex4static` -> `analysis/manuscript/outputs/figures/ex4static.png` (fig:ex4static). Sparse RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50.
@@ -56,14 +59,14 @@ Seed: 20260501
 - ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=200).
 - ex2: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
 - ex2_ldvb: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
-- ex3: Example 3 selected lambda=0.500 by finite CRPS over the documented grid.
+- ex3: Example 3 selected lambda=0.400 by finite CRPS over the documented grid.
 - ex3: Example 3 uses observed package BTflow and standardized NOI and AMO from climateIndices over 1987-01 to 2022-12.
 - ex4: Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0.
 - ex4: The static sparse benchmark uses the regularized horseshoe (RHS) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept.
 - ex4: The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget.
 - ex4: The tracked Example 4 dataset seed (20260718) was selected by the support-only ex4screen workflow using the p0=0.50 MCMC full-coverage criterion for the plotted slope coefficients.
 - ex4: Example 4 focuses on the general static exAL model; the AL special case remains available via al.ind = TRUE (static alias of dqlm.ind = TRUE).
-- coverage: Targeted run; requested targets: ex1, ex2, ex3, ex4.
+- coverage: All publication-set manuscript artifacts were targeted in this pipeline.
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.
 - timing: Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.
 - benchmark: Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.
