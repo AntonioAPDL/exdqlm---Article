@@ -198,6 +198,7 @@ if (!need_ex2) {
           y = y_ts, p0 = p0, model = model,
           df = c(0.9, 0.85), dim.df = c(1, 8),
           dqlm.ind = TRUE, sig.init = sig_init, fix.sigma = FALSE,
+          init.from.vb = TRUE, mh.proposal = "slice",
           vb_init_controls = list(max_iter = max_iter, n.samp = n_samp),
           n.burn = benchmark_n_burn, n.mcmc = benchmark_n_mcmc,
           verbose = FALSE
@@ -209,6 +210,7 @@ if (!need_ex2) {
           y = y_ts, p0 = p0, model = model,
           df = c(0.9, 0.85), dim.df = c(1, 8),
           sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
+          init.from.vb = TRUE, mh.proposal = "slice",
           vb_init_controls = list(max_iter = max_iter, n.samp = n_samp),
           n.burn = benchmark_n_burn, n.mcmc = benchmark_n_mcmc,
           verbose = FALSE
@@ -229,7 +231,10 @@ if (!need_ex2) {
     capture_output_file("ex2_benchmark_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("backend_profile=%s\n", selected_benchmark_profile))
-      cat(sprintf("p0=%s, sig.init=%s, gam.init=%s, vb_n.samp=%d, vb_max_iter=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", p0_label, format(sig_init), format(gam_init), n_samp, max_iter, benchmark_n_burn, benchmark_n_mcmc))
+      cat(sprintf(
+        "p0=%s, sig.init=%s, gam.init=%s, vb_n.samp=%d, vb_max_iter=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d, init.from.vb=TRUE, mh.proposal=slice\n\n",
+        p0_label, format(sig_init), format(gam_init), n_samp, max_iter, benchmark_n_burn, benchmark_n_mcmc
+      ))
       cat("VB benchmark diagnostics:\n")
       print(data.frame(
         model = c("DQLM", "exDQLM"),
