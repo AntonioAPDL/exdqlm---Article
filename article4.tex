@@ -656,17 +656,17 @@ R> abline(v = t.end, lty = 3)
 
 For our next example, we use the yearly Sunspot time series from the package \pkg{datasets}. The data are yearly counts for sunspots from 1700 to 1988, shown in Figure \ref{fig:ex2quant}. In this example we show how to: use the \pkg{dlm} package to create the state-space model, combine blocks of a state-space model, apply the VB approximation through \code{exdqlmLDVB()}, perform visual model diagnostics to compare the exDQLM with the DQLM, and use those diagnostics for discount-factor selection.
 
-The solar cycle impacts astronauts in space as well as lives and technology on earth. Of particular interest to scientists is the solar max, or period in which the sun is most active \cite{sunspot}; therefore, we explore the $0.95$ quantile in this example. Again, we begin by building the state-space structure used to estimate the quantile. Here we choose to model the quantile with a first order polynomial trend component as well as a Fourier form seasonal component that incorporates a fundamental period every 11 observations (years), as well as some of its corresponding harmonics. This results in a dynamic model with a total of 9 state parameters, 1 for the first order polynomial component and 8 for the seasonal component. The \pkg{exdqlm} functions are compatible with time-invariant \code{dlm} objects from the \pkg{dlm} package. For example, we create the first order trend component with the function \code{dlmModPoly()} from the \pkg{dlm} package, then use \code{as.exdqlm()} to turn the output into an \code{exdqlm} object.
+The solar cycle impacts astronauts in space as well as lives and technology on earth. Of particular interest to scientists is the solar max, or period in which the sun is most active \cite{sunspot}; therefore, we explore the $0.95$ quantile in this example. Again, we begin by building the state-space structure used to estimate the quantile. Here we choose to model the quantile with a first order polynomial trend component as well as a Fourier form seasonal component that incorporates a fundamental period every 11 observations (years). We include the first two harmonics: the fundamental 11-year cycle and a second harmonic that gives a modest amount of shape flexibility. This results in a dynamic model with a total of 5 state parameters, 1 for the first order polynomial component and 4 for the seasonal component. The \pkg{exdqlm} functions are compatible with time-invariant \code{dlm} objects from the \pkg{dlm} package. For example, we create the first order trend component with the function \code{dlmModPoly()} from the \pkg{dlm} package, then use \code{as.exdqlm()} to turn the output into an \code{exdqlm} object.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> dlm.trend.comp = dlm::dlmModPoly(1, m0 = mean(sunspot.year), C0 = 10)
 R> trend.comp = as.exdqlm(dlm.trend.comp)
 \end{CodeInput}
 \end{CodeChunk}
-Next, we construct the seasonal component with our \code{seasMod} function. The duration of sunspot cycles typically follow a period of 11 years, of which we include the first 4 harmonics in the component.
+Next, we construct the seasonal component with our \code{seasMod} function. Sunspot cycles typically have a period of about 11 years, so we use period \(p=11\) and harmonics \(h=1,2\).
 \begin{CodeChunk}
 \begin{CodeInput}
-R> seas.comp = seasMod(p = 11, h = 1:4, C0 = 10*diag(8))
+R> seas.comp = seasMod(p = 11, h = 1:2, C0 = 10*diag(4))
 \end{CodeInput}
 \end{CodeChunk}
 To combine the two components into a single state-space structure, we add the two \code{exdqlm} objects.
@@ -681,20 +681,16 @@ The resulting evolution matrix of the combined models is printed for illustratio
 R> model$GG
 \end{CodeInput}
 \begin{CodeOutput}
-     [,1]    [,2]   [,3]    [,4]   [,5]    [,6]    [,7]    [,8]    [,9]
- [1,]    1  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
- [2,]    0  0.8413 0.5406  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
- [3,]    0 -0.5406 0.8413  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
- [4,]    0  0.0000 0.0000  0.4154 0.9096  0.0000  0.0000  0.0000  0.0000
- [5,]    0  0.0000 0.0000 -0.9096 0.4154  0.0000  0.0000  0.0000  0.0000
- [6,]    0  0.0000 0.0000  0.0000 0.0000 -0.1423  0.9898  0.0000  0.0000
- [7,]    0  0.0000 0.0000  0.0000 0.0000 -0.9898 -0.1423  0.0000  0.0000
- [8,]    0  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000 -0.6549  0.7557
- [9,]    0  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000 -0.7557 -0.6549
+     [,1]    [,2]   [,3]    [,4]   [,5]
+ [1,]    1  0.0000 0.0000  0.0000 0.0000
+ [2,]    0  0.8413 0.5406  0.0000 0.0000
+ [3,]    0 -0.5406 0.8413  0.0000 0.0000
+ [4,]    0  0.0000 0.0000  0.4154 0.9096
+ [5,]    0  0.0000 0.0000 -0.9096 0.4154
 \end{CodeOutput}
 \end{CodeChunk}
 
-We will apply discount factors by component, i.e. a discount factor of $0.9$ for the trend component of dimension $1$ and a discount factor of $0.85$ for the seasonal component of dimension $8$. This discounting strategy can be applied with arguments \code{df = c(0.9,0.85)} and \code{dim.df = c(1,8)}.
+We will apply discount factors by component, i.e. a discount factor of $0.9$ for the trend component of dimension $1$ and a discount factor of $0.85$ for the seasonal component of dimension $4$. This discounting strategy can be applied with arguments \code{df = c(0.9,0.85)} and \code{dim.df = c(1,4)}.
 
 \begin{figure}[t]
 \centering
@@ -709,12 +705,12 @@ We call the function \code{exdqlmLDVB()} to obtain the VB approximations. We use
 \begin{CodeInput}
 R> options(exdqlm.max_iter = 500)
 R> M1 = exdqlmLDVB(y = sunspot.year, p0 = 0.95, model = model,
-+                  df = c(0.9,0.85), dim.df = c(1,8),
++                  df = c(0.9,0.85), dim.df = c(1,4),
 +                  dqlm.ind = TRUE, sig.init = 4,
 +                  fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
 R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.95, model = model,
-+                  df = c(0.9,0.85), dim.df = c(1,8),
++                  df = c(0.9,0.85), dim.df = c(1,4),
 +                  sig.init = 4, gam.init = -1.5,
 +                  fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
@@ -730,12 +726,12 @@ R> summary(M1)
 \begin{CodeOutput}
 Bayesian Dynamic Quantile Regression Model (DQLM)
 Number of Observations: 289
-State Dimension: 9
-Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
+State Dimension: 5
+Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 4 )
 
 DQLM fitted using VB
-Iterations until convergence: 169
-Run-time: 58.898 seconds
+Iterations until convergence: 135
+Run-time: 43.253 seconds
 \end{CodeOutput}
 \begin{CodeInput}
 R> summary(M2)
@@ -743,13 +739,13 @@ R> summary(M2)
 \begin{CodeOutput}
 Bayesian Dynamic Quantile Regression Model (exDQLM)
 Number of Observations: 289
-State Dimension: 9
-Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 8 )
+State Dimension: 5
+Discount factors ( dimensions ): 0.9 ( 1 ), 0.85 ( 4 )
 
 exDQLM fitted using LDVB
 Parameters estimated with LD: gamma sigma
-Iterations until convergence: 359
-Run-time: 188.371 seconds
+Iterations until convergence: 414
+Run-time: 144.596 seconds
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -799,11 +795,11 @@ R> print(diagM1M2)
 \end{CodeInput}
 \begin{CodeOutput}
    Diagnostic       M1        M2
-           KL    0.204    0.119
- KL (flipped)    0.209    0.117
-         CRPS   12.108   14.379
-         pplc 6008.815 8352.924
- run-time (s)   58.898  188.371
+           KL    0.144    0.135
+ KL (flipped)    0.128    0.098
+         CRPS   12.532   17.635
+         pplc 5002.316 9745.109
+ run-time (s)   43.253  144.596
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -826,7 +822,7 @@ R> metrics <- matrix(NA_real_, nrow(possible.dfs), 2,
 +                    dimnames = list(NULL, c("CRPS","KL")))
 R> for(i in 1:nrow(possible.dfs)){
 +   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.95, model = model,
-+                  df = possible.dfs[i,], dim.df = c(1,8),
++                  df = possible.dfs[i,], dim.df = c(1,4),
 +                  sig.init = 4, gam.init = -1.5,
 +                  fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
@@ -848,13 +844,13 @@ On this coarse grid, CRPS selects seasonal discount factor \(0.95\), while KL se
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.95, model = model,
-+                df = c(0.9,0.85), dim.df = c(1,8),
++                df = c(0.9,0.85), dim.df = c(1,4),
 +                sig.init = 4, init.from.vb = TRUE,
 +                mh.proposal = "slice",
 +                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
 +                dqlm.ind = TRUE, fix.sigma = FALSE)
 R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.95, model = model,
-+                df = c(0.9,0.85), dim.df = c(1,8),
++                df = c(0.9,0.85), dim.df = c(1,4),
 +                sig.init = 4, gam.init = -1.5,
 +                init.from.vb = TRUE, mh.proposal = "slice",
 +                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
@@ -869,11 +865,11 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.95, model = model,
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & pplc \\
  \midrule
- \tworowcell{DQLM} & VB & \textbf{58.90} & 0.187 & 12.108 & 6008.8 \\
- & MCMC & 260.45 & \textbf{0.143} & \textbf{10.829} & \textbf{3770.0} \\
+ \tworowcell{DQLM} & VB & \textbf{43.25} & 0.144 & 12.532 & 5002.3 \\
+ & MCMC & 188.12 & \textbf{0.136} & \textbf{11.935} & \textbf{4030.8} \\
  \midrule
- \tworowcell{exDQLM} & VB & \textbf{188.37} & \textbf{0.141} & 14.379 & 8352.9 \\
- & MCMC & 301.35 & 0.213 & \textbf{4.682} & \textbf{2212.9} \\
+ \tworowcell{exDQLM} & VB & \textbf{144.60} & \textbf{0.135} & 17.635 & 9745.1 \\
+ & MCMC & 245.83 & 0.196 & \textbf{5.107} & \textbf{2297.2} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.95\). Each row reports runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion. The VB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws, are warm-started from the corresponding VB fit, and use the \code{slice} sampler. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}

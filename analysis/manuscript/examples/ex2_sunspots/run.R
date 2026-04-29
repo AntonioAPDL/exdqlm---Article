@@ -28,10 +28,14 @@ if (!need_ex2) {
   y_ts <- datasets::sunspot.year
   y <- as.numeric(y_ts)
   diag_ref_samp <- seeded_rnorm(length(y_ts), seed_value + 201L)
+  seasonal_h <- 1:2
+  seasonal_dim <- 2L * length(seasonal_h)
+  dim_df <- c(1L, seasonal_dim)
+  ex2_model_tag <- sprintf("h%s_dim%d_v6", paste(seasonal_h, collapse = "_"), seasonal_dim)
 
   dlm_trend_comp <- dlm::dlmModPoly(1, m0 = mean(y), C0 = 10)
   trend_comp <- exdqlm::as.exdqlm(dlm_trend_comp)
-  seas_comp <- exdqlm::seasMod(p = 11, h = 1:4, C0 = 10 * diag(8))
+  seas_comp <- exdqlm::seasMod(p = 11, h = seasonal_h, C0 = 10 * diag(seasonal_dim))
   model <- trend_comp + seas_comp
 
   capture_output_file("ex2_model_output.txt", {
@@ -77,13 +81,13 @@ if (!need_ex2) {
 
   if (need_ex2_ldvb_core) {
     ex2_core_ldvb <- load_or_fit_cache(
-      sprintf("ex2_core_models_ldvb_p%s_nsamp%d_iter%d_tol%s_sig%s_gam%s_v5", p0_tag, n_samp, max_iter, format(tol), format(sig_init), format(gam_init)),
+      sprintf("ex2_core_models_ldvb_%s_p%s_nsamp%d_iter%d_tol%s_sig%s_gam%s", ex2_model_tag, p0_tag, n_samp, max_iter, format(tol), format(sig_init), format(gam_init)),
       {
       M_sigma_ldvb <- tryCatch(
         with_ex2_max_iter(
         exdqlm::exdqlmLDVB(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
+          df = c(0.9, 0.85), dim.df = dim_df,
           dqlm.ind = TRUE, sig.init = sig_init, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
           verbose = FALSE
@@ -95,7 +99,7 @@ if (!need_ex2) {
         with_ex2_max_iter(
         exdqlm::exdqlmLDVB(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
+          df = c(0.9, 0.85), dim.df = dim_df,
           dqlm.ind = TRUE, sig.init = sig_init, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
           verbose = FALSE
@@ -107,7 +111,7 @@ if (!need_ex2) {
         with_ex2_max_iter(
         exdqlm::exdqlmLDVB(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
+          df = c(0.9, 0.85), dim.df = dim_df,
           sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
           verbose = FALSE
@@ -116,7 +120,7 @@ if (!need_ex2) {
       )
 
       list(M_sigma_ldvb = M_sigma_ldvb, M1_ldvb = M1_ldvb, M2_ldvb = M2_ldvb)
-    }, note = sprintf("ex2_core_models_ldvb_p%s_nsamp%d_iter%d_tol%s_sig%s_gam%s_v5", p0_tag, n_samp, max_iter, format(tol), format(sig_init), format(gam_init)))
+    }, note = sprintf("ex2_core_models_ldvb_%s_p%s_nsamp%d_iter%d_tol%s_sig%s_gam%s", ex2_model_tag, p0_tag, n_samp, max_iter, format(tol), format(sig_init), format(gam_init)))
     M_sigma_ldvb <- ex2_core_ldvb$M_sigma_ldvb
     M1_ldvb <- ex2_core_ldvb$M1_ldvb
     M2_ldvb <- ex2_core_ldvb$M2_ldvb
@@ -182,8 +186,9 @@ if (!need_ex2) {
 
   if (need_ex2benchmark && ex2_ldvb_pair_ok) {
     benchmark_cache_key <- sprintf(
-      "ex2_dynamic_benchmark_%s_p%s_nsamp%d_iter%d_sig%s_gam%s_b%d_k%d_v5",
+      "ex2_dynamic_benchmark_%s_%s_p%s_nsamp%d_iter%d_sig%s_gam%s_b%d_k%d",
       selected_benchmark_profile,
+      ex2_model_tag,
       p0_tag,
       n_samp,
       max_iter,
@@ -196,7 +201,7 @@ if (!need_ex2) {
       M1_mcmc <- with_backend_profile(selected_benchmark_profile, {
         exdqlm::exdqlmMCMC(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
+          df = c(0.9, 0.85), dim.df = dim_df,
           dqlm.ind = TRUE, sig.init = sig_init, fix.sigma = FALSE,
           init.from.vb = TRUE, mh.proposal = "slice",
           vb_init_controls = list(max_iter = max_iter, n.samp = n_samp),
@@ -208,7 +213,7 @@ if (!need_ex2) {
       M2_mcmc <- with_backend_profile(selected_benchmark_profile, {
         exdqlm::exdqlmMCMC(
           y = y_ts, p0 = p0, model = model,
-          df = c(0.9, 0.85), dim.df = c(1, 8),
+          df = c(0.9, 0.85), dim.df = dim_df,
           sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
           init.from.vb = TRUE, mh.proposal = "slice",
           vb_init_controls = list(max_iter = max_iter, n.samp = n_samp),
@@ -433,17 +438,17 @@ if (!need_ex2) {
 
   if (need_ex2_ldvb_diag) {
     ldvb_diag <- load_or_fit_cache(
-      sprintf("ex2_ldvb_diagnostics_fit_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s_v5", p0_tag, ldvb_diag_n_samp, max_iter, format(sig_init), format(gam_init), format(ldvb_diag_tol)),
+      sprintf("ex2_ldvb_diagnostics_fit_%s_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s", ex2_model_tag, p0_tag, ldvb_diag_n_samp, max_iter, format(sig_init), format(gam_init), format(ldvb_diag_tol)),
       {
       with_ex2_max_iter(
       exdqlm::exdqlmLDVB(
         y = y_ts, p0 = p0, model = model,
-        df = c(0.9, 0.85), dim.df = c(1, 8),
+        df = c(0.9, 0.85), dim.df = dim_df,
         sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
         n.samp = ldvb_diag_n_samp, tol = ldvb_diag_tol,
         verbose = FALSE
       ))
-    }, note = sprintf("ex2_ldvb_diagnostics_fit_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s_v5", p0_tag, ldvb_diag_n_samp, max_iter, format(sig_init), format(gam_init), format(ldvb_diag_tol)))
+    }, note = sprintf("ex2_ldvb_diagnostics_fit_%s_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s", ex2_model_tag, p0_tag, ldvb_diag_n_samp, max_iter, format(sig_init), format(gam_init), format(ldvb_diag_tol)))
     seq_g <- as.numeric(ldvb_diag$seq.gamma)
     seq_s <- as.numeric(ldvb_diag$seq.sigma)
     el <- as.numeric(ldvb_diag$diagnostics$elbo)
@@ -543,7 +548,7 @@ if (!need_ex2) {
 
   if (need_ex2_tables) {
     ex2_df_scan <- load_or_fit_cache(
-      sprintf("ex2_df_scan_ldvb_primary_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s_v5", p0_tag, n_samp, max_iter, format(sig_init), format(gam_init), format(tol)),
+      sprintf("ex2_df_scan_ldvb_primary_%s_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s", ex2_model_tag, p0_tag, n_samp, max_iter, format(sig_init), format(gam_init), format(tol)),
       {
       possible_dfs <- cbind(0.9, df_grid)
       KLs <- rep(NA_real_, nrow(possible_dfs))
@@ -553,7 +558,7 @@ if (!need_ex2) {
           with_ex2_max_iter(
           exdqlm::exdqlmLDVB(
             y = y_ts, p0 = p0, model = model,
-            df = possible_dfs[i, ], dim.df = c(1, 8),
+            df = possible_dfs[i, ], dim.df = dim_df,
             sig.init = sig_init, gam.init = gam_init, fix.sigma = FALSE,
             n.samp = n_samp, tol = tol,
             verbose = FALSE
@@ -567,7 +572,7 @@ if (!need_ex2) {
         }
       }
       list(possible_dfs = possible_dfs, KLs = KLs, CRPSs = CRPSs)
-    }, note = sprintf("ex2_df_scan_ldvb_primary_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s_v5", p0_tag, n_samp, max_iter, format(sig_init), format(gam_init), format(tol)))
+    }, note = sprintf("ex2_df_scan_ldvb_primary_%s_p%s_nsamp%d_iter%d_sig%s_gam%s_tol%s", ex2_model_tag, p0_tag, n_samp, max_iter, format(sig_init), format(gam_init), format(tol)))
 
     possible_dfs <- ex2_df_scan$possible_dfs
     KLs <- ex2_df_scan$KLs

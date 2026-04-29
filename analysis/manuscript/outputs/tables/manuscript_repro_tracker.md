@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-28 22:14:48
+Generated: 2026-04-28 23:03:44
 Profile: standard
 Seed: 20260519
 
@@ -54,7 +54,7 @@ Seed: 20260519
 - ex2_policy: Example 2 manuscript workflow now uses LDVB and MCMC only; ISVB support artifacts were retired.
 - backend: Benchmark Profile B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
 - ex1: Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary).
-- ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (p0=0.95, tol=0.01, n.samp=3000, max_iter=500, iter=359).
+- ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (p0=0.95, tol=0.01, n.samp=3000, max_iter=500, iter=413).
 - ex2: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.95 by CRPS for this run profile; KL is reported alongside it.
 - ex3: Example 3 selected lambda=0.400 by finite CRPS over the documented grid.
 - ex3: Example 3 uses observed package BTflow and standardized NOI and AMO from climateIndices over 1987-01 to 2022-12.
