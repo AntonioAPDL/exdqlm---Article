@@ -44,7 +44,7 @@ profiles:
       max_iter: 500
       gam_init: -1.5
       sig_init: 4.0
-      plot_window: [1750, 1850]
+      plot_window: [1940, 1988]
       n_is: 180
       n_samp: 140
       tol: 0.08
@@ -128,7 +128,7 @@ profiles:
       max_iter: 500
       gam_init: -1.5
       sig_init: 4.0
-      plot_window: [1750, 1850]
+      plot_window: [1940, 1988]
       n_is: 500
       n_samp: 3000
       tol: 0.05
@@ -213,7 +213,7 @@ profiles:
       max_iter: 500
       gam_init: -1.5
       sig_init: 4.0
-      plot_window: [1750, 1850]
+      plot_window: [1940, 1988]
       n_is: 700
       n_samp: 3000
       tol: 0.03

@@ -699,7 +699,7 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \begin{figure}[t]
 \centering
 \includegraphics[width=1\textwidth]{ex2quant.png}
-\caption{Example 2: Sunspots. Top: The sunspot time series from 1700 to 1988. Bottom left: MAP estimates and 95\% CrIs of the estimated quantiles from the DQLM (red) and exDQLM (blue), plotted with the data (grey) from 1750 to 1850. Bottom right: Histogram of samples from the approximated posterior distribution of $\gamma$ under the exDQLM.}
+\caption{Example 2: Sunspots. Top: The sunspot time series from 1700 to 1988. Bottom left: MAP estimates and 95\% CrIs of the estimated quantiles from the DQLM (red) and exDQLM (blue), plotted with the data (grey) from 1940 onward. Bottom right: Histogram of samples from the approximated posterior distribution of $\gamma$ under the exDQLM.}
 \label{fig:ex2quant}
 \end{figure}
 
@@ -755,13 +755,13 @@ Run-time: 188.371 seconds
 
 
 
-We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1750 to 1850.
+We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1940 onward.
 % fig:ex1quant w850 h275
 % par(mfcol=c(1,3))
 % plot(sunspot.year, col="dark grey")
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(sunspot.year, xlim = c(1750,1850), col = "dark grey",
+R> plot(sunspot.year, xlim = c(1940,1988), col = "dark grey",
 +       ylab = "quantile 95% CrIs")
 R> exdqlmPlot(M1, add = TRUE, col = "red")
 R> exdqlmPlot(M2, add = TRUE, col = "blue")
