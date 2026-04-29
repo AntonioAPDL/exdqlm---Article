@@ -11,12 +11,11 @@ targets:
   benchmark_table: ex2bench
   manuscript_tables: ex2tables
   convergence_support: ex2_ldvb_diagnostics
-  optional_legacy_support: ex2quant_ldvb,ex2checks_ldvb,ex2tables_ldvb
 notes:
   - Keep the benchmark profile disclosure synchronized with generated backend tables.
   - Article table values are inline in article4.tex and must be updated from generated CSVs after reruns.
   - Experimental manuscript runs can set p0, sig_init, gam_init, max_iter, and plot_window from params_manuscript.yml.
-  - The primary ex2 target avoids duplicate LDVB-only copies of the manuscript figures; legacy support targets remain available explicitly if needed.
+  - The primary ex2 target is the only manuscript-facing source for Sunspots figures and tables; duplicate legacy LDVB-only output names are intentionally retired.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
   tests: Rscript analysis/run_all.R --stage manuscript --tests-only

@@ -48,13 +48,10 @@ if (targeted_run) {
       "tab_ex2_df_scan"
     ),
     ex2quant = c("fig_ex2quant"),
-    ex2quant_ldvb = c("fig_ex2quant_ldvb"),
     ex2checks = c("fig_ex2checks", "tab_ex2_dynamic_benchmark"),
-    ex2checks_ldvb = c("fig_ex2checks_ldvb"),
     ex2bench = c("tab_ex2_dynamic_benchmark"),
     ex2_ldvb_diagnostics = c("fig_ex2_ldvb_diagnostics"),
     ex2tables = c("tab_ex2_diagnostics", "tab_ex2_df_scan"),
-    ex2tables_ldvb = c("tab_ex2_diagnostics_ldvb", "tab_ex2_df_scan_ldvb"),
     ex3 = c(
       "fig_ex3data",
       "fig_ex3quantcomps",

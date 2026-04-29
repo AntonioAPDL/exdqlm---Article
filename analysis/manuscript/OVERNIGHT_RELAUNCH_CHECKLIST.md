@@ -107,7 +107,7 @@ Rscript $ARTICLE/analysis/support/ex3_monthly_nino34_redo/run_all.R \
 Rscript $ARTICLE/analysis/run_all.R \
   --stage manuscript \
   --pkg-path "$PKG" \
-  --targets ex2quant,ex2quant_ldvb,ex2checks,ex2checks_ldvb,ex2_ldvb_diagnostics,ex2tables,ex2tables_ldvb,ex2bench \
+  --targets ex2quant,ex2checks,ex2_ldvb_diagnostics,ex2tables,ex2bench \
   --force-refit \
   --skip-tests
 ```

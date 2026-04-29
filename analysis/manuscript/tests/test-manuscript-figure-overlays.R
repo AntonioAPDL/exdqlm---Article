@@ -20,9 +20,6 @@ testthat::test_that("key figure overlays are present (color checks)", {
   purple <- c(160/255, 32/255, 240/255)
   forestgreen <- c(34/255, 139/255, 34/255)
   darkorange <- c(1, 140/255, 0)
-  ldvb_m1 <- c(230/255, 159/255, 0)
-  ldvb_m2 <- c(0, 114/255, 178/255)
-
   ex1q <- read_img("analysis/manuscript/outputs/figures/ex1quants.png")
   if (!is.null(ex1q)) {
     testthat::expect_gt(count_near_color(ex1q, purple), 60)
@@ -40,18 +37,6 @@ testthat::test_that("key figure overlays are present (color checks)", {
   if (!is.null(ex2d)) {
     testthat::expect_gt(count_near_color(ex2d, blue), 20)
     testthat::expect_gt(count_near_color(ex2d, darkorange), 40)
-  }
-
-  ex2q_ld <- read_img("analysis/manuscript/outputs/figures/ex2quant_ldvb.png")
-  if (!is.null(ex2q_ld)) {
-    testthat::expect_gt(count_near_color(ex2q_ld, ldvb_m1), 30)
-    testthat::expect_gt(count_near_color(ex2q_ld, ldvb_m2), 20)
-  }
-
-  ex2c_ld <- read_img("analysis/manuscript/outputs/figures/ex2checks_ldvb.png")
-  if (!is.null(ex2c_ld)) {
-    testthat::expect_gt(count_near_color(ex2c_ld, ldvb_m1), 20)
-    testthat::expect_gt(count_near_color(ex2c_ld, ldvb_m2), 20)
   }
 
   ex3q <- read_img("analysis/manuscript/outputs/figures/ex3quantcomps.png")

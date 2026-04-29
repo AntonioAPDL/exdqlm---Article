@@ -10,8 +10,6 @@ tables:
   - ex2_dynamic_benchmark.csv
   - ex2_df_scan_kl.csv
   - ex2_diagnostics_summary.csv
-  - ex2_df_scan_kl_ldvb.csv
-  - ex2_diagnostics_summary_ldvb.csv
 logs:
   - ex2_model_output.txt
   - ex2_run_summary.txt

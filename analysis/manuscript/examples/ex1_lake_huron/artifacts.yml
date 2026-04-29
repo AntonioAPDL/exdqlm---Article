@@ -5,17 +5,13 @@ article_figures:
 support_figures:
   - ex1synth.png
   - ex1_mcmc_traces_all.png
-  - ex1_kernel_compare.png
 tables:
   - ex1_synthesis_bridge_check.csv
   - ex1_runtime_summary.csv
-  - ex1_kernel_summary.csv
-  - ex1_kernel_chain_stability.csv
 logs:
   - ex1_model_output.txt
   - ex1_run_summary.txt
   - ex1_synthesis_summary.txt
-  - ex1_kernel_compare_summary.txt
 cache_prefixes:
   - ex1_
 article_targets:

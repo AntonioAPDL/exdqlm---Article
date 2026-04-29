@@ -105,8 +105,8 @@ by maintaining separate example workflows.
 
 - Completed and regenerated locally (main manuscript):
   - Example 1 (`ex1mcmc`, `ex1quants`, `ex1synth`)
-  - Example 2 (`ex2quant`, `ex2quant_ldvb`, `ex2checks`, `ex2checks_ldvb`,
-    `ex2_ldvb_diagnostics`, `ex2tables`, `ex2tables_ldvb`, `ex2bench`)
+  - Example 2 (`ex2quant`, `ex2checks`, `ex2_ldvb_diagnostics`,
+    `ex2tables`, `ex2bench`)
   - Example 3 manuscript targets (`ex3data`, `ex3quantcomps`, `ex3zetapsi`,
     `ex3forecast`, `ex3tables`). Legacy `_ldvb` target aliases now route to
     these canonical LDVB artifacts rather than producing duplicate files.

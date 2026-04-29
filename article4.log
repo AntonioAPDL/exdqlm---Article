@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  28 APR 2026 19:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  28 APR 2026 20:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -946,6 +946,10 @@ Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1259.
 
 Package rerunfilecheck Info: File `article4.out' has not changed.
 (rerunfilecheck)             Checksum: 117E6F6DA39079575695AB2DE674ACE5;1880.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1259.
  ) 
 Here is how much of TeX's memory you used:

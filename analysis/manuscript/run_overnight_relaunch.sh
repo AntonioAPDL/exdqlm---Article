@@ -90,7 +90,7 @@ run_step "ex2" \
   Rscript "$ARTICLE_ROOT/analysis/run_all.R" \
     --stage manuscript \
     --pkg-path "$PKG_ROOT" \
-    --targets ex2quant,ex2quant_ldvb,ex2checks,ex2checks_ldvb,ex2_ldvb_diagnostics,ex2tables,ex2tables_ldvb,ex2bench \
+    --targets ex2quant,ex2checks,ex2_ldvb_diagnostics,ex2tables,ex2bench \
     --force-refit \
     --skip-tests
 
