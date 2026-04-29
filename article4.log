@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  28 APR 2026 22:04
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  28 APR 2026 22:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -761,7 +761,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [18]
-<analysis/manuscript/outputs/figures/ex2checks.png, id=419, 722.7pt x 433.62pt>
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 19
+ []
+
+[19 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
+<analysis/manuscript/outputs/figures/ex2checks.png, id=424, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
 
@@ -771,11 +776,6 @@ d on input line 775. on input line 775.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
 e 775.
 
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 19
- []
-
-[19 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 20 []
  []
@@ -940,20 +940,16 @@ Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1268.
 
 Package rerunfilecheck Info: File `article4.out' has not changed.
 (rerunfilecheck)             Checksum: 117E6F6DA39079575695AB2DE674ACE5;1880.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1268.
  ) 
 Here is how much of TeX's memory you used:
  8592 strings out of 494917
  125704 string characters out of 6180699
- 216031 words of memory out of 5000000
+ 216047 words of memory out of 5000000
  11555 multiletter control sequences out of 15000+600000
  143670 words of font info for 96 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 35i,16n,34p,2457b,523s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,16n,34p,2457b,519s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texl
 ive/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texlive/texmf-dist/font
 s/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/
@@ -985,7 +981,7 @@ nts/type1/public/lm/lmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on article4.pdf (35 pages, 3031011 bytes).
+Output written on article4.pdf (35 pages, 3027788 bytes).
 PDF statistics:
  722 PDF objects out of 1000 (max. 8388607)
  635 compressed objects within 7 object streams
