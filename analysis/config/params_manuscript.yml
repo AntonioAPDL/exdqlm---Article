@@ -29,7 +29,7 @@ profiles:
       n_mcmc: 180
       n_burn_trace: 1500
       n_mcmc_trace: 800
-      trace_seed: 20260615
+      trace_seed: 20260616
       thin_trace: 4
       n_chains_kernel: 4
       n_burn_kernel: 800
@@ -113,7 +113,7 @@ profiles:
       n_mcmc: 3000
       n_burn_trace: 2000
       n_mcmc_trace: 3000
-      trace_seed: 20260615
+      trace_seed: 20260616
       thin_trace: 10
       n_chains_kernel: 4
       n_burn_kernel: 2000
@@ -198,7 +198,7 @@ profiles:
       n_mcmc: 1000
       n_burn_trace: 7000
       n_mcmc_trace: 3500
-      trace_seed: 20260615
+      trace_seed: 20260616
       thin_trace: 10
       n_chains_kernel: 4
       n_burn_kernel: 3000
