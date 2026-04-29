@@ -18,6 +18,8 @@ generated artifact.
 - If a generated artifact note needs to change, update the corresponding
   `register_artifact()` call in the example script and regenerate the tracker.
 - Keep article-side review notes in `\aA{}` until the manuscript text is final.
+- Apply the manuscript prose rules in `WRITING_STYLE_CHECKLIST.md` whenever a
+  plot/table edit also changes article text, captions, or displayed code.
 - Commit scripts, regenerated figures/tables, PDF/log, and tracker updates
   together so the repo remains reproducible at every pushed commit.
 
@@ -112,7 +114,7 @@ generated artifact.
    reviewer/context risk.
 3. Example 2 figures and tables.
 4. Example 4 figure and table.
-5. Global caption pass.
+5. Global caption and prose-style pass using `WRITING_STYLE_CHECKLIST.md`.
 6. Full manuscript workflow and `pdflatex` validation.
 
 ## Validation Commands

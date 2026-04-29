@@ -140,3 +140,7 @@ example review pass, see
 
 For the final figure/table readability pass, see
 `analysis/manuscript/PLOT_POLISH_CHECKLIST.md`.
+
+For the shared manuscript prose standard used when editing article text,
+captions, and displayed code explanations, see
+`analysis/manuscript/WRITING_STYLE_CHECKLIST.md`.
