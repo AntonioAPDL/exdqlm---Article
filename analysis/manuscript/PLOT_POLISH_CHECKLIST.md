@@ -17,7 +17,8 @@ generated artifact.
   the same commit.
 - If a generated artifact note needs to change, update the corresponding
   `register_artifact()` call in the example script and regenerate the tracker.
-- Keep article-side review notes in `\aA{}` until the manuscript text is final.
+- Keep article-side review notes out of submission-facing text once the
+  corresponding edits are accepted.
 - Apply the manuscript prose rules in `WRITING_STYLE_CHECKLIST.md` whenever a
   plot/table edit also changes article text, captions, or displayed code.
 - Commit scripts, regenerated figures/tables, PDF/log, and tracker updates
