@@ -3,12 +3,12 @@
 find_repo_root <- function(start = getwd()) {
   cur <- normalizePath(start, mustWork = TRUE)
   repeat {
-    if (file.exists(file.path(cur, "article4.tex"))) {
+    if (file.exists(file.path(cur, "exdqlm-jss.tex"))) {
       return(cur)
     }
     parent <- dirname(cur)
     if (identical(parent, cur)) {
-      stop("Could not locate repository root (article4.tex not found).", call. = FALSE)
+      stop("Could not locate repository root (exdqlm-jss.tex not found).", call. = FALSE)
     }
     cur <- parent
   }

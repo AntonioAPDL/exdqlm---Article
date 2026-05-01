@@ -338,7 +338,7 @@ Why this matters:
 Step 1: Create a new supplement TeX file.
 
 - Suggested path:
-  `/home/jaguir26/local/src/exdqlm---Article/supplement-theory.tex`
+  `/home/jaguir26/local/src/exdqlm---Article/exdqlm-supplement.tex`
 - Keep it separate from the main article at first.
 - Add only after we decide whether the supplement is included in the submission
   bundle or maintained as an online appendix.
@@ -443,7 +443,7 @@ Corrections made in this pass:
 - Added an explicit distribution-parameterization contract to the supplement.
 - Expanded the package-to-algorithm map to distinguish exact Gibbs/CAVI blocks
   from Laplace-Delta and bounded-slice blocks.
-- Recompiled `supplement-theory.tex` after the normalization pass; the final
+- Recompiled `exdqlm-supplement.tex` after the normalization pass; the final
   compile completed without LaTeX warnings about undefined references,
   reruns, overfull boxes, or underfull boxes.
 
@@ -485,7 +485,7 @@ Date: 2026-04-30.
 The supplement was converted from an internal working derivation note into a
 submission-facing document:
 
-- Switched `supplement-theory.tex` to the local `jss` class with `nojss` and
+- Switched `exdqlm-supplement.tex` to the local `jss` class with `nojss` and
   `noheadings`, retaining JSS markup for package names, code, authors,
   abstract, keywords, and address information.
 - Removed the public "Working draft" metadata, internal source-path comments,
@@ -525,7 +525,7 @@ Source of truth for this pass:
 Audit rule:
 
 - Treat the package implementation as fixed for this pass.
-- Correct `supplement-theory.tex` only when the document is inaccurate,
+- Correct `exdqlm-supplement.tex` only when the document is inaccurate,
   incomplete in a submission-relevant way, or likely to mislead a reader about
   the current implementation.
 - Do not patch the package from this audit.

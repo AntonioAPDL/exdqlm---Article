@@ -213,7 +213,7 @@ register_note("timing", "Exact runtime printouts in manuscript are historical an
 register_note("timing", "Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.")
 register_note("benchmark", sprintf("Benchmark tables reported in the manuscript use backend Profile %s; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.", selected_benchmark_profile))
 register_note("benchmark", "benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.")
-register_note("scope", "Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in article4.tex.")
+register_note("scope", "Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.")
 
 write_tracker()
 

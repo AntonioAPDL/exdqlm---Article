@@ -1,7 +1,7 @@
 # Example 4: Static exAL
 
 This folder contains the canonical scripts for the static exAL simulation
-example in Section `sec:ex4static` of `article4.tex`.
+example in Section `sec:ex4static` of `exdqlm-jss.tex`.
 
 - `run.R` regenerates the manuscript-facing figure/table.
 - `seed_screen.R` runs the optional support-only seed screen.

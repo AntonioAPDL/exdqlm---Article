@@ -1,7 +1,7 @@
 # Manuscript Writing Style Checklist
 
 This checklist is the standing prose-quality standard for changes to
-`article4.tex`, table captions, figure captions, displayed code explanations,
+`exdqlm-jss.tex`, table captions, figure captions, displayed code explanations,
 and manuscript-facing example text. It is intended to keep edits consistent with
 a submission-ready JSS software article: neutral, factual, readable, and aligned
 with the current package and reproducible analysis workflow.

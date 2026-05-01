@@ -13,7 +13,7 @@ generated artifact.
 - Keep each plot change scoped to one figure or one tightly related figure set.
 - Regenerate the narrowest useful target first, inspect the figure, then run the
   full manuscript workflow before committing.
-- If a figure caption or displayed code chunk changes, update `article4.tex` in
+- If a figure caption or displayed code chunk changes, update `exdqlm-jss.tex` in
   the same commit.
 - If a generated artifact note needs to change, update the corresponding
   `register_artifact()` call in the example script and regenerate the tracker.
@@ -130,7 +130,7 @@ Full manuscript validation:
 
 ```bash
 Rscript analysis/run_all.R --stage manuscript --profile standard
-pdflatex -interaction=nonstopmode article4.tex
-pdflatex -interaction=nonstopmode article4.tex
-pdflatex -interaction=nonstopmode article4.tex
+pdflatex -interaction=nonstopmode exdqlm-jss.tex
+pdflatex -interaction=nonstopmode exdqlm-jss.tex
+pdflatex -interaction=nonstopmode exdqlm-jss.tex
 ```

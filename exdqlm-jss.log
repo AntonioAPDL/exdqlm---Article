@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  1 MAY 2026 02:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  1 MAY 2026 02:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**article4.tex
-(./article4.tex
+**exdqlm-jss.tex
+(./exdqlm-jss.tex
 LaTeX2e <2017-04-15>
 Babel <3.17> and hyphenation patterns for 3 language(s) loaded.
 (./jss.cls
@@ -269,7 +269,7 @@ Package: thumbpdf 2014/07/15 v3.16 Inclusion of thumbnails (HO)
 Package thumbpdf Warning: Compressed PDF objects of PDF 1.5 are not supported.
 
 
-Package thumbpdf Warning: Thumbnail data file `article4.tpt' not found.
+Package thumbpdf Warning: Thumbnail data file `exdqlm-jss.tpt' not found.
 
 ) (/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2016/04/27 v1.618033 publication quality tables
@@ -498,8 +498,8 @@ Environment Schunk is already defined, stay with former definition)
 LaTeX Warning: Unused global option(s):
     [jss].
 
-(./article4.aux)
-\openout1 = `article4.aux'.
+(./exdqlm-jss.aux)
+\openout1 = `exdqlm-jss.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 60.
 LaTeX Font Info:    ... okay on input line 60.
@@ -571,9 +571,9 @@ LaTeX Info: Redefining \ref on input line 60.
 LaTeX Info: Redefining \pageref on input line 60.
 LaTeX Info: Redefining \nameref on input line 60.
 
-(./article4.out) (./article4.out)
+(./exdqlm-jss.out) (./exdqlm-jss.out)
 \@outlinefile=\write4
-\openout4 = `article4.out'.
+\openout4 = `exdqlm-jss.out'.
 
 <jsslogo.jpg, id=68, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
@@ -883,7 +883,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 31
  []
 
-[31] (./article4.bbl
+[31] (./exdqlm-jss.bbl
 
 LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
 (Font)              Font shape `T1/lmr/b/sl' tried instead on input line 36.
@@ -933,22 +933,22 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [35]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 1258.
- (./article4.aux)
+ (./exdqlm-jss.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1258.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1258.
 
-Package rerunfilecheck Info: File `article4.out' has not changed.
+Package rerunfilecheck Info: File `exdqlm-jss.out' has not changed.
 (rerunfilecheck)             Checksum: 117E6F6DA39079575695AB2DE674ACE5;1880.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1258.
  ) 
 Here is how much of TeX's memory you used:
  8592 strings out of 494917
- 125706 string characters out of 6180699
+ 125736 string characters out of 6180699
  215949 words of memory out of 5000000
  11555 multiletter control sequences out of 15000+600000
  143670 words of font info for 96 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 35i,16n,34p,2455b,519s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,16n,34p,2457b,519s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texl
 ive/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texlive/texmf-dist/font
 s/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/
@@ -980,7 +980,7 @@ nts/type1/public/lm/lmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on article4.pdf (35 pages, 3008922 bytes).
+Output written on exdqlm-jss.pdf (35 pages, 3008922 bytes).
 PDF statistics:
  721 PDF objects out of 1000 (max. 8388607)
  634 compressed objects within 7 object streams

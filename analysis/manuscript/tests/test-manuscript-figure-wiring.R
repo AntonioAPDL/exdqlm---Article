@@ -10,7 +10,7 @@ extract_includegraphics <- function(tex_path) {
 }
 
 testthat::test_that("manuscript figures resolve from canonical generated outputs", {
-  tex_path <- file.path(repo_root, "article4.tex")
+  tex_path <- file.path(repo_root, "exdqlm-jss.tex")
   testthat::expect_true(file.exists(tex_path))
 
   tex <- readLines(tex_path, warn = FALSE)
@@ -33,7 +33,7 @@ testthat::test_that("manuscript figures resolve from canonical generated outputs
 })
 
 testthat::test_that("included manuscript figures are recorded in the reproducibility tracker", {
-  tex_path <- file.path(repo_root, "article4.tex")
+  tex_path <- file.path(repo_root, "exdqlm-jss.tex")
   included <- extract_includegraphics(tex_path)
   tracker <- utils::read.csv(tracker_csv, stringsAsFactors = FALSE)
 

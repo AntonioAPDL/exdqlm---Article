@@ -19,4 +19,4 @@
 "timing","Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here."
 "benchmark","Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles."
 "benchmark","benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run."
-"scope","Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in article4.tex."
+"scope","Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex."

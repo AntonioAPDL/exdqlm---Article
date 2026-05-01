@@ -3,7 +3,7 @@ suppressPackageStartupMessages(library(testthat))
 infer_repo_root <- function(start = getwd()) {
   cur <- normalizePath(start, mustWork = TRUE)
   repeat {
-    if (file.exists(file.path(cur, "article4.tex"))) return(cur)
+    if (file.exists(file.path(cur, "exdqlm-jss.tex"))) return(cur)
     parent <- dirname(cur)
     if (identical(parent, cur)) stop("Could not infer repo root for tests.", call. = FALSE)
     cur <- parent

@@ -13,5 +13,13 @@ analysis/manuscript/outputs/cache/*
 # Optional local figure-export mirror produced by --promote
 Figures/
 
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.tpt
+
 # OS/editor artifacts
 .DS_Store

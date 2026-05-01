@@ -1,7 +1,7 @@
 # Canonical Manuscript Examples
 
 This directory is the canonical, collaborator-facing source for the four
-examples shown in `article4.tex`.
+examples shown in `exdqlm-jss.tex`.
 
 Each example has its own folder with:
 
@@ -18,14 +18,14 @@ shared output folders:
 - `analysis/manuscript/outputs/logs/`
 - `analysis/manuscript/outputs/cache/`
 
-Keeping output filenames stable lets `article4.tex` remain simple:
+Keeping output filenames stable lets `exdqlm-jss.tex` remain simple:
 `\graphicspath` points to `analysis/manuscript/outputs/figures/`, and the
 article includes figures by filename only.
 
 ## Editing Rules
 
 1. Edit only the relevant example folder when changing an example.
-2. Keep manuscript-facing output filenames stable unless `article4.tex` is
+2. Keep manuscript-facing output filenames stable unless `exdqlm-jss.tex` is
    updated in the same commit.
 3. Update the example's `artifacts.yml` if a figure, table, or log is added,
    removed, or renamed.

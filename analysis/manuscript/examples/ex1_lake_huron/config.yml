@@ -11,7 +11,7 @@ targets:
   synthesis_support: ex1synth
   kernel_support: ex1kernel
 notes:
-  - Keep output filenames stable unless article4.tex is updated in the same commit.
+  - Keep output filenames stable unless exdqlm-jss.tex is updated in the same commit.
   - The manuscript-facing figure is ex1quants.png; ex1synth.png is support-only.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests

@@ -13,7 +13,7 @@ targets:
   ldvb_support: ex2quant_ldvb,ex2checks_ldvb,ex2_ldvb_diagnostics,ex2tables_ldvb
 notes:
   - Keep the benchmark profile disclosure synchronized with generated backend tables.
-  - Article table values are inline in article4.tex and must be updated from generated CSVs after reruns.
+  - Article table values are inline in exdqlm-jss.tex and must be updated from generated CSVs after reruns.
   - The manuscript quantile-comparison panel focuses on 1780--1830 for readability.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests

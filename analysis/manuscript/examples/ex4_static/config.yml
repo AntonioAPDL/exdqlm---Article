@@ -13,7 +13,7 @@ targets:
   seed_screen_support: ex4screen
 notes:
   - The seed screen is support-only and can be rerun independently.
-  - Article table values are inline in article4.tex and must be updated from generated CSVs after reruns.
+  - Article table values are inline in exdqlm-jss.tex and must be updated from generated CSVs after reruns.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
   seed_screen: Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --skip-tests

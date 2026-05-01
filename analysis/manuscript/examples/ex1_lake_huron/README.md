@@ -1,7 +1,7 @@
 # Example 1: Lake Huron
 
 This folder contains the canonical script for the Lake Huron example in
-Section `sec:ex1` of `article4.tex`.
+Section `sec:ex1` of `exdqlm-jss.tex`.
 
 Edit `run.R` when changing the Example 1 code shown or described in the paper.
 The numerical settings are read from the `ex1` section of

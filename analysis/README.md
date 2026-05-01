@@ -11,7 +11,7 @@ This folder contains reproducible analysis stages for the article.
 
 For a reader-facing map of the manuscript artifacts, support-only outputs, and
 rerun entry points, see
-`/home/jaguir26/local/src/exdqlm---Article/SUPPLEMENTARY_INDEX.md`.
+`/home/jaguir26/local/src/exdqlm---Article/manuscript-reproducibility-index.md`.
 
 The canonical source for the paper examples is
 `analysis/manuscript/examples/`, executed through `analysis/run_all.R --stage
@@ -67,6 +67,6 @@ package instead. Source mode remains the default.
 - Output filenames are stable for repeatable manuscript linkage.
 - The optional `--promote` flag copies selected figures into top-level
   `Figures/` as a local export mirror. That directory is ignored by git and is
-  not used by `article4.tex`.
+  not used by `exdqlm-jss.tex`.
 - The staged overnight manuscript relaunch plan is documented in
   `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.

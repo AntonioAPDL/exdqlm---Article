@@ -2,11 +2,11 @@
 
 This stage reproduces the main manuscript example artifacts (figures, key tables,
 and compact console-output equivalents) using the current `exdqlm` package API,
-without modifying `article4.tex`.
+without modifying `exdqlm-jss.tex`.
 
 For a reader-facing index of the publication artifacts, support-only outputs,
 and recommended rerun entry points, see
-`/home/jaguir26/local/src/exdqlm---Article/SUPPLEMENTARY_INDEX.md`.
+`/home/jaguir26/local/src/exdqlm---Article/manuscript-reproducibility-index.md`.
 
 ## Canonical Example Workflow
 
@@ -38,7 +38,7 @@ The intended update cycle is:
 
 1. Edit the relevant script in `analysis/manuscript/examples/`.
 2. Run the narrowest useful target with `analysis/run_all.R --stage manuscript`.
-3. Update any inline manuscript table/text in `article4.tex` from the generated
+3. Update any inline manuscript table/text in `exdqlm-jss.tex` from the generated
    CSV/log output.
 4. Run the manuscript tests or a focused validation pass.
 5. Commit the script, regenerated artifacts, manuscript text, and tracker updates
@@ -116,11 +116,11 @@ package instead. Source mode remains the default.
 - `analysis/manuscript/outputs/logs/`: compact textual outputs and session metadata.
 - `analysis/manuscript/outputs/cache/`: cached fitted objects to support fast targeted reruns.
 
-Figures cited by `article4.tex` are resolved from
+Figures cited by `exdqlm-jss.tex` are resolved from
 `analysis/manuscript/outputs/figures/` through the manuscript `\graphicspath`.
 Top-level `Figures/` files are optional local export copies created by
 `--promote`; they are ignored by git and are not searched by the manuscript
-build. Tables in `article4.tex` are inline LaTeX, so their displayed values
+build. Tables in `exdqlm-jss.tex` are inline LaTeX, so their displayed values
 must be updated from the generated CSV/log files whenever a model is rerun.
 
 Main tracker files:

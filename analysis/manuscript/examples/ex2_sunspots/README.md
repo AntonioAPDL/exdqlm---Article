@@ -1,7 +1,7 @@
 # Example 2: Sunspots
 
 This folder contains the canonical script for the Sunspots example in Section
-`sec:ex2` of `article4.tex`.
+`sec:ex2` of `exdqlm-jss.tex`.
 
 Edit `run.R` when changing the Example 2 model specifications, diagnostics, or
 benchmark table. The numerical settings are read from the `ex2` section of

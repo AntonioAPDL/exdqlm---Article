@@ -59,7 +59,7 @@ testthat::test_that("canonical manuscript example manifests parse cleanly", {
 testthat::test_that("article figures are declared by the canonical example manifests", {
   testthat::skip_if_not_installed("yaml")
 
-  tex_figures <- extract_includegraphics(file.path(repo_root, "article4.tex"))
+  tex_figures <- extract_includegraphics(file.path(repo_root, "exdqlm-jss.tex"))
   testthat::expect_gt(length(tex_figures), 0)
 
   manifest_figures <- unlist(lapply(canonical_examples, function(example) {
@@ -71,7 +71,7 @@ testthat::test_that("article figures are declared by the canonical example manif
   testthat::expect_equal(
     missing_from_manifests,
     character(0),
-    info = paste("Figures in article4.tex missing from example artifacts.yml files:", paste(missing_from_manifests, collapse = ", "))
+    info = paste("Figures in exdqlm-jss.tex missing from example artifacts.yml files:", paste(missing_from_manifests, collapse = ", "))
   )
 
   duplicated_manifest_figures <- names(which(table(manifest_figures) > 1L))

@@ -1,7 +1,7 @@
 # Example 3: Big Tree
 
 This folder contains the canonical script for the Big Tree example in Section
-`sec:ex3` of `article4.tex`.
+`sec:ex3` of `exdqlm-jss.tex`.
 
 Edit `run.R` when changing the manuscript-facing Big Tree workflow. This script
 uses the observed USGS monthly-average `BTflow` response and the standardized

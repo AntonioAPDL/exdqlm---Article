@@ -5,7 +5,7 @@ using the daily Big Trees / San Lorenzo dataset staged outside the repository.
 
 This workflow is intentionally separate from the tracked manuscript stage:
 
-- it does not modify `article4.tex`
+- it does not modify `exdqlm-jss.tex`
 - it does not replace the current monthly Big Trees example
 - it is used to prototype the daily redesign and inspect figures, tables, and
   fit objects before deciding whether the manuscript should change
