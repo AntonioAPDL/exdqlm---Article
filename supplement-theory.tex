@@ -83,7 +83,9 @@ exDQLM and DQLM fitting, transfer-function models, static exAL regression,
 forecasting, diagnostics, and posterior-predictive synthesis. This supplement
 gives the corresponding posterior targets, full conditional distributions,
 variational updates, Laplace-Delta approximations, ELBO components, and
-numerical routines used by the package. The derivations build on the AL
+numerical routines used by the package. It is primarily for readers who want
+to verify the posterior targets, update equations, and diagnostic quantities
+behind the exported functions. The derivations build on the AL
 mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
 models \citep{gonccalves2017dynamic}, the exAL/exDQLM formulation
 \citep{yan2025family,me}, FFBS for Gaussian state-space models
@@ -176,6 +178,12 @@ $p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ refers to functions of
 $(p_0,\gamma)$ defined in the main article.}
 \label{tab:supp_notation}
 \end{table}
+
+The latent variables $v_t$, $s_t$, $v_i$, and $s_i$ are introduced for
+posterior computation and are updated internally by the fitting routines; they
+are not user-supplied inputs. Practitioners specify the response, target
+quantile, model components, priors, and inference controls described in the
+main article.
 
 The distributional parameterizations are also fixed throughout:
 $\N(m,V)$ uses variance $V$;
@@ -301,8 +309,10 @@ $\tilde y_t=y_t-A_{p_0}v_t$ satisfies
 \end{equation}
 Thus the conditional state posterior is a Gaussian state-space posterior.
 The package implements the evolution variance through the discount-factor
-state-space construction used by \code{exdqlmMCMC()} and \code{exdqlmLDVB()};
-the notation above writes the induced covariance generically as $\mat{W}_t$.
+state-space construction used by \code{exdqlmMCMC()} and \code{exdqlmLDVB()}.
+Users specify discounting through \code{df} and \code{dim.df}; the routines
+construct the corresponding $\mat{W}_t$ sequence internally, and the notation
+above writes the induced covariance generically as $\mat{W}_t$.
 The derivations condition on the sequence $\mat{W}_{1:T}$ induced by the
 discount-factor construction in the main article. Componentwise discounting
 changes the block structure of $\mat{W}_t$; once this sequence is fixed within
@@ -423,6 +433,8 @@ $q(\sigma)$, and $q(v_t)$.
 \item Draw approximate posterior samples from the fitted variational factors
 when requested by \code{n.samp}.
 \end{enumerate}
+In the package, this AL/DQLM path is selected in the dynamic fitting routines
+with \code{dqlm.ind = TRUE}.
 
 The ELBO is
 \begin{align}
@@ -700,6 +712,8 @@ when requested by \code{n.samp}.
 \end{enumerate}
 In the AL special case, the nonconjugate $(\sigma,\gamma)$ block is replaced
 by the inverse-gamma $q(\sigma)$ update in Algorithm S2.
+This exAL path is the default in \code{exdqlmMCMC()} and \code{exdqlmLDVB()}
+when \code{dqlm.ind = FALSE}.
 
 \paragraph{ELBO.}
 The LDVB ELBO has the block decomposition
@@ -1071,6 +1085,9 @@ factors, and the $(\sigma,\gamma)$ block.
   \end{enumerate}
 \item Draw approximate posterior samples when requested.
 \end{enumerate}
+These static updates are implemented in \code{exalStaticMCMC()} and
+\code{exalStaticLDVB()}, with \code{beta_prior} selecting the Gaussian/ridge
+or RHS-NS coefficient prior.
 
 The static exAL ELBO is computed from the same blocks as the dynamic exDQLM,
 with the Gaussian state factor replaced by the Gaussian coefficient factor.
@@ -1150,8 +1167,9 @@ uses \eqref{eq:entropy_ig}.
 
 This section focuses on the \code{rhs_ns} coefficient prior, the
 Gibbs-friendly regularized horseshoe variant used for sparse static
-regression. It enters the static Gaussian update for $\vect{\beta}$ through a
-prior precision matrix. Let
+regression. Users only need this section when fitting static models with
+\code{beta_prior = "rhs_ns"}. The prior enters the static Gaussian update for
+$\vect{\beta}$ through a prior precision matrix. Let
 $\mathcal{A}\subseteq\{1,\ldots,p\}$ denote the active shrinkage set; by
 default an intercept, if present, is not shrunk. For $j\notin\mathcal{A}$ the
 package uses a fixed intercept precision. The direct \code{rhs} path is not
@@ -1640,7 +1658,7 @@ Function & Section & Derivation or computational block \\
 \texttt{exalStaticMCMC()} & S6--S7 & Static AL/exAL MCMC; Algorithm S6. \\
 \texttt{exalStaticLDVB()} & S6--S7 & Static AL/exAL LDVB; Algorithm S7. \\
 \texttt{exdqlmForecast()} & S8.1 & Forecast recursion and predictive draws. \\
-\texttt{exdqlmDiagnostics()} & S8.2 & Dynamic PIT, CRPS, and pplc diagnostics. \\
+\texttt{exdqlmDiagnostics()} & S8.2 & MAP one-step-ahead diagnostic sequence, CRPS, and pplc. \\
 \texttt{exalStaticDiagnostics()} & S8.2 & Static check-loss and reference-quantile diagnostics. \\
 \texttt{quantileSynthesis()} & S8.3 & Posterior-predictive synthesis; Algorithm S8. \\
 \begin{tabular}[t]{@{}l@{}}\texttt{dexal()}, \texttt{pexal()}\\ \texttt{qexal()}, \texttt{rexal()}\end{tabular} & S2 & exAL distribution evaluation and simulation. \\
@@ -1648,8 +1666,8 @@ Function & Section & Derivation or computational block \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Mapping between exported \pkg{exdqlm} functions and the algorithmic
-blocks derived in this supplement.}
+\caption{Mapping between exported \pkg{exdqlm} functions and the derivation or
+computational details documented in this supplement.}
 \label{tab:supp_algorithm_map}
 \end{table}
 
