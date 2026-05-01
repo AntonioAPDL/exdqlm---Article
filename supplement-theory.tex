@@ -10,7 +10,6 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Rp}{\mathbb{R}_{+}}
 \newcommand{\Ind}{\mathbb{I}}
-\newcommand{\T}{\mathsf{T}}
 \newcommand{\dd}{\mathrm{d}}
 \renewcommand{\E}{\mathbb{E}}
 \newcommand{\Var}{\mathbb{V}}
@@ -29,31 +28,34 @@
 \newcommand{\AL}{\operatorname{AL}}
 \newcommand{\exAL}{\operatorname{exAL}}
 \newcommand{\KL}{\operatorname{KL}}
+\newcommand{\CRPS}{\operatorname{CRPS}}
+\newcommand{\pplc}{\operatorname{pplc}}
 \newcommand{\elbo}{\mathcal{L}}
 \newcommand{\pigamma}{\pi_\gamma}
 \renewcommand{\theequation}{S\arabic{equation}}
 \renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thesubsection}{S\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{S\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \author{Antonio Aguirre \\ University of California Santa Cruz \And
         Raquel Barata \\ University of California Santa Cruz \AND
         Raquel Prado \\ University of California Santa Cruz \And
         Bruno Sans\'{o} \\ University of California Santa Cruz}
-\title{Supplementary Theory and Algorithm Details for \pkg{exdqlm}}
+\title{Supplementary Material for ``\pkg{exdqlm}: An \proglang{R} Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models''}
 
 \Plainauthor{Antonio Aguirre, Raquel Barata, Raquel Prado, Bruno Sanso}
-\Plaintitle{Supplementary Theory and Algorithm Details for exdqlm}
-\Shorttitle{Supplementary theory for \pkg{exdqlm}}
+\Plaintitle{Supplementary Material for exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}
+\Shorttitle{Supplementary material for \pkg{exdqlm}}
 
-\Abstract{This supplement gives the mathematical details behind the inference
-algorithms implemented in \pkg{exdqlm}. It records model hierarchies,
-augmented posterior targets, Markov chain Monte Carlo (MCMC) updates,
-variational Bayes (VB) factorizations, and evidence lower bound (ELBO)
-components for dynamic quantile linear models (DQLMs) under asymmetric Laplace
-(AL) and extended asymmetric Laplace (exAL) likelihoods, and for static AL/exAL
-regression with ridge or regularized horseshoe normal-scale (RHS-NS) priors.
-The notation is aligned with the main article and with the package interfaces:
-vectors are written in bold lowercase, matrices in bold uppercase, and
-dimensions are stated when objects are introduced.}
+\Abstract{This supplement derives the posterior targets, full conditional
+distributions, variational updates, Laplace-Delta approximations, and numerical
+blocks used by the algorithms in \pkg{exdqlm}. It covers dynamic AL/DQLM and
+exAL/exDQLM state-space models, transfer-function state augmentation, static
+AL/exAL regression, ridge and regularized horseshoe normal-scale (RHS-NS)
+shrinkage priors, forecasting, diagnostics, and posterior-predictive synthesis.
+The notation follows the main article, and each algorithmic block is linked to
+the corresponding exported package function.}
 
 \Keywords{Bayesian quantile regression, dynamic linear models, asymmetric
 Laplace likelihood, extended asymmetric Laplace likelihood, MCMC, variational
@@ -72,41 +74,78 @@ Bayes}
 
 \begin{document}
 
-\section{Scope and organization}
+\section{Scope and relation to the main article}
+\label{sec:supp_scope}
 
-This supplement is a mathematical companion to the main article. It is intended
-for readers who want to inspect the posterior targets and update equations
-behind the package routines, rather than for users who only need the applied
-workflow shown in the examples. The dynamic sections cover AL-based DQLMs and
-exAL-based exDQLMs. The static sections cover AL/exAL regression with Gaussian
-ridge priors and with the RHS-NS sparse prior used by the package.
+The main article describes the user-facing workflow for \pkg{exdqlm}: dynamic
+exDQLM and DQLM fitting, transfer-function models, static exAL regression,
+forecasting, diagnostics, and posterior-predictive synthesis. This supplement
+gives the corresponding posterior targets, full conditional distributions,
+variational updates, Laplace-Delta approximations, ELBO components, and
+numerical routines used by the package. The derivations build on the AL
+mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
+models \citep{gonccalves2017dynamic}, the exAL/exDQLM formulation
+\citep{yan2025family,me}, FFBS for Gaussian state-space models
+\citep{carter1994gibbs,fruhwirth1994data}, nonconjugate variational
+approximations \citep{wang2013nonconjugatevb}, and the RHS-NS prior
+\citep{nishimura2023shrunken}.
 
-Each model section follows the same organization: model hierarchy, augmented
-posterior target, MCMC updates, VB factorization and coordinate updates, ELBO
-components, and the corresponding package function. The final section maps the
-main user-facing functions to these algorithmic blocks.
+Readers interested in MCMC implementation should focus on Sections
+\ref{sec:dyn_dqlm}, \ref{sec:dyn_exdqlm}, \ref{sec:transfer_function}, and
+\ref{sec:static_ridge}. Readers interested in LDVB should focus on Sections
+\ref{sec:dyn_dqlm}, \ref{sec:dyn_exdqlm}, \ref{sec:static_ridge},
+\ref{sec:static_rhs}, and \ref{sec:numerical_blocks}. Readers checking package
+outputs should use Table~\ref{tab:supp_article_crosswalk} and
+Table~\ref{tab:supp_algorithm_map}.
 
-\section{Notation and distributional building blocks}
+The notation follows the main article. In particular, $\mat{F}_t$ denotes the
+observation vector, $\mat{G}_t$ the state evolution matrix, $\mat{W}_t$ the
+evolution covariance, $\vect{\theta}_t$ the dynamic state, $p_0$ the target
+quantile level, and $\gamma$ the exAL skewness parameter. Dimensions are stated
+when each object is introduced.
+
+\begin{table}[!htb]
+\centering
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}
+>{\raggedright\arraybackslash}p{0.20\textwidth}
+>{\raggedright\arraybackslash}p{0.16\textwidth}
+>{\raggedright\arraybackslash}X@{}}
+\toprule
+Main article topic & Main article location & Supplement location & Package functions \\
+\midrule
+exAL mixture and exDQLM hierarchy & Equations (1)--(6) & S2--S4 & \code{exdqlmMCMC()}, \code{exdqlmLDVB()} \\
+AL/DQLM special case & Section 2.5 & S3 & \code{dqlm.ind = TRUE}, \code{fix.gamma = TRUE} \\
+Discount-factor evolution & Section 2.3 & S3.1, S4.1 & \code{df}, \code{dim.df} \\
+Transfer-function exDQLM & Equations (7)--(10) & S5 & \code{exdqlmTransferMCMC()}, \code{exdqlmTransferLDVB()} \\
+Static AL/exAL regression & Section 2.5, Example 4 & S6--S7 & \code{exalStaticMCMC()}, \code{exalStaticLDVB()} \\
+Forecasting & Equation (15) & S8.1 & \code{exdqlmForecast()} \\
+Diagnostics & Equations (11)--(14) & S8.2 & \code{exdqlmDiagnostics()}, \code{exalStaticDiagnostics()} \\
+Posterior-predictive synthesis & Example 1 & S8.3 & \code{quantileSynthesis()} \\
+Numerical blocks & Section 2.2 and package implementation & S9 & Slice sampler, Laplace-Delta, ELBO blocks \\
+\bottomrule
+\end{tabularx}
+\caption{Crosswalk between the main article, this supplement, and the
+exported \pkg{exdqlm} functions.}
+\label{tab:supp_article_crosswalk}
+\end{table}
+
+\section{Notation and distributional conventions}
 
 Let $p_0\in(0,1)$ be the target quantile. The response is scalar. In dynamic
 models, observations are indexed by $t=1,\ldots,T$; in static regression,
-observations are indexed by $i=1,\ldots,n$. Lowercase bold symbols denote
-vectors, for example $\vect{\theta}_t\in\R^q$ and $\vect{\beta}\in\R^p$.
-Uppercase bold symbols denote matrices, for example $\mat{G}_t\in\R^{q\times q}$
-and $\mat{X}\in\R^{n\times p}$. For any positive definite matrix $\mat{A}$,
-$|\mat{A}|$ denotes its determinant.
+observations are indexed by $i=1,\ldots,n$. For any positive definite matrix
+$A$, $|A|$ denotes its determinant.
 
 \subsection{Notation contract}
 
-The supplement uses the following conventions throughout. The symbols
-$p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ are deterministic functions
-of $(p_0,\gamma)$, whereas $\pigamma(\gamma)$ denotes the prior density for
-$\gamma$ on $(L,U)$. Generic densities are denoted by $p(\cdot)$ only when no
-confusion with the exAL quantile map can arise. In variational sections,
-expectations without an explicit subscript are taken under the current
-mean-field distribution $q$. The symbol $\xi$ is reserved for the RHS-NS
-half-Cauchy auxiliary variable; the transformed coordinate for $\gamma$ in
-Laplace-Delta calculations is denoted by $z_\gamma$.
+The symbols $p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ are deterministic
+functions of $(p_0,\gamma)$, whereas $\pigamma(\gamma)$ denotes the prior
+density for $\gamma$ on $(L,U)$. Generic densities are denoted by $p(\cdot)$
+only when no confusion with the exAL quantile map can arise. In variational
+sections, expectations without an explicit subscript are taken under the
+current mean-field distribution $q$. The symbol $\xi$ is reserved for the
+RHS-NS half-Cauchy auxiliary variable; the transformed coordinate for $\gamma$
+in Laplace-Delta calculations is denoted by $z_\gamma$.
 
 \begin{table}[!htb]
 \centering
@@ -115,25 +154,38 @@ Laplace-Delta calculations is denoted by $z_\gamma$.
 Symbol & Meaning \\
 \midrule
 $p_0$ & Target quantile level. \\
-$p_\gamma$ & exAL internal quantile map determined by $(p_0,\gamma)$. \\
-$A_0,B_0$ & AL constants $A(p_0)$ and $B(p_0)$. \\
+$p_\gamma=p(p_0,\gamma)$ & Internal exAL quantile map defined in the main article. \\
+$A_{p_0},B_{p_0}$ & AL constants $A(p_0)$ and $B(p_0)$. \\
 $A_\gamma,B_\gamma,C_\gamma$ & exAL constants evaluated at $p_\gamma$. \\
+$L,U$ & Lower and upper admissible bounds for $\gamma$. \\
 $\pigamma(\gamma)$ & Prior density for $\gamma$ on $(L,U)$. \\
-$\vect{\theta}_t,\vect{f}_t,\mat{G}_t,\mat{W}_t$ & Dynamic state, observation vector, evolution matrix, and evolution covariance. \\
+$\vect{\theta}_t,\mat{F}_t,\mat{G}_t,\mat{W}_t$ & Dynamic state, observation vector, evolution matrix, and evolution covariance. \\
+$v_t,s_t$ & exAL latent variables in the dynamic model. \\
 $\vect{\beta},\mat{X}$ & Static regression coefficients and design matrix. \\
+$v_i,s_i$ & exAL latent variables in the static model. \\
 $\mathcal{A}$ & Active coefficient set receiving RHS-NS shrinkage. \\
+$\elbo(q)$ & Evidence lower bound. \\
 \bottomrule
 \end{tabularx}
-\caption{Core notation used throughout the supplement.}
+\caption{Core notation used throughout the supplement. The shorthand
+$p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ refers to functions of
+$(p_0,\gamma)$ defined in the main article.}
 \label{tab:supp_notation}
 \end{table}
 
 The distributional parameterizations are also fixed throughout:
-$\N(m,V)$ uses variance $V$; $\IG(a,b)$ uses rate $b$ with density proportional
-to $x^{-(a+1)}\exp(-b/x)$; $\Exp(\text{rate}=1/\sigma)$ has density
-$\sigma^{-1}\exp(-x/\sigma)$; and $\TNp(m,V)$ denotes $\N(m,V)$ truncated to
-$(0,\infty)$. The generalized inverse Gaussian parameterization is given in
-\eqref{eq:gig_parameterization}.
+$\N(m,V)$ uses variance $V$;
+\begin{equation}
+x\sim\IG(a,b)
+\quad\Longleftrightarrow\quad
+p(x)=\frac{b^a}{\Gamma(a)}x^{-a-1}\exp(-b/x),\qquad x>0,
+\end{equation}
+equivalently $x^{-1}\sim\operatorname{Gamma}(a,b)$ under a shape-rate gamma
+parameterization. The exponential distribution $\Exp(\text{rate}=1/\sigma)$
+has density $\sigma^{-1}\exp(-x/\sigma)$, matching the main article's
+mean-$\sigma$ convention for the AL and exAL mixture variables. Finally,
+$\TNp(m,V)$ denotes $\N(m,V)$ truncated to $(0,\infty)$. The generalized
+inverse Gaussian parameterization is given in \eqref{eq:gig_parameterization}.
 
 The asymmetric Laplace (AL) mixture representation used by the package is
 \begin{align}
@@ -170,124 +222,46 @@ y\mid \eta,\sigma,\gamma,v,s
 \end{equation}
 The package uses an inverse-gamma prior $\sigma\sim\IG(a_\sigma,b_\sigma)$
 and a proper truncated Student-$t$ prior $\pigamma(\gamma)$ for $\gamma$ on
-$(L,U)$.
+$(L,U)$. If $m_\gamma$, $s_\gamma$, and $\nu_\gamma$ denote its location,
+scale, and degrees of freedom, then
+\begin{equation}
+\pigamma(\gamma)=
+\frac{
+s_\gamma^{-1}t_{\nu_\gamma}\{(\gamma-m_\gamma)/s_\gamma\}
+}{
+T_{\nu_\gamma}\{(U-m_\gamma)/s_\gamma\}
+-T_{\nu_\gamma}\{(L-m_\gamma)/s_\gamma\}
+}\Ind(L<\gamma<U),
+\label{eq:gamma_prior}
+\end{equation}
+where $t_\nu(\cdot)$ and $T_\nu(\cdot)$ are the standard Student-$t$ density
+and distribution function.
 
 The generalized inverse Gaussian distribution is parameterized as
 \begin{equation}
-x\sim\GIG(\lambda,\chi,\psi)
+x\sim\GIG(\lambda,\chi,\psi_{\mathrm{GIG}})
 \quad\Longleftrightarrow\quad
 p(x)\propto x^{\lambda-1}
-\exp\left\{-\frac{1}{2}\left(\frac{\chi}{x}+\psi x\right)\right\},
+\exp\left\{-\frac{1}{2}\left(\frac{\chi}{x}+\psi_{\mathrm{GIG}} x\right)\right\},
 \qquad x>0.
 \label{eq:gig_parameterization}
 \end{equation}
 For $r\in\R$,
 \begin{equation}
 \E(x^r)=
-\left(\frac{\chi}{\psi}\right)^{r/2}
-\frac{K_{\lambda+r}(\sqrt{\chi\psi})}{K_{\lambda}(\sqrt{\chi\psi})},
+\left(\frac{\chi}{\psi_{\mathrm{GIG}}}\right)^{r/2}
+\frac{K_{\lambda+r}(\sqrt{\chi\psi_{\mathrm{GIG}}})}
+{K_{\lambda}(\sqrt{\chi\psi_{\mathrm{GIG}}})},
 \label{eq:gig_moments}
 \end{equation}
 where $K_\nu(\cdot)$ is the modified Bessel function of the second kind.
-
-\subsection{Reusable ELBO building blocks}
-\label{sec:elbo_building_blocks}
-
-The package records an ELBO sequence for VB convergence monitoring. All
-ELBOs in this supplement use
-\begin{equation}
-\elbo(q)=\E_q\{\log p(\text{complete data})\}+H(q),
-\qquad
-H(q)=-\E_q\{\log q\}.
-\end{equation}
-The following entropy and moment formulas are reused across the dynamic and
-static algorithms.
-
-If $\vect{x}\sim\N(\vect{m},\mat{V})$ with
-$\vect{x}\in\R^d$, then
-\begin{equation}
-H\{\N(\vect{m},\mat{V})\}
-=\frac{1}{2}\{d(1+\log 2\pi)+\log|\mat{V}|\}.
-\label{eq:entropy_gaussian}
-\end{equation}
-If $x\sim\IG(a,b)$ under the rate parameterization stated above, then
-\begin{equation}
-\E(x^{-1})=\frac{a}{b},\qquad
-\E(\log x)=\log b-\psi(a),
-\end{equation}
-and
-\begin{equation}
-H\{\IG(a,b)\}
-=a+\log b+\log\Gamma(a)-(a+1)\psi(a),
-\label{eq:entropy_ig}
-\end{equation}
-where $\psi(\cdot)$ is the digamma function.
-
-If $x\sim\GIG(\lambda,\chi,\psi_g)$ and
-$z=(\chi\psi_g)^{1/2}$, let
-$m_x=\E(x)$, $m_{1/x}=\E(x^{-1})$, and
-$m_{\log x}=\E(\log x)$. Then
-\begin{align}
-H\{\GIG(\lambda,\chi,\psi_g)\}
-&=
-\log\{2K_\lambda(z)\}
--\frac{\lambda}{2}\log\left(\frac{\psi_g}{\chi}\right)
--(\lambda-1)m_{\log x} \nonumber\\
-&\quad+
-\frac{1}{2}\{\chi m_{1/x}+\psi_g m_x\}.
-\label{eq:entropy_gig}
-\end{align}
-The moments $m_x$ and $m_{1/x}$ follow from \eqref{eq:gig_moments};
-$m_{\log x}$ is the derivative of $\log K_\lambda(z)$ with respect to
-$\lambda$ plus $\frac{1}{2}\log(\chi/\psi_g)$, and is evaluated numerically in
-the package.
-
-If $x\sim\TNp(m,V)$, let $s=V^{1/2}$, $u=m/s$, and
-$\Lambda(u)=\phi(u)/\Phi(u)$. The entropy is
-\begin{equation}
-H\{\TNp(m,V)\}
-=
-\frac{1}{2}\log(2\pi V)+\log\Phi(u)
-+\frac{1}{2}\{1-u\Lambda(u)\}.
-\label{eq:entropy_tnp}
-\end{equation}
-This closed form is used for the truncated-normal latent factors; numerically,
-the package evaluates the required moments using stable tail-probability
-guards.
-
-For exAL VB, the nonconjugate $(\sigma,\gamma)$ block is handled on
-transformed coordinates
-\begin{equation}
-u=\log\sigma,\qquad
-z_\gamma=\logit\left(\frac{\gamma-L}{U-L}\right).
-\end{equation}
-If $\vect{z}=(z_\gamma,u)^\T$ has Laplace approximation
-$q_z(\vect{z})=\N(\hat{\vect{z}},\mat{\Sigma}_z)$ and
-$(\gamma,\sigma)=T(\vect{z})$, then the entropy contribution on the original
-scale is approximated as
-\begin{equation}
-H\{q(\sigma,\gamma)\}
-\approx
-\frac{1}{2}\{2(1+\log 2\pi)+\log|\mat{\Sigma}_z|\}
-+\E_{q_z}\{\log|J_T(\vect{z})|\},
-\label{eq:entropy_ld}
-\end{equation}
-where
-\begin{equation}
-\log|J_T(\vect{z})|
-=u+\log(U-L)+\log r+\log(1-r),
-\qquad r=\expit(z_\gamma).
-\end{equation}
-The final expectation in \eqref{eq:entropy_ld}, and the other smooth
-expectations of functions of $(\sigma,\gamma)$, are evaluated by the same
-second-order Delta approximation used in the LDVB updates.
 
 \section{Dynamic DQLM under the AL likelihood}
 \label{sec:dyn_dqlm}
 
 \subsection{Model hierarchy and full joint}
 
-Let $\vect{\theta}_t\in\R^q$ be the latent state, $\vect{f}_t\in\R^q$ the
+Let $\vect{\theta}_t\in\R^q$ be the latent state, $\mat{F}_t\in\R^q$ the
 observation vector, $\mat{G}_t\in\R^{q\times q}$ the evolution matrix, and
 $\mat{W}_t\in\R^{q\times q}$ a positive semidefinite evolution covariance. The
 dynamic DQLM is
@@ -298,11 +272,11 @@ dynamic DQLM is
 &\sim \N(\mat{G}_t\vect{\theta}_{t-1},\mat{W}_t), \\
 v_t\mid\sigma &\sim \Exp(\text{rate}=1/\sigma), \\
 y_t\mid\vect{\theta}_t,\sigma,v_t
-&\sim \N(\vect{f}_t^\T\vect{\theta}_t + A_0 v_t,\ \sigma B_0 v_t),
+&\sim \N(\mat{F}_t^\top\vect{\theta}_t + A_{p_0} v_t,\ \sigma B_{p_0} v_t),
 \label{eq:dyn_dqlm_hierarchy}
 \end{align}
-where $A_0=A(p_0)$ and $B_0=B(p_0)$. With
-$\vect{v}=(v_1,\ldots,v_T)^\T$ and
+where $A_{p_0}=A(p_0)$ and $B_{p_0}=B(p_0)$. With
+$\vect{v}=(v_1,\ldots,v_T)^\top$ and
 $\vect{\theta}_{0:T}=(\vect{\theta}_0,\ldots,\vect{\theta}_T)$, the posterior
 target is
 \begin{align}
@@ -315,16 +289,21 @@ p(\sigma)\,p(\vect{\theta}_0)
 \label{eq:dyn_dqlm_joint}
 \end{align}
 Equivalently, conditional on $(\sigma,\vect{v})$, the pseudo-observation
-$\tilde y_t=y_t-A_0v_t$ satisfies
+$\tilde y_t=y_t-A_{p_0}v_t$ satisfies
 \begin{equation}
-\tilde y_t=\vect{f}_t^\T\vect{\theta}_t+\epsilon_t,\qquad
-\epsilon_t\sim\N(0,\sigma B_0v_t).
+\tilde y_t=\mat{F}_t^\top\vect{\theta}_t+\epsilon_t,\qquad
+\epsilon_t\sim\N(0,\sigma B_{p_0}v_t).
 \label{eq:dyn_dqlm_pseudo}
 \end{equation}
 Thus the conditional state posterior is a Gaussian state-space posterior.
 The package implements the evolution variance through the discount-factor
 state-space construction used by \code{exdqlmMCMC()} and \code{exdqlmLDVB()};
 the notation above writes the induced covariance generically as $\mat{W}_t$.
+The derivations condition on the sequence $\mat{W}_{1:T}$ induced by the
+discount-factor construction in the main article. Componentwise discounting
+changes the block structure of $\mat{W}_t$; once this sequence is fixed within
+a Gaussian pseudo-state update, the FFBS and LDVB state updates have the forms
+below.
 
 \subsection{MCMC updates}
 
@@ -336,13 +315,13 @@ $\vect{\theta}_{0:T}$ exactly by applying forward-filtering
 backward-sampling (FFBS) to \eqref{eq:dyn_dqlm_pseudo}.
 
 \paragraph{Scale.}
-Let $r_t=y_t-\vect{f}_t^\T\vect{\theta}_t$. Then
+Let $r_t=y_t-\mat{F}_t^\top\vect{\theta}_t$. Then
 \begin{equation}
 \sigma\mid \vect{\theta}_{0:T},\vect{v},\vect{y}
 \sim \IG\left(
 a_\sigma+\frac{3T}{2},\
 b_\sigma+\sum_{t=1}^T v_t+
-\sum_{t=1}^T\frac{(r_t-A_0v_t)^2}{2B_0v_t}
+\sum_{t=1}^T\frac{(r_t-A_{p_0}v_t)^2}{2B_{p_0}v_t}
 \right).
 \label{eq:dyn_dqlm_sigma_cond}
 \end{equation}
@@ -354,11 +333,28 @@ v_t\mid\vect{\theta}_t,\sigma,y_t
 \sim
 \GIG\left(
 \frac{1}{2},\
-\frac{r_t^2}{\sigma B_0},\
-\frac{A_0^2}{\sigma B_0}+\frac{2}{\sigma}
+\frac{r_t^2}{\sigma B_{p_0}},\
+\frac{A_{p_0}^2}{\sigma B_{p_0}}+\frac{2}{\sigma}
 \right).
 \label{eq:dyn_dqlm_v_cond}
 \end{equation}
+
+\paragraph{Algorithm S1 (dynamic DQLM MCMC).}
+The MCMC kernel leaves the augmented posterior in
+\eqref{eq:dyn_dqlm_joint} invariant; posterior summaries are Monte Carlo
+estimates from the retained finite chain.
+\begin{enumerate}[label=(\arabic*)]
+\item Initialize $\vect{\theta}_{0:T}$, $\vect{v}$, and $\sigma$.
+\item For $m=1,\ldots,N_{\mathrm{burn}}+N_{\mathrm{mcmc}}$:
+  \begin{enumerate}[label=(\alph*)]
+  \item sample $\vect{\theta}_{0:T}$ by FFBS using
+  \eqref{eq:dyn_dqlm_pseudo};
+  \item sample $\sigma$ from \eqref{eq:dyn_dqlm_sigma_cond};
+  \item sample each $v_t$ from \eqref{eq:dyn_dqlm_v_cond};
+  \item retain draws after burn-in.
+  \end{enumerate}
+\item Return posterior samples and filtered/smoothed state summaries.
+\end{enumerate}
 
 \subsection{Mean-field VB and ELBO}
 
@@ -373,37 +369,56 @@ $q(v_t)=\GIG(1/2,\chi_t,\psi_t)$. Define
 \begin{equation}
 \kappa=\E_q(\sigma^{-1})=\frac{a_q}{b_q},\qquad
 \ell_t=\E_q(v_t^{-1}),\qquad
-\nu_t=\E_q(v_t).
+\bar v_t=\E_q(v_t).
 \end{equation}
+The state factor $q(\vect{\theta}_{0:T})$ is a joint Gaussian smoothing
+distribution, not a product over time. The latent-variable updates require
+only its marginal means and variances.
 The state factor is the Gaussian posterior of the auxiliary model
 \begin{equation}
-y_t^\star=\vect{f}_t^\T\vect{\theta}_t+\epsilon_t^\star,\qquad
+y_t^\star=\mat{F}_t^\top\vect{\theta}_t+\epsilon_t^\star,\qquad
 \epsilon_t^\star\sim\N(0,R_t^\star),
 \qquad
-y_t^\star=y_t-\frac{A_0}{\ell_t},\quad
-R_t^\star=\frac{B_0}{\kappa\ell_t}.
+y_t^\star=y_t-\frac{A_{p_0}}{\ell_t},\quad
+R_t^\star=\frac{B_{p_0}}{\kappa\ell_t}.
 \label{eq:dyn_dqlm_vb_pseudo}
 \end{equation}
 After Kalman smoothing, write
 $q(\vect{\theta}_t)=\N(\vect{m}_{t|T},\mat{C}_{t|T})$ and define
 \begin{align}
-\bar r_t &= y_t-\vect{f}_t^\T\vect{m}_{t|T},\\
+\bar r_t &= y_t-\mat{F}_t^\top\vect{m}_{t|T},\\
 \overline{r_t^2}
-&= \bar r_t^2+\vect{f}_t^\T\mat{C}_{t|T}\vect{f}_t.
+&= \bar r_t^2+\mat{F}_t^\top\mat{C}_{t|T}\mat{F}_t.
 \end{align}
 The remaining coordinate-ascent variational inference (CAVI) updates are
 \begin{align}
 q(v_t)&=\GIG\left(
 \frac{1}{2},\
-\frac{\kappa}{B_0}\overline{r_t^2},\
-\kappa\left(2+\frac{A_0^2}{B_0}\right)\right), \\
+\frac{\kappa}{B_{p_0}}\overline{r_t^2},\
+\kappa\left(2+\frac{A_{p_0}^2}{B_{p_0}}\right)\right), \\
 q(\sigma)&=\IG(a_q,b_q), \qquad
 a_q=a_\sigma+\frac{3T}{2},\\
-b_q&=b_\sigma+\sum_{t=1}^T\nu_t+
-\frac{1}{2B_0}\sum_{t=1}^T
-\left\{\ell_t\overline{r_t^2}-2A_0\bar r_t+A_0^2\nu_t\right\}.
+b_q&=b_\sigma+\sum_{t=1}^T\bar v_t+
+\frac{1}{2B_{p_0}}\sum_{t=1}^T
+\left\{\ell_t\overline{r_t^2}-2A_{p_0}\bar r_t+A_{p_0}^2\bar v_t\right\}.
 \label{eq:dyn_dqlm_vb_sigma}
 \end{align}
+
+\paragraph{Algorithm S2 (dynamic DQLM LDVB).}
+\begin{enumerate}[label=(\arabic*)]
+\item Initialize the variational parameters for $q(\vect{\theta}_{0:T})$,
+$q(\sigma)$, and $q(v_t)$.
+\item Repeat until convergence:
+  \begin{enumerate}[label=(\alph*)]
+  \item update $q(\vect{\theta}_{0:T})$ by Kalman smoothing under
+  \eqref{eq:dyn_dqlm_vb_pseudo};
+  \item update $q(v_t)$ for $t=1,\ldots,T$;
+  \item update $q(\sigma)$ using \eqref{eq:dyn_dqlm_vb_sigma};
+  \item monitor moment changes and, when enabled, $\elbo(q)$.
+  \end{enumerate}
+\item Draw approximate posterior samples from the fitted variational factors
+when requested by \code{n.samp}.
+\end{enumerate}
 
 The ELBO is
 \begin{align}
@@ -446,12 +461,12 @@ a_\sigma\log b_\sigma-\log\Gamma(a_\sigma)
 -T\bar\ell_\sigma-\kappa\sum_{t=1}^T\nu_t,\\
 \sum_{t=1}^T\E_q\{\log p(y_t\mid\vect{\theta}_t,\sigma,v_t)\}
 &=
--\frac{T}{2}\log(2\pi)-\frac{T}{2}\log B_0
+-\frac{T}{2}\log(2\pi)-\frac{T}{2}\log B_{p_0}
 -\frac{T}{2}\bar\ell_\sigma
 -\frac{1}{2}\sum_{t=1}^T\bar\ell_{v,t}\nonumber\\
 &\quad
--\frac{\kappa}{2B_0}\sum_{t=1}^T
-\left\{\ell_t\overline{r_t^2}-2A_0\bar r_t+A_0^2\nu_t\right\}.
+-\frac{\kappa}{2B_{p_0}}\sum_{t=1}^T
+\left\{\ell_t\overline{r_t^2}-2A_{p_0}\bar r_t+A_{p_0}^2\bar v_t\right\}.
 \label{eq:dyn_dqlm_elbo_terms}
 \end{align}
 The entropy terms are given by \eqref{eq:entropy_ig} for $q(\sigma)$ and by
@@ -470,7 +485,7 @@ s_t\sim\TNp(0,1), \\
 y_t\mid\vect{\theta}_t,\sigma,\gamma,v_t,s_t
 &\sim
 \N\left(
-\vect{f}_t^\T\vect{\theta}_t+C_\gamma\sigma|\gamma|s_t+A_\gamma v_t,\
+\mat{F}_t^\top\vect{\theta}_t+C_\gamma\sigma|\gamma|s_t+A_\gamma v_t,\
 \sigma B_\gamma v_t
 \right),
 \label{eq:dyn_exdqlm_obs}
@@ -489,7 +504,7 @@ p(\vect{\theta}_0)\prod_{t=1}^Tp(\vect{\theta}_t\mid\vect{\theta}_{t-1})
 Conditional on $(\vect{v},\vect{s},\sigma,\gamma)$,
 \begin{equation}
 \tilde y_t=y_t-A_\gamma v_t-C_\gamma\sigma|\gamma|s_t,\qquad
-R_t=\sigma B_\gamma v_t,
+R^y_t=\sigma B_\gamma v_t,
 \label{eq:dyn_exdqlm_pseudo}
 \end{equation}
 which again gives a linear Gaussian state-space model for
@@ -504,7 +519,7 @@ is the default exact-kernel path.
 
 \paragraph{Latent $v_t$.}
 Let
-$r_t=y_t-\vect{f}_t^\T\vect{\theta}_t-C_\gamma\sigma|\gamma|s_t$. Then
+$r_t=y_t-\mat{F}_t^\top\vect{\theta}_t-C_\gamma\sigma|\gamma|s_t$. Then
 \begin{equation}
 v_t\mid\cdot
 \sim
@@ -517,14 +532,14 @@ v_t\mid\cdot
 \end{equation}
 
 \paragraph{Latent $s_t$.}
-Let $y_t^\circ=y_t-\vect{f}_t^\T\vect{\theta}_t-A_\gamma v_t$ and
-$d_\gamma=C_\gamma\sigma|\gamma|$. Then
+Let $y_t^\circ=y_t-\mat{F}_t^\top\vect{\theta}_t-A_\gamma v_t$ and
+$D_\gamma=C_\gamma\sigma|\gamma|$. Then
 \begin{equation}
 s_t\mid\cdot\sim\TNp(m_{s,t},V_{s,t}),
 \qquad
-V_{s,t}=\left(1+\frac{d_\gamma^2}{\sigma B_\gamma v_t}\right)^{-1},
+V_{s,t}=\left(1+\frac{D_\gamma^2}{\sigma B_\gamma v_t}\right)^{-1},
 \qquad
-m_{s,t}=V_{s,t}\frac{d_\gamma y_t^\circ}{\sigma B_\gamma v_t}.
+m_{s,t}=V_{s,t}\frac{D_\gamma y_t^\circ}{\sigma B_\gamma v_t}.
 \label{eq:dyn_exdqlm_s_cond}
 \end{equation}
 
@@ -533,8 +548,8 @@ Given $(\vect{v},\vect{s},\sigma,\gamma)$, sample
 $\vect{\theta}_{0:T}$ by FFBS using \eqref{eq:dyn_exdqlm_pseudo}.
 
 \paragraph{Scale.}
-For fixed $\gamma$, let $y_t^\circ=y_t-\vect{f}_t^\T\vect{\theta}_t-A_\gamma v_t$
-and $u_t=C_\gamma|\gamma|s_t$. Then
+For fixed $\gamma$, let $y_t^\circ=y_t-\mat{F}_t^\top\vect{\theta}_t-A_\gamma v_t$
+and $c_{\gamma,t}=C_\gamma|\gamma|s_t$. Then
 \begin{equation}
 \sigma\mid\cdot
 \sim
@@ -546,7 +561,7 @@ where
 \lambda_\sigma &= -\left(a_\sigma+\frac{3T}{2}\right), \\
 \chi_\sigma &= 2b_\sigma+2\sum_{t=1}^T v_t+
 \sum_{t=1}^T\frac{(y_t^\circ)^2}{B_\gamma v_t},\\
-\psi_\sigma &= \sum_{t=1}^T\frac{u_t^2}{B_\gamma v_t}.
+\psi_\sigma &= \sum_{t=1}^T\frac{c_{\gamma,t}^2}{B_\gamma v_t}.
 \end{align}
 
 \paragraph{Skewness.}
@@ -558,13 +573,36 @@ The conditional kernel for $\gamma$ is
 \exp\left[
 -\sum_{t=1}^T
 \frac{
-\{y_t-\vect{f}_t^\T\vect{\theta}_t-A_\gamma v_t-C_\gamma\sigma|\gamma|s_t\}^2
+\{y_t-\mat{F}_t^\top\vect{\theta}_t-A_\gamma v_t-C_\gamma\sigma|\gamma|s_t\}^2
 }{2\sigma B_\gamma v_t}
 \right],
 \label{eq:dyn_exdqlm_gamma_kernel}
 \end{align}
 for $\gamma\in(L,U)$. The default sampler applies the bounded slice update in
 Section~\ref{sec:slice} directly to this kernel.
+
+\paragraph{Algorithm S3 (dynamic exDQLM MCMC).}
+The default $(\sigma,\gamma)$ update consists of an exact GIG update for
+$\sigma$ conditional on $\gamma$, followed by a bounded univariate slice update
+for $\gamma$. Joint random-walk alternatives are implemented, but they are not
+the default kernel summarized here.
+\begin{enumerate}[label=(\arabic*)]
+\item Initialize $\vect{\theta}_{0:T}$, $\vect{v}$, $\vect{s}$, $\sigma$, and
+$\gamma$.
+\item For each MCMC iteration:
+  \begin{enumerate}[label=(\alph*)]
+  \item sample $v_t$ from \eqref{eq:dyn_exdqlm_v_cond}, $t=1,\ldots,T$;
+  \item sample $s_t$ from \eqref{eq:dyn_exdqlm_s_cond}, $t=1,\ldots,T$;
+  \item sample $\vect{\theta}_{0:T}$ by FFBS using
+  \eqref{eq:dyn_exdqlm_pseudo};
+  \item sample $\sigma$ from \eqref{eq:dyn_exdqlm_sigma_cond};
+  \item sample $\gamma$ on $(L,U)$ using \eqref{eq:dyn_exdqlm_gamma_kernel};
+  \item retain draws after burn-in.
+  \end{enumerate}
+\item Return posterior samples and state summaries.
+\end{enumerate}
+Setting $\gamma=0$ drops the $s_t$ block and reduces the sampler to the
+AL/DQLM kernel in Algorithm S1.
 
 \subsection{Laplace-Delta VB approximation}
 
@@ -600,7 +638,7 @@ y_t\phi_t-\kappa_2-\kappa_4m_{s,t}m_{1/v,t}
 }{\phi_t}.
 \label{eq:dyn_exdqlm_vb_pseudo}
 \end{equation}
-If $\eta_t=\vect{f}_t^\T\vect{\theta}_t$, write
+If $\eta_t=\mat{F}_t^\top\vect{\theta}_t$, write
 $m_{\eta,t}=\E(\eta_t)$, $S_{\eta,t}=\Var(\eta_t)$,
 $m_{\Delta,t}=y_t-m_{\eta,t}$, and
 $S_{\Delta,t}=m_{\Delta,t}^2+S_{\eta,t}$. Then
@@ -621,17 +659,43 @@ m_{s,t}^{\mathrm{VB}}
 The nonconjugate factor $q(\sigma,\gamma)$ is approximated by a
 Laplace-Delta step on transformed coordinates
 \begin{equation}
-u=\log\sigma,\qquad
+\ell_\sigma=\log\sigma,\qquad
 z_\gamma=\logit\left(\frac{\gamma-L}{U-L}\right).
 \label{eq:dyn_exdqlm_ld_transform}
 \end{equation}
 The transformed objective is the expected complete log-joint plus the
-Jacobian
-\begin{equation}
-u+\log\{\dd\gamma/\dd z_\gamma\}.
-\end{equation}
+Jacobian,
+\begin{align}
+h_z(\ell_\sigma,z_\gamma)
+&=
+\E_{-\sigma,\gamma}\{\log p(\vect{y},\vect{\theta}_{0:T},
+\vect{v},\vect{s},\sigma,\gamma)\} \nonumber\\
+&\quad
++\ell_\sigma+\log(U-L)+\log r+\log(1-r),
+\qquad r=\expit(z_\gamma).
+\label{eq:dyn_exdqlm_ld_objective}
+\end{align}
 The package stores the transformed mode, the approximate covariance matrix,
 Delta-method moments, and ELBO components.
+
+\paragraph{Algorithm S4 (dynamic exDQLM LDVB).}
+\begin{enumerate}[label=(\arabic*)]
+\item Initialize variational parameters for $q(\vect{\theta}_{0:T})$,
+$q(v_t)$, $q(s_t)$, and $q(\sigma,\gamma)$.
+\item Repeat until convergence:
+  \begin{enumerate}[label=(\alph*)]
+  \item update $q(\vect{\theta}_{0:T})$ by Kalman smoothing under
+  \eqref{eq:dyn_exdqlm_vb_pseudo};
+  \item update $q(v_t)$ and $q(s_t)$ using \eqref{eq:dyn_exdqlm_vb_vs};
+  \item update $q(\sigma,\gamma)$ by the Laplace-Delta approximation to
+  \eqref{eq:dyn_exdqlm_ld_objective};
+  \item monitor moment changes and, when enabled, $\elbo(q)$.
+  \end{enumerate}
+\item Draw approximate posterior samples from the fitted variational factors
+when requested by \code{n.samp}.
+\end{enumerate}
+In the AL special case, the nonconjugate $(\sigma,\gamma)$ block is replaced
+by the inverse-gamma $q(\sigma)$ update in Algorithm S2.
 
 \paragraph{ELBO.}
 The LDVB ELBO has the block decomposition
@@ -704,18 +768,102 @@ $\bar\ell_B$, $\bar\ell_\pi$, and $\E(\sigma^{-1})$ terms are evaluated under
 the Laplace-Delta approximation in \eqref{eq:entropy_ld} and
 \eqref{eq:delta_generic}.
 
-\section{Static AL and exAL regression with ridge priors}
+\section{Transfer-function exDQLM by state augmentation}
+\label{sec:transfer_function}
+
+Transfer-function inference uses the same AL/exAL likelihood and latent-variable
+updates as the dynamic models above. The only change is the state-space
+construction. Let $x_t\in\R^k$ be the input vector, $\zeta_t$ the transfer
+state, and $\psi_t\in\R^k$ the input-effect state. For fixed transfer rate
+$\lambda$, the augmented model uses
+\begin{align}
+\widetilde{\mat{F}}_t^\top
+&=(\mat{F}_t^\top,\ 1,\ 0_k^\top),&
+\widetilde{\vect{\theta}}_t^\top
+&=(\vect{\theta}_t^\top,\ \zeta_t,\ \psi_t^\top),
+\label{eq:tf_aug_state}\\
+\widetilde{\mat{G}}_t
+&=
+\operatorname{blockdiag}\left\{
+\mat{G}_t,\,
+\begin{pmatrix}
+\lambda & x_t^\top\\
+0_k & I_k
+\end{pmatrix}
+\right\},&
+\widetilde{\mat{W}}_t
+&=\operatorname{blockdiag}\{\mat{W}_t^\theta,\omega_t,W_t^\psi\}.
+\label{eq:tf_aug_mats}
+\end{align}
+The prior for $(\zeta_0,\psi_0^\top)^\top$ is
+$\N(m_0^{\mathrm{tf}},C_0^{\mathrm{tf}})$ and is appended to the base
+state prior. Conditional on $\lambda$, the transfer-function model is an
+ordinary exDQLM on the augmented state $\widetilde{\vect{\theta}}_t$.
+Therefore Algorithms S3 and S4 apply after replacing
+$(\mat{F}_t,\mat{G}_t,\mat{W}_t,\vect{\theta}_t)$ by
+$(\widetilde{\mat{F}}_t,\widetilde{\mat{G}}_t,\widetilde{\mat{W}}_t,
+\widetilde{\vect{\theta}}_t)$.
+
+\begin{table}[!htb]
+\centering
+\begin{tabularx}{0.82\textwidth}{@{}lX@{}}
+\toprule
+Mathematical object & Package input \\
+\midrule
+$x_t$ & \code{X} \\
+$\lambda$ & \code{lam} \\
+$(\delta_\zeta,\delta_\psi)$ & \code{tf.df} \\
+$m_0^{\mathrm{tf}}$ & \code{tf.m0} \\
+$C_0^{\mathrm{tf}}$ & \code{tf.C0} \\
+median decay time & \code{median.kt} \\
+\bottomrule
+\end{tabularx}
+\caption{Transfer-function quantities and their corresponding package inputs.}
+\label{tab:supp_tf_inputs}
+\end{table}
+
+\paragraph{Algorithm S5 (transfer-function exDQLM).}
+\begin{enumerate}[label=(\arabic*)]
+\item Construct $\widetilde{\mat{F}}_t$, $\widetilde{\mat{G}}_t$,
+$\widetilde{\mat{W}}_t$, and $\widetilde{\vect{\theta}}_t$ from
+\eqref{eq:tf_aug_state}--\eqref{eq:tf_aug_mats}.
+\item Set the augmented initial prior.
+\item Run the selected fitting routine: MCMC uses Algorithm S3 and LDVB uses
+Algorithm S4.
+\item Return summaries for both the base state and the transfer states.
+\end{enumerate}
+The transfer-function extension changes only the state-space matrices; the
+observation likelihood and latent-variable updates are unchanged.
+
+\section{Static AL and exAL regression with Gaussian priors}
 \label{sec:static_ridge}
 
 \subsection{Model hierarchy and full joint}
 
-Let $\mat{X}\in\R^{n\times p}$ have row vectors $\vect{x}_i^\T$, and let
+Let $\mat{X}\in\R^{n\times p}$ have row vectors $\vect{x}_i^\top$, and let
 $\vect{\beta}\in\R^p$. The ridge/Gaussian coefficient prior is
 \begin{equation}
-\vect{\beta}\sim\N(\vect{b}_0,\mat{B}_0),\qquad
-\vect{b}_0\in\R^p,\quad \mat{B}_0\in\R^{p\times p}.
+\vect{\beta}\sim\N(\vect{b}_{\beta,0},\mat{V}_{\beta,0}),\qquad
+\vect{b}_{\beta,0}\in\R^p,\quad \mat{V}_{\beta,0}\in\R^{p\times p}.
 \label{eq:static_beta_ridge}
 \end{equation}
+In the package interface, the same Gaussian update is used for
+\code{beta_prior = "ridge"}. When \code{beta_prior = "rhs_ns"}, the diagonal
+prior precision in this update is replaced by the RHS-NS expected precision
+described in Section~\ref{sec:static_rhs}.
+\begin{table}[!htb]
+\centering
+\begin{tabularx}{0.88\textwidth}{@{}lXcc@{}}
+\toprule
+\texttt{beta\_prior} & Coefficient prior & MCMC & LDVB \\
+\midrule
+\texttt{ridge} & Gaussian/ridge prior in \eqref{eq:static_beta_ridge}. & yes & yes \\
+\texttt{rhs\_ns} & Conjugate RHS-NS prior in Section~\ref{sec:static_rhs}. & yes & yes \\
+\bottomrule
+\end{tabularx}
+\caption{Static coefficient-prior options covered by the supplement.}
+\label{tab:supp_static_prior_menu}
+\end{table}
 Under the exAL likelihood,
 \begin{align}
 v_i\mid\sigma &\sim \Exp(\text{rate}=1/\sigma),\qquad
@@ -723,13 +871,13 @@ s_i\sim\TNp(0,1),\\
 y_i\mid\vect{\beta},\sigma,\gamma,v_i,s_i
 &\sim
 \N\left(
-\vect{x}_i^\T\vect{\beta}+C_\gamma\sigma|\gamma|s_i+A_\gamma v_i,\
+\vect{x}_i^\top\vect{\beta}+C_\gamma\sigma|\gamma|s_i+A_\gamma v_i,\
 \sigma B_\gamma v_i
 \right).
 \label{eq:static_exal_hierarchy}
 \end{align}
 The static AL model is obtained by setting $\gamma=0$, removing $s_i$, and
-using $A_0,B_0$. The exAL full joint is
+using $A_{p_0},B_{p_0}$. The exAL full joint is
 \begin{align}
 p(\vect{\beta},\sigma,\gamma,\vect{v},\vect{s},\vect{y})
 &=
@@ -748,13 +896,13 @@ y_i^\star=y_i-C_\gamma\sigma|\gamma|s_i-A_\gamma v_i,\qquad
 w_i=(\sigma B_\gamma v_i)^{-1}.
 \end{equation}
 Let $\mat{W}=\diag(w_1,\ldots,w_n)$ and
-$\vect{y}^\star=(y_1^\star,\ldots,y_n^\star)^\T$. Then
+$\vect{y}^\star=(y_1^\star,\ldots,y_n^\star)^\top$. Then
 \begin{align}
 \mat{\Sigma}_{\beta\mid\cdot}
-&=\left(\mat{B}_0^{-1}+\mat{X}^\T\mat{W}\mat{X}\right)^{-1},\\
+&=\left(\mat{V}_{\beta,0}^{-1}+\mat{X}^\top\mat{W}\mat{X}\right)^{-1},\\
 \vect{m}_{\beta\mid\cdot}
 &=\mat{\Sigma}_{\beta\mid\cdot}
-\left(\mat{B}_0^{-1}\vect{b}_0+\mat{X}^\T\mat{W}\vect{y}^\star\right),\\
+\left(\mat{V}_{\beta,0}^{-1}\vect{b}_{\beta,0}+\mat{X}^\top\mat{W}\vect{y}^\star\right),\\
 \vect{\beta}\mid\cdot
 &\sim\N(\vect{m}_{\beta\mid\cdot},\mat{\Sigma}_{\beta\mid\cdot}).
 \label{eq:static_beta_cond}
@@ -766,11 +914,11 @@ s_i\mid\cdot
 V_{s,i}
 &=\left(1+\frac{\sigma D_\gamma^2}{B_\gamma v_i}\right)^{-1},\\
 m_{s,i}
-&=V_{s,i}\frac{D_\gamma(y_i-\vect{x}_i^\T\vect{\beta}-A_\gamma v_i)}
+&=V_{s,i}\frac{D_\gamma(y_i-\vect{x}_i^\top\vect{\beta}-A_\gamma v_i)}
 {B_\gamma v_i},
 \label{eq:static_exal_s_cond}
 \end{align}
-and, with $r_i=y_i-\vect{x}_i^\T\vect{\beta}-\sigma D_\gamma s_i$,
+and, with $r_i=y_i-\vect{x}_i^\top\vect{\beta}-\sigma D_\gamma s_i$,
 \begin{equation}
 v_i\mid\cdot
 \sim
@@ -781,7 +929,7 @@ v_i\mid\cdot
 \right).
 \label{eq:static_exal_v_cond}
 \end{equation}
-For fixed $\gamma$, define $t_i=y_i-\vect{x}_i^\T\vect{\beta}-A_\gamma v_i$.
+For fixed $\gamma$, define $t_i=y_i-\vect{x}_i^\top\vect{\beta}-A_\gamma v_i$.
 Then
 \begin{equation}
 \sigma\mid\cdot
@@ -817,17 +965,35 @@ For the AL special case, the Gibbs updates reduce to
 \IG\left(
 a_\sigma+\frac{3n}{2},\
 b_\sigma+\sum_{i=1}^n v_i+
-\sum_{i=1}^n\frac{(y_i-\vect{x}_i^\T\vect{\beta}-A_0v_i)^2}{2B_0v_i}
+\sum_{i=1}^n\frac{(y_i-\vect{x}_i^\top\vect{\beta}-A_{p_0}v_i)^2}{2B_{p_0}v_i}
 \right),\\
 v_i\mid\cdot
 &\sim
 \GIG\left(
 \frac{1}{2},\
-\frac{(y_i-\vect{x}_i^\T\vect{\beta})^2}{\sigma B_0},\
-\frac{A_0^2}{\sigma B_0}+\frac{2}{\sigma}
+\frac{(y_i-\vect{x}_i^\top\vect{\beta})^2}{\sigma B_{p_0}},\
+\frac{A_{p_0}^2}{\sigma B_{p_0}}+\frac{2}{\sigma}
 \right).
 \label{eq:static_al_mcmc}
 \end{align}
+
+\paragraph{Algorithm S6 (static AL/exAL MCMC).}
+\begin{enumerate}[label=(\arabic*)]
+\item Initialize $\vect{\beta}$, $\vect{v}$, $\vect{s}$, $\sigma$, and
+$\gamma$; omit $\vect{s}$ and fix $\gamma=0$ for the AL path.
+\item For each MCMC iteration:
+  \begin{enumerate}[label=(\alph*)]
+  \item sample $\vect{\beta}$ from \eqref{eq:static_beta_cond};
+  \item sample $v_i$ for $i=1,\ldots,n$;
+  \item for exAL, sample $s_i$ for $i=1,\ldots,n$;
+  \item sample $\sigma$;
+  \item for exAL, sample $\gamma$ by bounded slice sampling;
+  \item if \code{beta_prior = "rhs_ns"}, update the RHS-NS scale block in
+  Section~\ref{sec:static_rhs};
+  \item retain draws after burn-in.
+  \end{enumerate}
+\item Return coefficient, latent-variable, and scale posterior samples.
+\end{enumerate}
 
 \subsection{Laplace-Delta VB updates and ELBO}
 
@@ -846,18 +1012,18 @@ y_i\kappa_1\E(v_i^{-1})
 -\kappa_4\E(v_i^{-1})\E(s_i)
 -\kappa_2,\\
 \mat{\Sigma}_\beta
-&=\left(\mat{B}_0^{-1}+\mat{X}^\T\diag(\omega_1,\ldots,\omega_n)\mat{X}\right)^{-1},\\
+&=\left(\mat{V}_{\beta,0}^{-1}+\mat{X}^\top\diag(\omega_1,\ldots,\omega_n)\mat{X}\right)^{-1},\\
 \vect{m}_\beta
 &=\mat{\Sigma}_\beta
-\left(\mat{B}_0^{-1}\vect{b}_0+\mat{X}^\T\vect{\eta}\right),
+\left(\mat{V}_{\beta,0}^{-1}\vect{b}_{\beta,0}+\mat{X}^\top\vect{\eta}\right),
 \label{eq:static_exal_vb_beta}
 \end{align}
-where $\vect{\eta}=(\eta_1,\ldots,\eta_n)^\T$. The $q(v_i)$ and $q(s_i)$
+where $\vect{\eta}=(\eta_1,\ldots,\eta_n)^\top$. The $q(v_i)$ and $q(s_i)$
 updates are also closed form conditional on moments of $q(\sigma,\gamma)$.
 Let
 \begin{equation}
-\bar r_i=y_i-\vect{x}_i^\T\vect{m}_\beta,\qquad
-\overline{r_i^2}=\bar r_i^2+\vect{x}_i^\T\mat{\Sigma}_\beta\vect{x}_i.
+\bar r_i=y_i-\vect{x}_i^\top\vect{m}_\beta,\qquad
+\overline{r_i^2}=\bar r_i^2+\vect{x}_i^\top\mat{\Sigma}_\beta\vect{x}_i.
 \end{equation}
 Then
 \begin{align}
@@ -895,20 +1061,37 @@ where
 \bar c(\gamma)
 &=2b_\sigma+2\sum_{i=1}^n\E(v_i)
 +\sum_{i=1}^n
-\frac{\E\{(y_i-\vect{x}_i^\T\vect{\beta}-A_\gamma v_i)^2/v_i\}}
+\frac{\E\{(y_i-\vect{x}_i^\top\vect{\beta}-A_\gamma v_i)^2/v_i\}}
 {B_\gamma},\\
 \bar d(\gamma)
 &=\sum_{i=1}^n\frac{C_\gamma^2\gamma^2}{B_\gamma}\E\{s_i^2/v_i\},\\
 \bar e(\gamma)
 &=\sum_{i=1}^n
 \frac{C_\gamma|\gamma|}{B_\gamma}
-\E\{s_i(y_i-\vect{x}_i^\T\vect{\beta}-A_\gamma v_i)/v_i\}.
+\E\{s_i(y_i-\vect{x}_i^\top\vect{\beta}-A_\gamma v_i)/v_i\}.
 \end{align}
 This factor is approximated by the same Laplace-Delta method as in the
 dynamic exDQLM. The AL path sets $\gamma=0$ and uses
 $q(\vect{\beta})q(\sigma)\prod_iq(v_i)$ with the same closed-form updates as
 Section~\ref{sec:dyn_dqlm}, replacing state smoothing moments by
-$\E\{(y_i-\vect{x}_i^\T\vect{\beta})^2\}$.
+$\E\{(y_i-\vect{x}_i^\top\vect{\beta})^2\}$.
+
+\paragraph{Algorithm S7 (static AL/exAL LDVB).}
+\begin{enumerate}[label=(\arabic*)]
+\item Initialize $q(\vect{\beta})$, the latent-variable factors, the scale
+factors, and the $(\sigma,\gamma)$ block.
+\item Repeat until convergence:
+  \begin{enumerate}[label=(\alph*)]
+  \item update $q(\vect{\beta})$ using \eqref{eq:static_exal_vb_beta};
+  \item update $q(v_i)$ and, for exAL, $q(s_i)$ using
+  \eqref{eq:static_exal_vb_vs};
+  \item update $q(\sigma)$ for AL or $q(\sigma,\gamma)$ for exAL;
+  \item if \code{beta_prior = "rhs_ns"}, update the RHS-NS factors in
+  Section~\ref{sec:static_rhs};
+  \item monitor moment changes and $\elbo(q)$.
+  \end{enumerate}
+\item Draw approximate posterior samples when requested.
+\end{enumerate}
 
 The static exAL ELBO is computed from the same blocks as the dynamic exDQLM,
 with the Gaussian state factor replaced by the Gaussian coefficient factor.
@@ -920,8 +1103,8 @@ $m_{v,i}=\E(v_i)$, $m_{1/v,i}=\E(v_i^{-1})$,
 $m_{\log v,i}=\E(\log v_i)$, $m_{s,i}=\E(s_i)$, and
 $m_{s^2,i}=\E(s_i^2)$. Also define
 \begin{equation}
-t_i=y_i-\vect{x}_i^\T\vect{m}_\beta,\qquad
-q_i=\vect{x}_i^\T\mat{\Sigma}_\beta\vect{x}_i.
+t_i=y_i-\vect{x}_i^\top\vect{m}_\beta,\qquad
+q_i=\vect{x}_i^\top\mat{\Sigma}_\beta\vect{x}_i.
 \end{equation}
 Then
 \begin{align}
@@ -1012,15 +1195,20 @@ For $j\in\mathcal{A}$, the \code{rhs_ns} hierarchy is
 \zeta^2&\sim\IG(a_\zeta,b_\zeta),
 \label{eq:rhs_ns_hierarchy}
 \end{align}
-unless $\zeta^2$ is fixed by the user. The resulting prior precision
+unless $\zeta^2$ is fixed by the user. The implementation includes the
+scale-dependent Gaussian log-normalizing terms shown in the ELBO contribution
+below. Thus the proportionality in \eqref{eq:rhs_ns_hierarchy} denotes the
+coefficient kernel, while the surrounding scale updates and ELBO use the
+corresponding normal-density contributions. The resulting prior precision
 contribution for active coefficients is
 \begin{equation}
-\pi_j=\frac{1}{\tau^2\lambda_j^2}+\frac{1}{\zeta^2}.
+\omega^{\mathrm{prior}}_j=\frac{1}{\tau^2\lambda_j^2}+\frac{1}{\zeta^2}.
 \label{eq:rhs_ns_precision}
 \end{equation}
 Consequently, the $\vect{\beta}$ update in MCMC or VB is obtained from the
-static Gaussian update after replacing $\mat{B}_0^{-1}$ by a diagonal precision
-matrix with active entries $\pi_j$ or their variational expectations.
+static Gaussian update after replacing $\mat{V}_{\beta,0}^{-1}$ by a diagonal precision
+matrix with active entries $\omega^{\mathrm{prior}}_j$ or their variational
+expectations.
 
 \subsection{RHS-NS MCMC updates}
 
@@ -1218,10 +1406,193 @@ inverse-gamma. This is the RHS-NS component of the full static-model ELBO; the
 likelihood, latent-variable, and $(\sigma,\gamma)$ terms are added by the
 surrounding static AL or exAL variational routine.
 
-\section{Bounded slice sampling and Laplace-Delta blocks}
-\label{sec:slice}
+\section{Forecasting, diagnostics, and posterior-predictive synthesis}
+\label{sec:forecast_diagnostics_synthesis}
+
+\subsection{Forecasting}
+
+For a posterior draw $m$ at forecast origin $\tilde t$, the state forecast
+recursion in the main article gives
+\begin{equation}
+\theta_{\tilde t+k}^{(m)}
+\sim
+\N\{a_{\tilde t}^{(m)}(k),R_{\tilde t}^{(m)}(k)\},
+\qquad k=1,\ldots,K.
+\end{equation}
+Given a forecasted state draw, posterior predictive draws are generated from
+\begin{equation}
+Y_{\tilde t+k}^{\mathrm{rep},(m)}
+\sim
+\exAL_{p_0}\{
+\mat{F}_{\tilde t+k}^\top\theta_{\tilde t+k}^{(m)},
+\sigma^{(m)},\gamma^{(m)}
+\}.
+\label{eq:forecast_postpred}
+\end{equation}
+For the AL/DQLM special case, set $\gamma^{(m)}=0$. The function
+\code{exdqlmForecast()} implements this recursion for MCMC and VB fitted
+objects; for VB fits, the posterior draws are replaced by draws from the fitted
+variational factors.
+
+\subsection{Diagnostics}
+
+The dynamic diagnostics use the fitted one-step-ahead sequence produced by the
+filtering recursion. In particular, the PIT value reported at time $t$ is
+\begin{equation}
+\widehat u_t =
+\Pr\{Y_t\le y_t\mid y_{1:t-1},
+\widehat v_{1:T},\widehat s_{1:T},\widehat\sigma,\widehat\gamma\},
+\label{eq:pit_plugin}
+\end{equation}
+where hats denote the fitted plug-in summaries used by the diagnostic routine.
+The QQ plot, ACF plot, KL divergence, and standardized forecast-error plot are
+computed from this diagnostic sequence rather than from posterior uncertainty
+bands for residuals.
+
+For predictive draws $y_t^{(1)},\ldots,y_t^{(M)}$, the empirical CRPS estimator
+is
+\begin{equation}
+\widehat{\CRPS}_t
+=
+\frac{1}{M}\sum_{m=1}^M |y_t^{(m)}-y_t^{\mathrm{obs}}|
+-
+\frac{1}{2M^2}\sum_{m=1}^M\sum_{\ell=1}^M
+|y_t^{(m)}-y_t^{(\ell)}|.
+\label{eq:crps_estimator}
+\end{equation}
+The reported CRPS is the average of \eqref{eq:crps_estimator} over the
+diagnostic time points \citep{gneiting2007}. For target quantile $p_0$, the
+posterior predictive loss criterion used by the package is
+\begin{equation}
+\widehat{\pplc}
+=
+\sum_t
+\frac{1}{M}\sum_{m=1}^M
+\rho_{p_0}\{y_t^{\mathrm{obs}}-y_t^{\mathrm{rep},(m)}\},
+\label{eq:pplc_estimator}
+\end{equation}
+where $\rho_{p_0}$ is the check-loss function \citep{gelfand1998model}.
+Dynamic diagnostic summaries are returned by \code{exdqlmDiagnostics()}.
+The static diagnostic routine returns check-loss summaries and
+reference-quantile errors when a reference quantile is supplied.
+
+\subsection{Posterior-predictive synthesis}
+
+The function \code{quantileSynthesis()} combines posterior predictive draws
+from separately fitted models at ordered levels $p_1<\cdots<p_K$. For each time
+point and draw index, it forms the quantile-specific predictive curve, applies
+the requested monotonicity correction when fitted quantiles cross, and
+interpolates across $p$ to obtain draws from one posterior predictive
+distribution. The monotonicity correction uses isotonic adjustment or monotone
+rearrangement \citep{barlow1972,chernozhukov2010}.
+
+\paragraph{Algorithm S8 (posterior-predictive synthesis).}
+\begin{enumerate}[label=(\arabic*)]
+\item Collect posterior predictive draw matrices from fitted models at
+$p_1<\cdots<p_K$.
+\item For each time point and draw index, form the quantile-specific predictive
+curve.
+\item Apply the requested monotonicity correction.
+\item Interpolate across quantile levels.
+\item Return synthesized posterior predictive draws and summaries.
+\end{enumerate}
+
+\section{Numerical and ELBO implementation blocks}
+\label{sec:numerical_blocks}
+
+\subsection{Reusable moment and entropy formulas}
+\label{sec:elbo_building_blocks}
+
+The VB routines monitor
+\begin{equation}
+\elbo(q)=\E_q\{\log p(\text{complete data})\}+H(q),
+\qquad
+H(q)=-\E_q\{\log q\}.
+\end{equation}
+The following moment and entropy formulas are reused by the dynamic and static
+algorithms.
+
+If $\vect{x}\sim\N(\vect{m},\mat{V})$ with
+$\vect{x}\in\R^d$, then
+\begin{equation}
+H\{\N(\vect{m},\mat{V})\}
+=\frac{1}{2}\{d(1+\log 2\pi)+\log|\mat{V}|\}.
+\label{eq:entropy_gaussian}
+\end{equation}
+If $x\sim\IG(a,b)$ under the parameterization in Section S2, then
+\begin{equation}
+\E(x^{-1})=\frac{a}{b},\qquad
+\E(\log x)=\log b-\psi(a),
+\end{equation}
+and
+\begin{equation}
+H\{\IG(a,b)\}
+=a+\log b+\log\Gamma(a)-(a+1)\psi(a),
+\label{eq:entropy_ig}
+\end{equation}
+where $\psi(\cdot)$ is the digamma function.
+
+If $x\sim\GIG(\lambda,\chi,\psi_{\mathrm{GIG}})$ and
+$z=(\chi\psi_{\mathrm{GIG}})^{1/2}$, let
+$m_x=\E(x)$, $m_{1/x}=\E(x^{-1})$, and
+$m_{\log x}=\E(\log x)$. Then
+\begin{align}
+H\{\GIG(\lambda,\chi,\psi_{\mathrm{GIG}})\}
+&=
+\log\{2K_\lambda(z)\}
+-\frac{\lambda}{2}\log\left(\frac{\psi_{\mathrm{GIG}}}{\chi}\right)
+-(\lambda-1)m_{\log x} \nonumber\\
+&\quad+
+\frac{1}{2}\{\chi m_{1/x}+\psi_{\mathrm{GIG}} m_x\}.
+\label{eq:entropy_gig}
+\end{align}
+The moments $m_x$ and $m_{1/x}$ follow from \eqref{eq:gig_moments};
+$m_{\log x}$ is the derivative of $\log K_\lambda(z)$ with respect to
+$\lambda$ plus $\frac{1}{2}\log(\chi/\psi_{\mathrm{GIG}})$, and is evaluated
+numerically in the package.
+
+If $x\sim\TNp(m,V)$, let $a=V^{1/2}$, $z=m/a$, and
+$\Lambda(z)=\phi(z)/\Phi(z)$. The entropy is
+\begin{equation}
+H\{\TNp(m,V)\}
+=
+\frac{1}{2}\log(2\pi V)+\log\Phi(z)
++\frac{1}{2}\{1-z\Lambda(z)\}.
+\label{eq:entropy_tnp}
+\end{equation}
+This closed form is used for the truncated-normal latent factors; numerically,
+the package evaluates the required moments using stable tail-probability
+guards.
+
+For exAL VB, the nonconjugate $(\sigma,\gamma)$ block is handled on
+transformed coordinates
+\begin{equation}
+\ell_\sigma=\log\sigma,\qquad
+z_\gamma=\logit\left(\frac{\gamma-L}{U-L}\right).
+\end{equation}
+If $\vect{z}=(z_\gamma,\ell_\sigma)^\top$ has Laplace approximation
+$q_z(\vect{z})=\N(\hat{\vect{z}},\mat{\Sigma}_z)$ and
+$(\gamma,\sigma)=T(\vect{z})$, then the entropy contribution on the original
+scale is approximated as
+\begin{equation}
+H\{q(\sigma,\gamma)\}
+\approx
+\frac{1}{2}\{2(1+\log 2\pi)+\log|\mat{\Sigma}_z|\}
++\E_{q_z}\{\log|J_T(\vect{z})|\},
+\label{eq:entropy_ld}
+\end{equation}
+where
+\begin{equation}
+\log|J_T(\vect{z})|
+=\ell_\sigma+\log(U-L)+\log r+\log(1-r),
+\qquad r=\expit(z_\gamma).
+\end{equation}
+The final expectation in \eqref{eq:entropy_ld}, and other smooth expectations
+of functions of $(\sigma,\gamma)$, are evaluated by the same second-order
+Delta approximation used in the LDVB updates.
 
 \subsection{Bounded univariate slice sampler}
+\label{sec:slice}
 
 Let $h(x)$ be an unnormalized log-density on a finite interval $[a,b]$, and let
 $x_0\in(a,b)$. The bounded slice update implemented in the package is:
@@ -1238,9 +1609,7 @@ accept $x_1$. Otherwise shrink the interval to $[L,x_1]$ if $x_1>x_0$ and to
 $[x_1,R]$ otherwise.
 \end{enumerate}
 For dynamic and static exAL MCMC fits, this sampler is applied to the
-one-dimensional $\gamma$ target on $(L,U)$ by default. The same bounded-slice
-utility can be reused by other internal one-dimensional nonconjugate blocks;
-the user-facing algorithms covered here are the exAL updates described above.
+one-dimensional $\gamma$ target on $(L,U)$ by default.
 
 \subsection{Laplace-Delta approximation}
 
@@ -1268,29 +1637,42 @@ This is used for smooth functions of $(\sigma,\gamma)$ in dynamic and static
 exAL models.
 
 \section{Package-to-algorithm map}
+\label{sec:package_algorithm_map}
 
-The formulas above describe the conditional targets and variational coordinate
-targets used by the package. The current implementation also exposes numerical
-warmup and scheduling controls, for example temporary holds of selected latent,
-state, or $(\sigma,\gamma)$ blocks in difficult early iterations. These controls
-change only when a target is updated, not the model or the target distributions
-displayed in this supplement.
+Sections S3--S9 define the targets used by the exported fitting and
+post-processing functions. Some routines temporarily hold or schedule selected
+blocks during early iterations for numerical stability. These controls affect
+update timing only; they do not change the posterior target, full conditional
+distributions, or coordinate optima listed in this supplement.
 
 \begin{table}[!htb]
 \centering
-\begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}>{\raggedright\arraybackslash}X@{}}
+\begingroup
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}p{0.30\textwidth}p{0.14\textwidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
-Function & Main algorithmic role \\
+Function & Section & Algorithmic block \\
 \midrule
-\code{exdqlmMCMC()} & Dynamic DQLM/exDQLM posterior simulation: FFBS for states, Gibbs for conjugate latent/scale blocks, and a default bounded-slice update for $\gamma$ when exAL is used, with random-walk alternatives exposed. \\
-\code{exdqlmLDVB()} & Dynamic DQLM/exDQLM mean-field VB: CAVI for Gaussian/GIG/truncated-normal blocks and Laplace-Delta for $(\sigma,\gamma)$ in exAL. \\
-\code{exalStaticMCMC()} & Static AL/exAL posterior simulation: Gaussian coefficient update, Gibbs latent/scale updates, RHS-NS inverse-gamma scale updates when selected, and a default bounded-slice update for $\gamma$ in exAL, with random-walk alternatives exposed. \\
-\code{exalStaticLDVB()} & Static AL/exAL mean-field VB: Gaussian coefficient factor, CAVI latent and RHS-NS scale factors, and Laplace-Delta for $(\sigma,\gamma)$ in exAL. \\
+\texttt{exdqlmMCMC()} & S3--S4 & Dynamic DQLM/exDQLM MCMC; Algorithms S1 and S3. \\
+\texttt{exdqlmLDVB()} & S3--S4 & Dynamic DQLM/exDQLM LDVB; Algorithms S2 and S4. \\
+\texttt{exdqlmTransferMCMC()} & S5 & Transfer-function MCMC; Algorithm S5 with Algorithm S3. \\
+\texttt{exdqlmTransferLDVB()} & S5 & Transfer-function LDVB; Algorithm S5 with Algorithm S4. \\
+\texttt{exalStaticMCMC()} & S6--S7 & Static AL/exAL MCMC; Algorithm S6. \\
+\texttt{exalStaticLDVB()} & S6--S7 & Static AL/exAL LDVB; Algorithm S7. \\
+\texttt{exdqlmForecast()} & S8.1 & Forecast recursion and predictive draws. \\
+\texttt{exdqlmDiagnostics()} & S8.2 & Dynamic PIT, CRPS, and pplc diagnostics. \\
+\texttt{exalStaticDiagnostics()} & S8.2 & Static check-loss and reference-quantile diagnostics. \\
+\texttt{quantileSynthesis()} & S8.3 & Posterior-predictive synthesis; Algorithm S8. \\
+\begin{tabular}[t]{@{}l@{}}\texttt{dexal()}, \texttt{pexal()}\\ \texttt{qexal()}, \texttt{rexal()}\end{tabular} & S2 & exAL distribution evaluation and simulation. \\
+\texttt{get\_gamma\_bounds()} & S2 & Roots $L,U$ for a fixed $p_0$. \\
 \bottomrule
 \end{tabularx}
-\caption{Connection between the main \pkg{exdqlm} functions and the
-algorithmic blocks described in this supplement.}
+\endgroup
+\caption{Mapping between exported \pkg{exdqlm} functions and the algorithmic
+blocks derived in this supplement.}
 \label{tab:supp_algorithm_map}
 \end{table}
+
+\bibliography{bibl}
 
 \end{document}
