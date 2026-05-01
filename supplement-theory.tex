@@ -1,29 +1,18 @@
-\documentclass[11pt]{article}
+\documentclass[nojss,noheadings]{jss}
 
-\usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{amsmath,amssymb,amsfonts}
 \usepackage{bm}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{enumitem}
-\usepackage{xcolor}
-\usepackage{hyperref}
+\raggedbottom
 
-\hypersetup{
-  colorlinks=true,
-  linkcolor=blue!55!black,
-  citecolor=blue!55!black,
-  urlcolor=blue!55!black
-}
-
-\newcommand{\pkg}[1]{\textsf{#1}}
-\newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Rp}{\mathbb{R}_{+}}
 \newcommand{\Ind}{\mathbb{I}}
 \newcommand{\T}{\mathsf{T}}
 \newcommand{\dd}{\mathrm{d}}
-\newcommand{\E}{\mathbb{E}}
+\renewcommand{\E}{\mathbb{E}}
 \newcommand{\Var}{\mathbb{V}}
 \newcommand{\Cov}{\mathbb{C}\mathrm{ov}}
 \newcommand{\tr}{\operatorname{tr}}
@@ -42,28 +31,62 @@
 \newcommand{\KL}{\operatorname{KL}}
 \newcommand{\elbo}{\mathcal{L}}
 \newcommand{\pigamma}{\pi_\gamma}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thetable}{S\arabic{table}}
 
+\author{Antonio Aguirre \\ University of California Santa Cruz \And
+        Raquel Barata \\ University of California Santa Cruz \AND
+        Raquel Prado \\ University of California Santa Cruz \And
+        Bruno Sans\'{o} \\ University of California Santa Cruz}
 \title{Supplementary Theory and Algorithm Details for \pkg{exdqlm}}
-\author{Working draft}
-\date{\today}
+
+\Plainauthor{Antonio Aguirre, Raquel Barata, Raquel Prado, Bruno Sanso}
+\Plaintitle{Supplementary Theory and Algorithm Details for exdqlm}
+\Shorttitle{Supplementary theory for \pkg{exdqlm}}
+
+\Abstract{This supplement gives the mathematical details behind the inference
+algorithms implemented in \pkg{exdqlm}. It records model hierarchies,
+augmented posterior targets, Markov chain Monte Carlo (MCMC) updates,
+variational Bayes (VB) factorizations, and evidence lower bound (ELBO)
+components for dynamic quantile linear models (DQLMs) under asymmetric Laplace
+(AL) and extended asymmetric Laplace (exAL) likelihoods, and for static AL/exAL
+regression with ridge or regularized horseshoe normal-scale (RHS-NS) priors.
+The notation is aligned with the main article and with the package interfaces:
+vectors are written in bold lowercase, matrices in bold uppercase, and
+dimensions are stated when objects are introduced.}
+
+\Keywords{Bayesian quantile regression, dynamic linear models, asymmetric
+Laplace likelihood, extended asymmetric Laplace likelihood, MCMC, variational
+Bayes}
+\Plainkeywords{Bayesian quantile regression, dynamic linear models, asymmetric
+Laplace likelihood, extended asymmetric Laplace likelihood, MCMC, variational
+Bayes}
+
+\Address{
+  Antonio Aguirre and Raquel Barata\\
+  Department of Statistics\\
+  University of California Santa Cruz\\
+  Santa Cruz, CA 95064\\
+  E-mail: \email{jaguir26@ucsc.edu}, \email{raquel.a.barata@gmail.com}\\
+}
 
 \begin{document}
-\maketitle
 
-\begin{abstract}
-This document records the model hierarchies, augmented posterior targets, MCMC
-updates, variational approximations, and ELBO components underlying the main
-dynamic models and the static ridge/RHS-NS paths in the current \pkg{exdqlm}
-implementation. It is written as a working supplement draft:
-sections that have already been checked against the existing theory notes are
-presented in mathematical form, and the final verification tasks are listed at
-the end. Vectors are written in bold lowercase, matrices in bold uppercase, and
-dimensions are given when each object is introduced.
-\end{abstract}
+\section{Scope and organization}
 
-\tableofcontents
+This supplement is a mathematical companion to the main article. It is intended
+for readers who want to inspect the posterior targets and update equations
+behind the package routines, rather than for users who only need the applied
+workflow shown in the examples. The dynamic sections cover AL-based DQLMs and
+exAL-based exDQLMs. The static sections cover AL/exAL regression with Gaussian
+ridge priors and with the RHS-NS sparse prior used by the package.
 
-\section{Notation and Distributional Building Blocks}
+Each model section follows the same organization: model hierarchy, augmented
+posterior target, MCMC updates, VB factorization and coordinate updates, ELBO
+components, and the corresponding package function. The final section maps the
+main user-facing functions to these algorithmic blocks.
+
+\section{Notation and distributional building blocks}
 
 Let $p_0\in(0,1)$ be the target quantile. The response is scalar. In dynamic
 models, observations are indexed by $t=1,\ldots,T$; in static regression,
@@ -73,7 +96,7 @@ Uppercase bold symbols denote matrices, for example $\mat{G}_t\in\R^{q\times q}$
 and $\mat{X}\in\R^{n\times p}$. For any positive definite matrix $\mat{A}$,
 $|\mat{A}|$ denotes its determinant.
 
-\subsection{Notation Contract}
+\subsection{Notation contract}
 
 The supplement uses the following conventions throughout. The symbols
 $p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ are deterministic functions
@@ -85,7 +108,8 @@ mean-field distribution $q$. The symbol $\xi$ is reserved for the RHS-NS
 half-Cauchy auxiliary variable; the transformed coordinate for $\gamma$ in
 Laplace-Delta calculations is denoted by $z_\gamma$.
 
-\begin{center}
+\begin{table}[!htb]
+\centering
 \begin{tabularx}{\textwidth}{@{}lX@{}}
 \toprule
 Symbol & Meaning \\
@@ -100,7 +124,9 @@ $\vect{\beta},\mat{X}$ & Static regression coefficients and design matrix. \\
 $\mathcal{A}$ & Active coefficient set receiving RHS-NS shrinkage. \\
 \bottomrule
 \end{tabularx}
-\end{center}
+\caption{Core notation used throughout the supplement.}
+\label{tab:supp_notation}
+\end{table}
 
 The distributional parameterizations are also fixed throughout:
 $\N(m,V)$ uses variance $V$; $\IG(a,b)$ uses rate $b$ with density proportional
@@ -164,14 +190,10 @@ For $r\in\R$,
 \end{equation}
 where $K_\nu(\cdot)$ is the modified Bessel function of the second kind.
 
-% Source check:
-% AL/DQLM: /home/jaguir26/local/src/DQLM-and-BQR---Theory/main.tex lines 39-64.
-% exAL: /home/jaguir26/local/src/univ-exDQLM---Ensemble/main.tex lines 108-143.
-
-\section{Dynamic DQLM under the AL Likelihood}
+\section{Dynamic DQLM under the AL likelihood}
 \label{sec:dyn_dqlm}
 
-\subsection{Model Hierarchy and Full Joint}
+\subsection{Model hierarchy and full joint}
 
 Let $\vect{\theta}_t\in\R^q$ be the latent state, $\vect{f}_t\in\R^q$ the
 observation vector, $\mat{G}_t\in\R^{q\times q}$ the evolution matrix, and
@@ -209,14 +231,14 @@ $\tilde y_t=y_t-A_0v_t$ satisfies
 \end{equation}
 Thus the conditional state posterior is a Gaussian state-space posterior.
 
-\subsection{MCMC Updates}
+\subsection{MCMC updates}
 
 One Gibbs sweep for the dynamic DQLM uses the following full conditionals.
 
 \paragraph{State path.}
-Given $(\sigma,\vect{v})$, sample
-$\vect{\theta}_{0:T}$ exactly by forward-filtering backward-sampling (FFBS)
-applied to \eqref{eq:dyn_dqlm_pseudo}.
+Given $(\sigma,\vect{v})$, sample the state path
+$\vect{\theta}_{0:T}$ exactly by applying forward-filtering
+backward-sampling (FFBS) to \eqref{eq:dyn_dqlm_pseudo}.
 
 \paragraph{Scale.}
 Let $r_t=y_t-\vect{f}_t^\T\vect{\theta}_t$. Then
@@ -274,7 +296,7 @@ $q(\vect{\theta}_t)=\N(\vect{m}_{t|T},\mat{C}_{t|T})$ and define
 \overline{r_t^2}
 &= \bar r_t^2+\vect{f}_t^\T\mat{C}_{t|T}\vect{f}_t.
 \end{align}
-The remaining CAVI updates are
+The remaining coordinate-ascent variational inference (CAVI) updates are
 \begin{align}
 q(v_t)&=\GIG\left(
 \frac{1}{2},\
@@ -305,15 +327,10 @@ The state-path term $\elbo_\theta$ is evaluated from the auxiliary Gaussian
 state-space model in \eqref{eq:dyn_dqlm_vb_pseudo} through the Kalman marginal
 likelihood identity used in the package ELBO diagnostics.
 
-% Source check:
-% /home/jaguir26/local/src/DQLM-and-BQR---Theory/main.tex lines 746-1191.
-% Current package reduced path:
-% /home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile/R/exdqlmLDVB.R lines 227-245.
-
-\section{Dynamic exDQLM under the exAL Likelihood}
+\section{Dynamic exDQLM under the exAL likelihood}
 \label{sec:dyn_exdqlm}
 
-\subsection{Model Hierarchy and Full Joint}
+\subsection{Model hierarchy and full joint}
 
 The dynamic exDQLM replaces the AL observation in
 \eqref{eq:dyn_dqlm_hierarchy} with the exAL augmentation
@@ -348,9 +365,9 @@ R_t=\sigma B_\gamma v_t,
 which again gives a linear Gaussian state-space model for
 $\vect{\theta}_{0:T}$.
 
-\subsection{MCMC Updates}
+\subsection{MCMC updates}
 
-The current package default samples $\sigma$ from its exact conditional
+The default package path samples $\sigma$ from its exact conditional
 given $\gamma$ and then updates $\gamma$ by bounded univariate slice sampling.
 Joint random-walk alternatives are also implemented, but the following target
 is the default exact-kernel path.
@@ -419,7 +436,7 @@ The conditional kernel for $\gamma$ is
 for $\gamma\in(L,U)$. The default sampler applies the bounded slice update in
 Section~\ref{sec:slice} directly to this kernel.
 
-\subsection{LDVB Approximation}
+\subsection{Laplace-Delta VB approximation}
 
 The mean-field family is
 \begin{equation}
@@ -479,8 +496,12 @@ z_\gamma=\logit\left(\frac{\gamma-L}{U-L}\right).
 \label{eq:dyn_exdqlm_ld_transform}
 \end{equation}
 The transformed objective is the expected complete log-joint plus the
-Jacobian $u+\log\{\dd\gamma/\dd z_\gamma\}$. The package stores the transformed mode,
-the approximate covariance matrix, Delta-method moments, and ELBO components.
+Jacobian
+\begin{equation}
+u+\log\{\dd\gamma/\dd z_\gamma\}.
+\end{equation}
+The package stores the transformed mode, the approximate covariance matrix,
+Delta-method moments, and ELBO components.
 
 \paragraph{ELBO.}
 The LDVB ELBO has the block decomposition
@@ -497,15 +518,10 @@ The state and latent-variable blocks are exact for the current
 $q(\sigma,\gamma)$ moments; the $(\sigma,\gamma)$ entropy and smooth
 expectations are evaluated under the Laplace-Delta approximation.
 
-% Source check:
-% /home/jaguir26/local/src/univ-exDQLM---Ensemble/main.tex lines 108-790.
-% Package slice default:
-% /home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile/R/exdqlmMCMC.R lines 1200-1270.
-
-\section{Static AL and exAL Regression with Ridge Priors}
+\section{Static AL and exAL regression with ridge priors}
 \label{sec:static_ridge}
 
-\subsection{Model Hierarchy and Full Joint}
+\subsection{Model hierarchy and full joint}
 
 Let $\mat{X}\in\R^{n\times p}$ have row vectors $\vect{x}_i^\T$, and let
 $\vect{\beta}\in\R^p$. The ridge/Gaussian coefficient prior is
@@ -538,7 +554,7 @@ p(v_i\mid\sigma)p(s_i).
 \label{eq:static_exal_joint}
 \end{align}
 
-\subsection{MCMC Updates}
+\subsection{MCMC updates}
 
 For fixed $(\sigma,\gamma,\vect{v},\vect{s})$, define
 \begin{equation}
@@ -627,7 +643,7 @@ v_i\mid\cdot
 \label{eq:static_al_mcmc}
 \end{align}
 
-\subsection{LDVB Updates and ELBO}
+\subsection{Laplace-Delta VB updates and ELBO}
 
 The static exAL variational family is
 \begin{equation}
@@ -719,27 +735,23 @@ The static exAL ELBO is
 where $H(q)$ is the sum of the Gaussian, GIG, truncated-normal, and
 Laplace-Delta entropy terms.
 
-% Source check:
-% /home/jaguir26/local/src/exAL---Regression/main.tex lines 53-1790.
-% /home/jaguir26/local/src/DQLM-and-BQR---Theory/main.tex lines 68-530.
-
-\section{Static Regression with the RHS-NS Prior}
+\section{Static regression with the RHS-NS prior}
 \label{sec:static_rhs}
 
-This section focuses on the \code{rhs\_ns} coefficient prior, the
-Gibbs-friendly regularized horseshoe variant used as the sparse-prior target
-for this supplement. It enters the static Gaussian update for $\vect{\beta}$
-through a prior precision matrix. Let
+This section focuses on the \code{rhs_ns} coefficient prior, the
+Gibbs-friendly regularized horseshoe variant used for sparse static
+regression. It enters the static Gaussian update for $\vect{\beta}$ through a
+prior precision matrix. Let
 $\mathcal{A}\subseteq\{1,\ldots,p\}$ denote the active shrinkage set; by
 default an intercept, if present, is not shrunk. For $j\notin\mathcal{A}$ the
 package uses a fixed intercept precision. The direct \code{rhs} path is not
-developed here because its log-scale block is nonconjugate and is not the
-intended sparse-prior derivation for this supplement.
+developed here because its log-scale block is nonconjugate; the
+\code{rhs_ns} path is the conjugate sparse-prior formulation documented in
+this supplement.
 
-\subsection{RHS-NS Prior: Package-exact Hierarchy}
+\subsection{RHS-NS prior hierarchy}
 
-The \code{rhs\_ns} option is the Gibbs-friendly regularized horseshoe variant
-used in the current implementation. For $j\in\mathcal{A}$,
+For $j\in\mathcal{A}$, the \code{rhs_ns} hierarchy is
 \begin{align}
 \beta_j\mid\tau^2,\lambda_j^2,\zeta^2
 &\propto
@@ -762,7 +774,7 @@ Consequently, the $\vect{\beta}$ update in MCMC or VB is obtained from the
 static Gaussian update after replacing $\mat{B}_0^{-1}$ by a diagonal precision
 matrix with active entries $\pi_j$ or their variational expectations.
 
-\subsection{RHS-NS MCMC Updates}
+\subsection{RHS-NS MCMC updates}
 
 Conditioning on $\vect{\beta}$, the shrinkage block has closed-form
 inverse-gamma updates:
@@ -794,7 +806,7 @@ implementation may temporarily freeze or schedule the global-scale update during
 configured warmup iterations for numerical stability; this changes only the
 update schedule, not the conditional target displayed above.
 
-\subsection{RHS-NS VB Updates and ELBO Contribution}
+\subsection{RHS-NS VB updates and ELBO contribution}
 
 The package uses a mean-field approximation over the RHS-NS scale block. For
 $j\in\mathcal{A}$,
@@ -831,13 +843,13 @@ As in MCMC, optional warmup scheduling for the $\tau^2,\xi$ block affects when
 the coordinate is updated, not the coordinate target itself.
 
 The following term-by-term ELBO contribution matches the package's
-\code{rhs\_ns} scale block. For $x\sim\IG(a,b)$ under the rate
+\code{rhs_ns} scale block. For $x\sim\IG(a,b)$ under the rate
 parameterization used above, define
-\begin{equation}
-m_{\log x}(a,b)=\log b-\psi(a),\qquad
-m_{x^{-1}}(a,b)=a/b,\qquad
-h_{\IG}(a,b)=a+\log b+\log\Gamma(a)-(a+1)\psi(a),
-\end{equation}
+\begin{align}
+m_{\log x}(a,b)&=\log b-\psi(a),&
+m_{x^{-1}}(a,b)&=a/b,\\
+h_{\IG}(a,b)&=a+\log b+\log\Gamma(a)-(a+1)\psi(a),
+\end{align}
 where $\psi(\cdot)$ is the digamma function and $h_{\IG}$ is the entropy of an
 inverse-gamma variational factor. Let
 \begin{align}
@@ -958,18 +970,10 @@ inverse-gamma. This is the RHS-NS component of the full static-model ELBO; the
 likelihood, latent-variable, and $(\sigma,\gamma)$ terms are added by the
 surrounding static AL or exAL variational routine.
 
-% Source check:
-% RHS-NS package code:
-% /home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile/R/static_beta_prior.R lines 989-1470.
-% Conceptual RHS notes:
-% /home/jaguir26/local/src/RHS---Implementations/main.tex lines 202-865.
-% Package-exact RHS-NS TeX source:
-% /home/jaguir26/local/src/Q-DESN---Theory-for-implementation/main.tex lines 91-183, 240-284, 369-463, 501-540.
-
-\section{Bounded Slice Sampling and Laplace-Delta Blocks}
+\section{Bounded slice sampling and Laplace-Delta blocks}
 \label{sec:slice}
 
-\subsection{Bounded Univariate Slice Sampler}
+\subsection{Bounded univariate slice sampler}
 
 Let $h(x)$ be an unnormalized log-density on a finite interval $[a,b]$, and let
 $x_0\in(a,b)$. The bounded slice update implemented in the package is:
@@ -987,10 +991,10 @@ $[x_1,R]$ otherwise.
 \end{enumerate}
 For dynamic and static exAL MCMC fits, this sampler is applied to the
 one-dimensional $\gamma$ target on $(L,U)$ by default. The same bounded-slice
-utility is also available to internal one-dimensional nonconjugate blocks, but
-those legacy shrinkage targets are outside the scope of this supplement.
+utility can be reused by other internal one-dimensional nonconjugate blocks;
+the user-facing algorithms covered here are the exAL updates described above.
 
-\subsection{Laplace-Delta Approximation}
+\subsection{Laplace-Delta approximation}
 
 For a nonconjugate block $\vect{\eta}\in\R^d$ with log target
 $\ell(\vect{\eta})$, let $\hat{\vect{\eta}}$ be a local mode and
@@ -1015,16 +1019,10 @@ r(\hat{\vect{\eta}})
 This is used for smooth functions of $(\sigma,\gamma)$ in dynamic and static
 exAL models.
 
-% Source check:
-% Slice code:
-% /home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile/R/utils.R lines 239-330.
-% Laplace-Delta sources:
-% /home/jaguir26/local/src/univ-exDQLM---Ensemble/main.tex lines 549-658.
-% /home/jaguir26/local/src/exAL---Regression/main.tex lines 1019-1412.
+\section{Package-to-algorithm map}
 
-\section{Package-to-Algorithm Map}
-
-\begin{center}
+\begin{table}[!htb]
+\centering
 \begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
 Function & Main algorithmic role \\
@@ -1035,21 +1033,9 @@ Function & Main algorithmic role \\
 \code{exalStaticLDVB()} & Static AL/exAL mean-field VB: Gaussian coefficient factor, CAVI latent and RHS-NS scale factors, and Laplace-Delta for $(\sigma,\gamma)$ in exAL. \\
 \bottomrule
 \end{tabularx}
-\end{center}
-
-\section{Second-pass Verification Checklist}
-
-Before this supplement is submitted, perform the following checks:
-\begin{enumerate}[label=(\arabic*)]
-\item Compare every displayed DQLM expression against
-\code{DQLM-and-BQR---Theory/main.tex}.
-\item Compare every dynamic exDQLM expression against
-\code{univ-exDQLM---Ensemble/main.tex} and the current
-\code{exdqlmMCMC()} / \code{exdqlmLDVB()} implementation.
-\item Compare every static exAL ridge expression against
-\code{exAL---Regression/main.tex}.
-\item Verify the term-by-term RHS-NS ELBO against
-\code{static\_beta\_prior.R}.
-\end{enumerate}
+\caption{Connection between the main \pkg{exdqlm} functions and the
+algorithmic blocks described in this supplement.}
+\label{tab:supp_algorithm_map}
+\end{table}
 
 \end{document}

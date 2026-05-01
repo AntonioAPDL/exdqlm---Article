@@ -478,10 +478,34 @@ Equation-family verification matrix:
 - Rechecked bounded slice-sampler prose against the current implementation in
   `R/utils.R` lines 239-330.
 
+## 12. JSS-facing Supplement Polish Pass
+
+Date: 2026-04-30.
+
+The supplement was converted from an internal working derivation note into a
+submission-facing document:
+
+- Switched `supplement-theory.tex` to the local `jss` class with `nojss` and
+  `noheadings`, retaining JSS markup for package names, code, authors,
+  abstract, keywords, and address information.
+- Removed the public "Working draft" metadata, internal source-path comments,
+  and the public second-pass verification checklist from the TeX file. The
+  derivation trace remains in this audit document.
+- Added a short scope-and-organization section so readers understand how to use
+  the supplement before entering the model-specific mathematics.
+- Normalized section and subsection headings to sentence style and changed the
+  notation and package-map displays into captioned tables.
+- Prefixed supplement tables and displayed equations with `S` numbering to
+  avoid ambiguity with the main article.
+- Reduced unnecessary packages and resolved JSS-width line breaks in the
+  mathematical prose and displayed equations.
+- Recompiled the supplement after the JSS-facing polish pass. The final log has
+  no undefined references, rerun warnings, overfull boxes, or underfull boxes.
+  The only remaining warning is the standard `hyperindex` warning emitted by
+  the bundled `jss.cls` under this TeX Live/hyperref combination.
+
 Remaining verification work before submission:
 
-- Decide whether implementation comments with local file paths should remain
-  as TeX comments or be removed before submission.
-- If this supplement becomes an official submission file, replace
-  "Working draft" metadata with final supplement metadata and add references if
-  needed.
+- Do one final visual PDF read for page breaks and equation readability.
+- Decide whether the official submitted supplement should include a short
+  reference list, or rely on the main article for citations.
