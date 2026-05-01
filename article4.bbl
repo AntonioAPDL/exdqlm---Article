@@ -10,12 +10,13 @@
   \urlstyle{rm}\Url}\fi
 \providecommand{\eprint}[2][]{\url{#2}}
 
-\bibitem[{Barata \emph{et~al.}({2022})Barata, Prado, and Sans\'{o}}]{me}
-Barata R, Prado R, Sans\'{o} B ({2022}).
+\bibitem[{Barata \emph{et~al.}(2022)Barata, Prado, and Sans\'{o}}]{me}
+Barata R, Prado R, Sans\'{o} B (2022).
 \newblock \enquote{{Fast inference for time-varying quantiles via flexible
   dynamic models with application to the characterization of atmospheric
   rivers}.}
-\newblock \emph{The annals of applied statistics}.
+\newblock \emph{The Annals of Applied Statistics}, \textbf{16}(1), 247--271.
+\newblock \doi{10.1214/21-AOAS1497}.
 
 \bibitem[{Barlow \emph{et~al.}(1972)Barlow, Bartholomew, Bremner, and
   Brunk}]{barlow1972}
