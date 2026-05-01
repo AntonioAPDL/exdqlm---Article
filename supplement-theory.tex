@@ -190,6 +190,98 @@ For $r\in\R$,
 \end{equation}
 where $K_\nu(\cdot)$ is the modified Bessel function of the second kind.
 
+\subsection{Reusable ELBO building blocks}
+\label{sec:elbo_building_blocks}
+
+The package records an ELBO sequence for VB convergence monitoring. All
+ELBOs in this supplement use
+\begin{equation}
+\elbo(q)=\E_q\{\log p(\text{complete data})\}+H(q),
+\qquad
+H(q)=-\E_q\{\log q\}.
+\end{equation}
+The following entropy and moment formulas are reused across the dynamic and
+static algorithms.
+
+If $\vect{x}\sim\N(\vect{m},\mat{V})$ with
+$\vect{x}\in\R^d$, then
+\begin{equation}
+H\{\N(\vect{m},\mat{V})\}
+=\frac{1}{2}\{d(1+\log 2\pi)+\log|\mat{V}|\}.
+\label{eq:entropy_gaussian}
+\end{equation}
+If $x\sim\IG(a,b)$ under the rate parameterization stated above, then
+\begin{equation}
+\E(x^{-1})=\frac{a}{b},\qquad
+\E(\log x)=\log b-\psi(a),
+\end{equation}
+and
+\begin{equation}
+H\{\IG(a,b)\}
+=a+\log b+\log\Gamma(a)-(a+1)\psi(a),
+\label{eq:entropy_ig}
+\end{equation}
+where $\psi(\cdot)$ is the digamma function.
+
+If $x\sim\GIG(\lambda,\chi,\psi_g)$ and
+$z=(\chi\psi_g)^{1/2}$, let
+$m_x=\E(x)$, $m_{1/x}=\E(x^{-1})$, and
+$m_{\log x}=\E(\log x)$. Then
+\begin{align}
+H\{\GIG(\lambda,\chi,\psi_g)\}
+&=
+\log\{2K_\lambda(z)\}
+-\frac{\lambda}{2}\log\left(\frac{\psi_g}{\chi}\right)
+-(\lambda-1)m_{\log x} \nonumber\\
+&\quad+
+\frac{1}{2}\{\chi m_{1/x}+\psi_g m_x\}.
+\label{eq:entropy_gig}
+\end{align}
+The moments $m_x$ and $m_{1/x}$ follow from \eqref{eq:gig_moments};
+$m_{\log x}$ is the derivative of $\log K_\lambda(z)$ with respect to
+$\lambda$ plus $\frac{1}{2}\log(\chi/\psi_g)$, and is evaluated numerically in
+the package.
+
+If $x\sim\TNp(m,V)$, let $s=V^{1/2}$, $u=m/s$, and
+$\Lambda(u)=\phi(u)/\Phi(u)$. The entropy is
+\begin{equation}
+H\{\TNp(m,V)\}
+=
+\frac{1}{2}\log(2\pi V)+\log\Phi(u)
++\frac{1}{2}\{1-u\Lambda(u)\}.
+\label{eq:entropy_tnp}
+\end{equation}
+This closed form is used for the truncated-normal latent factors; numerically,
+the package evaluates the required moments using stable tail-probability
+guards.
+
+For exAL VB, the nonconjugate $(\sigma,\gamma)$ block is handled on
+transformed coordinates
+\begin{equation}
+u=\log\sigma,\qquad
+z_\gamma=\logit\left(\frac{\gamma-L}{U-L}\right).
+\end{equation}
+If $\vect{z}=(z_\gamma,u)^\T$ has Laplace approximation
+$q_z(\vect{z})=\N(\hat{\vect{z}},\mat{\Sigma}_z)$ and
+$(\gamma,\sigma)=T(\vect{z})$, then the entropy contribution on the original
+scale is approximated as
+\begin{equation}
+H\{q(\sigma,\gamma)\}
+\approx
+\frac{1}{2}\{2(1+\log 2\pi)+\log|\mat{\Sigma}_z|\}
++\E_{q_z}\{\log|J_T(\vect{z})|\},
+\label{eq:entropy_ld}
+\end{equation}
+where
+\begin{equation}
+\log|J_T(\vect{z})|
+=u+\log(U-L)+\log r+\log(1-r),
+\qquad r=\expit(z_\gamma).
+\end{equation}
+The final expectation in \eqref{eq:entropy_ld}, and the other smooth
+expectations of functions of $(\sigma,\gamma)$, are evaluated by the same
+second-order Delta approximation used in the LDVB updates.
+
 \section{Dynamic DQLM under the AL likelihood}
 \label{sec:dyn_dqlm}
 
@@ -328,7 +420,42 @@ The ELBO is
 \end{align}
 The state-path term $\elbo_\theta$ is evaluated from the auxiliary Gaussian
 state-space model in \eqref{eq:dyn_dqlm_vb_pseudo} through the Kalman marginal
-likelihood identity used in the package ELBO diagnostics.
+likelihood identity
+\begin{equation}
+\elbo_\theta
+=\log p(\vect{y}^{\star})
+-\E_q\{\log p(\vect{y}^{\star}\mid\vect{\theta}_{0:T})\},
+\label{eq:dyn_dqlm_elbo_theta}
+\end{equation}
+where $p(\vect{y}^{\star})$ is the marginal likelihood of the auxiliary
+Gaussian state-space model. This identity is equivalent to
+$\E_q\{\log p(\vect{\theta}_{0:T})\}+H\{q(\vect{\theta}_{0:T})\}$ for the
+current state update.
+
+The remaining terms in \eqref{eq:dyn_dqlm_elbo} are computable from the
+current variational moments. Let
+$\bar\ell_\sigma=\E(\log\sigma)$ and
+$\bar\ell_{v,t}=\E(\log v_t)$. Then
+\begin{align}
+\E_q\{\log p(\sigma)\}
+&=
+a_\sigma\log b_\sigma-\log\Gamma(a_\sigma)
+-(a_\sigma+1)\bar\ell_\sigma-b_\sigma\kappa,\\
+\sum_{t=1}^T\E_q\{\log p(v_t\mid\sigma)\}
+&=
+-T\bar\ell_\sigma-\kappa\sum_{t=1}^T\nu_t,\\
+\sum_{t=1}^T\E_q\{\log p(y_t\mid\vect{\theta}_t,\sigma,v_t)\}
+&=
+-\frac{T}{2}\log(2\pi)-\frac{T}{2}\log B_0
+-\frac{T}{2}\bar\ell_\sigma
+-\frac{1}{2}\sum_{t=1}^T\bar\ell_{v,t}\nonumber\\
+&\quad
+-\frac{\kappa}{2B_0}\sum_{t=1}^T
+\left\{\ell_t\overline{r_t^2}-2A_0\bar r_t+A_0^2\nu_t\right\}.
+\label{eq:dyn_dqlm_elbo_terms}
+\end{align}
+The entropy terms are given by \eqref{eq:entropy_ig} for $q(\sigma)$ and by
+\eqref{eq:entropy_gig} for the $q(v_t)$ factors.
 
 \section{Dynamic exDQLM under the exAL likelihood}
 \label{sec:dyn_exdqlm}
@@ -511,15 +638,71 @@ The LDVB ELBO has the block decomposition
 \begin{equation}
 \elbo(q)=
 \elbo_{\mathrm{like}}+\elbo_\theta+\elbo_v+\elbo_s+\elbo_{\sigma\gamma}
-+H\{q(\vect{\theta}_{0:T})\}
 +\sum_{t=1}^TH\{q(v_t)\}
 +\sum_{t=1}^TH\{q(s_t)\}
 +H\{q(\sigma,\gamma)\}.
 \label{eq:dyn_exdqlm_elbo}
 \end{equation}
-The state and latent-variable blocks are exact for the current
-$q(\sigma,\gamma)$ moments; the $(\sigma,\gamma)$ entropy and smooth
-expectations are evaluated under the Laplace-Delta approximation.
+The state block is
+\begin{equation}
+\elbo_\theta
+=\E_q\left\{\log p(\vect{\theta}_0)
++\sum_{t=1}^T\log p(\vect{\theta}_t\mid\vect{\theta}_{t-1})\right\}
++H\{q(\vect{\theta}_{0:T})\}.
+\label{eq:dyn_exdqlm_elbo_theta}
+\end{equation}
+As in the AL case, this Gaussian state-space contribution can be evaluated by
+the auxiliary Kalman normalizing-constant identity for the current
+pseudo-response and variance.
+
+Let
+$\bar\ell_\sigma=\E(\log\sigma)$,
+$\bar\ell_B=\E(\log B_\gamma)$,
+$\bar\ell_{\pi}=\E\{\log\pigamma(\gamma)\}$,
+$m_{v,t}=\E(v_t)$, $m_{1/v,t}=\E(v_t^{-1})$,
+$m_{\log v,t}=\E(\log v_t)$, $m_{s,t}=\E(s_t)$, and
+$m_{s^2,t}=\E(s_t^2)$. Define
+\begin{align}
+Q_t
+&=
+\kappa_1S_{\Delta,t}m_{1/v,t}
+-2\kappa_2m_{\Delta,t}
++\kappa_3m_{v,t}
+-2\kappa_4m_{\Delta,t}m_{s,t}m_{1/v,t} \nonumber\\
+&\quad
++\kappa_5m_{s^2,t}m_{1/v,t}
++2\kappa_6m_{s,t}.
+\label{eq:dyn_exdqlm_elbo_Q}
+\end{align}
+Then the likelihood, latent-prior, and nonconjugate-prior blocks are
+\begin{align}
+\elbo_{\mathrm{like}}
+&=
+-\frac{T}{2}\log(2\pi)
+-\frac{T}{2}(\bar\ell_\sigma+\bar\ell_B)
+-\frac{1}{2}\sum_{t=1}^Tm_{\log v,t}
+-\frac{1}{2}\sum_{t=1}^TQ_t,\\
+\elbo_v
+&=
+-T\bar\ell_\sigma-\E(\sigma^{-1})\sum_{t=1}^Tm_{v,t},\\
+\elbo_s
+&=
+T\log 2-\frac{T}{2}\log(2\pi)
+-\frac{1}{2}\sum_{t=1}^Tm_{s^2,t},\\
+\elbo_{\sigma\gamma}
+&=
+a_\sigma\log b_\sigma-\log\Gamma(a_\sigma)
+-(a_\sigma+1)\bar\ell_\sigma
+-b_\sigma\E(\sigma^{-1})
++\bar\ell_{\pi}.
+\label{eq:dyn_exdqlm_elbo_terms}
+\end{align}
+The GIG and truncated-normal entropy terms are given by
+\eqref{eq:entropy_gig} and \eqref{eq:entropy_tnp}. The
+$(\sigma,\gamma)$ entropy and the smooth expectations in the $\kappa_j$,
+$\bar\ell_B$, $\bar\ell_\pi$, and $\E(\sigma^{-1})$ terms are evaluated under
+the Laplace-Delta approximation in \eqref{eq:entropy_ld} and
+\eqref{eq:delta_generic}.
 
 \section{Static AL and exAL regression with ridge priors}
 \label{sec:static_ridge}
@@ -727,16 +910,78 @@ $q(\vect{\beta})q(\sigma)\prod_iq(v_i)$ with the same closed-form updates as
 Section~\ref{sec:dyn_dqlm}, replacing state smoothing moments by
 $\E\{(y_i-\vect{x}_i^\T\vect{\beta})^2\}$.
 
-The static exAL ELBO is
+The static exAL ELBO is computed from the same blocks as the dynamic exDQLM,
+with the Gaussian state factor replaced by the Gaussian coefficient factor.
+Let
+$\bar\ell_\sigma=\E(\log\sigma)$,
+$\bar\ell_B=\E(\log B_\gamma)$,
+$\bar\ell_\pi=\E\{\log\pigamma(\gamma)\}$,
+$m_{v,i}=\E(v_i)$, $m_{1/v,i}=\E(v_i^{-1})$,
+$m_{\log v,i}=\E(\log v_i)$, $m_{s,i}=\E(s_i)$, and
+$m_{s^2,i}=\E(s_i^2)$. Also define
 \begin{equation}
-\elbo(q)=
-\E_q\{\log p(\vect{\beta})+\log p(\sigma)+\log \pigamma(\gamma)\}
-+\sum_{i=1}^n\E_q\{\log p(y_i\mid\cdot)+\log p(v_i\mid\sigma)+\log p(s_i)\}
-+H(q),
-\label{eq:static_exal_elbo}
+t_i=y_i-\vect{x}_i^\T\vect{m}_\beta,\qquad
+q_i=\vect{x}_i^\T\mat{\Sigma}_\beta\vect{x}_i.
 \end{equation}
-where $H(q)$ is the sum of the Gaussian, GIG, truncated-normal, and
-Laplace-Delta entropy terms.
+Then
+\begin{align}
+\elbo(q)
+&=
+\elbo_{\mathrm{like}}+\elbo_v+\elbo_s+\elbo_\beta
++\elbo_{\sigma\gamma}
++H\{q(\vect{\beta})\}
++\sum_{i=1}^nH\{q(v_i)\}\nonumber\\
+&\quad
++\sum_{i=1}^nH\{q(s_i)\}
++H\{q(\sigma,\gamma)\},
+\label{eq:static_exal_elbo}
+\end{align}
+where
+\begin{align}
+\elbo_{\mathrm{like}}
+&=
+-\frac{n}{2}\log(2\pi)
+-\frac{n}{2}(\bar\ell_B+\bar\ell_\sigma)
+-\frac{1}{2}\sum_{i=1}^nm_{\log v,i}\nonumber\\
+&\quad
+-\frac{1}{2}\sum_{i=1}^n
+\left\{
+\kappa_1m_{1/v,i}(t_i^2+q_i)
+-2\kappa_2t_i+\kappa_3m_{v,i}
+\right\}\nonumber\\
+&\quad
++\sum_{i=1}^n
+\left\{
+\kappa_4m_{s,i}m_{1/v,i}t_i
+-\kappa_6m_{s,i}
+-\frac{1}{2}\kappa_5m_{s^2,i}m_{1/v,i}
+\right\},\\
+\elbo_v
+&=
+-n\bar\ell_\sigma-\E(\sigma^{-1})\sum_{i=1}^nm_{v,i},\\
+\elbo_s
+&=
+n\log 2-\frac{n}{2}\log(2\pi)
+-\frac{1}{2}\sum_{i=1}^nm_{s^2,i},\\
+\elbo_{\sigma\gamma}
+&=
+a_\sigma\log b_\sigma-\log\Gamma(a_\sigma)
+-(a_\sigma+1)\bar\ell_\sigma
+-b_\sigma\E(\sigma^{-1})
++\bar\ell_\pi,\\
+\elbo_\beta
+&=\E_q\{\log p(\vect{\beta})\}.
+\label{eq:static_exal_elbo_terms}
+\end{align}
+For the ridge prior, $\elbo_\beta$ is the Gaussian prior expectation. For the
+RHS-NS prior, it is replaced by the RHS-NS contribution in
+Section~\ref{sec:static_rhs}. The Gaussian, GIG, truncated-normal, and
+Laplace-Delta entropy terms are given by
+\eqref{eq:entropy_gaussian}, \eqref{eq:entropy_gig},
+\eqref{eq:entropy_tnp}, and \eqref{eq:entropy_ld}, respectively. The AL path
+is recovered by setting $\gamma=0$ and dropping the $s_i$ and
+$(\sigma,\gamma)$ Laplace-Delta blocks; then $q(\sigma)$ is inverse-gamma and
+uses \eqref{eq:entropy_ig}.
 
 \section{Static regression with the RHS-NS prior}
 \label{sec:static_rhs}

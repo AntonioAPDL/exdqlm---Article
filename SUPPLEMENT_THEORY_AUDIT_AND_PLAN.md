@@ -545,10 +545,15 @@ Findings:
   also exposes transformed random-walk alternatives, so the package map was
   clarified to say bounded slice is the default rather than the only path.
 - Dynamic exAL/exDQLM VB: the kappa-moment definitions, `q(v_t)`, `q(s_t)`,
-  state pseudo-response, Laplace-Delta `(sigma, gamma)` block, and ELBO pieces
-  in `exdqlmLDVB.R` match the supplement. The implementation may temporarily
-  hold the `s_t` and `(sigma, gamma)` blocks during warmup; this is a numerical
-  schedule and does not alter the displayed targets.
+  state pseudo-response, Laplace-Delta `(sigma, gamma)` block, and ELBO block
+  structure in `exdqlmLDVB.R` match the supplement. The implementation may
+  temporarily hold the `s_t` and `(sigma, gamma)` blocks during warmup; this is
+  a numerical schedule and does not alter the displayed targets. A later ELBO
+  pass found one narrow diagnostic discrepancy: the closed-form entropy of a
+  positive truncated-normal factor should contain `0.5 * (1 - alpha * Lambda)`
+  when `alpha = mu / tau`, whereas the current exAL LDVB code uses the opposite
+  sign in this entropy term. This affects the monitored ELBO value for exAL
+  LDVB, not the coordinate update for `q(s_t)`.
 - Static AL regression MCMC/VB: the reduced static path in `exalStaticMCMC.R`
   and `utils.R` matches the supplement's AL special-case updates after replacing
   state moments by static regression moments.
@@ -559,7 +564,9 @@ Findings:
   alternatives.
 - Static exAL regression VB: `exalStaticLDVB.R` matches the supplement's
   Gaussian `q(beta)`, GIG `q(v_i)`, truncated-normal `q(s_i)`,
-  Laplace-Delta `q(sigma,gamma)`, and ELBO decomposition.
+  Laplace-Delta `q(sigma,gamma)`, and ELBO decomposition. The same
+  positive-truncated-normal entropy sign discrepancy appears in the static
+  exAL LDVB monitored ELBO.
 - RHS-NS sparse prior: `static_beta_prior.R` matches the supplement's active
   coefficient precision, inverse-gamma MCMC updates, mean-field VB updates,
   fixed-versus-random `zeta2` branches, unshrunk-intercept contribution, and
@@ -584,3 +591,54 @@ Supplement corrections made in this pass:
   is the default exAL MCMC path and that random-walk alternatives are exposed.
 
 No package-code changes were made in this audit.
+
+## 14. ELBO derivability and entropy-expression pass
+
+Date: 2026-04-30.
+
+Purpose:
+
+- Convert the ELBO sections from high-level decompositions into computable
+  formulas that a reader can map to the package diagnostics.
+- Reuse exact entropy formulas when available and state explicitly when the
+  package uses Laplace-Delta approximations.
+
+Sources checked:
+
+- Dynamic AL/DQLM ELBO: `DQLM-and-BQR---Theory/main.tex` lines 1061-1197 and
+  the reduced CAVI implementation in `R/utils.R` lines 1082-1265.
+- Static AL/BQR ELBO: `DQLM-and-BQR---Theory/main.tex` lines 349-532 and the
+  reduced static CAVI implementation in `R/utils.R` lines 1420-1665.
+- Dynamic exAL/exDQLM ELBO: `univ-exDQLM---Ensemble/main.tex` lines 658-789,
+  `exDQLM---Ensemble/main.tex` lines 1524-1578, and `R/exdqlmLDVB.R`.
+- Static exAL ELBO: `exAL---Regression/main.tex` lines 1412-1805 and
+  `R/exalStaticLDVB.R` lines 2022-2097.
+
+Supplement changes made:
+
+- Added a reusable ELBO-building-block subsection with Gaussian,
+  inverse-gamma, GIG, positive truncated-normal, and Laplace-Delta entropy
+  formulas.
+- Expanded the dynamic AL/DQLM ELBO into the state pseudo-model contribution,
+  inverse-gamma scale prior, exponential latent prior, AL likelihood, and
+  entropy terms.
+- Expanded the dynamic exAL/exDQLM ELBO into likelihood, latent-prior,
+  nonconjugate-prior, GIG entropy, truncated-normal entropy, state, and
+  Laplace-Delta entropy blocks.
+- Expanded the static exAL ridge/RHS ELBO into likelihood, latent-prior,
+  coefficient-prior, nonconjugate-prior, and entropy blocks, with the AL special
+  case stated explicitly.
+
+Important implementation note:
+
+- The positive truncated-normal entropy is analytically available. With
+  `u = mu / tau` and `Lambda = phi(u) / Phi(u)`, the entropy is
+  `0.5 * log(2*pi*tau^2) + log(Phi(u)) + 0.5 * (1 - u * Lambda)`.
+- The current package code in `R/exdqlmLDVB.R` and `R/exalStaticLDVB.R` uses
+  `0.5 * (1 + u * Lambda)` for this entropy term. The moments used to update
+  the truncated-normal factors are correct; the discrepancy is isolated to the
+  monitored ELBO entropy contribution.
+- No package-code changes were made in this supplement pass. If we want the
+  CRAN branch ELBO diagnostics to match the mathematical supplement exactly,
+  this sign should be patched in the package and the affected LDVB examples
+  should be rerun.
