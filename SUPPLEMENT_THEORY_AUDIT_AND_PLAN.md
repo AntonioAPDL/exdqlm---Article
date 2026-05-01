@@ -144,8 +144,8 @@ Coverage assessment:
 - Needs one supplement-level adjustment: the TeX notes usually describe the
   `gamma` update as MH or MH/slice, while the current package default is a
   bounded univariate slice update for `gamma` with exact `sigma` update given
-  `gamma`. The target kernel is available, but the slice algorithm should be
-  written explicitly in S6.
+  `gamma`. The supplement draft now includes the generic bounded-slice
+  algorithm; it still needs a final line-by-line check against `utils.R`.
 
 ### 3.3 Static exAL Regression with Ridge Prior
 
@@ -293,14 +293,12 @@ The following sections can be drafted now with high confidence:
 2. S2 dynamic DQLM hierarchy, full joint, Gibbs/FFBS, CAVI, and ELBO.
 3. S3 dynamic exDQLM hierarchy, full joint, conditionals, LDVB, and ELBO.
 4. S4 static AL/exAL regression with ridge prior.
-5. S6 generic Laplace-Delta description.
+5. S6 generic bounded-slice and Laplace-Delta description.
 6. S7 package-to-algorithm map.
 
-The following section should be drafted, but with an explicit placeholder for
-the piece that still needs a final clean algorithm statement:
-
-1. S6 bounded slice sampler, because the algorithm is simple and implemented,
-   but not yet written cleanly in the theory notes.
+At this point, the supplement draft has no intentional large mathematical
+placeholders. The remaining work is verification and polishing, not new
+derivation from scratch.
 
 ## 6. Missing or Incomplete Items
 
@@ -323,31 +321,17 @@ Remaining work:
 - Confirm notation in the static ridge/exAL section feeds cleanly into the
   RHS-NS section.
 
-### Missing item B: Bounded slice sampler algorithm
+### Item B: Bounded slice sampler algorithm
 
-Need to write:
+Status: drafted in the supplement.
 
-```text
-PLACEHOLDER C1:
-Generic bounded univariate slice sampler targeting a log-kernel h(x) on
-[L, U].
-
-PLACEHOLDER C2:
-Application to the static exAL gamma update.
-
-PLACEHOLDER C3:
-Application to the dynamic exDQLM gamma update.
-
-PLACEHOLDER C4:
-Short statement that sigma is updated exactly from its conditional when the
-current sampler uses the default `mh.proposal = "slice"` path.
-```
-
-Why this is missing:
+Why this matters:
 
 - The code has the sampler.
 - The TeX theory notes mostly say MH or MH/slice.
 - The supplement should match the package default.
+- Remaining work is to verify the algorithm statement against the current
+  implementation in `R/utils.R`.
 
 ## 7. Proposed Writing Plan
 
