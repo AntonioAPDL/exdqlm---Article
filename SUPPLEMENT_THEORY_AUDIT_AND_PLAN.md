@@ -453,16 +453,33 @@ Equation-family verification matrix:
 | --- | --- | --- | --- |
 | AL mixture and dynamic DQLM MCMC/VB | `DQLM-and-BQR---Theory/main.tex` lines 840-1048 | Checked | Uses the same AL constants, IG scale update, GIG latent update, and variational pseudo-observation. |
 | Dynamic exDQLM hierarchy and MCMC conditionals | `univ-exDQLM---Ensemble/main.tex` lines 108-341 | Checked | Supplement uses the same exAL augmentation and conditional kernels; sampler wording reflects current package slice default rather than older MH-only notes. |
-| Dynamic exDQLM LDVB moments | `univ-exDQLM---Ensemble/main.tex` lines 404-680 and `R/exdqlmLDVB.R` LD block | Checked with approximation note | Kappa moment definitions and Laplace-Delta role are aligned; final code-level audit should still compare stored diagnostic names if this becomes user-facing documentation. |
-| Static exAL ridge MCMC/VB | `exAL---Regression/main.tex` lines 247-398 and 1019-1455 | Checked | Static beta, latent `s`, latent `v`, sigma, gamma, and LDVB factorization are aligned with source notes. |
-| RHS-NS MCMC/VB/ELBO | `Q-DESN---Theory-for-implementation/main.tex` lines 91-183, 240-284, 369-463, 501-540 and `R/static_beta_prior.R` lines 1194-1474 | Checked | Term-by-term ELBO matches the package structure. Remaining final audit should focus on fixed `zeta2`, intercept shrinkage, and warmup/freeze behavior in prose. |
+| Dynamic exDQLM LDVB moments | `univ-exDQLM---Ensemble/main.tex` lines 404-690 and `R/exdqlmLDVB.R` LD block | Checked with approximation note | Kappa moment definitions and Laplace-Delta role are aligned. Stored diagnostic names are implementation metadata rather than theory targets. |
+| Static exAL ridge MCMC/VB | `exAL---Regression/main.tex` lines 247-398, 573-710, 910-1088, and 1412-1455 | Checked | Static beta, latent `s`, latent `v`, sigma, gamma, and LDVB factorization are aligned with source notes. |
+| RHS-NS MCMC/VB/ELBO | `Q-DESN---Theory-for-implementation/main.tex` lines 91-183, 240-284, 369-463, 501-540 and `R/static_beta_prior.R` lines 822-1398 | Checked | Term-by-term ELBO matches the package structure. Fixed `zeta2`, unshrunk intercept behavior, and warmup/freeze scheduling were reconciled in the 2026-04-30 safety pass. |
 | Bounded slice sampler | `R/utils.R` lines 239-330 | Checked | Algorithm matches stepping-out, truncation to bounds, shrinkage, and acceptance logic. |
+
+2026-04-30 safety pass:
+
+- Rechecked the AL dynamic DQLM MCMC/VB/ELBO block against
+  `DQLM-and-BQR---Theory/main.tex` lines 840-1191.
+- Rechecked the exAL dynamic hierarchy, MCMC conditionals, LDVB moment block,
+  and Laplace-Delta role against `univ-exDQLM---Ensemble/main.tex` lines
+  108-341 and 404-690, plus the current dynamic LDVB implementation.
+- Rechecked the static exAL ridge MCMC/VB/ELBO block against
+  `exAL---Regression/main.tex` lines 247-398, 573-710, 910-1088, and
+  1412-1455.
+- Rechecked the RHS-NS hierarchy, MCMC/VB scale updates, fixed-versus-random
+  `zeta2` behavior, unshrunk-intercept contribution, and term-level ELBO
+  against `Q-DESN---Theory-for-implementation/main.tex` lines 240-284,
+  422-463, and 501-540, plus `R/static_beta_prior.R`.
+- Added explicit prose clarifying that RHS-NS tau warmup/freeze controls in the
+  package are update-scheduling devices and do not change the conditional or
+  coordinate targets printed in the supplement.
+- Rechecked bounded slice-sampler prose against the current implementation in
+  `R/utils.R` lines 239-330.
 
 Remaining verification work before submission:
 
-- Do one final line-by-line pass of the RHS-NS text against
-  `R/static_beta_prior.R`, especially fixed `zeta2`, unshrunk intercepts, and
-  tau warmup/freeze language.
 - Decide whether implementation comments with local file paths should remain
   as TeX comments or be removed before submission.
 - If this supplement becomes an official submission file, replace

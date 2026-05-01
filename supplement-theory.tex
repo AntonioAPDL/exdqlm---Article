@@ -789,6 +789,10 @@ b_\zeta+\frac{1}{2}\sum_{j\in\mathcal{A}}\beta_j^2
 \label{eq:rhs_ns_mcmc}
 \end{align}
 with the last line omitted when $\zeta^2$ is fixed.
+These equations are the conditional targets for the RHS-NS scale block. The
+implementation may temporarily freeze or schedule the global-scale update during
+configured warmup iterations for numerical stability; this changes only the
+update schedule, not the conditional target displayed above.
 
 \subsection{RHS-NS VB Updates and ELBO Contribution}
 
@@ -823,6 +827,8 @@ The third line is shorthand for
 $b_\tau=\frac{1}{2}\sum_{j\in\mathcal{A}}\bar\beta_j^2
 \E\{(\lambda_j^2)^{-1}\}+\E(\xi^{-1})$, where the expectation of
 $(\lambda_j^2)^{-1}$ is component-specific inside the summation.
+As in MCMC, optional warmup scheduling for the $\tau^2,\xi$ block affects when
+the coordinate is updated, not the coordinate target itself.
 
 The following term-by-term ELBO contribution matches the package's
 \code{rhs\_ns} scale block. For $x\sim\IG(a,b)$ under the rate
