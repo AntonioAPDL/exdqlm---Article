@@ -32,6 +32,7 @@
 \newcommand{\pplc}{\operatorname{pplc}}
 \newcommand{\elbo}{\mathcal{L}}
 \newcommand{\pigamma}{\pi_\gamma}
+\newcommand{\TableStyle}{\footnotesize\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.08}}
 \renewcommand{\theequation}{S\arabic{equation}}
 \renewcommand{\thetable}{S\arabic{table}}
 \renewcommand{\thesection}{S\arabic{section}}
@@ -91,9 +92,10 @@ approximations \citep{wang2013nonconjugatevb}, and the RHS-NS prior
 \citep{nishimura2023shrunken}.
 
 Table~\ref{tab:supp_article_crosswalk} gives the main navigation map. The
-model sections derive the fitting targets and updates, Section~\ref{sec:numerical_blocks}
-collects reusable numerical identities, and Table~\ref{tab:supp_algorithm_map}
-links the exported functions to the corresponding algorithmic blocks.
+model sections derive the fitting targets and updates,
+Section~\ref{sec:numerical_blocks} collects reusable numerical identities, and
+Table~\ref{tab:supp_algorithm_map} links the exported functions to the
+corresponding computational blocks.
 
 The notation follows the main article. In particular, $\mat{F}_t$ denotes the
 observation vector, $\mat{G}_t$ the state evolution matrix, $\mat{W}_t$ the
@@ -103,26 +105,28 @@ when each object is introduced.
 
 \begin{table}[!htb]
 \centering
+\begingroup
+\TableStyle
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}
 >{\raggedright\arraybackslash}p{0.20\textwidth}
->{\raggedright\arraybackslash}p{0.16\textwidth}
 >{\raggedright\arraybackslash}X@{}}
 \toprule
-Main article topic & Main article location & Supplement location & Package functions \\
+Main article topic & Main article location & Supplement location \\
 \midrule
-exAL mixture and exDQLM hierarchy & Equations (1)--(6) & S2--S4 & \code{exdqlmMCMC()}, \code{exdqlmLDVB()} \\
-AL/DQLM special case & Section 2.5 & S3 & \code{dqlm.ind = TRUE}, \code{fix.gamma = TRUE} \\
-Discount-factor evolution & Section 2.3 & S3.1, S4.1 & \code{df}, \code{dim.df} \\
-Transfer-function exDQLM & Equations (7)--(10) & S5 & \code{exdqlmTransferMCMC()}, \code{exdqlmTransferLDVB()} \\
-Static AL/exAL regression & Section 2.5, Example 4 & S6--S7 & \code{exalStaticMCMC()}, \code{exalStaticLDVB()} \\
-Forecasting & Equation (15) & S8.1 & \code{exdqlmForecast()} \\
-Diagnostics & Equations (11)--(14) & S8.2 & \code{exdqlmDiagnostics()}, \code{exalStaticDiagnostics()} \\
-Posterior-predictive synthesis & Example 1 & S8.3 & \code{quantileSynthesis()} \\
-Numerical blocks & Section 2.2 & S9 & Slice sampler, Laplace-Delta, ELBO blocks \\
+exAL mixture and exDQLM hierarchy & Equations (1)--(6) & S2--S4 \\
+AL/DQLM special case & Section 2.5 & S3 \\
+Discount-factor evolution & Section 2.3 & S3.1, S4.1 \\
+Transfer-function exDQLM & Equations (7)--(10) & S5 \\
+Static AL/exAL regression & Section 2.5, Example 4 & S6--S7 \\
+Forecasting & Equation (15) & S8.1 \\
+Diagnostics & Equations (11)--(14) & S8.2 \\
+Posterior-predictive synthesis & Example 1 & S8.3 \\
+Numerical blocks & Section 2.2 & S9 \\
 \bottomrule
 \end{tabularx}
+\endgroup
 \caption{Crosswalk between the main article, this supplement, and the
-exported \pkg{exdqlm} functions.}
+corresponding derivation sections.}
 \label{tab:supp_article_crosswalk}
 \end{table}
 
@@ -133,7 +137,7 @@ models, observations are indexed by $t=1,\ldots,T$; in static regression,
 observations are indexed by $i=1,\ldots,n$. For any positive definite matrix
 $A$, $|A|$ denotes its determinant.
 
-\subsection{Notation contract}
+\subsection{Core notation}
 
 The symbols $p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ are deterministic
 functions of $(p_0,\gamma)$, whereas $\pigamma(\gamma)$ denotes the prior
@@ -146,6 +150,8 @@ in Laplace-Delta calculations is denoted by $z_\gamma$.
 
 \begin{table}[!htb]
 \centering
+\begingroup
+\TableStyle
 \begin{tabularx}{\textwidth}{@{}lX@{}}
 \toprule
 Symbol & Meaning \\
@@ -164,6 +170,7 @@ $\mathcal{A}$ & Active coefficient set receiving RHS-NS shrinkage. \\
 $\elbo(q)$ & Evidence lower bound. \\
 \bottomrule
 \end{tabularx}
+\endgroup
 \caption{Core notation used throughout the supplement. The shorthand
 $p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ refers to functions of
 $(p_0,\gamma)$ defined in the main article.}
@@ -801,25 +808,10 @@ S4 apply after replacing
 $(\mat{F}_t,\mat{G}_t,\mat{W}_t,\vect{\theta}_t)$ by
 $(\widetilde{\mat{F}}_t,\widetilde{\mat{G}}_t,\widetilde{\mat{W}}_t,
 \widetilde{\vect{\theta}}_t)$.
-
-\begin{table}[!htb]
-\centering
-\begin{tabularx}{0.82\textwidth}{@{}lX@{}}
-\toprule
-Mathematical object & Package interface \\
-\midrule
-$x_t$ & \code{X} \\
-$\lambda$ & \code{lam} \\
-$(\delta_\zeta,\delta_\psi)$ & \code{tf.df} \\
-$m_0^{\mathrm{tf}}$ & \code{tf.m0} \\
-$C_0^{\mathrm{tf}}$ & \code{tf.C0} \\
-median decay time & returned field \code{median.kt} \\
-\bottomrule
-\end{tabularx}
-\caption{Transfer-function quantities and their corresponding package
-interface fields.}
-\label{tab:supp_tf_inputs}
-\end{table}
+The package inputs \code{X}, \code{lam}, \code{tf.df}, \code{tf.m0}, and
+\code{tf.C0} correspond to $x_t$, $\lambda$, the transfer discount factors,
+$m_0^{\mathrm{tf}}$, and $C_0^{\mathrm{tf}}$; \code{median.kt} is returned as a
+summary of the fitted transfer response.
 
 \paragraph{Algorithm S5 (transfer-function exDQLM).}
 \begin{enumerate}[label=(\arabic*)]
@@ -849,20 +841,8 @@ $\vect{\beta}\in\R^p$. The ridge/Gaussian coefficient prior is
 In the package interface, the same Gaussian update is used for
 \code{beta_prior = "ridge"}. When \code{beta_prior = "rhs_ns"}, the diagonal
 prior precision in this update is replaced by the RHS-NS expected precision
-described in Section~\ref{sec:static_rhs}.
-\begin{table}[!htb]
-\centering
-\begin{tabularx}{0.88\textwidth}{@{}lXcc@{}}
-\toprule
-\texttt{beta\_prior} & Coefficient prior & MCMC & LDVB \\
-\midrule
-\texttt{ridge} & Gaussian/ridge prior in \eqref{eq:static_beta_ridge}. & yes & yes \\
-\texttt{rhs\_ns} & Conjugate RHS-NS prior in Section~\ref{sec:static_rhs}. & yes & yes \\
-\bottomrule
-\end{tabularx}
-\caption{Static coefficient-prior options covered by the supplement.}
-\label{tab:supp_static_prior_menu}
-\end{table}
+described in Section~\ref{sec:static_rhs}. Thus this supplement covers the
+Gaussian/ridge prior and the conjugate RHS-NS prior, both for MCMC and LDVB.
 Under the exAL likelihood,
 \begin{align}
 v_i\mid\sigma &\sim \Exp(\text{rate}=1/\sigma),\qquad
@@ -1648,10 +1628,10 @@ distributions, or coordinate optima listed in this supplement.
 \begin{table}[!htb]
 \centering
 \begingroup
-\footnotesize
+\TableStyle
 \begin{tabularx}{\textwidth}{@{}p{0.30\textwidth}p{0.14\textwidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
-Function & Section & Algorithmic block \\
+Function & Section & Derivation or computational block \\
 \midrule
 \texttt{exdqlmMCMC()} & S3--S4 & Dynamic DQLM/exDQLM MCMC; Algorithms S1 and S3. \\
 \texttt{exdqlmLDVB()} & S3--S4 & Dynamic DQLM/exDQLM LDVB; Algorithms S2 and S4. \\
@@ -1673,6 +1653,7 @@ blocks derived in this supplement.}
 \label{tab:supp_algorithm_map}
 \end{table}
 
+\clearpage
 \bibliography{bibl}
 
 \end{document}
