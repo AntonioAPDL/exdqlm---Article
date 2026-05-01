@@ -41,6 +41,7 @@
 \newcommand{\exAL}{\operatorname{exAL}}
 \newcommand{\KL}{\operatorname{KL}}
 \newcommand{\elbo}{\mathcal{L}}
+\newcommand{\pigamma}{\pi_\gamma}
 
 \title{Supplementary Theory and Algorithm Details for \pkg{exdqlm}}
 \author{Working draft}
@@ -72,6 +73,42 @@ Uppercase bold symbols denote matrices, for example $\mat{G}_t\in\R^{q\times q}$
 and $\mat{X}\in\R^{n\times p}$. For any positive definite matrix $\mat{A}$,
 $|\mat{A}|$ denotes its determinant.
 
+\subsection{Notation Contract}
+
+The supplement uses the following conventions throughout. The symbols
+$p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ are deterministic functions
+of $(p_0,\gamma)$, whereas $\pigamma(\gamma)$ denotes the prior density for
+$\gamma$ on $(L,U)$. Generic densities are denoted by $p(\cdot)$ only when no
+confusion with the exAL quantile map can arise. In variational sections,
+expectations without an explicit subscript are taken under the current
+mean-field distribution $q$. The symbol $\xi$ is reserved for the RHS-NS
+half-Cauchy auxiliary variable; the transformed coordinate for $\gamma$ in
+Laplace-Delta calculations is denoted by $z_\gamma$.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$p_0$ & Target quantile level. \\
+$p_\gamma$ & exAL internal quantile map determined by $(p_0,\gamma)$. \\
+$A_0,B_0$ & AL constants $A(p_0)$ and $B(p_0)$. \\
+$A_\gamma,B_\gamma,C_\gamma$ & exAL constants evaluated at $p_\gamma$. \\
+$\pigamma(\gamma)$ & Prior density for $\gamma$ on $(L,U)$. \\
+$\vect{\theta}_t,\vect{f}_t,\mat{G}_t,\mat{W}_t$ & Dynamic state, observation vector, evolution matrix, and evolution covariance. \\
+$\vect{\beta},\mat{X}$ & Static regression coefficients and design matrix. \\
+$\mathcal{A}$ & Active coefficient set receiving RHS-NS shrinkage. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The distributional parameterizations are also fixed throughout:
+$\N(m,V)$ uses variance $V$; $\IG(a,b)$ uses rate $b$ with density proportional
+to $x^{-(a+1)}\exp(-b/x)$; $\Exp(\text{rate}=1/\sigma)$ has density
+$\sigma^{-1}\exp(-x/\sigma)$; and $\TNp(m,V)$ denotes $\N(m,V)$ truncated to
+$(0,\infty)$. The generalized inverse Gaussian parameterization is given in
+\eqref{eq:gig_parameterization}.
+
 The asymmetric Laplace (AL) mixture representation used by the package is
 \begin{align}
 v &\mid \sigma \sim \Exp(\text{rate}=1/\sigma), \qquad v>0, \\
@@ -90,10 +127,10 @@ $s\sim\TNp(0,1)$, a standard normal truncated to $(0,\infty)$. For
 $\gamma\in(L,U)$, define
 \begin{align}
 g(\gamma) &= 2\Phi(-|\gamma|)\exp(\gamma^2/2), \\
-p(\gamma) &= \Ind(\gamma<0) + \frac{p_0-\Ind(\gamma<0)}{g(\gamma)}, \\
-A_\gamma &= A\{p(\gamma)\}, \qquad
-B_\gamma = B\{p(\gamma)\}, \qquad
-C_\gamma = \{\Ind(\gamma>0)-p(\gamma)\}^{-1}.
+p_\gamma &= \Ind(\gamma<0) + \frac{p_0-\Ind(\gamma<0)}{g(\gamma)}, \\
+A_\gamma &= A(p_\gamma), \qquad
+B_\gamma = B(p_\gamma), \qquad
+C_\gamma = \{\Ind(\gamma>0)-p_\gamma\}^{-1}.
 \label{eq:exal_ABC}
 \end{align}
 The endpoints $L<0<U$ are the roots $g(L)=1-p_0$ and $g(U)=p_0$. Conditional on
@@ -105,12 +142,9 @@ y\mid \eta,\sigma,\gamma,v,s
 \sigma B_\gamma v \right).
 \label{eq:exal_aug}
 \end{equation}
-The package uses an inverse-gamma prior $\sigma\sim\IG(a_\sigma,b_\sigma)$,
-with density proportional to
-\[
-\sigma^{-(a_\sigma+1)}\exp(-b_\sigma/\sigma),
-\]
-and a proper truncated Student-$t$ prior for $\gamma$ on $(L,U)$.
+The package uses an inverse-gamma prior $\sigma\sim\IG(a_\sigma,b_\sigma)$
+and a proper truncated Student-$t$ prior $\pigamma(\gamma)$ for $\gamma$ on
+$(L,U)$.
 
 The generalized inverse Gaussian distribution is parameterized as
 \begin{equation}
@@ -302,7 +336,7 @@ p(\vect{\theta}_{0:T},\vect{v},\vect{s},\sigma,\gamma\mid\vect{y})
 p(\vect{\theta}_0)\prod_{t=1}^Tp(\vect{\theta}_t\mid\vect{\theta}_{t-1})
 \prod_{t=1}^Tp(y_t\mid\vect{\theta}_t,v_t,s_t,\sigma,\gamma) \nonumber\\
 &\quad\times
-\prod_{t=1}^Tp(v_t\mid\sigma)\prod_{t=1}^Tp(s_t)\,p(\sigma)p(\gamma).
+\prod_{t=1}^Tp(v_t\mid\sigma)\prod_{t=1}^Tp(s_t)\,p(\sigma)\pigamma(\gamma).
 \label{eq:dyn_exdqlm_joint}
 \end{align}
 Conditional on $(\vect{v},\vect{s},\sigma,\gamma)$,
@@ -372,7 +406,7 @@ where
 The conditional kernel for $\gamma$ is
 \begin{align}
 \pi(\gamma\mid\cdot)
-&\propto p(\gamma)\,
+&\propto \pigamma(\gamma)\,
 \prod_{t=1}^T(\sigma B_\gamma v_t)^{-1/2}
 \exp\left[
 -\sum_{t=1}^T
@@ -441,11 +475,11 @@ The nonconjugate factor $q(\sigma,\gamma)$ is approximated by a
 Laplace-Delta step on transformed coordinates
 \begin{equation}
 u=\log\sigma,\qquad
-\xi=\logit\left(\frac{\gamma-L}{U-L}\right).
+z_\gamma=\logit\left(\frac{\gamma-L}{U-L}\right).
 \label{eq:dyn_exdqlm_ld_transform}
 \end{equation}
 The transformed objective is the expected complete log-joint plus the
-Jacobian $u+\log\{\dd\gamma/\dd\xi\}$. The package stores the transformed mode,
+Jacobian $u+\log\{\dd\gamma/\dd z_\gamma\}$. The package stores the transformed mode,
 the approximate covariance matrix, Delta-method moments, and ELBO components.
 
 \paragraph{ELBO.}
@@ -497,7 +531,7 @@ using $A_0,B_0$. The exAL full joint is
 \begin{align}
 p(\vect{\beta},\sigma,\gamma,\vect{v},\vect{s},\vect{y})
 &=
-p(\vect{\beta})p(\sigma)p(\gamma)
+p(\vect{\beta})p(\sigma)\pigamma(\gamma)
 \prod_{i=1}^n
 p(y_i\mid\vect{\beta},\sigma,\gamma,v_i,s_i)
 p(v_i\mid\sigma)p(s_i).
@@ -561,7 +595,7 @@ The nonstandard $\gamma$ kernel is
 \begin{align}
 \pi(\gamma\mid\cdot)
 &\propto
-p(\gamma)\,[B_\gamma]^{-n/2}
+\pigamma(\gamma)\,[B_\gamma]^{-n/2}
 \exp\left\{
 \sum_{i=1}^n\frac{D_\gamma s_it_i}{B_\gamma v_i}
 -\frac{1}{2\sigma}\sum_{i=1}^n\frac{t_i^2}{B_\gamma v_i}
@@ -646,7 +680,7 @@ The nonconjugate factor $q(\sigma,\gamma)$ is proportional to
 \begin{align}
 q(\sigma,\gamma)
 &\propto
-p(\gamma)[B_\gamma]^{-n/2}
+\pigamma(\gamma)[B_\gamma]^{-n/2}
 \sigma^{-(a_\sigma+1+3n/2)}
 \exp\left\{
 -\frac{1}{2}\left(\frac{\bar c(\gamma)}{\sigma}
@@ -677,7 +711,7 @@ $\E\{(y_i-\vect{x}_i^\T\vect{\beta})^2\}$.
 The static exAL ELBO is
 \begin{equation}
 \elbo(q)=
-\E_q\{\log p(\vect{\beta})+\log p(\sigma)+\log p(\gamma)\}
+\E_q\{\log p(\vect{\beta})+\log p(\sigma)+\log \pigamma(\gamma)\}
 +\sum_{i=1}^n\E_q\{\log p(y_i\mid\cdot)+\log p(v_i\mid\sigma)+\log p(s_i)\}
 +H(q),
 \label{eq:static_exal_elbo}
@@ -966,6 +1000,7 @@ For a smooth function $r(\vect{\eta})$, the Delta approximation used by LDVB is
 \E\{r(\vect{\eta})\}
 \approx
 r(\hat{\vect{\eta}})
++
 \frac{1}{2}\tr\left[
 \nabla^2 r(\hat{\vect{\eta}})[-\mat{H}]^{-1}
 \right].
@@ -984,14 +1019,14 @@ exAL models.
 \section{Package-to-Algorithm Map}
 
 \begin{center}
-\begin{tabularx}{\textwidth}{@{}l l l X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
-Function & Model & Main inference target & Notes \\
+Function & Main algorithmic role \\
 \midrule
-\code{exdqlmMCMC()} & Dynamic DQLM/exDQLM & Posterior simulation & FFBS plus Gibbs/slice blocks \\
-\code{exdqlmLDVB()} & Dynamic DQLM/exDQLM & Mean-field VB & CAVI plus Laplace-Delta \\
-\code{exalStaticMCMC()} & Static AL/exAL & Posterior simulation & Ridge/RHS-NS priors \\
-\code{exalStaticLDVB()} & Static AL/exAL & Mean-field VB & Ridge/RHS-NS priors \\
+\code{exdqlmMCMC()} & Dynamic DQLM/exDQLM posterior simulation: FFBS for states, Gibbs for conjugate latent/scale blocks, and bounded slice for $\gamma$ when exAL is used. \\
+\code{exdqlmLDVB()} & Dynamic DQLM/exDQLM mean-field VB: CAVI for Gaussian/GIG/truncated-normal blocks and Laplace-Delta for $(\sigma,\gamma)$ in exAL. \\
+\code{exalStaticMCMC()} & Static AL/exAL posterior simulation: Gaussian coefficient update, Gibbs latent/scale updates, RHS-NS inverse-gamma scale updates when selected, and bounded slice for $\gamma$ in exAL. \\
+\code{exalStaticLDVB()} & Static AL/exAL mean-field VB: Gaussian coefficient factor, CAVI latent and RHS-NS scale factors, and Laplace-Delta for $(\sigma,\gamma)$ in exAL. \\
 \bottomrule
 \end{tabularx}
 \end{center}

@@ -412,3 +412,59 @@ locations. No matching `exdqlm`, `RHS`, `Q-DESN`, or horseshoe source repos
 were found under `/home/jaguir26/local/src`, `/home/jaguir26/src`, or nearby
 home-directory source locations. The relevant theory sources for this pass are
 therefore the muscat local repositories listed above.
+
+## 11. Normalization and Polish Pass
+
+Date: 2026-04-30.
+
+The supplement was normalized using the following contract:
+
+- Use `p_gamma` only for the exAL internal quantile map.
+- Use `pi_gamma(gamma)` for the prior density of `gamma`.
+- Reserve `xi` for the RHS-NS half-Cauchy auxiliary variable.
+- Use `z_gamma` for the transformed `gamma` coordinate in Laplace-Delta
+  calculations.
+- Treat `IG(a,b)` as inverse-gamma with rate `b`.
+- Treat `GIG(lambda, chi, psi)` as the package parameterization with kernel
+  `x^(lambda-1) exp{-(chi/x + psi x)/2}`.
+- Treat all unsubscripted expectations in VB sections as expectations under
+  the current mean-field distribution `q`.
+
+Corrections made in this pass:
+
+- Removed the notation collision between the exAL map `p(gamma)` and the
+  prior density for `gamma` by renaming the map to `p_gamma` and the prior to
+  `pi_gamma(gamma)`.
+- Removed the notation collision between the Laplace-Delta transform `xi` and
+  the RHS-NS auxiliary variable `xi` by using `z_gamma` for the transformed
+  `gamma` coordinate.
+- Corrected the generic Delta approximation from a product form to the usual
+  additive second-order approximation.
+- Added an explicit distribution-parameterization contract to the supplement.
+- Expanded the package-to-algorithm map to distinguish exact Gibbs/CAVI blocks
+  from Laplace-Delta and bounded-slice blocks.
+- Recompiled `supplement-theory.tex` after the normalization pass; the final
+  compile completed without LaTeX warnings about undefined references,
+  reruns, overfull boxes, or underfull boxes.
+
+Equation-family verification matrix:
+
+| Supplement block | Source checked | Status | Notes |
+| --- | --- | --- | --- |
+| AL mixture and dynamic DQLM MCMC/VB | `DQLM-and-BQR---Theory/main.tex` lines 840-1048 | Checked | Uses the same AL constants, IG scale update, GIG latent update, and variational pseudo-observation. |
+| Dynamic exDQLM hierarchy and MCMC conditionals | `univ-exDQLM---Ensemble/main.tex` lines 108-341 | Checked | Supplement uses the same exAL augmentation and conditional kernels; sampler wording reflects current package slice default rather than older MH-only notes. |
+| Dynamic exDQLM LDVB moments | `univ-exDQLM---Ensemble/main.tex` lines 404-680 and `R/exdqlmLDVB.R` LD block | Checked with approximation note | Kappa moment definitions and Laplace-Delta role are aligned; final code-level audit should still compare stored diagnostic names if this becomes user-facing documentation. |
+| Static exAL ridge MCMC/VB | `exAL---Regression/main.tex` lines 247-398 and 1019-1455 | Checked | Static beta, latent `s`, latent `v`, sigma, gamma, and LDVB factorization are aligned with source notes. |
+| RHS-NS MCMC/VB/ELBO | `Q-DESN---Theory-for-implementation/main.tex` lines 91-183, 240-284, 369-463, 501-540 and `R/static_beta_prior.R` lines 1194-1474 | Checked | Term-by-term ELBO matches the package structure. Remaining final audit should focus on fixed `zeta2`, intercept shrinkage, and warmup/freeze behavior in prose. |
+| Bounded slice sampler | `R/utils.R` lines 239-330 | Checked | Algorithm matches stepping-out, truncation to bounds, shrinkage, and acceptance logic. |
+
+Remaining verification work before submission:
+
+- Do one final line-by-line pass of the RHS-NS text against
+  `R/static_beta_prior.R`, especially fixed `zeta2`, unshrunk intercepts, and
+  tau warmup/freeze language.
+- Decide whether implementation comments with local file paths should remain
+  as TeX comments or be removed before submission.
+- If this supplement becomes an official submission file, replace
+  "Working draft" metadata with final supplement metadata and add references if
+  needed.
