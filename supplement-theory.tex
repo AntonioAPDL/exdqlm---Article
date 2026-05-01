@@ -353,10 +353,16 @@ v_t\mid\vect{\theta}_t,\sigma,y_t
 \label{eq:dyn_dqlm_v_cond}
 \end{equation}
 
-\paragraph{Algorithm S1 (dynamic DQLM MCMC).}
+\paragraph{Algorithm S1 (dynamic DQLM MCMC).}\hfill\par
 The MCMC kernel leaves the augmented posterior in
 \eqref{eq:dyn_dqlm_joint} invariant; posterior summaries are Monte Carlo
 estimates from the retained finite chain.
+\par\noindent\emph{Input:} observations $\vect{y}$, model matrices
+$(\mat{F}_t,\mat{G}_t,\mat{W}_t)$, initial state prior, AL prior
+hyperparameters, and MCMC controls $N_{\mathrm{burn}}$ and
+$N_{\mathrm{mcmc}}$.
+\par\noindent\emph{Output:} retained posterior draws for
+$(\vect{\theta}_{0:T},\vect{v},\sigma)$ and filtered/smoothed state summaries.
 \begin{enumerate}[label=(\arabic*)]
 \item Initialize $\vect{\theta}_{0:T}$, $\vect{v}$, and $\sigma$.
 \item For $m=1,\ldots,N_{\mathrm{burn}}+N_{\mathrm{mcmc}}$:
@@ -365,9 +371,9 @@ estimates from the retained finite chain.
   \eqref{eq:dyn_dqlm_pseudo};
   \item sample $\sigma$ from \eqref{eq:dyn_dqlm_sigma_cond};
   \item sample each $v_t$ from \eqref{eq:dyn_dqlm_v_cond};
-  \item retain draws after burn-in.
+  \item if $m>N_{\mathrm{burn}}$, retain the current draw.
   \end{enumerate}
-\item Return posterior samples and filtered/smoothed state summaries.
+\item Return the retained draws and state summaries.
 \end{enumerate}
 
 \subsection{Mean-field VB and ELBO}
@@ -418,20 +424,28 @@ b_q&=b_\sigma+\sum_{t=1}^T\bar v_t+
 \label{eq:dyn_dqlm_vb_sigma}
 \end{align}
 
-\paragraph{Algorithm S2 (dynamic DQLM LDVB).}
+\paragraph{Algorithm S2 (dynamic DQLM LDVB).}\hfill\par
+\par\noindent\emph{Input:} observations $\vect{y}$, model matrices
+$(\mat{F}_t,\mat{G}_t,\mat{W}_t)$, initial state prior, AL prior
+hyperparameters, convergence tolerance, and optional posterior-sampling
+control \code{n.samp}.
+\par\noindent\emph{Output:} fitted variational factors for
+$(\vect{\theta}_{0:T},\vect{v},\sigma)$, convergence diagnostics, ELBO values
+when requested, and optional approximate posterior draws.
 \begin{enumerate}[label=(\arabic*)]
 \item Initialize the variational parameters for $q(\vect{\theta}_{0:T})$,
 $q(\sigma)$, and $q(v_t)$.
-\item Repeat until convergence:
+\item Repeat until the convergence criterion is met:
   \begin{enumerate}[label=(\alph*)]
   \item update $q(\vect{\theta}_{0:T})$ by Kalman smoothing under
   \eqref{eq:dyn_dqlm_vb_pseudo};
-  \item update $q(v_t)$ for $t=1,\ldots,T$;
+  \item update $q(v_t)$ for $t=1,\ldots,T$ using the GIG CAVI update above;
   \item update $q(\sigma)$ using \eqref{eq:dyn_dqlm_vb_sigma};
   \item monitor moment changes and, when enabled, $\elbo(q)$.
   \end{enumerate}
 \item Draw approximate posterior samples from the fitted variational factors
 when requested by \code{n.samp}.
+\item Return the fitted factors, diagnostics, and optional draws.
 \end{enumerate}
 In the package, this AL/DQLM path is selected in the dynamic fitting routines
 with \code{dqlm.ind = TRUE}.
@@ -597,25 +611,32 @@ The conditional kernel for $\gamma$ is
 for $\gamma\in(L,U)$. The default sampler applies the bounded slice update in
 Section~\ref{sec:slice} directly to this kernel.
 
-\paragraph{Algorithm S3 (dynamic exDQLM MCMC).}
+\paragraph{Algorithm S3 (dynamic exDQLM MCMC).}\hfill\par
 The default $(\sigma,\gamma)$ update consists of an exact GIG update for
 $\sigma$ conditional on $\gamma$, followed by a bounded univariate slice update
 for $\gamma$. Joint random-walk alternatives are implemented, but they are not
 the default kernel summarized here.
+\par\noindent\emph{Input:} observations $\vect{y}$, model matrices
+$(\mat{F}_t,\mat{G}_t,\mat{W}_t)$, initial state prior, exAL prior
+hyperparameters, admissible interval $(L,U)$ for $\gamma$, and MCMC controls
+$N_{\mathrm{burn}}$ and $N_{\mathrm{mcmc}}$.
+\par\noindent\emph{Output:} retained posterior draws for
+$(\vect{\theta}_{0:T},\vect{v},\vect{s},\sigma,\gamma)$ and state summaries.
 \begin{enumerate}[label=(\arabic*)]
 \item Initialize $\vect{\theta}_{0:T}$, $\vect{v}$, $\vect{s}$, $\sigma$, and
 $\gamma$.
-\item For each MCMC iteration:
+\item For $m=1,\ldots,N_{\mathrm{burn}}+N_{\mathrm{mcmc}}$:
   \begin{enumerate}[label=(\alph*)]
   \item sample $v_t$ from \eqref{eq:dyn_exdqlm_v_cond}, $t=1,\ldots,T$;
   \item sample $s_t$ from \eqref{eq:dyn_exdqlm_s_cond}, $t=1,\ldots,T$;
   \item sample $\vect{\theta}_{0:T}$ by FFBS using
   \eqref{eq:dyn_exdqlm_pseudo};
   \item sample $\sigma$ from \eqref{eq:dyn_exdqlm_sigma_cond};
-  \item sample $\gamma$ on $(L,U)$ using \eqref{eq:dyn_exdqlm_gamma_kernel};
-  \item retain draws after burn-in.
+  \item sample $\gamma$ on $(L,U)$ with the bounded slice sampler in
+  Section~\ref{sec:slice}, targeting \eqref{eq:dyn_exdqlm_gamma_kernel};
+  \item if $m>N_{\mathrm{burn}}$, retain the current draw.
   \end{enumerate}
-\item Return posterior samples and state summaries.
+\item Return the retained draws and state summaries.
 \end{enumerate}
 Setting $\gamma=0$ drops the $s_t$ block and reduces the sampler to the
 AL/DQLM kernel in Algorithm S1.
@@ -694,21 +715,31 @@ h_z(\ell_\sigma,z_\gamma)
 The package stores the transformed mode, the approximate covariance matrix,
 Delta-method moments, and ELBO components.
 
-\paragraph{Algorithm S4 (dynamic exDQLM LDVB).}
+\paragraph{Algorithm S4 (dynamic exDQLM LDVB).}\hfill\par
+\par\noindent\emph{Input:} observations $\vect{y}$, model matrices
+$(\mat{F}_t,\mat{G}_t,\mat{W}_t)$, initial state prior, exAL prior
+hyperparameters, admissible interval $(L,U)$ for $\gamma$, convergence
+tolerance, and optional posterior-sampling control \code{n.samp}.
+\par\noindent\emph{Output:} fitted variational factors for
+$(\vect{\theta}_{0:T},\vect{v},\vect{s},\sigma,\gamma)$, convergence
+diagnostics, ELBO values when requested, and optional approximate posterior
+draws.
 \begin{enumerate}[label=(\arabic*)]
 \item Initialize variational parameters for $q(\vect{\theta}_{0:T})$,
 $q(v_t)$, $q(s_t)$, and $q(\sigma,\gamma)$.
-\item Repeat until convergence:
+\item Repeat until the convergence criterion is met:
   \begin{enumerate}[label=(\alph*)]
   \item update $q(\vect{\theta}_{0:T})$ by Kalman smoothing under
   \eqref{eq:dyn_exdqlm_vb_pseudo};
   \item update $q(v_t)$ and $q(s_t)$ using \eqref{eq:dyn_exdqlm_vb_vs};
-  \item update $q(\sigma,\gamma)$ by the Laplace-Delta approximation to
-  \eqref{eq:dyn_exdqlm_ld_objective};
+  \item update $q(\sigma,\gamma)$ on the transformed coordinates
+  $(\ell_\sigma,z_\gamma)$ in \eqref{eq:dyn_exdqlm_ld_transform} by the
+  Laplace-Delta approximation to \eqref{eq:dyn_exdqlm_ld_objective};
   \item monitor moment changes and, when enabled, $\elbo(q)$.
   \end{enumerate}
 \item Draw approximate posterior samples from the fitted variational factors
 when requested by \code{n.samp}.
+\item Return the fitted factors, diagnostics, and optional draws.
 \end{enumerate}
 In the AL special case, the nonconjugate $(\sigma,\gamma)$ block is replaced
 by the inverse-gamma $q(\sigma)$ update in Algorithm S2.
@@ -827,14 +858,19 @@ The package inputs \code{X}, \code{lam}, \code{tf.df}, \code{tf.m0}, and
 $m_0^{\mathrm{tf}}$, and $C_0^{\mathrm{tf}}$; \code{median.kt} is returned as a
 summary of the fitted transfer response.
 
-\paragraph{Algorithm S5 (transfer-function exDQLM).}
+\paragraph{Algorithm S5 (transfer-function state augmentation and fitting).}\hfill\par
+\par\noindent\emph{Input:} base dynamic model, transfer covariates $x_t$,
+fixed transfer rate $\lambda$, transfer discount factors, and transfer-state
+prior $(m_0^{\mathrm{tf}},C_0^{\mathrm{tf}})$.
+\par\noindent\emph{Output:} fitted base-state and transfer-state summaries,
+including the transfer response summary \code{median.kt}.
 \begin{enumerate}[label=(\arabic*)]
 \item Construct $\widetilde{\mat{F}}_t$, $\widetilde{\mat{G}}_t$,
 $\widetilde{\mat{W}}_t$, and $\widetilde{\vect{\theta}}_t$ from
 \eqref{eq:tf_aug_state}--\eqref{eq:tf_aug_mats}.
 \item Set the augmented initial prior.
-\item Run the selected fitting routine: MCMC uses Algorithm S3 and LDVB uses
-Algorithm S4.
+\item Run the selected fitting routine on the augmented state-space system:
+MCMC uses Algorithm S3 and LDVB uses Algorithm S4.
 \item Return summaries for both the base state and the transfer states.
 \end{enumerate}
 The transfer-function extension changes only the state-space matrices; the
@@ -952,14 +988,16 @@ bounded slice sampler in Section~\ref{sec:slice}.
 For the AL special case, the Gibbs updates reduce to
 \begin{align}
 \vect{\beta}\mid\cdot
-&\sim\N(\vect{m}_{\beta\mid\cdot},\mat{\Sigma}_{\beta\mid\cdot}),\\
+&\sim\N(\vect{m}_{\beta\mid\cdot},\mat{\Sigma}_{\beta\mid\cdot}),
+\label{eq:static_al_beta_cond}\\
 \sigma\mid\cdot
 &\sim
 \IG\left(
 a_\sigma+\frac{3n}{2},\
 b_\sigma+\sum_{i=1}^n v_i+
 \sum_{i=1}^n\frac{(y_i-\vect{x}_i^\top\vect{\beta}-A_{p_0}v_i)^2}{2B_{p_0}v_i}
-\right),\\
+\right),
+\label{eq:static_al_sigma_cond}\\
 v_i\mid\cdot
 &\sim
 \GIG\left(
@@ -967,25 +1005,36 @@ v_i\mid\cdot
 \frac{(y_i-\vect{x}_i^\top\vect{\beta})^2}{\sigma B_{p_0}},\
 \frac{A_{p_0}^2}{\sigma B_{p_0}}+\frac{2}{\sigma}
 \right).
-\label{eq:static_al_mcmc}
+\label{eq:static_al_v_cond}
 \end{align}
 
-\paragraph{Algorithm S6 (static AL/exAL MCMC).}
+\paragraph{Algorithm S6 (static AL/exAL MCMC).}\hfill\par
+\par\noindent\emph{Input:} response vector $\vect{y}$, design matrix
+$\mat{X}$, target quantile $p_0$, coefficient prior specification, AL/exAL
+prior hyperparameters, and MCMC controls $N_{\mathrm{burn}}$ and
+$N_{\mathrm{mcmc}}$.
+\par\noindent\emph{Output:} retained posterior draws for regression
+coefficients, latent variables, scale parameters, and shrinkage parameters when
+\code{beta_prior = "rhs_ns"}.
 \begin{enumerate}[label=(\arabic*)]
 \item Initialize $\vect{\beta}$, $\vect{v}$, $\vect{s}$, $\sigma$, and
 $\gamma$; omit $\vect{s}$ and fix $\gamma=0$ for the AL path.
-\item For each MCMC iteration:
+\item For $m=1,\ldots,N_{\mathrm{burn}}+N_{\mathrm{mcmc}}$:
   \begin{enumerate}[label=(\alph*)]
   \item sample $\vect{\beta}$ from \eqref{eq:static_beta_cond};
-  \item sample $v_i$ for $i=1,\ldots,n$;
-  \item for exAL, sample $s_i$ for $i=1,\ldots,n$;
-  \item sample $\sigma$;
-  \item for exAL, sample $\gamma$ by bounded slice sampling;
+  \item sample $v_i$ from \eqref{eq:static_exal_v_cond},
+  $i=1,\ldots,n$, with the AL simplification in \eqref{eq:static_al_v_cond};
+  \item for exAL, sample $s_i$ from \eqref{eq:static_exal_s_cond},
+  $i=1,\ldots,n$;
+  \item sample $\sigma$ from \eqref{eq:static_exal_sigma_cond}, with the AL
+  simplification in \eqref{eq:static_al_sigma_cond};
+  \item for exAL, sample $\gamma$ on $(L,U)$ with the bounded slice sampler,
+  targeting \eqref{eq:static_exal_gamma_cond};
   \item if \code{beta_prior = "rhs_ns"}, update the RHS-NS scale block in
-  Section~\ref{sec:static_rhs};
-  \item retain draws after burn-in.
+  \eqref{eq:rhs_ns_mcmc};
+  \item if $m>N_{\mathrm{burn}}$, retain the current draw.
   \end{enumerate}
-\item Return coefficient, latent-variable, and scale posterior samples.
+\item Return the retained posterior draws.
 \end{enumerate}
 
 \subsection{Laplace-Delta VB updates and ELBO}
@@ -1069,21 +1118,29 @@ $q(\vect{\beta})q(\sigma)\prod_iq(v_i)$ with the same closed-form updates as
 Section~\ref{sec:dyn_dqlm}, replacing state smoothing moments by
 $\E\{(y_i-\vect{x}_i^\top\vect{\beta})^2\}$.
 
-\paragraph{Algorithm S7 (static AL/exAL LDVB).}
+\paragraph{Algorithm S7 (static AL/exAL LDVB).}\hfill\par
+\par\noindent\emph{Input:} response vector $\vect{y}$, design matrix
+$\mat{X}$, target quantile $p_0$, coefficient prior specification, AL/exAL
+prior hyperparameters, convergence tolerance, and optional posterior-sampling
+control \code{n.samp}.
+\par\noindent\emph{Output:} fitted variational factors, convergence
+diagnostics, ELBO values, and optional approximate posterior draws.
 \begin{enumerate}[label=(\arabic*)]
 \item Initialize $q(\vect{\beta})$, the latent-variable factors, the scale
 factors, and the $(\sigma,\gamma)$ block.
-\item Repeat until convergence:
+\item Repeat until the convergence criterion is met:
   \begin{enumerate}[label=(\alph*)]
   \item update $q(\vect{\beta})$ using \eqref{eq:static_exal_vb_beta};
   \item update $q(v_i)$ and, for exAL, $q(s_i)$ using
   \eqref{eq:static_exal_vb_vs};
-  \item update $q(\sigma)$ for AL or $q(\sigma,\gamma)$ for exAL;
+  \item update $q(\sigma)$ for AL or $q(\sigma,\gamma)$ for exAL using the
+  Laplace-Delta approximation to \eqref{eq:static_exal_q_sigmagam};
   \item if \code{beta_prior = "rhs_ns"}, update the RHS-NS factors in
-  Section~\ref{sec:static_rhs};
+  \eqref{eq:rhs_ns_vb_updates};
   \item monitor moment changes and $\elbo(q)$.
   \end{enumerate}
-\item Draw approximate posterior samples when requested.
+\item Draw approximate posterior samples when requested by \code{n.samp}.
+\item Return the fitted factors, diagnostics, and optional draws.
 \end{enumerate}
 These static updates are implemented in \code{exalStaticMCMC()} and
 \code{exalStaticLDVB()}, with \code{beta_prior} selecting the Gaussian/ridge
@@ -1484,15 +1541,20 @@ interpolates across $p$ to obtain draws from one posterior predictive
 distribution. The monotonicity correction uses isotonic adjustment and, when
 requested, global monotone rearrangement \citep{barlow1972,chernozhukov2010}.
 
-\paragraph{Algorithm S8 (posterior-predictive synthesis).}
+\paragraph{Algorithm S8 (posterior-predictive synthesis).}\hfill\par
+\par\noindent\emph{Input:} posterior predictive draws or fitted forecast
+objects from models at ordered quantile levels $p_1<\cdots<p_K$, together with
+the requested monotonicity correction and interpolation settings.
+\par\noindent\emph{Output:} synthesized posterior predictive draws and
+summary intervals on the common predictive scale.
 \begin{enumerate}[label=(\arabic*)]
-\item Collect posterior predictive draw matrices from fitted models at
-$p_1<\cdots<p_K$.
-\item For each time point and draw index, form the quantile-specific predictive
-curve.
+\item Extract or collect posterior predictive draw matrices for each fitted
+quantile level.
+\item For each time point and retained draw index, form the quantile-specific
+predictive curve over $p_1,\ldots,p_K$.
 \item Apply the requested monotonicity correction.
 \item Interpolate across quantile levels.
-\item Return synthesized posterior predictive draws and summaries.
+\item Return synthesized posterior predictive draws and summary intervals.
 \end{enumerate}
 
 \section{Numerical and ELBO implementation blocks}
@@ -1653,8 +1715,8 @@ Function & Section & Derivation or computational block \\
 \midrule
 \texttt{exdqlmMCMC()} & S3--S4 & Dynamic DQLM/exDQLM MCMC; Algorithms S1 and S3. \\
 \texttt{exdqlmLDVB()} & S3--S4 & Dynamic DQLM/exDQLM LDVB; Algorithms S2 and S4. \\
-\texttt{exdqlmTransferMCMC()} & S5 & Transfer-function MCMC; Algorithm S5 with Algorithm S3. \\
-\texttt{exdqlmTransferLDVB()} & S5 & Transfer-function LDVB; Algorithm S5 with Algorithm S4. \\
+\texttt{exdqlmTransferMCMC()} & S5 & Transfer-function state augmentation; Algorithm S5 with Algorithm S3. \\
+\texttt{exdqlmTransferLDVB()} & S5 & Transfer-function state augmentation; Algorithm S5 with Algorithm S4. \\
 \texttt{exalStaticMCMC()} & S6--S7 & Static AL/exAL MCMC; Algorithm S6. \\
 \texttt{exalStaticLDVB()} & S6--S7 & Static AL/exAL LDVB; Algorithm S7. \\
 \texttt{exdqlmForecast()} & S8.1 & Forecast recursion and predictive draws. \\
