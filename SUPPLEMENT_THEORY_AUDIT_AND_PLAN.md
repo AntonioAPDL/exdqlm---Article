@@ -509,3 +509,78 @@ Remaining verification work before submission:
 - Do one final visual PDF read for page breaks and equation readability.
 - Decide whether the official submitted supplement should include a short
   reference list, or rely on the main article for citations.
+
+## 13. Implementation-match audit against `cransub/0.4.0`
+
+Date: 2026-04-30.
+
+Source of truth for this pass:
+
+- Article repo: `/home/jaguir26/local/src/exdqlm---Article`
+- Article commit at start of pass: `8e81e019380acdf8e4930a918946fe78c21e1e3e`
+- Package repo: `/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`
+- Package branch: `cransub/0.4.0`
+- Package commit: `33adab3ad545ba3ceb013d8e3682be2bdbfa3118`
+
+Audit rule:
+
+- Treat the package implementation as fixed for this pass.
+- Correct `supplement-theory.tex` only when the document is inaccurate,
+  incomplete in a submission-relevant way, or likely to mislead a reader about
+  the current implementation.
+- Do not patch the package from this audit.
+
+Findings:
+
+- Dynamic AL/DQLM MCMC: the state FFBS pseudo-observation, inverse-gamma
+  `sigma` update, and GIG `v_t` update in `exdqlmMCMC.R` match the supplement.
+  The implementation includes optional warmup scheduling for state, latent, and
+  `sigma` blocks. This is a scheduling detail, not a formula mismatch.
+- Dynamic AL/DQLM VB: the reduced CAVI core in `utils.R` matches the supplement
+  pseudo-response, GIG latent update, inverse-gamma `sigma` factor, and ELBO
+  decomposition.
+- Dynamic exAL/exDQLM MCMC: the GIG `v_t`, truncated-normal `s_t`, FFBS state
+  update, exact conditional `sigma` GIG update, and default bounded-slice
+  `gamma` kernel in `exdqlmMCMC.R` match the supplement. The implementation
+  also exposes transformed random-walk alternatives, so the package map was
+  clarified to say bounded slice is the default rather than the only path.
+- Dynamic exAL/exDQLM VB: the kappa-moment definitions, `q(v_t)`, `q(s_t)`,
+  state pseudo-response, Laplace-Delta `(sigma, gamma)` block, and ELBO pieces
+  in `exdqlmLDVB.R` match the supplement. The implementation may temporarily
+  hold the `s_t` and `(sigma, gamma)` blocks during warmup; this is a numerical
+  schedule and does not alter the displayed targets.
+- Static AL regression MCMC/VB: the reduced static path in `exalStaticMCMC.R`
+  and `utils.R` matches the supplement's AL special-case updates after replacing
+  state moments by static regression moments.
+- Static exAL regression MCMC: the Gaussian coefficient update, GIG `v_i`,
+  truncated-normal `s_i`, exact conditional `sigma` GIG update, and default
+  bounded-slice `gamma` kernel in `exalStaticMCMC.R` match the supplement. As
+  with the dynamic case, the package also exposes transformed random-walk
+  alternatives.
+- Static exAL regression VB: `exalStaticLDVB.R` matches the supplement's
+  Gaussian `q(beta)`, GIG `q(v_i)`, truncated-normal `q(s_i)`,
+  Laplace-Delta `q(sigma,gamma)`, and ELBO decomposition.
+- RHS-NS sparse prior: `static_beta_prior.R` matches the supplement's active
+  coefficient precision, inverse-gamma MCMC updates, mean-field VB updates,
+  fixed-versus-random `zeta2` branches, unshrunk-intercept contribution, and
+  term-level ELBO. The direct nonconjugate `rhs` path remains intentionally
+  excluded from the supplement.
+- State evolution notation: the supplement used generic `W_t`; the package
+  induces the evolution covariance through discount-factor filtering. The
+  supplement was clarified to state that `W_t` denotes the covariance induced by
+  the package's discount-factor construction.
+- Warmup/scheduling notation: the supplement previously described the update
+  targets but did not state that the package may schedule early updates for
+  numerical stability. A concise package-map note was added. This keeps the
+  supplement implementation-honest without turning it into a code manual.
+
+Supplement corrections made in this pass:
+
+- Clarified the discount-factor interpretation of the dynamic evolution
+  covariance.
+- Added a compact implementation note explaining that warmup/scheduling controls
+  change update timing, not the statistical targets.
+- Revised the package-to-algorithm table to say the bounded-slice `gamma` update
+  is the default exAL MCMC path and that random-walk alternatives are exposed.
+
+No package-code changes were made in this audit.

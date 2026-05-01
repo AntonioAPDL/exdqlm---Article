@@ -230,6 +230,9 @@ $\tilde y_t=y_t-A_0v_t$ satisfies
 \label{eq:dyn_dqlm_pseudo}
 \end{equation}
 Thus the conditional state posterior is a Gaussian state-space posterior.
+The package implements the evolution variance through the discount-factor
+state-space construction used by \code{exdqlmMCMC()} and \code{exdqlmLDVB()};
+the notation above writes the induced covariance generically as $\mat{W}_t$.
 
 \subsection{MCMC updates}
 
@@ -1021,15 +1024,22 @@ exAL models.
 
 \section{Package-to-algorithm map}
 
+The formulas above describe the conditional targets and variational coordinate
+targets used by the package. The current implementation also exposes numerical
+warmup and scheduling controls, for example temporary holds of selected latent,
+state, or $(\sigma,\gamma)$ blocks in difficult early iterations. These controls
+change only when a target is updated, not the model or the target distributions
+displayed in this supplement.
+
 \begin{table}[!htb]
 \centering
 \begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
 Function & Main algorithmic role \\
 \midrule
-\code{exdqlmMCMC()} & Dynamic DQLM/exDQLM posterior simulation: FFBS for states, Gibbs for conjugate latent/scale blocks, and bounded slice for $\gamma$ when exAL is used. \\
+\code{exdqlmMCMC()} & Dynamic DQLM/exDQLM posterior simulation: FFBS for states, Gibbs for conjugate latent/scale blocks, and a default bounded-slice update for $\gamma$ when exAL is used, with random-walk alternatives exposed. \\
 \code{exdqlmLDVB()} & Dynamic DQLM/exDQLM mean-field VB: CAVI for Gaussian/GIG/truncated-normal blocks and Laplace-Delta for $(\sigma,\gamma)$ in exAL. \\
-\code{exalStaticMCMC()} & Static AL/exAL posterior simulation: Gaussian coefficient update, Gibbs latent/scale updates, RHS-NS inverse-gamma scale updates when selected, and bounded slice for $\gamma$ in exAL. \\
+\code{exalStaticMCMC()} & Static AL/exAL posterior simulation: Gaussian coefficient update, Gibbs latent/scale updates, RHS-NS inverse-gamma scale updates when selected, and a default bounded-slice update for $\gamma$ in exAL, with random-walk alternatives exposed. \\
 \code{exalStaticLDVB()} & Static AL/exAL mean-field VB: Gaussian coefficient factor, CAVI latent and RHS-NS scale factors, and Laplace-Delta for $(\sigma,\gamma)$ in exAL. \\
 \bottomrule
 \end{tabularx}
