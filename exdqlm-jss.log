@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2024.6.12)  1 MAY 2026 03:56
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2026.5.1)  1 MAY 2026 23:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -72,7 +72,7 @@ LaTeX Font Info:    Try loading font information for T1+aer on input line 105.
 (/usr/share/texlive/texmf-dist/tex/latex/ae/t1aer.fd
 File: t1aer.fd 1997/11/16 Font definitions for T1/aer.
 )))
-(/usr/share/texlive/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
+(/home/jaguir26/texmf/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 2008/02/07
 
 Style option: `fancyvrb' v2.7a, with DG/SPQR fixes, and firstline=lastline fix 
@@ -89,6 +89,92 @@ Package: fontenc 2017/04/05 v2.0i Standard LaTeX package
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1enc.def
 File: t1enc.def 2017/04/05 v2.0i Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
+))
+(/home/jaguir26/texmf/tex/latex/upquote/upquote.sty
+Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verba
+tim
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2017/04/05 v2.0i Standard LaTeX package
+Package textcomp Info: Sub-encoding information:
+(textcomp)               5 = only ISO-Adobe without \textcurrency
+(textcomp)               4 = 5 + \texteuro
+(textcomp)               3 = 4 + \textohm
+(textcomp)               2 = 3 + \textestimated + \textcurrency
+(textcomp)               1 = TS1 - \textcircled - \t
+(textcomp)               0 = TS1 (full)
+(textcomp)             Font families with sub-encoding setting implement
+(textcomp)             only a restricted character set as indicated.
+(textcomp)             Family '?' is the default used for unknown fonts.
+(textcomp)             See the documentation for details.
+Package textcomp Info: Setting ? sub-encoding to TS1/1 on input line 79.
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/ts1enc.def
+File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
+)
+LaTeX Info: Redefining \oldstylenums on input line 334.
+Package textcomp Info: Setting cmr sub-encoding to TS1/0 on input line 349.
+Package textcomp Info: Setting cmss sub-encoding to TS1/0 on input line 350.
+Package textcomp Info: Setting cmtt sub-encoding to TS1/0 on input line 351.
+Package textcomp Info: Setting cmvtt sub-encoding to TS1/0 on input line 352.
+Package textcomp Info: Setting cmbr sub-encoding to TS1/0 on input line 353.
+Package textcomp Info: Setting cmtl sub-encoding to TS1/0 on input line 354.
+Package textcomp Info: Setting ccr sub-encoding to TS1/0 on input line 355.
+Package textcomp Info: Setting ptm sub-encoding to TS1/4 on input line 356.
+Package textcomp Info: Setting pcr sub-encoding to TS1/4 on input line 357.
+Package textcomp Info: Setting phv sub-encoding to TS1/4 on input line 358.
+Package textcomp Info: Setting ppl sub-encoding to TS1/3 on input line 359.
+Package textcomp Info: Setting pag sub-encoding to TS1/4 on input line 360.
+Package textcomp Info: Setting pbk sub-encoding to TS1/4 on input line 361.
+Package textcomp Info: Setting pnc sub-encoding to TS1/4 on input line 362.
+Package textcomp Info: Setting pzc sub-encoding to TS1/4 on input line 363.
+Package textcomp Info: Setting bch sub-encoding to TS1/4 on input line 364.
+Package textcomp Info: Setting put sub-encoding to TS1/5 on input line 365.
+Package textcomp Info: Setting uag sub-encoding to TS1/5 on input line 366.
+Package textcomp Info: Setting ugq sub-encoding to TS1/5 on input line 367.
+Package textcomp Info: Setting ul8 sub-encoding to TS1/4 on input line 368.
+Package textcomp Info: Setting ul9 sub-encoding to TS1/4 on input line 369.
+Package textcomp Info: Setting augie sub-encoding to TS1/5 on input line 370.
+Package textcomp Info: Setting dayrom sub-encoding to TS1/3 on input line 371.
+Package textcomp Info: Setting dayroms sub-encoding to TS1/3 on input line 372.
+
+Package textcomp Info: Setting pxr sub-encoding to TS1/0 on input line 373.
+Package textcomp Info: Setting pxss sub-encoding to TS1/0 on input line 374.
+Package textcomp Info: Setting pxtt sub-encoding to TS1/0 on input line 375.
+Package textcomp Info: Setting txr sub-encoding to TS1/0 on input line 376.
+Package textcomp Info: Setting txss sub-encoding to TS1/0 on input line 377.
+Package textcomp Info: Setting txtt sub-encoding to TS1/0 on input line 378.
+Package textcomp Info: Setting lmr sub-encoding to TS1/0 on input line 379.
+Package textcomp Info: Setting lmdh sub-encoding to TS1/0 on input line 380.
+Package textcomp Info: Setting lmss sub-encoding to TS1/0 on input line 381.
+Package textcomp Info: Setting lmssq sub-encoding to TS1/0 on input line 382.
+Package textcomp Info: Setting lmvtt sub-encoding to TS1/0 on input line 383.
+Package textcomp Info: Setting lmtt sub-encoding to TS1/0 on input line 384.
+Package textcomp Info: Setting qhv sub-encoding to TS1/0 on input line 385.
+Package textcomp Info: Setting qag sub-encoding to TS1/0 on input line 386.
+Package textcomp Info: Setting qbk sub-encoding to TS1/0 on input line 387.
+Package textcomp Info: Setting qcr sub-encoding to TS1/0 on input line 388.
+Package textcomp Info: Setting qcs sub-encoding to TS1/0 on input line 389.
+Package textcomp Info: Setting qpl sub-encoding to TS1/0 on input line 390.
+Package textcomp Info: Setting qtm sub-encoding to TS1/0 on input line 391.
+Package textcomp Info: Setting qzc sub-encoding to TS1/0 on input line 392.
+Package textcomp Info: Setting qhvc sub-encoding to TS1/0 on input line 393.
+Package textcomp Info: Setting futs sub-encoding to TS1/4 on input line 394.
+Package textcomp Info: Setting futx sub-encoding to TS1/4 on input line 395.
+Package textcomp Info: Setting futj sub-encoding to TS1/4 on input line 396.
+Package textcomp Info: Setting hlh sub-encoding to TS1/3 on input line 397.
+Package textcomp Info: Setting hls sub-encoding to TS1/3 on input line 398.
+Package textcomp Info: Setting hlst sub-encoding to TS1/3 on input line 399.
+Package textcomp Info: Setting hlct sub-encoding to TS1/5 on input line 400.
+Package textcomp Info: Setting hlx sub-encoding to TS1/5 on input line 401.
+Package textcomp Info: Setting hlce sub-encoding to TS1/5 on input line 402.
+Package textcomp Info: Setting hlcn sub-encoding to TS1/5 on input line 403.
+Package textcomp Info: Setting hlcw sub-encoding to TS1/5 on input line 404.
+Package textcomp Info: Setting hlcf sub-encoding to TS1/5 on input line 405.
+Package textcomp Info: Setting pplx sub-encoding to TS1/3 on input line 406.
+Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 407.
+Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 408.
+Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 409.
 ))
 (/usr/share/texlive/texmf-dist/tex/latex/lm/lmodern.sty
 Package: lmodern 2009/10/30 v1.6 Latin Modern Fonts
@@ -271,7 +357,7 @@ Package thumbpdf Warning: Compressed PDF objects of PDF 1.5 are not supported.
 
 Package thumbpdf Warning: Thumbnail data file `exdqlm-jss.tpt' not found.
 
-) (/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty
+) (/home/jaguir26/texmf/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2016/04/27 v1.618033 publication quality tables
 \heavyrulewidth=\dimen109
 \lightrulewidth=\dimen110
@@ -404,88 +490,6 @@ Package: Sweave
 (/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
 Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
 )
-(/usr/share/texlive/texmf-dist/tex/latex/base/textcomp.sty
-Package: textcomp 2017/04/05 v2.0i Standard LaTeX package
-Package textcomp Info: Sub-encoding information:
-(textcomp)               5 = only ISO-Adobe without \textcurrency
-(textcomp)               4 = 5 + \texteuro
-(textcomp)               3 = 4 + \textohm
-(textcomp)               2 = 3 + \textestimated + \textcurrency
-(textcomp)               1 = TS1 - \textcircled - \t
-(textcomp)               0 = TS1 (full)
-(textcomp)             Font families with sub-encoding setting implement
-(textcomp)             only a restricted character set as indicated.
-(textcomp)             Family '?' is the default used for unknown fonts.
-(textcomp)             See the documentation for details.
-Package textcomp Info: Setting ? sub-encoding to TS1/1 on input line 79.
-
-(/usr/share/texlive/texmf-dist/tex/latex/base/ts1enc.def
-File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
-)
-LaTeX Info: Redefining \oldstylenums on input line 334.
-Package textcomp Info: Setting cmr sub-encoding to TS1/0 on input line 349.
-Package textcomp Info: Setting cmss sub-encoding to TS1/0 on input line 350.
-Package textcomp Info: Setting cmtt sub-encoding to TS1/0 on input line 351.
-Package textcomp Info: Setting cmvtt sub-encoding to TS1/0 on input line 352.
-Package textcomp Info: Setting cmbr sub-encoding to TS1/0 on input line 353.
-Package textcomp Info: Setting cmtl sub-encoding to TS1/0 on input line 354.
-Package textcomp Info: Setting ccr sub-encoding to TS1/0 on input line 355.
-Package textcomp Info: Setting ptm sub-encoding to TS1/4 on input line 356.
-Package textcomp Info: Setting pcr sub-encoding to TS1/4 on input line 357.
-Package textcomp Info: Setting phv sub-encoding to TS1/4 on input line 358.
-Package textcomp Info: Setting ppl sub-encoding to TS1/3 on input line 359.
-Package textcomp Info: Setting pag sub-encoding to TS1/4 on input line 360.
-Package textcomp Info: Setting pbk sub-encoding to TS1/4 on input line 361.
-Package textcomp Info: Setting pnc sub-encoding to TS1/4 on input line 362.
-Package textcomp Info: Setting pzc sub-encoding to TS1/4 on input line 363.
-Package textcomp Info: Setting bch sub-encoding to TS1/4 on input line 364.
-Package textcomp Info: Setting put sub-encoding to TS1/5 on input line 365.
-Package textcomp Info: Setting uag sub-encoding to TS1/5 on input line 366.
-Package textcomp Info: Setting ugq sub-encoding to TS1/5 on input line 367.
-Package textcomp Info: Setting ul8 sub-encoding to TS1/4 on input line 368.
-Package textcomp Info: Setting ul9 sub-encoding to TS1/4 on input line 369.
-Package textcomp Info: Setting augie sub-encoding to TS1/5 on input line 370.
-Package textcomp Info: Setting dayrom sub-encoding to TS1/3 on input line 371.
-Package textcomp Info: Setting dayroms sub-encoding to TS1/3 on input line 372.
-
-Package textcomp Info: Setting pxr sub-encoding to TS1/0 on input line 373.
-Package textcomp Info: Setting pxss sub-encoding to TS1/0 on input line 374.
-Package textcomp Info: Setting pxtt sub-encoding to TS1/0 on input line 375.
-Package textcomp Info: Setting txr sub-encoding to TS1/0 on input line 376.
-Package textcomp Info: Setting txss sub-encoding to TS1/0 on input line 377.
-Package textcomp Info: Setting txtt sub-encoding to TS1/0 on input line 378.
-Package textcomp Info: Setting lmr sub-encoding to TS1/0 on input line 379.
-Package textcomp Info: Setting lmdh sub-encoding to TS1/0 on input line 380.
-Package textcomp Info: Setting lmss sub-encoding to TS1/0 on input line 381.
-Package textcomp Info: Setting lmssq sub-encoding to TS1/0 on input line 382.
-Package textcomp Info: Setting lmvtt sub-encoding to TS1/0 on input line 383.
-Package textcomp Info: Setting lmtt sub-encoding to TS1/0 on input line 384.
-Package textcomp Info: Setting qhv sub-encoding to TS1/0 on input line 385.
-Package textcomp Info: Setting qag sub-encoding to TS1/0 on input line 386.
-Package textcomp Info: Setting qbk sub-encoding to TS1/0 on input line 387.
-Package textcomp Info: Setting qcr sub-encoding to TS1/0 on input line 388.
-Package textcomp Info: Setting qcs sub-encoding to TS1/0 on input line 389.
-Package textcomp Info: Setting qpl sub-encoding to TS1/0 on input line 390.
-Package textcomp Info: Setting qtm sub-encoding to TS1/0 on input line 391.
-Package textcomp Info: Setting qzc sub-encoding to TS1/0 on input line 392.
-Package textcomp Info: Setting qhvc sub-encoding to TS1/0 on input line 393.
-Package textcomp Info: Setting futs sub-encoding to TS1/4 on input line 394.
-Package textcomp Info: Setting futx sub-encoding to TS1/4 on input line 395.
-Package textcomp Info: Setting futj sub-encoding to TS1/4 on input line 396.
-Package textcomp Info: Setting hlh sub-encoding to TS1/3 on input line 397.
-Package textcomp Info: Setting hls sub-encoding to TS1/3 on input line 398.
-Package textcomp Info: Setting hlst sub-encoding to TS1/3 on input line 399.
-Package textcomp Info: Setting hlct sub-encoding to TS1/5 on input line 400.
-Package textcomp Info: Setting hlx sub-encoding to TS1/5 on input line 401.
-Package textcomp Info: Setting hlce sub-encoding to TS1/5 on input line 402.
-Package textcomp Info: Setting hlcn sub-encoding to TS1/5 on input line 403.
-Package textcomp Info: Setting hlcw sub-encoding to TS1/5 on input line 404.
-Package textcomp Info: Setting hlcf sub-encoding to TS1/5 on input line 405.
-Package textcomp Info: Setting pplx sub-encoding to TS1/3 on input line 406.
-Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 407.
-Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 408.
-Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 409.
-)
 (/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty
 Package: fontenc 2017/04/05 v2.0i Standard LaTeX package
 
@@ -501,27 +505,27 @@ LaTeX Warning: Unused global option(s):
 (./exdqlm-jss.aux)
 \openout1 = `exdqlm-jss.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 60.
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 60.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 60.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 66.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 66.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 66.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 66.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 66.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 66.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 66.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 66.
  (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 60.
-LaTeX Font Info:    Try loading font information for T1+lmr on input line 60.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 66.
+LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    Try loading font information for T1+lmr on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
@@ -557,7 +561,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box30
-Package hyperref Info: Link coloring ON on input line 60.
+Package hyperref Info: Link coloring ON on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -567,9 +571,9 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count124
 )
-LaTeX Info: Redefining \ref on input line 60.
-LaTeX Info: Redefining \pageref on input line 60.
-LaTeX Info: Redefining \nameref on input line 60.
+LaTeX Info: Redefining \ref on input line 66.
+LaTeX Info: Redefining \pageref on input line 66.
+LaTeX Info: Redefining \nameref on input line 66.
 
 (./exdqlm-jss.out) (./exdqlm-jss.out)
 \@outlinefile=\write4
@@ -578,55 +582,55 @@ LaTeX Info: Redefining \nameref on input line 60.
 <jsslogo.jpg, id=68, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
 <use jsslogo.jpg>
-Package pdftex.def Info: jsslogo.jpg  used on input line 60. on input line 60.
+Package pdftex.def Info: jsslogo.jpg  used on input line 66. on input line 66.
 Package pdftex.def Info: Requested size: 89.80768pt x 65.43607pt on input line 
-60.
-LaTeX Font Info:    Try loading font information for T1+pzc on input line 60.
+66.
+LaTeX Font Info:    Try loading font information for T1+pzc on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pzc.fd
 File: t1pzc.fd 2001/06/04 font definitions for T1/pzc.
 )
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <28> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 60.
-LaTeX Font Info:    Try loading font information for T1+lmss on input line 60.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 66.
+LaTeX Font Info:    Try loading font information for T1+lmss on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 60.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 60.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 60.
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 66.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 60.
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 66.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 60.
+(Font)              <10.95> on input line 66.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 60.
+(Font)              <8> on input line 66.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 60.
-LaTeX Font Info:    Try loading font information for U+msa on input line 60.
+(Font)              <6> on input line 66.
+LaTeX Font Info:    Try loading font information for U+msa on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 60.
+LaTeX Font Info:    Try loading font information for U+msb on input line 66.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -635,6 +639,9 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 {/usr/share/texlive/texmf-dist/fonts/map/pdftex/updmap/pdftex.map} <./jsslogo.j
 pg>]
 (/usr/share/texlive/texmf-dist/tex/latex/lm/t1lmtt.fd)
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 2 []
  []
@@ -658,7 +665,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [5]
-Underfull \vbox (badness 4341) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -666,6 +673,9 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [6]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 7
  []
@@ -681,7 +691,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [9]
-LaTeX Font Info:    Try loading font information for OT1+lmss on input line 321
+LaTeX Font Info:    Try loading font information for OT1+lmss on input line 339
 .
  (/usr/share/texlive/texmf-dist/tex/latex/lm/ot1lmss.fd
 File: ot1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
@@ -696,6 +706,9 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [11]
+Underfull \vbox (badness 5696) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 12 []
  []
@@ -710,36 +723,35 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 File: analysis/manuscript/outputs/figures/ex1mcmc.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex1mcmc.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex1mcmc.png  used 
-on input line 522. on input line 522.
+on input line 543. on input line 543.
 Package pdftex.def Info: Requested size: 309.85626pt x 185.91042pt on input lin
-e 522.
+e 543.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 14 []
  []
 
-[14 <./analysis/manuscript/outputs/figures/ex1mcmc.png>]
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 564
+[14]
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 586
 .
-
-(/usr/share/texlive/texmf-dist/tex/latex/lm/ts1lmtt.fd
+ (/usr/share/texlive/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<analysis/manuscript/outputs/figures/ex1quants.png, id=385, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex1quants.png, id=384, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex1quants.png Graphic file (type png)
 
 <use analysis/manuscript/outputs/figures/ex1quants.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex1quants.png  use
-d on input line 570. on input line 570.
+d on input line 592. on input line 592.
 Package pdftex.def Info: Requested size: 398.38567pt x 239.03429pt on input lin
-e 570.
+e 592.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 15
  []
 
-[15]
+[15 <./analysis/manuscript/outputs/figures/ex1mcmc.png>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 16 []
  []
@@ -750,53 +762,53 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [17]
-<analysis/manuscript/outputs/figures/ex2quant.png, id=413, 722.7pt x 534.798pt>
+<analysis/manuscript/outputs/figures/ex2quant.png, id=410, 722.7pt x 534.798pt>
 
 File: analysis/manuscript/outputs/figures/ex2quant.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex2quant.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex2quant.png  used
- on input line 702. on input line 702.
+ on input line 724. on input line 724.
 Package pdftex.def Info: Requested size: 442.65375pt x 327.5646pt on input line
- 702.
+ 724.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 18 []
  []
 
 [18]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 19
- []
-
-[19 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex2checks.png, id=424, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex2checks.png, id=417, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
 
 <use analysis/manuscript/outputs/figures/ex2checks.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex2checks.png  use
-d on input line 773. on input line 773.
+d on input line 763. on input line 763.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 773.
+e 763.
 
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 19
+ []
+
+[19 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 20 []
  []
 
 [20 <./analysis/manuscript/outputs/figures/ex2checks.png (PNG copy)>]
+<analysis/manuscript/outputs/figures/ex3data.png, id=433, 722.7pt x 433.62pt>
+File: analysis/manuscript/outputs/figures/ex3data.png Graphic file (type png)
+<use analysis/manuscript/outputs/figures/ex3data.png>
+Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3data.png  used 
+on input line 867. on input line 867.
+Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
+e 867.
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 21
  []
 
 [21]
-<analysis/manuscript/outputs/figures/ex3data.png, id=439, 722.7pt x 433.62pt>
-File: analysis/manuscript/outputs/figures/ex3data.png Graphic file (type png)
-<use analysis/manuscript/outputs/figures/ex3data.png>
-Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3data.png  used 
-on input line 887. on input line 887.
-Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 887.
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 22 []
  []
@@ -807,55 +819,58 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23 <./analysis/manuscript/outputs/figures/ex3data.png (PNG copy)>]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-\T1/lmr/m/n/10.95 24 []
- []
-
-[24]
-<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=464, 722.7pt x 433.6
+<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=458, 722.7pt x 433.6
 2pt>
 File: analysis/manuscript/outputs/figures/ex3quantcomps.png Graphic file (type 
 png)
 <use analysis/manuscript/outputs/figures/ex3quantcomps.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3quantcomps.png 
- used on input line 979. on input line 979.
+ used on input line 959. on input line 959.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 979.
+e 959.
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 24 []
+ []
+
+[24]
+<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=464, 722.7pt x 433.62pt
+>
+File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
+)
+<use analysis/manuscript/outputs/figures/ex3zetapsi.png>
+Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3zetapsi.png  us
+ed on input line 993. on input line 993.
+Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
+e 993.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 25
  []
 
 [25 <./analysis/manuscript/outputs/figures/ex3quantcomps.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=472, 722.7pt x 433.62pt
->
-File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
-)
-<use analysis/manuscript/outputs/figures/ex3zetapsi.png>
-Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3zetapsi.png  us
-ed on input line 1013. on input line 1013.
-Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 1013.
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 26 []
  []
 
 [26 <./analysis/manuscript/outputs/figures/ex3zetapsi.png (PNG copy)>]
-Overfull \hbox (10.94998pt too wide) has occurred while \output is active
-[] \T1/lmr/m/n/10.95 27
- []
-
-[27]
-<analysis/manuscript/outputs/figures/ex3forecast.png, id=488, 578.16pt x 397.48
+<analysis/manuscript/outputs/figures/ex3forecast.png, id=482, 578.16pt x 397.48
 5pt>
 File: analysis/manuscript/outputs/figures/ex3forecast.png Graphic file (type pn
 g)
 <use analysis/manuscript/outputs/figures/ex3forecast.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3forecast.png  u
-sed on input line 1076. on input line 1076.
+sed on input line 1056. on input line 1056.
 Package pdftex.def Info: Requested size: 265.59494pt x 182.59665pt on input lin
-e 1076.
+e 1056.
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 27
+ []
+
+[27]
+Underfull \vbox (badness 1755) has occurred while \output is active []
+
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 28 []
@@ -867,27 +882,29 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [29]
-<analysis/manuscript/outputs/figures/ex4static.png, id=506, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex4static.png, id=504, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex4static.png Graphic file (type png)
 
 <use analysis/manuscript/outputs/figures/ex4static.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex4static.png  use
-d on input line 1191. on input line 1191.
+d on input line 1171. on input line 1171.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 1191.
+e 1171.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 30 []
  []
 
-[30]
+[30 <./analysis/manuscript/outputs/figures/ex4static.png (PNG copy)>]
+Underfull \vbox (badness 1158) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 31
  []
 
-[31 <./analysis/manuscript/outputs/figures/ex4static.png (PNG copy)>]
-(./exdqlm-jss.bbl
+[31] (./exdqlm-jss.bbl
 
 LaTeX Font Warning: Font shape `T1/lmr/b/it' in size <10.95> not available
 (Font)              Font shape `T1/lmr/b/sl' tried instead on input line 36.
@@ -898,13 +915,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [32]
-Underfull \hbox (badness 5847) in paragraph at lines 157--161
+Underfull \hbox (badness 5847) in paragraph at lines 151--155
 []\T1/lmr/m/n/10.95 MathWorks (2026).  ``Work-ing with Quan-tile Re-gres-sion M
 od-els.''  Doc-u-men-
  []
 
 
-Underfull \hbox (badness 2744) in paragraph at lines 157--161
+Underfull \hbox (badness 2744) in paragraph at lines 151--155
 \T1/lmr/m/n/10.95 ta-tion page, ac-cessed 2026-04-19, URL [][]$\T1/lmtt/m/n/10.
 95 https : / / www . mathworks . com / help / stats /
  []
@@ -915,44 +932,47 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [33]
-Underfull \hbox (badness 2735) in paragraph at lines 230--234
+Underfull \hbox (badness 2735) in paragraph at lines 224--228
 \T1/lmr/m/n/10.95 doc-u-men-ta-tion, ac-cessed 2026-04-19, URL [][]$\T1/lmtt/m/
 n/10.95 https : / / www . statsmodels . org / stable /
  []
+
+)
+LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1240.
+
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1240.
+
+Underfull \vbox (badness 2689) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 34 []
  []
 
-[34])
-LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1260.
-
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1260.
-
+[34]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 35
  []
 
 [35]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1260.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1240.
  (./exdqlm-jss.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1260.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1260.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1240.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1240.
 
 Package rerunfilecheck Info: File `exdqlm-jss.out' has not changed.
-(rerunfilecheck)             Checksum: 117E6F6DA39079575695AB2DE674ACE5;1880.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1260.
+(rerunfilecheck)             Checksum: 8BF19465B83FEE41365CD577D2BBD0C1;1884.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1240.
  ) 
 Here is how much of TeX's memory you used:
- 8592 strings out of 494917
- 125736 string characters out of 6180699
- 216949 words of memory out of 5000000
- 11555 multiletter control sequences out of 15000+600000
+ 8607 strings out of 494917
+ 125971 string characters out of 6180700
+ 219452 words of memory out of 5000000
+ 11567 multiletter control sequences out of 15000+600000
  143670 words of font info for 96 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 35i,16n,34p,2457b,519s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,16n,34p,2451b,513s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texl
 ive/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texlive/texmf-dist/font
 s/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/
@@ -984,10 +1004,10 @@ nts/type1/public/lm/lmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on exdqlm-jss.pdf (35 pages, 3009292 bytes).
+Output written on exdqlm-jss.pdf (35 pages, 3007536 bytes).
 PDF statistics:
- 725 PDF objects out of 1000 (max. 8388607)
- 638 compressed objects within 7 object streams
+ 721 PDF objects out of 1000 (max. 8388607)
+ 634 compressed objects within 7 object streams
  145 named destinations out of 1000 (max. 500000)
  179 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -89,8 +89,8 @@ exDQLM and DQLM fitting, transfer-function models, static exAL regression,
 forecasting, diagnostics, and posterior-predictive synthesis. This supplement
 gives the corresponding posterior targets, full conditional distributions,
 variational updates, Laplace--delta approximations, ELBO components, and
-numerical routines used by the package. It is primarily for readers who want
-to verify the posterior targets, update equations, and diagnostic quantities
+numerical routines used by the package. Readers can use this document to
+verify the posterior targets, update equations, and diagnostic quantities
 behind the exported functions. The derivations build on the AL
 mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
 models \citep{gonccalves2017dynamic}, the exAL/exDQLM formulation
@@ -139,6 +139,7 @@ corresponding derivation sections.}
 \end{table}
 
 \section{Notation and distributional conventions}
+\label{sec:supp_distributional_conventions}
 
 Let $p_0\in(0,1)$ be the target quantile. The response is scalar. In dynamic
 models, observations are indexed by $t=1,\ldots,T$; in static regression,
@@ -870,6 +871,9 @@ Algorithms~\ref{alg:dyn-exdqlm-mcmc} and~\ref{alg:dyn-exdqlm-ldvb} apply after r
 $(\mat{F}_t,\mat{G}_t,\mat{W}_t,\vect{\theta}_t)$ by
 $(\widetilde{\mat{F}}_t,\widetilde{\mat{G}}_t,\widetilde{\mat{W}}_t,
 \widetilde{\vect{\theta}}_t)$.
+The current transfer-fitting routines treat $\lambda$ as fixed by the user or
+by an external grid search; they do not sample or optimize $\lambda$
+internally.
 The package inputs \code{X}, \code{lam}, \code{tf.df}, \code{tf.m0}, and
 \code{tf.C0} correspond to $x_t$, $\lambda$, the transfer discount factors,
 $m_0^{\mathrm{tf}}$, and $C_0^{\mathrm{tf}}$; \code{median.kt} is returned as a
@@ -1336,14 +1340,14 @@ $a_\tau=(|\mathcal{A}|+1)/2$. Let
 $\bar\beta_j^2=\E_q(\beta_j^2)$. The coordinate updates are
 \begin{align}
 b_{\lambda j}
-&=\frac{1}{2}\bar\beta_j^2\,\E(\tau^{-2})+\E(\nu_j^{-1}),\\
+&=\frac{1}{2}\bar\beta_j^2\,\E\{(\tau^2)^{-1}\}+\E(\nu_j^{-1}),\\
 b_{\nu j}
 &=1+\E\{(\lambda_j^2)^{-1}\},\\
 b_\tau
 &=\frac{1}{2}\sum_{j\in\mathcal{A}}\bar\beta_j^2
 \E\{(\lambda_j^2)^{-1}\}+\E(\xi^{-1}),\\
 b_\xi
-&=\frac{1}{\tau_0^2}+\E(\tau^{-2}),\\
+&=\frac{1}{\tau_0^2}+\E\{(\tau^2)^{-1}\},\\
 a_\zeta^\star
 &=a_\zeta+\frac{|\mathcal{A}|}{2},\qquad
 b_\zeta^\star=b_\zeta+\frac{1}{2}\sum_{j\in\mathcal{A}}\bar\beta_j^2.
@@ -1609,7 +1613,8 @@ H\{\N(\vect{m},\mat{V})\}
 =\frac{1}{2}\{d(1+\log 2\pi)+\log|\mat{V}|\}.
 \label{eq:entropy_gaussian}
 \end{equation}
-If $x\sim\IG(a,b)$ under the parameterization in Section S2, then
+If $x\sim\IG(a,b)$ under the parameterization in
+Section~\ref{sec:supp_distributional_conventions}, then
 \begin{equation}
 \E(x^{-1})=\frac{a}{b},\qquad
 \E(\log x)=\log b-\psi(a),

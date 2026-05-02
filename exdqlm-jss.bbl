@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{43}
+\begin{thebibliography}{42}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -72,12 +72,6 @@ Fogarty B (2020).
 \newblock \enquote{\pkg{QuantReg.jl}: Quickstart Guide.}
 \newblock Documentation page, accessed 2026-04-19,
   \urlprefix\url{https://fogarty-ben.github.io/QuantReg.jl/v0.1/quickstart/}.
-
-\bibitem[{Fox(2012)}]{sunspot}
-Fox K (2012).
-\newblock \enquote{Solar Minimum; Solar Maximum.}
-\newblock
-  \urlprefix\url{https://www.nasa.gov/mission_pages/sunearth/news/solarmin-max.html}.
 
 \bibitem[{Fr{\"u}hwirth-Schnatter(1994)}]{fruhwirth1994data}
 Fr{\"u}hwirth-Schnatter S (1994).
