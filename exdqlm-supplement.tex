@@ -5,6 +5,7 @@
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{enumitem}
+\usepackage{placeins}
 \raggedbottom
 
 \newcommand{\R}{\mathbb{R}}
@@ -400,27 +401,44 @@ VB/LDVB fits are generated after convergence from the fitted variational
 factors; this sampling step is separate from the coordinate update.
 
 The discount-factor construction changes how $\mat{W}_t$, or equivalently
-$\mat{R}_t$, is formed during the prediction step \citep{west1985dynamic}. For
-example, scalar discounting can be written as
+$\mat{R}_t$, is formed during the prediction step
+\citep[Section~6.3]{west1997bayesian}. Let
 \[
-\mat{R}_t
+\mat{P}_t
 =
-\delta^{-1}\mat{G}_t\mat{C}_{t-1|t-1}\mat{G}_t^\top,
+\mat{G}_t\mat{C}_{t-1|t-1}\mat{G}_t^\top
 \]
-which is equivalent at that step to
+denote the propagated covariance before discount inflation. For a partition of
+the state vector into blocks $\mathcal{B}_1,\ldots,\mathcal{B}_h$, with
+discount factors $\delta_1,\ldots,\delta_h$, the package constructs a
+blockwise inflation matrix $\mat{D}$ with entries
 \[
-\mat{W}_t
+D_{ij}
 =
-\frac{1-\delta}{\delta}
-\mat{G}_t\mat{C}_{t-1|t-1}\mat{G}_t^\top.
+\begin{cases}
+(1-\delta_b)/\delta_b, & i,j\in\mathcal{B}_b,\\
+0, & i\in\mathcal{B}_b,\ j\in\mathcal{B}_{b'},\ b\neq b',
+\end{cases}
 \]
-Componentwise discounting applies the same construction blockwise. Once the
-prediction covariance $\mat{R}_t$ is formed, the filtering, backward-sampling,
-and smoothing equations above are unchanged.
+and uses
+\[
+\mat{W}_t=\mat{D}\circ\mat{P}_t,\qquad
+\mat{R}_t=\mat{P}_t+\mat{W}_t,
+\]
+where $\circ$ denotes elementwise multiplication. Thus within-block entries of
+the propagated covariance are inflated by $1/\delta_b$, while cross-block
+entries of $\mat{R}_t$ remain those in $\mat{P}_t$. If all states share a single
+discount factor $\delta$, this reduces to the scalar-discount special case
+$\mat{R}_t=\delta^{-1}\mat{P}_t$ and
+$\mat{W}_t=\{(1-\delta)/\delta\}\mat{P}_t$. Once $\mat{R}_t$ is formed, the
+filtering, backward-sampling, and smoothing equations above are unchanged.
 
-Table~\ref{tab:gaussian_state_update_map} gives the offset and variance used
-by each dynamic algorithm. The variational rows are obtained by completing the
-square in the expected Gaussian log likelihood.
+This subsection is model-agnostic. To use it for any dynamic model below,
+select the appropriate row of Table~\ref{tab:gaussian_state_update_map}, plug
+that row's offset $d_t$ and variance $Q_t$ into
+\eqref{eq:generic_gaussian_obs}, and then apply the same filtering and backward
+recursions above. The variational rows are obtained by completing the square in
+the expected Gaussian log likelihood.
 \begin{table}[!htb]
 \centering
 \begingroup
@@ -464,6 +482,7 @@ $m_{1/v,t}=\E(v_t^{-1})$, $\bar s_t=\E(s_t)$, and the $\kappa_j$ moments are
 defined in \eqref{eq:dyn_exdqlm_kappa}.}
 \label{tab:gaussian_state_update_map}
 \end{table}
+\FloatBarrier
 
 \section{Dynamic DQLM under the AL likelihood}
 \label{sec:dyn_dqlm}
