@@ -59,7 +59,7 @@
 distributions, variational updates, Laplace--delta approximations, and numerical
 blocks used by the algorithms in \pkg{exdqlm}. It covers dynamic AL/DQLM and
 exAL/exDQLM state-space models, transfer-function state augmentation, static
-AL/exAL regression, ridge and regularized horseshoe normal-scale (RHS-NS)
+AL/exAL regression, ridge and Nishimura--Suchard regularized horseshoe
 shrinkage priors, forecasting, diagnostics, and posterior-predictive synthesis.
 The notation follows the main article, and each algorithmic block is linked to
 the corresponding exported package function.}
@@ -96,7 +96,7 @@ mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
 models \citep{gonccalves2017dynamic}, the exAL/exDQLM formulation
 \citep{yan2025family,me}, FFBS for Gaussian state-space models
 \citep{carter1994gibbs,fruhwirth1994data}, nonconjugate variational
-approximations \citep{wang2013nonconjugatevb}, and the RHS-NS prior
+approximations \citep{wang2013nonconjugatevb}, and the \code{rhs\_ns} prior
 \citep{nishimura2023shrunken}.
 
 Table~\ref{tab:supp_article_crosswalk} gives the main navigation map. The
@@ -154,7 +154,7 @@ density for $\gamma$ on $(L,U)$. Generic densities are denoted by $p(\cdot)$
 only when no confusion with the exAL quantile map can arise. In variational
 sections, expectations without an explicit subscript are taken under the
 current mean-field distribution $q$. The symbol $\xi$ is reserved for the
-RHS-NS half-Cauchy auxiliary variable; the transformed coordinate for $\gamma$
+\code{rhs\_ns} half-Cauchy auxiliary variable; the transformed coordinate for $\gamma$
 in Laplace--delta calculations is denoted by $z_\gamma$.
 
 \begin{table}[!htb]
@@ -175,7 +175,7 @@ $\vect{\theta}_t,\mat{F}_t,\mat{G}_t,\mat{W}_t$ & Dynamic state, observation vec
 $v_t,s_t$ & exAL latent variables in the dynamic model. \\
 $\vect{\beta},\mat{X}$ & Static regression coefficients and design matrix. \\
 $v_i,s_i$ & exAL latent variables in the static model. \\
-$\mathcal{A}$ & Active coefficient set receiving RHS-NS shrinkage. \\
+$\mathcal{A}$ & Active coefficient set receiving \code{rhs\_ns} shrinkage. \\
 $\elbo(q)$ & Evidence lower bound. \\
 \bottomrule
 \end{tabularx}
@@ -913,10 +913,10 @@ $\vect{\beta}\in\R^p$. The ridge/Gaussian coefficient prior is
 \label{eq:static_beta_ridge}
 \end{equation}
 In the package interface, the same Gaussian update is used for
-\code{beta_prior = "ridge"}. When \code{beta_prior = "rhs_ns"}, the diagonal
-prior precision in this update is replaced by the RHS-NS expected precision
+\code{beta_prior = "ridge"}. When \code{beta_prior = "rhs\_ns"}, the diagonal
+prior precision in this update is replaced by the \code{rhs\_ns} expected precision
 described in Section~\ref{sec:static_rhs}. Thus this supplement covers the
-Gaussian/ridge prior and the conjugate RHS-NS prior, both for MCMC and LDVB.
+Gaussian/ridge prior and the conjugate \code{rhs\_ns} prior, both for MCMC and LDVB.
 Under the exAL likelihood,
 \begin{align}
 v_i\mid\sigma &\sim \Exp(\text{rate}=1/\sigma),\qquad
@@ -1040,7 +1040,7 @@ prior hyperparameters, and MCMC controls $N_{\mathrm{burn}}$ and
 $N_{\mathrm{mcmc}}$.
 \par\noindent\emph{Output:} retained posterior draws for regression
 coefficients, latent variables, scale parameters, and shrinkage parameters when
-\code{beta_prior = "rhs_ns"}.
+\code{beta_prior = "rhs\_ns"}.
 \begin{enumerate}[label=(\arabic*)]
 \item Initialize $\vect{\beta}$, $\vect{v}$, $\vect{s}$, $\sigma$, and
 $\gamma$; omit $\vect{s}$ and fix $\gamma=0$ for the AL path.
@@ -1055,7 +1055,7 @@ $\gamma$; omit $\vect{s}$ and fix $\gamma=0$ for the AL path.
   simplification in \eqref{eq:static_al_sigma_cond};
   \item for exAL, sample $\gamma$ on $(L,U)$ with the bounded slice sampler,
   targeting \eqref{eq:static_exal_gamma_cond};
-  \item if \code{beta_prior = "rhs_ns"}, update the RHS-NS scale block in
+  \item if \code{beta_prior = "rhs\_ns"}, update the \code{rhs\_ns} scale block in
   \eqref{eq:rhs_ns_mcmc};
   \item if $m>N_{\mathrm{burn}}$, retain the current draw.
   \end{enumerate}
@@ -1162,7 +1162,7 @@ factors, and the $(\sigma,\gamma)$ block.
   \eqref{eq:static_exal_vb_vs};
   \item update $q(\sigma)$ for AL or $q(\sigma,\gamma)$ for exAL using the
   Laplace--delta approximation to \eqref{eq:static_exal_q_sigmagam};
-  \item if \code{beta_prior = "rhs_ns"}, update the RHS-NS factors in
+  \item if \code{beta_prior = "rhs\_ns"}, update the \code{rhs\_ns} factors in
   \eqref{eq:rhs_ns_vb_updates};
   \item monitor moment changes and $\elbo(q)$.
   \end{enumerate}
@@ -1172,7 +1172,7 @@ factors, and the $(\sigma,\gamma)$ block.
 \end{suppalgorithm}
 These static updates are implemented in \code{exalStaticMCMC()} and
 \code{exalStaticLDVB()}, with \code{beta_prior} selecting the Gaussian/ridge
-or RHS-NS coefficient prior.
+or \code{rhs\_ns} coefficient prior.
 
 The static exAL ELBO is computed from the same blocks as the dynamic exDQLM,
 with the Gaussian state factor replaced by the Gaussian coefficient factor.
@@ -1238,7 +1238,7 @@ a_\sigma\log b_\sigma-\log\Gamma(a_\sigma)
 \label{eq:static_exal_elbo_terms}
 \end{align}
 For the ridge prior, $\elbo_\beta$ is the Gaussian prior expectation. For the
-RHS-NS prior, it is replaced by the RHS-NS contribution in
+\code{rhs\_ns} prior, it is replaced by the \code{rhs\_ns} contribution in
 Section~\ref{sec:static_rhs}. The Gaussian, GIG, truncated-normal, and
 Laplace--delta entropy terms are given by
 \eqref{eq:entropy_gaussian}, \eqref{eq:entropy_gig},
@@ -1247,24 +1247,24 @@ is recovered by setting $\gamma=0$ and dropping the $s_i$ and
 $(\sigma,\gamma)$ Laplace--delta blocks; then $q(\sigma)$ is inverse-gamma and
 uses \eqref{eq:entropy_ig}.
 
-\section{Static regression with the RHS-NS prior}
+\section{Static regression with the Nishimura--Suchard regularized horseshoe prior}
 \label{sec:static_rhs}
 
-This section focuses on the \code{rhs_ns} coefficient prior, the
+This section focuses on the \code{rhs\_ns} coefficient prior, the
 conditionally conjugate regularized horseshoe variant used for sparse static
 regression. Users only need this section when fitting static models with
-\code{beta_prior = "rhs_ns"}. The prior enters the static Gaussian update for
+\code{beta_prior = "rhs\_ns"}. The prior enters the static Gaussian update for
 $\vect{\beta}$ through a prior precision matrix. Let
 $\mathcal{A}\subseteq\{1,\ldots,p\}$ denote the active shrinkage set; by
 default an intercept, if present, is not shrunk. For $j\notin\mathcal{A}$ the
 package uses a fixed intercept precision. The direct \code{rhs} path is not
 developed here because its log-scale block is nonconjugate; the
-\code{rhs_ns} path is the conjugate sparse-prior formulation documented in
+\code{rhs\_ns} path is the conjugate sparse-prior formulation documented in
 this supplement.
 
-\subsection{RHS-NS prior hierarchy}
+\subsection{Nishimura--Suchard prior hierarchy}
 
-For $j\in\mathcal{A}$, the \code{rhs_ns} hierarchy is
+For $j\in\mathcal{A}$, the \code{rhs\_ns} hierarchy is
 \begin{align}
 \beta_j\mid\tau^2,\lambda_j^2,\zeta^2
 &\propto
@@ -1292,7 +1292,7 @@ static Gaussian update after replacing $\mat{V}_{\beta,0}^{-1}$ by a diagonal pr
 matrix with active entries $\omega^{\mathrm{prior}}_j$ or their variational
 expectations.
 
-\subsection{RHS-NS MCMC updates}
+\subsection{Nishimura--Suchard MCMC updates}
 
 Conditioning on $\vect{\beta}$, the shrinkage block has closed-form
 inverse-gamma updates:
@@ -1319,14 +1319,14 @@ b_\zeta+\frac{1}{2}\sum_{j\in\mathcal{A}}\beta_j^2
 \label{eq:rhs_ns_mcmc}
 \end{align}
 with the last line omitted when $\zeta^2$ is fixed.
-These equations are the conditional targets for the RHS-NS scale block. The
+These equations are the conditional targets for the \code{rhs\_ns} scale block. The
 implementation may temporarily freeze or schedule the global-scale update during
 configured warmup iterations for numerical stability; this changes only the
 update schedule, not the conditional target displayed above.
 
-\subsection{RHS-NS variational updates and ELBO contribution}
+\subsection{Nishimura--Suchard variational updates and ELBO contribution}
 
-The package uses a mean-field approximation over the RHS-NS scale block. For
+The package uses a mean-field approximation over the \code{rhs\_ns} scale block. For
 $j\in\mathcal{A}$,
 \begin{align}
 q(\lambda_j^2)&=\IG(a_{\lambda j},b_{\lambda j}),&
@@ -1361,7 +1361,7 @@ As in MCMC, optional warmup scheduling for the $\tau^2,\xi$ block affects when
 the coordinate is updated, not the coordinate target itself.
 
 The following term-by-term ELBO contribution matches the package's
-\code{rhs_ns} scale block. For $x\sim\IG(a,b)$ under the rate
+\code{rhs\_ns} scale block. For $x\sim\IG(a,b)$ under the rate
 parameterization used above, define
 \begin{align}
 m_{\log x}(a,b)&=\log b-\psi(a),&
@@ -1466,7 +1466,7 @@ the fixed Gaussian intercept-prior contribution
 \end{equation}
 where $\pi_0$ is the fixed intercept precision. If the intercept is shrunk,
 this term is omitted because the intercept is already represented in the
-active RHS-NS block.
+active \code{rhs\_ns} block.
 
 Thus the package contribution is
 \begin{equation}
@@ -1484,7 +1484,7 @@ Thus the package contribution is
 \label{eq:rhs_ns_elbo}
 \end{equation}
 All terms are available in closed form because each scale factor is
-inverse-gamma. This is the RHS-NS component of the full static-model ELBO; the
+inverse-gamma. This is the \code{rhs\_ns} component of the full static-model ELBO; the
 likelihood, latent-variable, and $(\sigma,\gamma)$ terms are added by the
 surrounding static AL or exAL variational routine.
 
