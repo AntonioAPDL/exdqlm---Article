@@ -188,8 +188,8 @@ if (!need_ex2) {
     capture_output_file("ex2_benchmark_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("backend_profile=%s\n", selected_benchmark_profile))
-      cat(sprintf("vb_n.samp=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", n_samp, benchmark_n_burn, benchmark_n_mcmc))
-      cat("VB benchmark diagnostics:\n")
+      cat(sprintf("ldvb_n.samp=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", n_samp, benchmark_n_burn, benchmark_n_mcmc))
+      cat("LDVB benchmark diagnostics:\n")
       print(data.frame(
         model = c("DQLM", "exDQLM"),
         runtime_sec = c(ex2_benchmark$diag_vb$m1.rt, ex2_benchmark$diag_vb$m2.rt),
@@ -214,12 +214,12 @@ if (!need_ex2) {
       relative_path = "analysis/manuscript/outputs/logs/ex2_benchmark_run_summary.txt",
       manuscript_target = "support: Example 2 dynamic benchmark summary",
       status = "reproduced",
-      notes = "Runtime and diagnostics summary for the dynamic VB versus MCMC benchmark under the disclosed backend profile."
+      notes = "Runtime and diagnostics summary for the dynamic LDVB versus MCMC benchmark under the disclosed backend profile."
     )
 
     ex2_benchmark_table <- data.frame(
       model = c("DQLM", "exDQLM", "DQLM", "exDQLM"),
-      method = c("VB", "VB", "MCMC", "MCMC"),
+      method = c("LDVB", "LDVB", "MCMC", "MCMC"),
       runtime_sec = c(
         ex2_benchmark$diag_vb$m1.rt,
         ex2_benchmark$diag_vb$m2.rt,
@@ -258,7 +258,7 @@ if (!need_ex2) {
       manuscript_target = "tab:ex2bench",
       status = "reproduced",
       notes = sprintf(
-        "Representative dynamic VB versus MCMC benchmark for Example 2 under backend Profile %s.",
+        "Representative dynamic LDVB versus MCMC benchmark for Example 2 under backend Profile %s.",
         selected_benchmark_profile
       )
     )

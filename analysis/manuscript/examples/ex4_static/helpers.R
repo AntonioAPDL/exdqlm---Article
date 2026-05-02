@@ -432,7 +432,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
 }
 
 ex4_summary_rows <- function(ex4_obj, cfg_ex4 = NULL) {
-  vb_n_samp <- if (!is.null(cfg_ex4)) as.integer(cfg_ex4$n_samp %||% NA_integer_) else NA_integer_
+  ldvb_n_samp <- if (!is.null(cfg_ex4)) as.integer(cfg_ex4$n_samp %||% NA_integer_) else NA_integer_
   mcmc_n_burn <- if (!is.null(cfg_ex4)) as.integer(cfg_ex4$n_burn %||% NA_integer_) else NA_integer_
   mcmc_n_mcmc <- if (!is.null(cfg_ex4)) as.integer(cfg_ex4$n_mcmc %||% NA_integer_) else NA_integer_
   do.call(
@@ -443,7 +443,7 @@ ex4_summary_rows <- function(ex4_obj, cfg_ex4 = NULL) {
       mcmc_cov <- ex4_resolve_slope_coverage(res$mcmc, ex4_obj$beta_slopes)
       data.frame(
         p0 = rep(res$p0, 2L),
-        method = c("VB", "MCMC"),
+        method = c("LDVB", "MCMC"),
         runtime_sec = c(res$ldvb$runtime, res$mcmc$runtime),
         active_signal_rmse = c(res$ldvb$active_rmse, res$mcmc$active_rmse),
         inactive_signal_mae = c(res$ldvb$inactive_mae, res$mcmc$inactive_mae),
@@ -451,7 +451,7 @@ ex4_summary_rows <- function(ex4_obj, cfg_ex4 = NULL) {
         holdout_check_loss = c(res$ldvb$holdout_check_loss, res$mcmc$holdout_check_loss),
         rhs_tau = c(res$ldvb$tau, res$mcmc$tau),
         rhs_zeta2 = c(res$ldvb$zeta2, res$mcmc$zeta2),
-        posterior_draws = c(vb_n_samp, mcmc_n_mcmc),
+        posterior_draws = c(ldvb_n_samp, mcmc_n_mcmc),
         burn_in = c(NA_integer_, mcmc_n_burn),
         ldvb_iter = c(res$ldvb$iter, NA_integer_),
         ldvb_stop = c(res$ldvb$stop, NA_character_),

@@ -1,8 +1,8 @@
 need_ex4 <- target_enabled("ex4", c("ex4figure", "ex4table"))
 if (!need_ex4) {
-  log_msg("Example 4 (static RHS sparse simulation): skipped (target filter)")
+  log_msg("Example 4 (static RHS-NS sparse simulation): skipped (target filter)")
 } else {
-  log_msg("Example 4 (static RHS sparse simulation): start")
+  log_msg("Example 4 (static RHS-NS sparse simulation): start")
 
   source(file.path(repo_root, "analysis", "manuscript", "examples", "ex4_static", "helpers.R"), local = TRUE)
 
@@ -98,7 +98,7 @@ if (!need_ex4) {
     relative_path = "analysis/manuscript/outputs/logs/ex4_run_summary.txt",
     manuscript_target = "Example 4 textual outputs",
     status = "reproduced",
-    notes = "Sparse RHS static simulation settings and recovery metrics for Example 4."
+    notes = "Sparse RHS-NS static simulation settings and recovery metrics for Example 4."
   )
 
   summary_rows <- ex4_summary_rows(ex4_obj, cfg_ex4 = cfg_ex4)
@@ -110,7 +110,7 @@ if (!need_ex4) {
       artifact_id = "tab_ex4static_summary",
       manuscript_target = "new: Example 4 static simulation summary",
       status = "reproduced",
-      notes = "Runtime and sparse-signal recovery metrics for LDVB and MCMC under the RHS prior."
+      notes = "Runtime and sparse-signal recovery metrics for LDVB and MCMC under the RHS-NS prior."
     )
   }
 
@@ -166,7 +166,7 @@ if (!need_ex4) {
         if (i == 1L) {
           graphics::legend(
             "topleft",
-            legend = c("truth", "VB 95% interval", "MCMC 95% interval"),
+            legend = c("truth", "LDVB 95% interval", "MCMC 95% interval"),
             col = c("black", ldvb_cols$m1, ldvb_cols$m2),
             pch = c(18, 16, 16),
             lty = c(0, 1, 1),
@@ -184,7 +184,7 @@ if (!need_ex4) {
       relative_path = "analysis/manuscript/outputs/figures/ex4static.png",
       manuscript_target = "fig:ex4static",
       status = "reproduced",
-      notes = "Sparse RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50."
+      notes = "Sparse RHS-NS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50."
     )
   }
 
@@ -194,7 +194,7 @@ if (!need_ex4) {
   )
   register_note(
     "ex4",
-    "The static sparse benchmark uses the regularized horseshoe (RHS) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept."
+    "The static sparse benchmark uses the regularized horseshoe normal-scale (RHS-NS) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept."
   )
   register_note(
     "ex4",
@@ -215,5 +215,5 @@ if (!need_ex4) {
     "Example 4 focuses on the general static exAL model; the AL special case remains available via al.ind = TRUE (static alias of dqlm.ind = TRUE)."
   )
 
-  log_msg("Example 4 (static RHS sparse simulation): complete")
+  log_msg("Example 4 (static RHS-NS sparse simulation): complete")
 }
