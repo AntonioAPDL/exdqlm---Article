@@ -94,10 +94,10 @@ verify the posterior targets, update equations, and diagnostic quantities
 behind the exported functions. The derivations build on the AL
 mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
 models \citep{gonccalves2017dynamic}, the exAL/exDQLM formulation
-\citep{yan2025family,me}, FFBS for Gaussian state-space models
-\citep{carter1994gibbs,fruhwirth1994data}, nonconjugate variational
-approximations \citep{wang2013nonconjugatevb}, and the \code{rhs\_ns} prior
-\citep{nishimura2023shrunken}.
+\citep{yan2025family,me}, Gaussian state-space filtering, smoothing, and FFBS
+recursions described in Section~\ref{sec:gaussian_state_update},
+nonconjugate variational approximations \citep{wang2013nonconjugatevb}, and
+the \code{rhs\_ns} prior \citep{nishimura2023shrunken}.
 
 Table~\ref{tab:supp_article_crosswalk} gives the main navigation map. The
 model sections derive the fitting targets and updates,
@@ -124,6 +124,7 @@ Main article topic & Main article location & Supplement location \\
 exAL mixture and exDQLM hierarchy & Equations (1)--(6) & S2--S4 \\
 AL/DQLM special case & Section 2.5 & S3 \\
 Discount-factor evolution & Section 2.3 & S3.1, S4.1 \\
+Gaussian state updates & Section 2.2 & S2.2 \\
 Transfer-function exDQLM & Equations (7)--(10) & S5 \\
 Static AL/exAL regression & Section 2.5, Example 4 & S6--S7 \\
 Forecasting & Equation (16) & S8.1 \\
@@ -172,6 +173,7 @@ $A_\gamma,B_\gamma,C_\gamma$ & exAL constants evaluated at $p_\gamma$. \\
 $L,U$ & Lower and upper admissible bounds for $\gamma$. \\
 $\pigamma(\gamma)$ & Prior density for $\gamma$ on $(L,U)$. \\
 $\vect{\theta}_t,\mat{F}_t,\mat{G}_t,\mat{W}_t$ & Dynamic state, observation vector, evolution matrix, and evolution covariance. \\
+$d_t,Q_t$ & Observation offset and variance in the generic Gaussian state update. \\
 $v_t,s_t$ & exAL latent variables in the dynamic model. \\
 $\vect{\beta},\mat{X}$ & Static regression coefficients and design matrix. \\
 $v_i,s_i$ & exAL latent variables in the static model. \\
@@ -277,6 +279,192 @@ For $r\in\R$,
 \end{equation}
 where $K_\nu(\cdot)$ is the modified Bessel function of the second kind.
 
+\subsection{Gaussian state updates for dynamic models}
+\label{sec:gaussian_state_update}
+
+All dynamic MCMC and VB updates for the state path reduce to the same
+conditionally Gaussian state-space calculation. The package uses the
+observation-offset representation
+\begin{equation}
+y_t=\mat{F}_t^\top\vect{\theta}_t+d_t+e_t,\qquad
+e_t\sim\N(0,Q_t),
+\label{eq:generic_gaussian_obs}
+\end{equation}
+where $d_t$ is the scalar observation offset and $Q_t>0$ is the scalar
+conditional observation variance. In the implementation these quantities are
+stored as the extra observation offset and variance, respectively. Equivalently,
+with $z_t=y_t-d_t$,
+\[
+z_t=\mat{F}_t^\top\vect{\theta}_t+e_t,\qquad e_t\sim\N(0,Q_t).
+\]
+Together with
+\[
+\vect{\theta}_0\sim\N(\vect{m}_0,\mat{C}_0),\qquad
+\vect{\theta}_t\mid\vect{\theta}_{t-1}
+\sim
+\N(\mat{G}_t\vect{\theta}_{t-1},\mat{W}_t),
+\]
+this defines the Gaussian state update used below.
+
+Initialize $\vect{m}_{0|0}=\vect{m}_0$ and
+$\mat{C}_{0|0}=\mat{C}_0$. For $t=1,\ldots,T$, the Kalman prediction and
+filtering recursions are
+\begin{align}
+\vect{a}_t
+&=\mat{G}_t\vect{m}_{t-1|t-1},&
+\mat{R}_t
+&=\mat{G}_t\mat{C}_{t-1|t-1}\mat{G}_t^\top+\mat{W}_t,
+\label{eq:generic_kalman_prediction}\\
+\mu_t^y
+&=d_t+\mat{F}_t^\top\vect{a}_t,&
+S_t
+&=\mat{F}_t^\top\mat{R}_t\mat{F}_t+Q_t,
+\label{eq:generic_kalman_forecast}\\
+\delta_t^y
+&=y_t-\mu_t^y,&
+\vect{k}_t
+&=\mat{R}_t\mat{F}_tS_t^{-1},
+\label{eq:generic_kalman_gain}\\
+\vect{m}_{t|t}
+&=\vect{a}_t+\vect{k}_t\delta_t^y,&
+\mat{C}_{t|t}
+&=\mat{R}_t-\vect{k}_tS_t\vect{k}_t^\top.
+\label{eq:generic_kalman_filter}
+\end{align}
+The same forward pass gives the Gaussian auxiliary normalizing constant
+\begin{equation}
+\log p_{\mathrm{G}}(\vect{y})
+=
+\sum_{t=1}^T
+\log \N\{y_t\mid d_t+\mat{F}_t^\top\vect{a}_t,S_t\},
+\label{eq:generic_kalman_loglik}
+\end{equation}
+which is used in the ELBO state-block identities below.
+
+For MCMC, the state path is sampled by forward-filtering backward-sampling
+(FFBS) \citep{carter1994gibbs,fruhwirth1994data}. After the forward filter,
+draw
+\[
+\vect{\theta}_T\sim\N(\vect{m}_{T|T},\mat{C}_{T|T}).
+\]
+For $t=T-1,\ldots,0$, define
+\begin{equation}
+\mat{J}_t
+=
+\mat{C}_{t|t}\mat{G}_{t+1}^\top\mat{R}_{t+1}^{-1}.
+\label{eq:generic_backward_gain}
+\end{equation}
+Then sample
+\begin{equation}
+\vect{\theta}_t\mid\vect{\theta}_{t+1},\vect{y}
+\sim
+\N(\vect{h}_t,\mat{H}_t),
+\label{eq:generic_backward_sampling}
+\end{equation}
+where
+\begin{align}
+\vect{h}_t
+&=
+\vect{m}_{t|t}
++
+\mat{J}_t(\vect{\theta}_{t+1}-\vect{a}_{t+1}),\\
+\mat{H}_t
+&=
+\mat{C}_{t|t}
+-
+\mat{J}_t\mat{R}_{t+1}\mat{J}_t^\top.
+\label{eq:generic_backward_sampling_moments}
+\end{align}
+
+For VB and LDVB, the state factor $q(\vect{\theta}_{0:T})$ is updated
+deterministically by the Rauch--Tung--Striebel backward smoother applied to the
+same Gaussian system. Set $\vect{m}_{T|T}$ and $\mat{C}_{T|T}$ equal to the
+final filtered moments. For $t=T-1,\ldots,0$,
+\begin{align}
+\vect{m}_{t|T}
+&=
+\vect{m}_{t|t}
++
+\mat{J}_t(\vect{m}_{t+1|T}-\vect{a}_{t+1}),\\
+\mat{C}_{t|T}
+&=
+\mat{C}_{t|t}
++
+\mat{J}_t(\mat{C}_{t+1|T}-\mat{R}_{t+1})\mat{J}_t^\top.
+\label{eq:generic_rts_smoother}
+\end{align}
+Thus MCMC uses stochastic backward sampling from the Gaussian conditional state
+posterior, whereas VB/LDVB uses deterministic smoothing to update the Gaussian
+factor $q(\vect{\theta}_{0:T})$. Posterior samples returned by the package from
+VB/LDVB fits are generated after convergence from the fitted variational
+factors; this sampling step is separate from the coordinate update.
+
+The discount-factor construction changes how $\mat{W}_t$, or equivalently
+$\mat{R}_t$, is formed during the prediction step \citep{west1985dynamic}. For
+example, scalar discounting can be written as
+\[
+\mat{R}_t
+=
+\delta^{-1}\mat{G}_t\mat{C}_{t-1|t-1}\mat{G}_t^\top,
+\]
+which is equivalent at that step to
+\[
+\mat{W}_t
+=
+\frac{1-\delta}{\delta}
+\mat{G}_t\mat{C}_{t-1|t-1}\mat{G}_t^\top.
+\]
+Componentwise discounting applies the same construction blockwise. Once the
+prediction covariance $\mat{R}_t$ is formed, the filtering, backward-sampling,
+and smoothing equations above are unchanged.
+
+Table~\ref{tab:gaussian_state_update_map} gives the offset and variance used
+by each dynamic algorithm. The variational rows are obtained by completing the
+square in the expected Gaussian log likelihood.
+\begin{table}[!htb]
+\centering
+\begingroup
+\TableStyle
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}
+>{\raggedright\arraybackslash}p{0.25\textwidth}
+>{\raggedright\arraybackslash}p{0.19\textwidth}
+>{\raggedright\arraybackslash}X@{}}
+\toprule
+Dynamic update & Offset $d_t$ & Variance $Q_t$ & State update \\
+\midrule
+DQLM MCMC &
+$A_{p_0}v_t$ &
+$\sigma B_{p_0}v_t$ &
+Kalman filter and FFBS backward sampling. \\
+exDQLM MCMC &
+$A_\gamma v_t+C_\gamma\sigma|\gamma|s_t$ &
+$\sigma B_\gamma v_t$ &
+Kalman filter and FFBS backward sampling. \\
+DQLM VB &
+$A_{p_0}/m_{1/v,t}$ &
+$B_{p_0}/\{\kappa m_{1/v,t}\}$ &
+Kalman filter and deterministic RTS smoothing. \\
+exDQLM LDVB &
+$\{\kappa_2+\kappa_4\bar s_t m_{1/v,t}\}/\phi_t$ &
+$\phi_t^{-1}$, $\phi_t=\kappa_1m_{1/v,t}$ &
+Kalman filter and deterministic RTS smoothing. \\
+Transfer-function exDQLM &
+Same as the selected base dynamic update &
+Same as the selected base dynamic update &
+Apply the same update after replacing
+$(\mat{F}_t,\mat{G}_t,\mat{W}_t,\vect{\theta}_t)$ by the augmented quantities
+in Section~\ref{sec:transfer_function}. \\
+\bottomrule
+\end{tabularx}
+\endgroup
+\caption{Offset and variance representation used by the generic Gaussian state
+update in \eqref{eq:generic_gaussian_obs}. Here
+$\kappa=\E(\sigma^{-1})$ in the DQLM VB row,
+$m_{1/v,t}=\E(v_t^{-1})$, $\bar s_t=\E(s_t)$, and the $\kappa_j$ moments are
+defined in \eqref{eq:dyn_exdqlm_kappa}.}
+\label{tab:gaussian_state_update_map}
+\end{table}
+
 \section{Dynamic DQLM under the AL likelihood}
 \label{sec:dyn_dqlm}
 
@@ -316,26 +504,22 @@ $\tilde y_t=y_t-A_{p_0}v_t$ satisfies
 \epsilon_t\sim\N(0,\sigma B_{p_0}v_t).
 \label{eq:dyn_dqlm_pseudo}
 \end{equation}
-Thus the conditional state posterior is a Gaussian state-space posterior.
-The package implements the evolution variance through the discount-factor
-state-space construction used by \code{exdqlmMCMC()} and \code{exdqlmLDVB()}.
-Users specify discounting through \code{df} and \code{dim.df}; the routines
-construct the corresponding $\mat{W}_t$ sequence internally, and the notation
-above writes the induced covariance generically as $\mat{W}_t$.
-The derivations condition on the sequence $\mat{W}_{1:T}$ induced by the
-discount-factor construction in the main article. Componentwise discounting
-changes the block structure of $\mat{W}_t$; once this sequence is fixed within
-a Gaussian pseudo-state update, the FFBS and LDVB state updates have the forms
-below.
+Thus the conditional state posterior is the Gaussian state-space posterior
+defined in Section~\ref{sec:gaussian_state_update}, with the DQLM MCMC offset
+and variance given in Table~\ref{tab:gaussian_state_update_map}. The package
+constructs the evolution covariance through the discount-factor state-space
+rules described in the main article; once the prediction covariance is formed,
+the filtering and backward updates are those in
+Section~\ref{sec:gaussian_state_update}.
 
 \subsection{MCMC updates}
 
 One Gibbs sweep for the dynamic DQLM uses the following full conditionals.
 
 \paragraph{State path.}
-Given $(\sigma,\vect{v})$, sample the state path
-$\vect{\theta}_{0:T}$ exactly by applying forward-filtering
-backward-sampling (FFBS) to \eqref{eq:dyn_dqlm_pseudo}.
+Given $(\sigma,\vect{v})$, sample $\vect{\theta}_{0:T}$ by the FFBS recursion
+in Section~\ref{sec:gaussian_state_update}, using
+$d_t=A_{p_0}v_t$ and $Q_t=\sigma B_{p_0}v_t$.
 
 \paragraph{Scale.}
 Let $r_t=y_t-\mat{F}_t^\top\vect{\theta}_t$. Then
@@ -378,7 +562,8 @@ $(\vect{\theta}_{0:T},\vect{v},\sigma)$ and filtered/smoothed state summaries.
 \item For $m=1,\ldots,N_{\mathrm{burn}}+N_{\mathrm{mcmc}}$:
   \begin{enumerate}[label=(\alph*)]
   \item sample $\vect{\theta}_{0:T}$ by FFBS using
-  \eqref{eq:dyn_dqlm_pseudo};
+  Section~\ref{sec:gaussian_state_update} and the DQLM MCMC row of
+  Table~\ref{tab:gaussian_state_update_map};
   \item sample $\sigma$ from \eqref{eq:dyn_dqlm_sigma_cond};
   \item sample each $v_t$ from \eqref{eq:dyn_dqlm_v_cond};
   \item if $m>N_{\mathrm{burn}}$, retain the current draw.
@@ -414,7 +599,12 @@ y_t^\star=y_t-\frac{A_{p_0}}{m_{1/v,t}},\quad
 R_t^\star=\frac{B_{p_0}}{\kappa m_{1/v,t}}.
 \label{eq:dyn_dqlm_vb_pseudo}
 \end{equation}
-After Kalman smoothing, write
+Equivalently, this is the generic observation-offset form in
+\eqref{eq:generic_gaussian_obs} with
+$d_t=A_{p_0}/m_{1/v,t}$ and
+$Q_t=B_{p_0}/\{\kappa m_{1/v,t}\}$.
+After applying the deterministic smoother in
+Section~\ref{sec:gaussian_state_update}, write
 $q(\vect{\theta}_t)=\N(\vect{m}_{t|T},\mat{C}_{t|T})$ and define
 \begin{align}
 \bar r_t &= y_t-\mat{F}_t^\top\vect{m}_{t|T},\\
@@ -449,8 +639,9 @@ when requested, and optional approximate posterior draws.
 $q(\sigma)$, and $q(v_t)$.
 \item Repeat until the convergence criterion is met:
   \begin{enumerate}[label=(\alph*)]
-  \item update $q(\vect{\theta}_{0:T})$ by Kalman smoothing under
-  \eqref{eq:dyn_dqlm_vb_pseudo};
+  \item update $q(\vect{\theta}_{0:T})$ by the deterministic smoother in
+  Section~\ref{sec:gaussian_state_update}, using the DQLM VB row of
+  Table~\ref{tab:gaussian_state_update_map};
   \item update $q(v_t)$ for $t=1,\ldots,T$ using the GIG CAVI update above;
   \item update $q(\sigma)$ using \eqref{eq:dyn_dqlm_vb_sigma};
   \item monitor moment changes and, when ELBO monitoring is enabled, $\elbo(q)$.
@@ -550,8 +741,10 @@ Conditional on $(\vect{v},\vect{s},\sigma,\gamma)$,
 R^y_t=\sigma B_\gamma v_t,
 \label{eq:dyn_exdqlm_pseudo}
 \end{equation}
-which again gives a linear Gaussian state-space model for
-$\vect{\theta}_{0:T}$.
+This is the generic Gaussian state update in
+Section~\ref{sec:gaussian_state_update} with
+$d_t=A_\gamma v_t+C_\gamma\sigma|\gamma|s_t$ and
+$Q_t=\sigma B_\gamma v_t$.
 
 \subsection{MCMC updates}
 
@@ -588,7 +781,9 @@ V_{s,t}=\left(1+\frac{D_\gamma^2}{\sigma B_\gamma v_t}\right)^{-1},
 
 \paragraph{State path.}
 Given $(\vect{v},\vect{s},\sigma,\gamma)$, sample
-$\vect{\theta}_{0:T}$ by FFBS using \eqref{eq:dyn_exdqlm_pseudo}.
+$\vect{\theta}_{0:T}$ by the FFBS recursion in
+Section~\ref{sec:gaussian_state_update}, using the exDQLM MCMC row of
+Table~\ref{tab:gaussian_state_update_map}.
 
 \paragraph{Scale.}
 For fixed $\gamma$, let $y_t^\circ=y_t-\mat{F}_t^\top\vect{\theta}_t-A_\gamma v_t$
@@ -644,7 +839,8 @@ $\gamma$.
   \item sample $v_t$ from \eqref{eq:dyn_exdqlm_v_cond}, $t=1,\ldots,T$;
   \item sample $s_t$ from \eqref{eq:dyn_exdqlm_s_cond}, $t=1,\ldots,T$;
   \item sample $\vect{\theta}_{0:T}$ by FFBS using
-  \eqref{eq:dyn_exdqlm_pseudo};
+  Section~\ref{sec:gaussian_state_update} and the exDQLM MCMC row of
+  Table~\ref{tab:gaussian_state_update_map};
   \item sample $\sigma$ from \eqref{eq:dyn_exdqlm_sigma_cond};
   \item sample $\gamma$ on $(L,U)$ with the bounded slice sampler in
   Section~\ref{sec:slice}, targeting \eqref{eq:dyn_exdqlm_gamma_kernel};
@@ -676,10 +872,12 @@ $q(\sigma,\gamma)$. Define
 \label{eq:dyn_exdqlm_kappa}
 \end{align}
 Let $m_{1/v,t}=\E(v_t^{-1})$, $\bar s_t=\E(s_t)$, and
-$\overline{s_t^2}=\E(s_t^2)$. The state factor is Gaussian and is computed by Kalman
-smoothing with observation precision
+$\overline{s_t^2}=\E(s_t^2)$. The state factor is Gaussian and is updated by
+the deterministic smoother in Section~\ref{sec:gaussian_state_update} with
+observation precision
 \begin{equation}
 \phi_t=\kappa_1m_{1/v,t}
+\label{eq:dyn_exdqlm_vb_precision}
 \end{equation}
 and pseudo-response
 \begin{equation}
@@ -690,6 +888,30 @@ y_t\phi_t-\kappa_2-\kappa_4\bar s_t m_{1/v,t}
 }{\phi_t}.
 \label{eq:dyn_exdqlm_vb_pseudo}
 \end{equation}
+Equivalently, in the original-data form
+\eqref{eq:generic_gaussian_obs}, the offset is
+$d_t=\{\kappa_2+\kappa_4\bar s_t m_{1/v,t}\}/\phi_t$ and the variance is
+$Q_t=\phi_t^{-1}$. To see this, let
+$\eta_t=\mat{F}_t^\top\vect{\theta}_t$ and let $\E_{-\theta}$ denote
+expectation over all variational factors except the state factor. The terms
+in the expected quadratic loss that depend on $\eta_t$ are
+\begin{align}
+&\E_{-\theta}\left[
+\frac{
+\{y_t-\eta_t-A_\gamma v_t-C_\gamma\sigma|\gamma|s_t\}^2
+}{
+\sigma B_\gamma v_t
+}
+\right] \nonumber\\
+&\qquad =
+\phi_t(y_t-\eta_t)^2
+-
+2\{\kappa_2+\kappa_4\bar s_t m_{1/v,t}\}(y_t-\eta_t)
++\text{constant},
+\label{eq:dyn_exdqlm_ldvb_state_square}
+\end{align}
+so completing the square gives \eqref{eq:dyn_exdqlm_vb_pseudo} and
+\eqref{eq:dyn_exdqlm_vb_precision}.
 If $\eta_t=\mat{F}_t^\top\vect{\theta}_t$, write
 $m_{\eta,t}=\E(\eta_t)$, $S_{\eta,t}=\Var(\eta_t)$,
 $m_{\Delta,t}=y_t-m_{\eta,t}$, and
@@ -746,8 +968,9 @@ draws.
 $q(v_t)$, $q(s_t)$, and $q(\sigma,\gamma)$.
 \item Repeat until the convergence criterion is met:
   \begin{enumerate}[label=(\alph*)]
-  \item update $q(\vect{\theta}_{0:T})$ by Kalman smoothing under
-  \eqref{eq:dyn_exdqlm_vb_pseudo};
+  \item update $q(\vect{\theta}_{0:T})$ by the deterministic smoother in
+  Section~\ref{sec:gaussian_state_update}, using the exDQLM LDVB row of
+  Table~\ref{tab:gaussian_state_update_map};
   \item update $q(v_t)$ and $q(s_t)$ using \eqref{eq:dyn_exdqlm_vb_vs};
   \item update $q(\sigma,\gamma)$ on the transformed coordinates
   $(\ell_\sigma,z_\gamma)$ in \eqref{eq:dyn_exdqlm_ld_transform} by the
@@ -794,7 +1017,7 @@ $m_{v,t}=\E(v_t)$, $m_{1/v,t}=\E(v_t^{-1})$,
 $m_{\log v,t}=\E(\log v_t)$, $\bar s_t=\E(s_t)$, and
 $\overline{s_t^2}=\E(s_t^2)$. Define
 \begin{align}
-Q_t
+\mathcal{Q}_t
 &=
 \kappa_1S_{\Delta,t}m_{1/v,t}
 -2\kappa_2m_{\Delta,t}
@@ -803,7 +1026,7 @@ Q_t
 &\quad
 +\kappa_5\overline{s_t^2}m_{1/v,t}
 +2\kappa_6\bar s_t.
-\label{eq:dyn_exdqlm_elbo_Q}
+\label{eq:dyn_exdqlm_elbo_mathcalQ}
 \end{align}
 Then the likelihood, latent-prior, and nonconjugate-prior blocks are
 \begin{align}
@@ -812,7 +1035,7 @@ Then the likelihood, latent-prior, and nonconjugate-prior blocks are
 -\frac{T}{2}\log(2\pi)
 -\frac{T}{2}(\bar\ell_\sigma+\bar\ell_B)
 -\frac{1}{2}\sum_{t=1}^Tm_{\log v,t}
--\frac{1}{2}\sum_{t=1}^TQ_t,\\
+-\frac{1}{2}\sum_{t=1}^T\mathcal{Q}_t,\\
 \elbo_v
 &=
 -T\bar\ell_\sigma-\E(\sigma^{-1})\sum_{t=1}^Tm_{v,t},\\
@@ -867,7 +1090,9 @@ $\N(m_0^{\mathrm{tf}},C_0^{\mathrm{tf}})$ and is appended to the base
 state prior. Conditional on $\lambda$, the augmented model has the same
 posterior form as the base exDQLM with state
 $\widetilde{\vect{\theta}}_t$. Consequently,
-Algorithms~\ref{alg:dyn-exdqlm-mcmc} and~\ref{alg:dyn-exdqlm-ldvb} apply after replacing
+the Gaussian state update in Section~\ref{sec:gaussian_state_update}, together
+with Algorithms~\ref{alg:dyn-exdqlm-mcmc} and~\ref{alg:dyn-exdqlm-ldvb},
+applies after replacing
 $(\mat{F}_t,\mat{G}_t,\mat{W}_t,\vect{\theta}_t)$ by
 $(\widetilde{\mat{F}}_t,\widetilde{\mat{G}}_t,\widetilde{\mat{W}}_t,
 \widetilde{\vect{\theta}}_t)$.
@@ -940,6 +1165,9 @@ p(y_i\mid\vect{\beta},\sigma,\gamma,v_i,s_i)
 p(v_i\mid\sigma)p(s_i).
 \label{eq:static_exal_target}
 \end{align}
+Unlike the dynamic models in Sections~\ref{sec:dyn_dqlm}--\ref{sec:transfer_function},
+the static regression update does not use Kalman filtering, FFBS, or RTS
+smoothing. The coefficient block is a Gaussian weighted-regression update.
 
 \subsection{MCMC updates}
 
