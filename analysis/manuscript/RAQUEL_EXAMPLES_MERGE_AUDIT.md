@@ -30,9 +30,9 @@ by maintaining separate example workflows.
 ## Canonical Repositories
 
 - Article repo:
-  `/home/jaguir26/local/src/exdqlm---Article`
+  `/data/muscat_data/jaguir26/exdqlm---Article`
 - Package repo for the current CRAN-facing branch:
-  `/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`
+  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0`
 - Package branch:
   `cransub/0.4.0`
 

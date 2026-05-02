@@ -1,6 +1,6 @@
 runtime:
   seed: 20260421
-  pkg_path: /home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile
+  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0
   output_tag: monthly_reduced6_crps_dense_p015_df099_iter200
   parallel: false
   workers: 1

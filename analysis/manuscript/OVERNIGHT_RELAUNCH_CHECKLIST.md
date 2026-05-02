@@ -6,8 +6,8 @@ and the alternative monthly Example 3 sandbox against the current article-facing
 
 ## Package + repo state
 
-- Article repo: `/home/jaguir26/local/src/exdqlm---Article`
-- Package repo: `/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`
+- Article repo: current checkout
+- Package repo: sibling checkout `../exdqlm__wt__cransub_0.4.0`
 - Required package state before launch: clean `cransub/0.4.0` HEAD, recorded
   in the launch logs before rerunning.
 - Load package source through `--pkg-path` for manuscript runs.
@@ -35,8 +35,9 @@ Run from the article repo root:
 ```bash
 git status --short
 git rev-parse HEAD
-Rscript -e "pkg <- '/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile'; cat(normalizePath(pkg), '\n')"
-Rscript -e "pkgload::load_all('/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile', quiet = TRUE); cat(formals(exdqlm::exdqlmLDVB)$fix.sigma, '\n')"
+export PKG="$(cd .. && pwd)/exdqlm__wt__cransub_0.4.0"
+Rscript -e "cat(normalizePath(Sys.getenv('PKG')), '\n')"
+Rscript -e "pkgload::load_all(Sys.getenv('PKG'), quiet = TRUE); cat(formals(exdqlm::exdqlmLDVB)$fix.sigma, '\n')"
 ```
 
 Expected:
@@ -52,8 +53,8 @@ Run in this order so we surface the highest-risk package changes first.
 ### 1. Example 4 seed screen + tracked rerun
 
 ```bash
-ARTICLE=/home/jaguir26/local/src/exdqlm---Article
-PKG=/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile
+ARTICLE="$(pwd)"
+PKG="$(cd .. && pwd)/exdqlm__wt__cransub_0.4.0"
 
 Rscript $ARTICLE/analysis/run_all.R \
   --stage manuscript \

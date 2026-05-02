@@ -230,9 +230,8 @@ The full-history review config also records:
 - the contrasting zero-reference line used on the coefficient-state panels
 - the historical and future observation marker sizes used in the review plots
 
-By default the workflow loads package source from:
-
-`/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`
+By default the workflow loads package source from the configured package path,
+with a fallback to sibling checkout `../exdqlm__wt__cransub_0.4.0`.
 
 Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
 

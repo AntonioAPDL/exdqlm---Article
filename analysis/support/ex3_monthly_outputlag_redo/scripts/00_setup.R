@@ -50,15 +50,42 @@ ensure_runtime_dir(table_dir, keep_local = TRUE)
 ensure_runtime_dir(log_dir, keep_local = TRUE)
 ensure_runtime_dir(cache_dir, keep_local = TRUE)
 
-pkg_path <- Sys.getenv("EX3_MONTHLY_PKG_PATH", unset = config$runtime$pkg_path)
+resolve_pkg_path <- function(envvar, configured_path) {
+  env_path <- Sys.getenv(envvar, unset = "")
+  candidates <- character()
+  if (nzchar(env_path)) {
+    candidates <- c(candidates, env_path)
+  }
+  if (!is.null(configured_path) && nzchar(configured_path)) {
+    candidates <- c(candidates, configured_path)
+  }
+  candidates <- c(
+    candidates,
+    file.path(repo_root, "..", "exdqlm__wt__cransub_0.4.0")
+  )
+  candidates <- unique(vapply(
+    candidates,
+    normalizePath,
+    character(1),
+    winslash = "/",
+    mustWork = FALSE
+  ))
+  valid <- candidates[file.exists(file.path(candidates, "DESCRIPTION"))]
+  if (length(valid)) {
+    return(valid[[1]])
+  }
+  stop(
+    "Could not locate exdqlm source. Checked: ",
+    paste(candidates, collapse = ", ")
+  )
+}
+
+pkg_path <- resolve_pkg_path("EX3_MONTHLY_PKG_PATH", config$runtime$pkg_path)
 daily_input_path <- Sys.getenv(
   "EX3_MONTHLY_DAILY_INPUT_PATH",
   unset = config$data$daily_input_path
 )
 
-if (!file.exists(file.path(pkg_path, "DESCRIPTION"))) {
-  stop("Could not locate exdqlm source at: ", pkg_path)
-}
 if (!file.exists(daily_input_path)) {
   stop("Could not locate staged daily dataset at: ", daily_input_path)
 }

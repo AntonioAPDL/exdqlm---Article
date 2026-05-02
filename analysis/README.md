@@ -11,7 +11,7 @@ This folder contains reproducible analysis stages for the article.
 
 For a reader-facing map of the manuscript artifacts, support-only outputs, and
 rerun entry points, see
-`/home/jaguir26/local/src/exdqlm---Article/manuscript-reproducibility-index.md`.
+`/data/muscat_data/jaguir26/exdqlm---Article/manuscript-reproducibility-index.md`.
 
 The canonical source for the paper examples is
 `analysis/manuscript/examples/`, executed through `analysis/run_all.R --stage
@@ -44,8 +44,8 @@ Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --
 Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
 ```
 
-By default, the analysis workflow loads local `exdqlm` source from
-`/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`. Override that with
+By default, the analysis workflow loads local `exdqlm` source from a sibling
+checkout at `../exdqlm__wt__cransub_0.4.0`. Override that with
 `--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
 If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
 For constrained environments where rebuilding local source is not feasible,

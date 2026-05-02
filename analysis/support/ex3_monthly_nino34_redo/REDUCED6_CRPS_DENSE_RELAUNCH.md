@@ -16,9 +16,9 @@ the manuscript-facing Example 3.
 - Package branch:
   `cransub/0.4.0`
 - Package worktree:
-  `/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`
-- Required package commit at relaunch:
-  `ac245f1`
+  sibling checkout `../exdqlm__wt__cransub_0.4.0`
+- Package commit at relaunch:
+  recorded by the launcher in `.run_state/reduced6_crps_dense_launch_info.txt`
 
 ## Model Definition
 

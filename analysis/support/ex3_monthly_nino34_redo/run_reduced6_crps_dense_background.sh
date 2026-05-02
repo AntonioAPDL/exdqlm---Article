@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ARTICLE_ROOT="${ARTICLE_ROOT:-/home/jaguir26/local/src/exdqlm---Article}"
-PKG_ROOT="${EX3_MONTHLY_PKG_PATH:-/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARTICLE_ROOT="${ARTICLE_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
+PKG_ROOT="${EX3_MONTHLY_PKG_PATH:-$(cd "$ARTICLE_ROOT/.." && pwd)/exdqlm__wt__cransub_0.4.0}"
 CONFIG_PATH="$ARTICLE_ROOT/analysis/support/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml"
 OUTPUT_DIR="$ARTICLE_ROOT/analysis/support/ex3_monthly_nino34_redo/outputs/monthly_reduced6_crps_dense_p015_df099_iter200"
 LOG_DIR="$OUTPUT_DIR/logs"

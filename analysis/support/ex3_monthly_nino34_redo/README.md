@@ -51,36 +51,36 @@ setup.
 
 Tracked configs:
 
-- [config.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config.yml)
+- [config.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config.yml)
   - default paper-like launchcheck
   - `p0 = 0.15`
   - `nino34`, no lagged covariates
-- [config_launchcheck.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_launchcheck.yml)
+- [config_launchcheck.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_launchcheck.yml)
   - explicit copy of the default paper-like launchcheck
-- [config_q7_full.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_q7_full.yml)
+- [config_q7_full.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_q7_full.yml)
   - paper-like q7 run
-- [config_allidx_launchcheck.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_allidx_launchcheck.yml)
+- [config_allidx_launchcheck.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_allidx_launchcheck.yml)
   - monthly all-index launchcheck
   - one quantile at `0.15`
   - all 17 monthly indices at once
   - no lags, transforms, or interactions
   - all discount factors set to `0.99`
-- [config_allidx_intermediate.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_allidx_intermediate.yml)
+- [config_allidx_intermediate.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_allidx_intermediate.yml)
   - the first serious screening run
   - same all-index monthly structure as above
   - deeper VB budget: `tol = 0.05`, `n.samp = 300`, `max_iter = 50`
-- [config_allidx_fullconv.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_allidx_fullconv.yml)
+- [config_allidx_fullconv.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_allidx_fullconv.yml)
   - pruning-grade all-index screening run
   - same all-index monthly structure as above
   - large VB budget intended for convergence-sensitive pruning:
     `tol = 0.02`, `n.samp = 500`, `max_iter = 300`
-- [config_reduced6_refined.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_reduced6_refined.yml)
+- [config_reduced6_refined.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_reduced6_refined.yml)
   - reduced 6-index rerun after full-model screening
   - uses `NOI`, `SOI`, `ESPI`, `PNA`, `WHWP`, and `AMO`
   - keeps the same monthly Example 3 structure
   - refined transfer-decay grid around the previously selected `lambda = 0.30`
   - `tol = 0.02`, `n.samp = 500`, `max_iter = 200`
-- [config_reduced6_crps_dense.yml](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml)
+- [config_reduced6_crps_dense.yml](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml)
   - reduced 6-index rerun using the same covariate set
   - selects the transfer decay by `CRPS`, not `KL`
   - dense lambda grid from `0.01` through `0.99`
@@ -115,7 +115,7 @@ bash analysis/support/ex3_monthly_nino34_redo/check_reduced6_crps_dense_status.s
 ```
 
 The detailed relaunch contract for this support run is documented in
-[REDUCED6_CRPS_DENSE_RELAUNCH.md](/home/jaguir26/local/src/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/REDUCED6_CRPS_DENSE_RELAUNCH.md).
+[REDUCED6_CRPS_DENSE_RELAUNCH.md](/data/muscat_data/jaguir26/exdqlm---Article/analysis/support/ex3_monthly_nino34_redo/REDUCED6_CRPS_DENSE_RELAUNCH.md).
 
 The q7 launcher remains available for the paper-like profile:
 

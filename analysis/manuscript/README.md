@@ -6,7 +6,7 @@ without modifying `exdqlm-jss.tex`.
 
 For a reader-facing index of the publication artifacts, support-only outputs,
 and recommended rerun entry points, see
-`/home/jaguir26/local/src/exdqlm---Article/manuscript-reproducibility-index.md`.
+`/data/muscat_data/jaguir26/exdqlm---Article/manuscript-reproducibility-index.md`.
 
 ## Canonical Example Workflow
 
@@ -100,8 +100,8 @@ Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit --skip-tests
 ```
 
-By default, this stage loads local `exdqlm` source from
-`/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile`. Override that with
+By default, this stage loads local `exdqlm` source from a sibling checkout at
+`../exdqlm__wt__cransub_0.4.0`. Override that with
 `--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
 If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
 For constrained environments where rebuilding local source is not feasible,

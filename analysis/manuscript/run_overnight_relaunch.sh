@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ARTICLE_ROOT="/home/jaguir26/local/src/exdqlm---Article"
-PKG_ROOT="${EXDQLM_PKG_PATH:-/home/jaguir26/local/src/exdqlm__wt__rhs_ns_reconcile}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARTICLE_ROOT="${ARTICLE_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+PKG_ROOT="${EXDQLM_PKG_PATH:-$(cd "$ARTICLE_ROOT/.." && pwd)/exdqlm__wt__cransub_0.4.0}"
 STAMP="$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="$ARTICLE_ROOT/analysis/manuscript/outputs/logs/overnight_relaunch_$STAMP"
 MASTER_LOG="$RUN_DIR/master.log"

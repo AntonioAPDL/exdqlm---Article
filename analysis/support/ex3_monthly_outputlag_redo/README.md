@@ -31,7 +31,8 @@ By default the workflow expects:
 - daily CSV:
   `/home/jaguir26/data/exdqlm_experiments/ex3_daily/big_trees_daily_usgs_ppt_soil.csv`
 - package checkout:
-  `/home/jaguir26/local/src/exdqlm__wt__0p4p0_article_main`
+  configured package path, with a fallback to sibling checkout
+  `../exdqlm__wt__cransub_0.4.0`
 
 The aggregated monthly flow currently spans:
 

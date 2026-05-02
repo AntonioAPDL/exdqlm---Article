@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ARTICLE_ROOT="${ARTICLE_ROOT:-/home/jaguir26/local/src/exdqlm---Article}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARTICLE_ROOT="${ARTICLE_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 OUTPUT_DIR="$ARTICLE_ROOT/analysis/support/ex3_monthly_nino34_redo/outputs/monthly_reduced6_crps_dense_p015_df099_iter200"
 LOG_DIR="$OUTPUT_DIR/logs"
 STATE_DIR="$OUTPUT_DIR/.run_state"
