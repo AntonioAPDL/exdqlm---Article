@@ -1287,7 +1287,7 @@ contribution for active coefficients is
 \omega^{\mathrm{prior}}_j=\frac{1}{\tau^2\lambda_j^2}+\frac{1}{\zeta^2}.
 \label{eq:rhs_ns_precision}
 \end{equation}
-Consequently, the $\vect{\beta}$ update in MCMC or VB is obtained from the
+Consequently, the $\vect{\beta}$ update in MCMC or LDVB is obtained from the
 static Gaussian update after replacing $\mat{V}_{\beta,0}^{-1}$ by a diagonal precision
 matrix with active entries $\omega^{\mathrm{prior}}_j$ or their variational
 expectations.
@@ -1324,7 +1324,7 @@ implementation may temporarily freeze or schedule the global-scale update during
 configured warmup iterations for numerical stability; this changes only the
 update schedule, not the conditional target displayed above.
 
-\subsection{RHS-NS VB updates and ELBO contribution}
+\subsection{RHS-NS variational updates and ELBO contribution}
 
 The package uses a mean-field approximation over the RHS-NS scale block. For
 $j\in\mathcal{A}$,
