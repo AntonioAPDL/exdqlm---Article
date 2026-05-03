@@ -1937,7 +1937,8 @@ delta approximation used in the LDVB updates.
 \label{sec:slice}
 
 Let $h(x)$ be an unnormalized log-density on a finite interval $[a,b]$, and let
-$x_0\in(a,b)$. The bounded slice update implemented in the package is:
+$x_0\in(a,b)$. Following the stepping-out and shrinkage construction of
+\citet{neal2003slice}, the bounded slice update implemented in the package is:
 \begin{enumerate}[label=(\arabic*)]
 \item Draw $e\sim\Exp(1)$ and set the log-slice height $z=h(x_0)-e$.
 \item Draw $u\sim\operatorname{Unif}(0,w)$ and initialize

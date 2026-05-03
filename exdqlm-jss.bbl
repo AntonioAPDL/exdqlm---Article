@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{45}
+\begin{thebibliography}{46}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -159,6 +159,12 @@ Muggeo VMR (2025).
   Quantiles and Non-Parametric Growth Charts}.
 \newblock R package version 1.7-2,
   \urlprefix\url{https://CRAN.R-project.org/package=quantregGrowth}.
+
+\bibitem[{Neal(2003)}]{neal2003slice}
+Neal RM (2003).
+\newblock \enquote{Slice sampling.}
+\newblock \emph{The Annals of Statistics}, \textbf{31}(3), 705--767.
+\newblock \doi{10.1214/aos/1056562461}.
 
 \bibitem[{Nishimura and Suchard(2023)}]{nishimura2023shrunken}
 Nishimura A, Suchard MA (2023).
