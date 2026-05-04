@@ -7,8 +7,8 @@ and the alternative monthly Example 3 sandbox against the current article-facing
 ## Package + repo state
 
 - Article repo: current checkout
-- Package repo: sibling checkout `../exdqlm__wt__cransub_0.4.0`
-- Required package state before launch: clean `cransub/0.4.0` HEAD, recorded
+- Package repo: sibling checkout `../exdqlm__wt__main`
+- Required package state before launch: clean `main` HEAD, recorded
   in the launch logs before rerunning.
 - Load package source through `--pkg-path` for manuscript runs.
 - Use `--force-refit` for manuscript reruns so cached fits from older package
@@ -35,7 +35,7 @@ Run from the article repo root:
 ```bash
 git status --short
 git rev-parse HEAD
-export PKG="$(cd .. && pwd)/exdqlm__wt__cransub_0.4.0"
+export PKG="$(cd .. && pwd)/exdqlm__wt__main"
 Rscript -e "cat(normalizePath(Sys.getenv('PKG')), '\n')"
 Rscript -e "pkgload::load_all(Sys.getenv('PKG'), quiet = TRUE); cat(formals(exdqlm::exdqlmLDVB)$fix.sigma, '\n')"
 ```
@@ -54,7 +54,7 @@ Run in this order so we surface the highest-risk package changes first.
 
 ```bash
 ARTICLE="$(pwd)"
-PKG="$(cd .. && pwd)/exdqlm__wt__cransub_0.4.0"
+PKG="$(cd .. && pwd)/exdqlm__wt__main"
 
 Rscript $ARTICLE/analysis/run_all.R \
   --stage manuscript \

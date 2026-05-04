@@ -8,8 +8,8 @@ Comparison with Barata et al. (2022) is deferred to a later document pass.
 
 Current package source checked against this plan:
 
-- Package repo: `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0`
-- Package branch: `cransub/0.4.0`
+- Package repo: `/data/muscat_data/jaguir26/exdqlm__wt__main`
+- Package branch: `main`
 - Article repo: `/data/muscat_data/jaguir26/exdqlm---Article`
 
 ## 1. Target Scope
@@ -191,7 +191,7 @@ Primary sources:
 
 - `/home/jaguir26/local/src/RHS---Implementations/main.tex`
 - `/home/jaguir26/local/src/Q-DESN---Theory-for-implementation/main.tex`
-- `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/static_beta_prior.R`
+- `/data/muscat_data/jaguir26/exdqlm__wt__main/R/static_beta_prior.R`
 
 Do not use the older direct-RHS log-scale derivations as the supplement target.
 Those are useful historical/context files, but the package-paper sparse-prior
@@ -227,19 +227,19 @@ Historical/non-target location:
 Useful locations in current package code:
 
 - Prior dispatch and controls:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/static_beta_prior.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/static_beta_prior.R`,
   line 9.
 - RHS-NS initialization:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/static_beta_prior.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/static_beta_prior.R`,
   line 989.
 - RHS-NS VB update:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/static_beta_prior.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/static_beta_prior.R`,
   line 1194.
 - RHS-NS ELBO contribution:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/static_beta_prior.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/static_beta_prior.R`,
   line 1295.
 - RHS-NS MCMC update:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/static_beta_prior.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/static_beta_prior.R`,
   line 1399.
 
 Coverage assessment:
@@ -258,32 +258,32 @@ Coverage assessment:
 Dynamic functions:
 
 - `exdqlmMCMC()`:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/exdqlmMCMC.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/exdqlmMCMC.R`,
   function definition near line 246.
 - `exdqlmLDVB()`:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/exdqlmLDVB.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/exdqlmLDVB.R`,
   function definition near line 148.
 Static functions:
 
 - `exalStaticMCMC()`:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/exalStaticMCMC.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/exalStaticMCMC.R`,
   function definition near line 198.
 - `exalStaticLDVB()`:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/exalStaticLDVB.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/exalStaticLDVB.R`,
   function definition near line 1041.
 - Static coefficient-prior machinery:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/static_beta_prior.R`.
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/static_beta_prior.R`.
 
 Shared implementation:
 
 - Bounded univariate slice sampler:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/utils.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/utils.R`,
   line 239.
 - Static AL alias `al.ind` for `dqlm.ind`:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/utils.R`,
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/utils.R`,
   line 613.
 - Global inference controls and warmup configuration:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0/R/exal_inference_config.R`.
+  `/data/muscat_data/jaguir26/exdqlm__wt__main/R/exal_inference_config.R`.
 
 ## 5. What We Can Draft Immediately
 
@@ -510,7 +510,7 @@ Remaining verification work before submission:
 - Decide whether the official submitted supplement should include a short
   reference list, or rely on the main article for citations.
 
-## 13. Implementation-match audit against `cransub/0.4.0`
+## 13. Implementation-match audit against `main`
 
 Date: 2026-04-30.
 
@@ -518,8 +518,8 @@ Source of truth for this pass:
 
 - Article repo: `/data/muscat_data/jaguir26/exdqlm---Article`
 - Article commit at start of pass: `8e81e019380acdf8e4930a918946fe78c21e1e3e`
-- Package repo: `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0`
-- Package branch: `cransub/0.4.0`
+- Package repo: `/data/muscat_data/jaguir26/exdqlm__wt__main`
+- Package branch: `main`
 - Package commit: `33adab3ad545ba3ceb013d8e3682be2bdbfa3118`
 
 Audit rule:

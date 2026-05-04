@@ -1,6 +1,6 @@
 runtime:
   seed: 20260412
-  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0
+  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__main
   output_tag: full_history_q7_launchcheck
   parallel: true
   workers: 4

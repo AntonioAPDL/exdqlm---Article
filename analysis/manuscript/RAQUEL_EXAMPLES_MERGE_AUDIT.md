@@ -32,9 +32,9 @@ by maintaining separate example workflows.
 - Article repo:
   `/data/muscat_data/jaguir26/exdqlm---Article`
 - Package repo for the current CRAN-facing branch:
-  `/data/muscat_data/jaguir26/exdqlm__wt__cransub_0.4.0`
+  `/data/muscat_data/jaguir26/exdqlm__wt__main`
 - Package branch:
-  `cransub/0.4.0`
+  `main`
 
 ## Merge Provenance
 

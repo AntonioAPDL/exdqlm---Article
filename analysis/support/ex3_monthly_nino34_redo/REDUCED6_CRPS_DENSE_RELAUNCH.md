@@ -2,7 +2,7 @@
 
 This note documents the remaining alternative Example 3 work after the main
 manuscript relaunch. The goal is to regenerate the support-only reduced-6
-monthly sandbox with the current CRAN-target package branch, without changing
+monthly sandbox with the CRAN-aligned package `main` branch, without changing
 the manuscript-facing Example 3.
 
 ## Scope
@@ -14,9 +14,9 @@ the manuscript-facing Example 3.
 - Output tag:
   `monthly_reduced6_crps_dense_p015_df099_iter200`
 - Package branch:
-  `cransub/0.4.0`
+  `main`
 - Package worktree:
-  sibling checkout `../exdqlm__wt__cransub_0.4.0`
+  sibling checkout `../exdqlm__wt__main`
 - Package commit at relaunch:
   recorded by the launcher in `.run_state/reduced6_crps_dense_launch_info.txt`
 
@@ -87,5 +87,5 @@ settings, selected lambda, diagnostics, and generated files.
 
 The previous dense reduced-6 attempt was started from an older package snapshot
 and stopped before figures, diagnostics, and manifest were produced. The current
-relaunch is explicitly tied to `cransub/0.4.0` so that the alternative Example 3
-support run matches the package branch used for the article and CRAN submission.
+relaunch is explicitly tied to `main` so that the alternative Example 3 support
+run matches the package branch used for the article and CRAN release.

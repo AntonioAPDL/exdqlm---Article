@@ -42,7 +42,7 @@ resolve_pkg_path <- function() {
   env_pkg_path <- Sys.getenv("EXDQLM_PKG_PATH", unset = "")
   env_pkg_path <- if (nzchar(env_pkg_path)) env_pkg_path else NULL
   default_pkg_path <- normalizePath(
-    file.path(repo_root, "..", "exdqlm__wt__cransub_0.4.0"),
+    file.path(repo_root, "..", "exdqlm__wt__main"),
     winslash = "/",
     mustWork = FALSE
   )

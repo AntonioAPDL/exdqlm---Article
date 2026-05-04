@@ -61,7 +61,7 @@ resolve_pkg_path <- function(envvar, configured_path) {
   }
   candidates <- c(
     candidates,
-    file.path(repo_root, "..", "exdqlm__wt__cransub_0.4.0")
+    file.path(repo_root, "..", "exdqlm__wt__main")
   )
   candidates <- unique(vapply(
     candidates,
