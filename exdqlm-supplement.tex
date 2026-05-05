@@ -57,9 +57,11 @@
 \Shorttitle{Supplementary material for \pkg{exdqlm}}
 
 \Abstract{This supplement derives the posterior targets, full conditional
-distributions, variational updates, Laplace--delta approximations, and numerical
-blocks used by the algorithms in \pkg{exdqlm}. It covers dynamic AL/DQLM and
-exAL/exDQLM state-space models, transfer-function state augmentation, static
+distributions, variational updates, Laplace--delta approximations, evidence
+lower bound (ELBO) terms, and numerical blocks used by the algorithms in
+\pkg{exdqlm}. It covers dynamic asymmetric Laplace/dynamic quantile linear model
+(AL/DQLM) and extended asymmetric Laplace/extended dynamic quantile linear model
+(exAL/exDQLM) state-space models, transfer-function state augmentation, static
 AL/exAL regression, ridge and Nishimura--Suchard regularized horseshoe
 shrinkage priors, forecasting, diagnostics, and posterior-predictive synthesis.
 The notation follows the main article, and each algorithmic block is linked to
@@ -89,14 +91,16 @@ The main article describes the user-facing workflow for \pkg{exdqlm}: dynamic
 exDQLM and DQLM fitting, transfer-function models, static exAL regression,
 forecasting, diagnostics, and posterior-predictive synthesis. This supplement
 gives the corresponding posterior targets, full conditional distributions,
-variational updates, Laplace--delta approximations, ELBO components, and
+Markov chain Monte Carlo (MCMC) and variational Bayes (VB) updates,
+Laplace--delta variational Bayes (LDVB) approximations, ELBO components, and
 numerical routines used by the package. Readers can use this document to
 verify the posterior targets, update equations, and diagnostic quantities
 behind the exported functions. The derivations build on the AL
 mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
 models \citep{gonccalves2017dynamic}, the exAL/exDQLM formulation
-\citep{yan2025family,me}, Gaussian state-space filtering, smoothing, and FFBS
-recursions described in Section~\ref{sec:gaussian_state_update},
+\citep{yan2025family,me}, Gaussian state-space filtering, smoothing, and
+forward-filtering backward-sampling (FFBS) recursions described in
+Section~\ref{sec:gaussian_state_update},
 nonconjugate variational approximations \citep{wang2013nonconjugatevb}, and
 the \code{rhs\_ns} prior \citep{nishimura2023shrunken}.
 
@@ -207,7 +211,7 @@ parameterization. The exponential distribution $\Exp(\text{rate}=1/\sigma)$
 has density $\sigma^{-1}\exp(-x/\sigma)$, matching the main article's
 mean-$\sigma$ convention for the AL and exAL mixture variables. Finally,
 $\TNp(m,V)$ denotes $\N(m,V)$ truncated to $(0,\infty)$. The generalized
-inverse Gaussian parameterization is given in \eqref{eq:gig_parameterization}.
+inverse Gaussian (GIG) parameterization is given in \eqref{eq:gig_parameterization}.
 Throughout, $\phi(\cdot)$ and $\Phi(\cdot)$ denote the standard normal density
 and distribution function.
 
@@ -217,7 +221,7 @@ v &\mid \sigma \sim \Exp(\text{rate}=1/\sigma), \qquad v>0, \\
 y \mid \eta,\sigma,v
 &\sim \N\{ \eta + A(p_0)v,\ \sigma B(p_0)v \},
 \end{align}
-where
+where $\eta$ is the quantile-location parameter and
 \begin{equation}
 A(p)=\frac{1-2p}{p(1-p)}, \qquad B(p)=\frac{2}{p(1-p)}.
 \label{eq:al_AB}
@@ -378,7 +382,7 @@ where
 \end{align}
 
 For VB and LDVB, the state factor $q(\vect{\theta}_{0:T})$ is updated
-deterministically by the Rauch--Tung--Striebel backward smoother applied to the
+deterministically by the Rauch--Tung--Striebel (RTS) backward smoother applied to the
 same Gaussian system. Set $\vect{m}_{T|T}$ and $\mat{C}_{T|T}$ equal to the
 final filtered moments. For $t=T-1,\ldots,0$,
 \begin{align}
@@ -1765,7 +1769,7 @@ fitted variational factors.
 
 \subsection{Diagnostics}
 
-The dynamic diagnostics use the plug-in MAP standardized one-step-ahead
+The dynamic diagnostics use the plug-in maximum a posteriori (MAP) standardized one-step-ahead
 forecast-error sequence stored as \code{map.standard.forecast.errors}. If
 $\widehat f_t$ and $\widehat q_t$ denote the fitted one-step-ahead location and
 variance used in this sequence, the diagnostic error and its normal-score
@@ -1776,17 +1780,17 @@ transform are
 \widehat u_t = \Phi(\widehat e_t).
 \label{eq:pit_plugin}
 \end{equation}
-The QQ plot, ACF plot, and standardized forecast-error plot are computed from
+The quantile--quantile (QQ) plot, autocorrelation function (ACF) plot, and standardized forecast-error plot are computed from
 $\{\widehat e_t\}$ or $\{\widehat u_t\}$ rather than from posterior uncertainty
-bands for residuals. The reported $\KL$ summaries are nearest-neighbor estimates
+bands for residuals. The reported Kullback--Leibler (KL) summaries are nearest-neighbor estimates
 of the divergence between this empirical standardized-error sample and a
 reference standard-normal sample supplied through \code{ref} or generated
 internally; the flipped version reverses the two arguments.
 
 For predictive draws $y_t^{(1)},\ldots,y_t^{(M)}$, let
 \(\widehat q_t(\tau_k)\) denote the empirical posterior predictive quantile at
-level \(\tau_k\). The diagnostic CRPS calculation uses the identity between
-CRPS and integrated check loss,
+level \(\tau_k\). The diagnostic continuous ranked probability score (CRPS)
+calculation uses the identity between CRPS and integrated check loss,
 \[
 \CRPS(y_t^{\mathrm{obs}},G_t)
 =
@@ -1807,7 +1811,7 @@ diagnostic time points \citep{gneiting2007,laio2007verification}. By default,
 \code{exdqlmDiagnostics()} uses
 \(\tau_k=0.01,0.02,\ldots,0.99\) with equal weights \(w_k=1/K\). User-supplied
 weights are normalized to sum to one. For target quantile $p_0$, the
-posterior predictive loss criterion returned as \code{pplc} is
+posterior predictive loss criterion (PPLC) returned as \code{pplc} is
 \begin{equation}
 \widehat{\PPLC}
 =
