@@ -189,7 +189,7 @@ continue through forecast, figures, and manifest without refitting.
 The post-fit figure layer also writes
 `tables/ex3_daily_forecast_synthesis_metrics.csv`, which scores the synthesized
 forecast distributions on the held-out future values only. CRPS is computed
-with the same internal helper used by the `0.4.0` package diagnostics, while
+with the same internal helper used by the package diagnostics, while
 `KL` and `KL.flip` are computed from PIT-normalized synthesis forecast errors
 against a reproducible standard-normal reference sample.
 
@@ -231,7 +231,7 @@ The full-history review config also records:
 - the historical and future observation marker sizes used in the review plots
 
 By default the workflow loads package source from the configured package path,
-with a fallback to sibling checkout `../exdqlm__wt__main`.
+with a fallback to sibling checkout `../exdqlm__wt__0.5.0-crps-iqs`.
 
 Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
 

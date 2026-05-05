@@ -1,7 +1,7 @@
 utils::data("BTflow", package = "exdqlm", envir = environment())
 
 if (!exists("BTflow")) {
-  stop("Required dataset BTflow is not available from the 0.4.0 package checkout.")
+  stop("Required dataset BTflow is not available from the package checkout.")
 }
 
 daily_df <- read.csv(daily_input_path, stringsAsFactors = FALSE)

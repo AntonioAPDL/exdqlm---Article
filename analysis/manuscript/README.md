@@ -101,7 +101,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit 
 ```
 
 By default, this stage loads local `exdqlm` source from a sibling checkout at
-`../exdqlm__wt__main`. Override that with
+`../exdqlm__wt__0.5.0-crps-iqs`. Override that with
 `--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
 If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
 For constrained environments where rebuilding local source is not feasible,

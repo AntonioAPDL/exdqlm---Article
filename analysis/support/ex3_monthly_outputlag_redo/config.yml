@@ -1,6 +1,6 @@
 runtime:
   seed: 20260414
-  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__main
+  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__0.5.0-crps-iqs
   output_tag: monthly_outputlag_launchcheck
   parallel: true
   workers: 2

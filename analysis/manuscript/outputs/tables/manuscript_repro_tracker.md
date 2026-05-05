@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-04-29 03:44:16
+Generated: 2026-05-04 20:07:46
 Profile: standard
 Seed: 20260501
 
@@ -64,7 +64,7 @@ Seed: 20260501
 - ex4: Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0.
 - ex4: The static sparse benchmark uses the Nishimura-Suchard regularized horseshoe (rhs_ns) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept.
 - ex4: The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget.
-- ex4: The tracked Example 4 dataset seed (20260718) was selected by the support-only ex4screen workflow using the p0=0.50 MCMC full-coverage criterion for the plotted slope coefficients.
+- ex4: The tracked Example 4 dataset seed (20260712) was selected by the support-only ex4screen workflow using the p0=0.50 MCMC full-coverage criterion for the plotted slope coefficients.
 - ex4: Example 4 focuses on the general static exAL model; the AL special case remains available via al.ind = TRUE (static alias of dqlm.ind = TRUE).
 - coverage: All publication-set manuscript artifacts were targeted in this pipeline.
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.

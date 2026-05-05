@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARTICLE_ROOT="${ARTICLE_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-PKG_ROOT="${EXDQLM_PKG_PATH:-$(cd "$ARTICLE_ROOT/.." && pwd)/exdqlm__wt__main}"
+PKG_ROOT="${EXDQLM_PKG_PATH:-$(cd "$ARTICLE_ROOT/.." && pwd)/exdqlm__wt__0.5.0-crps-iqs}"
 STAMP="$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="$ARTICLE_ROOT/analysis/manuscript/outputs/logs/overnight_relaunch_$STAMP"
 MASTER_LOG="$RUN_DIR/master.log"

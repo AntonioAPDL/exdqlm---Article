@@ -1,6 +1,6 @@
 runtime:
   seed: 20260421
-  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__main
+  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__0.5.0-crps-iqs
   output_tag: monthly_nino34_q7_full
   parallel: true
   workers: 7

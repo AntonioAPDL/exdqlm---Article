@@ -3,12 +3,13 @@
 This note is the reader-facing map to the reproducible materials that accompany
 the `exdqlm` software article. It is intended to complement the manuscript by
 identifying the publication artifacts, the main support-only artifacts, and the
-tracked rerun paths used to regenerate them from the current `0.4.0` package.
+tracked rerun paths used to regenerate them from the current `0.5.0.9000`
+development package.
 
 Current snapshot references are recorded in the generated reproducibility
 tracker and rerun logs. When regenerating artifacts, use the checked-out article
-commit together with the CRAN-aligned package `main` branch, or override the
-package path explicitly with `--pkg-path`.
+commit together with the package development branch `feature/0.5.0-crps-iqs`,
+or override the package path explicitly with `--pkg-path`.
 
 ## 1. Publication Artifacts
 

@@ -1,7 +1,7 @@
 utils::data("nino34", package = "exdqlm", envir = environment())
 
 if (!exists("nino34")) {
-  stop("Required dataset nino34 is not available from the 0.4.0 package checkout.")
+  stop("Required dataset nino34 is not available from the package checkout.")
 }
 
 daily_df <- read.csv(daily_input_path, stringsAsFactors = FALSE)

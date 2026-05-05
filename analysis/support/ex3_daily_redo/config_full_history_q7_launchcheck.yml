@@ -1,6 +1,6 @@
 runtime:
   seed: 20260412
-  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__main
+  pkg_path: /data/muscat_data/jaguir26/exdqlm__wt__0.5.0-crps-iqs
   output_tag: full_history_q7_launchcheck
   parallel: true
   workers: 4

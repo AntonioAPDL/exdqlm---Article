@@ -342,20 +342,28 @@ where $\Phi$ denotes the standard normal CDF. These plug-in quantities are diagn
 
 Using this estimated sequence $\{\hat u_t\}$, we can assess the model performance in several ways. First, we visually examine the correlation of the estimated sequence via an ACF plot. Second, by transforming the values with a standard normal inverse CDF, we compare their distributional shape to that of a standard normal with a normal QQ-plot. To quantify the divergence of this transformed sequence from normality we use the KL divergence \citep{kullback1951information}, $\KL(h,\phi) = \int_{-\infty}^{\infty} h(x)\log \frac{h(x)}{\phi(x)}\mathrm{d}x$, where $h$ denotes the diagnostic sample distribution and $\phi$ is the standard normal density. The package reports nearest-neighbor estimates of this divergence by comparing the transformed forecast-error sample with a standard-normal reference sample, together with a flipped version that reverses the two arguments. Smaller values suggest better calibration. The MAP standardized forecast errors in \eqref{eq:standardized_error} can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-In addition to the calibration-based diagnostics above, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive draws \citep{gneiting2007}. Let $\rho_p(x)=x[p-I(x<0)]$ denote the check loss at level $p$. For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
+In addition to the calibration-based diagnostics above, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive distribution \citep{gneiting2007}. Let $\rho_p(x)=x[p-I(x<0)]$ denote the check loss at level $p$. For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
 \begin{equation}
 \CRPS(y,G)=\mathbb{E}_{Y\sim G}|Y-y|-\frac{1}{2}\mathbb{E}_{Y,Y'\sim G}|Y-Y'|
 =2\int_0^1 \rho_p\!\left(y-G^{-1}(p)\right)\,dp,
 \label{eq:crps_main}
 \end{equation}
-which shows that CRPS integrates check loss across all quantile levels and therefore evaluates the full predictive distribution rather than a single target level \(p_0\). Smaller CRPS values indicate better calibrated and sharper predictive performance. For deterministic forecasts, CRPS reduces to the absolute error, so the sample mean CRPS equals the MAE.
+which shows that CRPS integrates check loss across all quantile levels and therefore evaluates the full predictive distribution rather than a single target level \(p_0\). In \code{exdqlmDiagnostics()}, the posterior predictive draws define empirical quantiles \(\widehat q_t(\tau_k)\), and the reported pointwise score is the finite integrated quantile-score approximation
+\begin{equation}
+\widehat{\CRPS}_t
+=
+2\sum_{k=1}^{K} w_k
+\rho_{\tau_k}\{y_t^{obs}-\widehat q_t(\tau_k)\},
+\label{eq:crps_iqs_main}
+\end{equation}
+where the weights \(w_k\) sum to one \citep{laio2007verification}. The package default uses the grid \(\tau_k=0.01,0.02,\ldots,0.99\) with equal weights, and the reported mean CRPS averages \eqref{eq:crps_iqs_main} over time. Smaller CRPS values indicate better calibrated and sharper predictive performance. For deterministic forecasts, CRPS reduces to the absolute error, so the sample mean CRPS equals the MAE.
 
 For a final diagnostic, we include the \cite{gelfand1998model} posterior predictive loss criterion (PPLC), returned by the package as \code{pplc}, which evaluates the posterior predictive distribution under the target-level check loss $\rho_{p_0}$. That is,
 \begin{align}
 \PPLC = \sum_t \E[\rho_{p_0} (y_t^{obs}-y^{rep}_t) \mid y_{1:T}],
 \label{eq:pplc_main}
 \end{align}
-where the expectation is with respect to posterior predictive replicate draws generated from the observation equation \eqref{EQ:exDLM} under posterior draws of the model parameters. Thus, the CRPS summarizes the full predictive distribution through an integrated check loss, whereas PPLC keeps the target quantile explicit through $\rho_{p_0}$. Smaller PPLC values indicate better performance under this target-quantile loss criterion. Samples from the posterior replicate distributions are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
+where the expectation is with respect to posterior predictive replicate draws generated from the observation equation \eqref{EQ:exDLM} under posterior draws of the model parameters. Thus, CRPS summarizes the full predictive distribution through the integrated quantile-score approximation in \eqref{eq:crps_iqs_main}, whereas PPLC keeps the target quantile explicit through $\rho_{p_0}$. Smaller PPLC values indicate better performance under this target-quantile loss criterion. Samples from the posterior replicate distributions are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
 The function \code{exdqlmDiagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} or \code{exdqlmLDVB()} is passed to \code{exdqlmDiagnostics()}, the resulting object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence and flipped KL divergence, the mean CRPS, \code{pplc}, the ordered pairs of the QQ-plot, and autocorrelations by lag. By default, the function also produces the QQ-plot, ACF plot, and MAP standardized forecast-error plot.  Examples of the utility of \code{exdqlmDiagnostics()} can be found in Section \ref{sec:exs}.
 
@@ -846,14 +854,14 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{24.27} & \textbf{0.059} & 8.603 & 3923.8 \\
- & MCMC & 275.42 & 0.125 & \textbf{7.690} & \textbf{3047.1} \\
+ \tworowcell{DQLM} & LDVB & \textbf{24.70} & \textbf{0.059} & 8.689 & 3909.2 \\
+ & MCMC & 268.39 & 0.101 & \textbf{7.759} & \textbf{3036.2} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{107.20} & \textbf{0.037} & 6.433 & 2349.4 \\
- & MCMC & 331.96 & 0.195 & \textbf{5.154} & \textbf{2242.4} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{107.16} & \textbf{0.037} & 6.473 & 2342.1 \\
+ & MCMC & 322.34 & 0.177 & \textbf{5.220} & \textbf{2247.1} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the KL divergence, the mean CRPS from posterior predictive draws, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.4.0, \pkg{exdqlm} 0.4.0, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; diagnostic calculations are not included in the runtime column. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the KL divergence, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.5.3, \pkg{exdqlm} development version 0.5.0.9000, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; diagnostic calculations are not included in the runtime column. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -914,7 +922,7 @@ R> model.w.reg = model + reg.comp
 
 To allow the components to evolve gradually over time while keeping the fitted paths smooth, all discount factors are set to 0.99. Thus the same discounting level is used for the trend, seasonal block, dynamic regression coefficients, and transfer-function components. In the package interface, these choices are passed through \code{df} for the base state-space model and through \code{tf.df} for the transfer-function states.
 
-The second model, \(M_2\), uses the transfer-function structure from Section \ref{sec:tf}. We use the LDVB transfer-function implementation for a fast approximate fit to the monthly series; the corresponding MCMC implementation is available when posterior simulation is desired. The transfer rate \(\lambda\) is selected by scanning the grid \(0.1,0.2,\ldots,0.9\) and choosing the fitted value with the smallest finite CRPS. The code below records failed fits and non-finite diagnostic values explicitly, which is useful in grid searches where some candidate specifications may be numerically unstable. In this run, all candidate values returned finite diagnostics and CRPS selected \(\lambda = 0.5\).
+The second model, \(M_2\), uses the transfer-function structure from Section \ref{sec:tf}. We use the LDVB transfer-function implementation for a fast approximate fit to the monthly series; the corresponding MCMC implementation is available when posterior simulation is desired. The transfer rate \(\lambda\) is selected by scanning the grid \(0.1,0.2,\ldots,0.9\) and choosing the fitted value with the smallest finite CRPS. The code below records failed fits and non-finite diagnostic values explicitly, which is useful in grid searches where some candidate specifications may be numerically unstable. In this run, all candidate values returned finite diagnostics and CRPS selected \(\lambda = 0.4\).
 \begin{CodeChunk}
 \begin{CodeInput}
 R> possible.lams = seq(0.1, 0.9, 0.1)
@@ -954,7 +962,7 @@ R> if (!any(ok)) stop("No finite CRPS values were produced.")
 R> metrics$lambda[which(ok)[which.min(metrics$CRPS[ok])]]
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 0.5
+[1] 0.4
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -974,10 +982,10 @@ R> M1 = exdqlmLDVB(y = y.fit, p0 = 0.15, model = model.w.reg,
 +                df = c(0.99, 0.99, 0.99), dim.df = c(1, 6, 2),
 +                sig.init = 0.1, gam.init = -0.1,
 +                n.samp = 1000, tol = 0.05, verbose = FALSE)
-R> set.seed(20263806)
+R> set.seed(20263805)
 R> M2 = exdqlmTransferLDVB(y = y.fit, p0 = 0.15, model = model,
 +                        df = c(0.99, 0.99), dim.df = c(1, 6),
-+                        X = X.input, tf.df = c(0.99, 0.99), lam = 0.50,
++                        X = X.input, tf.df = c(0.99, 0.99), lam = 0.40,
 +                        tf.m0 = rep(0, 3),
 +                        tf.C0 = diag(c(0.1, 0.005, 0.005), 3),
 +                        sig.init = 0.1, gam.init = -0.1,
@@ -1086,8 +1094,8 @@ Finally, we use \code{exdqlmDiagnostics()} to compute the KL divergence, CRPS, a
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M1} regression & 0.161 & \textbf{0.350} & 152.0 \\
- \code{M2} transfer function & \textbf{0.144} & 0.353 & \textbf{145.9} \\
+ \code{M1} regression & \textbf{0.161} & \textbf{0.354} & 151.8 \\
+ \code{M2} transfer function & 0.177 & 0.356 & \textbf{146.2} \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Diagnostic comparison between the dynamic regression model (\code{M1}) and the transfer-function model (\code{M2}). Lower values are preferred for all three criteria. Here CRPS assesses the full predictive distribution, PPLC assesses target-quantile posterior predictive loss, and KL summarizes one-step-ahead calibration discrepancy. Because the columns are the comparison metrics, bold entries indicate the smaller value within each column; displayed ties are left unbolded.}
@@ -1101,7 +1109,7 @@ R> checks.out = exdqlmDiagnostics(M1, M2, ref = ref.samp,
 +                              plot = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
-The diagnostics give a mixed but useful comparison. The transfer-function model has the smaller KL divergence and PPLC, whereas the direct regression model has the slightly smaller CRPS. The CRPS values are nearly identical, so we do not interpret the table as selecting a single dominant model. Instead, the example illustrates how the package diagnostics expose different aspects of fit: the transfer-function model is favored by the calibration-oriented and target-quantile loss criteria, while the direct regression is slightly favored by the full-distribution CRPS criterion.
+The diagnostics give a mixed but useful comparison. The direct regression model has the smaller KL divergence and CRPS, whereas the transfer-function model has the smaller PPLC. The CRPS values are nearly identical, so we do not interpret the table as selecting a single dominant model. Instead, the example illustrates how the package diagnostics expose different aspects of fit: the transfer-function model is favored by the target-quantile loss criterion, while the direct regression is slightly favored by the calibration and full-distribution CRPS criteria.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1135,7 +1143,7 @@ R> Sigma.x = 0.5 ^ as.matrix(dist(1:8))
 R> beta.true = c(3, 1.5, 0, 0, 2, 0, 0, 0)
 R> rhs.ctrl = list(tau0 = 0.15, a_zeta = 2, b_zeta = 9,
 +                  zeta2_fixed = 9, shrink_intercept = FALSE)
-R> set.seed(20260718)
+R> set.seed(20260712)
 R> sim.y = function(X.raw, p0) {
 +     drop(X.raw %*% beta.true) + 1.5 * (rnorm(nrow(X.raw)) - qnorm(p0))
 +   }
@@ -1191,21 +1199,21 @@ Figure \ref{fig:ex4static} shows that both methods recover the active coefficien
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{22.50} & 0.267 & 0.128 & 0.714 \\
- & MCMC & 156.91 & \textbf{0.201} & \textbf{0.085} & \textbf{0.515} \\
+ \tworowcell{0.05} & LDVB & \textbf{18.64} & 0.083 & 0.043 & 0.667 \\
+ & MCMC & 84.52 & \textbf{0.058} & \textbf{0.041} & \textbf{0.579} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{13.33} & 0.112 & 0.079 & 0.302 \\
- & MCMC & 149.08 & \textbf{0.082} & \textbf{0.070} & \textbf{0.267} \\
+ \tworowcell{0.25} & LDVB & \textbf{10.50} & \textbf{0.106} & 0.046 & \textbf{0.215} \\
+ & MCMC & 85.60 & 0.133 & \textbf{0.029} & 0.225 \\
  \midrule
- \tworowcell{0.50} & LDVB & \textbf{2.51} & 0.110 & 0.101 & 0.382 \\
- & MCMC & 155.25 & \textbf{0.013} & \textbf{0.074} & \textbf{0.367} \\
+ \tworowcell{0.50} & LDVB & \textbf{7.95} & \textbf{0.106} & 0.084 & 0.359 \\
+ & MCMC & 91.54 & 0.110 & \textbf{0.067} & \textbf{0.322} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference fit is better on the active-signal RMSE, the null-coefficient MAE, and the holdout quantile RMSE at all three quantile levels. The advantage is mild at \(p_0 = 0.05\) and \(p_0 = 0.25\), but it is especially pronounced for the active coefficients at \(p_0 = 0.50\), where the MCMC active-signal RMSE is much smaller. The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 11-fold at \(p_0 = 0.25\), and 62-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner coefficient-recovery and uncertainty illustration. Accordingly, the static \code{rhs\_ns} specification still supports both roles cleanly: LDVB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference fit has the smaller null-coefficient MAE at all three quantile levels and the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is slightly smaller on active-signal RMSE for \(p_0 = 0.25\) and \(p_0 = 0.50\) and on holdout quantile RMSE for \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 5-fold at \(p_0 = 0.05\), 8-fold at \(p_0 = 0.25\), and 12-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner posterior-interval coverage for the plotted coefficients. Accordingly, the static \code{rhs\_ns} specification still supports both roles cleanly: LDVB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}

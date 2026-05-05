@@ -7,7 +7,7 @@ the canonical manuscript workflow under `analysis/manuscript/examples/`.
 
 - Keep a single source of truth for reproducible manuscript examples.
 - Preserve Raquel-reviewed example intent while aligning with the current
-  `exdqlm` 0.4.0 API and article wording.
+  current `exdqlm` API and article wording.
 - Verify that all manuscript examples and the alternative Example 3 sandbox can
   be rerun end-to-end from local source.
 
@@ -31,10 +31,10 @@ by maintaining separate example workflows.
 
 - Article repo:
   `/data/muscat_data/jaguir26/exdqlm---Article`
-- Package repo for the current CRAN-facing branch:
-  `/data/muscat_data/jaguir26/exdqlm__wt__main`
+- Package repo for the current article-facing package branch:
+  `/data/muscat_data/jaguir26/exdqlm__wt__0.5.0-crps-iqs`
 - Package branch:
-  `main`
+  `feature/0.5.0-crps-iqs`
 
 ## Merge Provenance
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARTICLE_ROOT="${ARTICLE_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
-PKG_ROOT="${EX3_MONTHLY_PKG_PATH:-$(cd "$ARTICLE_ROOT/.." && pwd)/exdqlm__wt__main}"
+PKG_ROOT="${EX3_MONTHLY_PKG_PATH:-$(cd "$ARTICLE_ROOT/.." && pwd)/exdqlm__wt__0.5.0-crps-iqs}"
 CONFIG_PATH="$ARTICLE_ROOT/analysis/support/ex3_monthly_nino34_redo/config_reduced6_crps_dense.yml"
 OUTPUT_DIR="$ARTICLE_ROOT/analysis/support/ex3_monthly_nino34_redo/outputs/monthly_reduced6_crps_dense_p015_df099_iter200"
 LOG_DIR="$OUTPUT_DIR/logs"
@@ -22,8 +22,8 @@ fi
 
 pkg_branch="$(git -C "$PKG_ROOT" rev-parse --abbrev-ref HEAD)"
 pkg_commit="$(git -C "$PKG_ROOT" rev-parse --short HEAD)"
-if [[ "$pkg_branch" != "main" ]]; then
-  echo "Expected package branch main, found $pkg_branch at $PKG_ROOT" >&2
+if [[ "$pkg_branch" != "feature/0.5.0-crps-iqs" ]]; then
+  echo "Expected package branch feature/0.5.0-crps-iqs, found $pkg_branch at $PKG_ROOT" >&2
   exit 1
 fi
 

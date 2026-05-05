@@ -1783,19 +1783,30 @@ of the divergence between this empirical standardized-error sample and a
 reference standard-normal sample supplied through \code{ref} or generated
 internally; the flipped version reverses the two arguments.
 
-For predictive draws $y_t^{(1)},\ldots,y_t^{(M)}$, the empirical CRPS estimator
-is
+For predictive draws $y_t^{(1)},\ldots,y_t^{(M)}$, let
+\(\widehat q_t(\tau_k)\) denote the empirical posterior predictive quantile at
+level \(\tau_k\). The diagnostic CRPS calculation uses the identity between
+CRPS and integrated check loss,
+\[
+\CRPS(y_t^{\mathrm{obs}},G_t)
+=
+2\int_0^1
+\rho_\tau\{y_t^{\mathrm{obs}}-G_t^{-1}(\tau)\}\,d\tau,
+\]
+and reports the finite integrated quantile-score approximation
 \begin{equation}
 \widehat{\CRPS}_t
 =
-\frac{1}{M}\sum_{m=1}^M |y_t^{(m)}-y_t^{\mathrm{obs}}|
--
-\frac{1}{2M^2}\sum_{m=1}^M\sum_{\ell=1}^M
-|y_t^{(m)}-y_t^{(\ell)}|.
+2\sum_{k=1}^{K}
+w_k
+\rho_{\tau_k}\{y_t^{\mathrm{obs}}-\widehat q_t(\tau_k)\}.
 \label{eq:crps_estimator}
 \end{equation}
 The reported CRPS is the average of \eqref{eq:crps_estimator} over the
-diagnostic time points \citep{gneiting2007}. For target quantile $p_0$, the
+diagnostic time points \citep{gneiting2007,laio2007verification}. By default,
+\code{exdqlmDiagnostics()} uses
+\(\tau_k=0.01,0.02,\ldots,0.99\) with equal weights \(w_k=1/K\). User-supplied
+weights are normalized to sum to one. For target quantile $p_0$, the
 posterior predictive loss criterion returned as \code{pplc} is
 \begin{equation}
 \widehat{\PPLC}
