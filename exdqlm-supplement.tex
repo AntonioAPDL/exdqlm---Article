@@ -59,10 +59,10 @@
 \Abstract{This supplement derives the posterior targets, full conditional
 distributions, variational updates, Laplace--delta approximations, evidence
 lower bound (ELBO) terms, and numerical blocks used by the algorithms in
-\pkg{exdqlm}. It covers dynamic asymmetric Laplace/dynamic quantile linear model
-(AL/DQLM) and extended asymmetric Laplace/extended dynamic quantile linear model
-(exAL/exDQLM) state-space models, transfer-function state augmentation, static
-AL/exAL regression, ridge and Nishimura--Suchard regularized horseshoe
+\pkg{exdqlm}. It covers state-space DQLMs under the asymmetric Laplace (AL)
+likelihood and exDQLMs under the extended asymmetric Laplace (exAL) likelihood,
+transfer-function state augmentation, static AL and exAL regression, ridge and
+Nishimura--Suchard regularized horseshoe
 shrinkage priors, forecasting, diagnostics, and posterior-predictive synthesis.
 The notation follows the main article, and each algorithmic block is linked to
 the corresponding exported package function.}
@@ -104,11 +104,10 @@ Section~\ref{sec:gaussian_state_update},
 nonconjugate variational approximations \citep{wang2013nonconjugatevb}, and
 the \code{rhs\_ns} prior \citep{nishimura2023shrunken}.
 
-Table~\ref{tab:supp_article_crosswalk} gives the main navigation map. The
-model sections derive the fitting targets and updates,
-Section~\ref{sec:numerical_blocks} collects reusable numerical identities, and
-Table~\ref{tab:supp_algorithm_map} links the exported functions to the
-corresponding computational blocks.
+Table~\ref{tab:supp_roadmap} gives the main navigation map, linking each
+article topic to the corresponding supplement sections and exported package
+routines. The model sections derive the fitting targets and updates, and
+Section~\ref{sec:numerical_blocks} collects reusable numerical identities.
 
 The notation follows the main article. In particular, $\mat{F}_t$ denotes the
 observation vector, $\mat{G}_t$ the state evolution matrix, $\mat{W}_t$ the
@@ -120,29 +119,69 @@ when each object is introduced.
 \centering
 \begingroup
 \TableStyle
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}
->{\raggedright\arraybackslash}p{0.20\textwidth}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+>{\raggedright\arraybackslash}p{0.18\textwidth}
+>{\raggedright\arraybackslash}p{0.15\textwidth}
 >{\raggedright\arraybackslash}X@{}}
 \toprule
-Main article topic & Main article location & Supplement location \\
+Article topic or workflow & Main article location & Supplement location &
+Exported functions or computational block \\
 \midrule
-exAL mixture and exDQLM hierarchy & Equations (1)--(6) & S2--S4 \\
-AL/DQLM special case & Section 2.5 & S3 \\
-Discount-factor evolution & Section 2.3 & S3.1, S4.1 \\
-Gaussian state updates & Section 2.2 & S2.2 \\
-Transfer-function exDQLM & Equations (7)--(10) & S5 \\
-Static AL/exAL regression & Section 2.5, Example 4 & S6--S7 \\
-Forecasting & Equation (16) & S8.1 \\
-Diagnostics & Equations (11)--(15) & S8.2 \\
-Posterior-predictive synthesis & Example 1 & S8.3 \\
-Numerical blocks & Section 2.2 & S9 \\
+exAL distribution and gamma bounds &
+Section 2.1 &
+S2 &
+\code{dexal()}, \code{pexal()}, \code{qexal()}, \code{rexal()},
+\code{get\_gamma\_bounds()}. \\
+Dynamic DQLM and exDQLM fitting &
+Sections 2.1--2.2, Examples 1--2 &
+S3--S4 &
+\code{exdqlmMCMC()}, \code{exdqlmLDVB()}; dynamic fitting algorithms. \\
+Gaussian state updates &
+Section 2.2 &
+S2.2 &
+Kalman filtering, FFBS backward sampling, and RTS smoothing. \\
+Discount-factor evolution &
+Section 2.3 &
+S2.2, S3.1, S4.1 &
+State-evolution covariance construction used by the dynamic routines. \\
+Transfer-function exDQLM &
+Section 2.4, Example 3 &
+S5 &
+\code{exdqlmTransferMCMC()}, \code{exdqlmTransferLDVB()}. \\
+Static AL and exAL regression &
+Section 2.5, Example 4 &
+S6--S7 &
+\code{exalStaticMCMC()}, \code{exalStaticLDVB()}. \\
+Forecasting &
+Section 3.2 &
+S8.1 &
+\code{exdqlmForecast()}; forecast recursion and predictive draws. \\
+Diagnostics &
+Section 3.1, Examples 2--3 &
+S8.2 &
+\code{exdqlmDiagnostics()}, \code{exalStaticDiagnostics()}; calibration and
+predictive-score summaries. \\
+Posterior-predictive synthesis &
+Example 1 &
+S8.3 &
+\code{quantileSynthesis()}; Algorithm~\ref{alg:predictive-synthesis}. \\
+Reusable numerical blocks &
+Section 2.2 &
+S9 &
+GIG moments, entropy terms, slice sampling, and Laplace--delta approximation. \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Crosswalk between the main article, this supplement, and the
-corresponding derivation sections.}
-\label{tab:supp_article_crosswalk}
+\caption{Roadmap connecting the main article, supplement derivations, and
+exported \pkg{exdqlm} routines or computational blocks.}
+\label{tab:supp_roadmap}
 \end{table}
+
+Some routines temporarily hold or schedule selected blocks during early
+iterations for numerical stability. These controls affect update timing only;
+they do not change the posterior target, full conditional distributions, or
+coordinate optima documented in the sections listed in
+Table~\ref{tab:supp_roadmap}.
 
 \section{Notation and distributional conventions}
 \label{sec:supp_distributional_conventions}
@@ -1993,43 +2032,6 @@ r(\hat{\vect{\eta}})
 \end{equation}
 This is used for smooth functions of $(\sigma,\gamma)$ in dynamic and static
 exAL models.
-
-\section{Package-to-algorithm map}
-\label{sec:package_algorithm_map}
-
-Sections S3--S9 define the targets used by the exported fitting and
-post-processing functions. Some routines temporarily hold or schedule selected
-blocks during early iterations for numerical stability. These controls affect
-update timing only; they do not change the posterior target, full conditional
-distributions, or coordinate optima listed in this supplement.
-
-\begin{table}[!htb]
-\centering
-\begingroup
-\TableStyle
-\begin{tabularx}{\textwidth}{@{}p{0.30\textwidth}p{0.14\textwidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-Function & Section & Derivation or computational block \\
-\midrule
-\code{exdqlmMCMC()} & S3--S4 & Dynamic DQLM/exDQLM MCMC; Algorithms~\ref{alg:dyn-dqlm-mcmc} and~\ref{alg:dyn-exdqlm-mcmc}. \\
-\code{exdqlmLDVB()} & S3--S4 & Dynamic DQLM/exDQLM LDVB; Algorithms~\ref{alg:dyn-dqlm-vb} and~\ref{alg:dyn-exdqlm-ldvb}. \\
-\code{exdqlmTransferMCMC()} & S5 & Transfer-function state augmentation; Algorithm~\ref{alg:transfer-fitting} with Algorithm~\ref{alg:dyn-exdqlm-mcmc}. \\
-\code{exdqlmTransferLDVB()} & S5 & Transfer-function state augmentation; Algorithm~\ref{alg:transfer-fitting} with Algorithm~\ref{alg:dyn-exdqlm-ldvb}. \\
-\code{exalStaticMCMC()} & S6--S7 & Static AL/exAL MCMC; Algorithm~\ref{alg:static-mcmc}. \\
-\code{exalStaticLDVB()} & S6--S7 & Static AL/exAL LDVB; Algorithm~\ref{alg:static-ldvb}. \\
-\code{exdqlmForecast()} & S8.1 & Forecast recursion and predictive draws. \\
-\code{exdqlmDiagnostics()} & S8.2 & MAP one-step-ahead diagnostic sequence, $\CRPS$, and \code{pplc}. \\
-\code{exalStaticDiagnostics()} & S8.2 & Static check-loss and reference-quantile diagnostics. \\
-\code{quantileSynthesis()} & S8.3 & Posterior-predictive synthesis; Algorithm~\ref{alg:predictive-synthesis}. \\
-\begin{tabular}[t]{@{}l@{}}\code{dexal()}, \code{pexal()}\\ \code{qexal()}, \code{rexal()}\end{tabular} & S2 & exAL distribution evaluation and simulation. \\
-\code{get\_gamma\_bounds()} & S2 & Roots $L,U$ for a fixed $p_0$. \\
-\bottomrule
-\end{tabularx}
-\endgroup
-\caption{Mapping between exported \pkg{exdqlm} functions and the derivation or
-computational details documented in this supplement.}
-\label{tab:supp_algorithm_map}
-\end{table}
 
 \clearpage
 \bibliography{references}
