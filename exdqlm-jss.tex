@@ -1046,24 +1046,58 @@ R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = 18, m1 = MTF,
 \end{CodeInput}
 \end{CodeChunk}
 
-Table \ref{tab:ex3} reports scores computed only over the 18 held-out months. The mean check loss targets the \(p_0=0.15\) quantile directly, CRPS summarizes the posterior predictive forecast draws, and the interval score, coverage, and width summarize the 95\% forecast intervals.
+For the numerical model comparison in Table \ref{tab:ex3}, we use
+\code{exdqlmDiagnostics()} so that the reported quantities are the package
+diagnostics defined in Section \ref{sec:diags}. These diagnostics are computed
+from the final-training fitted objects. The replication materials also retain
+support-only holdout forecast scores for the 18-month window, but those scores
+are produced by article helper code rather than by an exported package
+diagnostic function.
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> set.seed(20265401)
+R> ref.samp = rnorm(length(y.train))
+R> diag.ex3 = exdqlmDiagnostics(M0, MTF, plot = FALSE, ref = ref.samp)
+R> tab.ex3 = data.frame(
++      model = c("M0", "MTF"),
++      KL = c(diag.ex3$m1.KL, diag.ex3$m2.KL),
++      CRPS = c(diag.ex3$m1.CRPS, diag.ex3$m2.CRPS),
++      PPLC = c(diag.ex3$m1.pplc, diag.ex3$m2.pplc))
+\end{CodeInput}
+\end{CodeChunk}
 
 \begin{table}[t!]
 \centering
 \TableStyle
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{tabular}{@{}lrrr@{}}
  \toprule
- Model & \shortstack{check\\loss} & CRPS & \shortstack{interval\\score} & coverage & width \\
+ Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no transfer & \textbf{0.119} & \textbf{0.492} & 8.648 & 0.833 & 1.851 \\
- \code{MTF} transfer function & 0.149 & 0.522 & \textbf{6.985} & \textbf{0.889} & 2.317 \\
+ \code{M0} no transfer & 0.212 & 0.481 & \textbf{101.057} \\
+ \code{MTF} transfer function & \textbf{0.096} & \textbf{0.370} & 121.632 \\
  \bottomrule
 \end{tabular}
-\caption{Example 3: Big Tree water flow. Held-out forecast comparison between the no-transfer baseline \code{M0} and the transfer-function model \code{MTF}. Scores are computed on July 2021 through December 2022 only. Lower values are preferred for check loss, CRPS, and interval score. Coverage is compared with the nominal 0.95 level, and width reports the mean 95\% interval width. Bold entries mark the preferred value for the comparison metrics; width is descriptive and is not bolded.}
+\caption{Example 3: Big Tree water flow. Package diagnostics from
+\code{exdqlmDiagnostics()} for the no-transfer baseline \code{M0} and the
+transfer-function model \code{MTF}, computed on the final-training fitted
+objects. KL denotes the nearest-neighbor Kullback--Leibler divergence diagnostic,
+CRPS denotes the continuous ranked probability score, and PPLC denotes the
+posterior predictive loss criterion. Lower values are preferred; bold entries
+mark the smaller value for each diagnostic.}
 \label{tab:ex3}
 \end{table}
 
-The held-out scores are mixed. The no-transfer baseline has the smaller target check loss and CRPS, while the transfer-function model has the smaller interval score and coverage closer to the nominal 95\% level, with wider intervals. We therefore do not interpret this example as showing uniform forecast superiority for the transfer-function model. Rather, it shows how \pkg{exdqlm} can add lagged external-input structure to a dynamic quantile model, inspect the resulting transfer states, and evaluate the conditional forecasts on a held-out window. The replication materials also retain a contemporaneous dynamic-regression sensitivity fit with the same NOI and AMO covariates; that fit is used as a guardrail for interpretation rather than as the main manuscript comparison.
+The package diagnostics are mixed. The transfer-function model has smaller KL
+and CRPS values, while the no-transfer baseline has the smaller PPLC, which
+keeps the target-level check loss explicit. We therefore do not interpret this
+example as showing uniform superiority for the transfer-function model. Rather,
+it shows how \pkg{exdqlm} can add lagged external-input structure to a dynamic
+quantile model, inspect the resulting transfer states, use the exported
+diagnostic workflow, and forecast conditionally on future covariate values. The
+replication materials also retain a contemporaneous dynamic-regression
+sensitivity fit with the same NOI and AMO covariates; that fit is used as a
+guardrail for interpretation rather than as the main manuscript comparison.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

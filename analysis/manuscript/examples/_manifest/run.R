@@ -11,7 +11,7 @@ expected_targets <- data.frame(
     "fig_ex3quantcomps",
     "fig_ex3zetapsi",
     "fig_ex3forecast",
-    "tab_ex3_forecast_metrics",
+    "tab_ex3_diagnostics",
     "fig_ex4static",
     "tab_ex4static_summary"
   ),
@@ -60,6 +60,7 @@ if (targeted_run) {
       "fig_ex3quantcomps",
       "fig_ex3zetapsi",
       "fig_ex3forecast",
+      "tab_ex3_diagnostics",
       "tab_ex3_validation_selection",
       "tab_ex3_forecast_metrics",
       "tab_ex3_sensitivity_forecast_metrics"
@@ -71,8 +72,8 @@ if (targeted_run) {
     ex3zetapsi_ldvb = c("fig_ex3zetapsi"),
     ex3forecast = c("fig_ex3forecast"),
     ex3forecast_ldvb = c("fig_ex3forecast"),
-    ex3tables = c("tab_ex3_validation_selection", "tab_ex3_forecast_metrics", "tab_ex3_sensitivity_forecast_metrics"),
-    ex3tables_ldvb = c("tab_ex3_validation_selection", "tab_ex3_forecast_metrics", "tab_ex3_sensitivity_forecast_metrics"),
+    ex3tables = c("tab_ex3_diagnostics", "tab_ex3_validation_selection", "tab_ex3_forecast_metrics", "tab_ex3_sensitivity_forecast_metrics"),
+    ex3tables_ldvb = c("tab_ex3_diagnostics", "tab_ex3_validation_selection", "tab_ex3_forecast_metrics", "tab_ex3_sensitivity_forecast_metrics"),
     ex4screen = c("tab_ex4_seed_screen_p050_summary", "tab_ex4_seed_screen_p050_selection", "log_ex4_seed_screen_p050_summary"),
     ex4 = c("fig_ex4static", "tab_ex4static_summary"),
     ex4figure = c("fig_ex4static"),

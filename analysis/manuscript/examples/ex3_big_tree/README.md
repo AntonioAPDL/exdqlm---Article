@@ -33,11 +33,14 @@ Rscript analysis/run_all.R --stage manuscript --tests-only
 
 The article currently uses `ex3data.png`, `ex3quantcomps.png`,
 `ex3zetapsi.png`, `ex3forecast.png`, and the values in
-`ex3_forecast_metrics.csv`. The transfer-function validation screen is stored in
-`ex3_validation_selection.csv` and selects the transfer-function rate and
-instantaneous-coefficient discount factor by forecast check loss on the internal
-validation window. The final manuscript metrics are computed only on the
-18-month holdout forecast window. The validation table records fit/forecast
-failures and package convergence flags separately: `status == "ok"` means the
-fit completed and produced finite forecast metrics, while `converged` reports
-the LDVB joint stopping rule from the package.
+`ex3_diagnostics_summary.csv`, which is produced by the exported
+`exdqlmDiagnostics()` workflow. The transfer-function validation screen is
+stored in `ex3_validation_selection.csv` and selects the transfer-function rate
+and instantaneous-coefficient discount factor by forecast check loss on the
+internal validation window. The support tables `ex3_forecast_metrics.csv` and
+`ex3_sensitivity_forecast_metrics.csv` retain 18-month holdout forecast scores
+computed by the replication helpers; they are not package diagnostics and are
+not the manuscript table. The validation table records fit/forecast failures
+and package convergence flags separately: `status == "ok"` means the fit
+completed and produced finite forecast metrics, while `converged` reports the
+LDVB joint stopping rule from the package.

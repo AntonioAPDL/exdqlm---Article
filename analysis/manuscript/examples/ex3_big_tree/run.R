@@ -728,6 +728,21 @@ if (!need_ex3) {
     validation_table <- ex3_models$validation_table
     forecast_metrics <- ex3_models$forecast_metrics
     sensitivity_metrics <- ex3_models$sensitivity_metrics
+    diag_ref_samp <- with_local_seed(seed_value + 4900L, stats::rnorm(length(y_train_ts)))
+    diagnostics_out <- exdqlm::exdqlmDiagnostics(
+      M0, MTF,
+      plot = FALSE,
+      ref = diag_ref_samp
+    )
+    diagnostics_summary <- data.frame(
+      model = c("M0_no_transfer", "MTF_transfer_function"),
+      label = c("M0 no transfer", "MTF transfer function"),
+      KL = c(diagnostics_out$m1.KL, diagnostics_out$m2.KL),
+      KL_flipped = c(diagnostics_out$m1.KL.flip, diagnostics_out$m2.KL.flip),
+      CRPS = c(diagnostics_out$m1.CRPS, diagnostics_out$m2.CRPS),
+      PPLC = c(diagnostics_out$m1.pplc, diagnostics_out$m2.pplc),
+      stringsAsFactors = FALSE
+    )
 
     capture_output_file("ex3_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
@@ -757,6 +772,8 @@ if (!need_ex3) {
         iter = c(M0$iter %||% NA_integer_, MTF$iter %||% NA_integer_, if (fit_ok(MREG)) MREG$iter %||% NA_integer_ else NA_integer_),
         converged = c(isTRUE(M0$converged), isTRUE(MTF$converged), if (fit_ok(MREG)) isTRUE(MREG$converged) else NA)
       ))
+      cat("\nFinal-training package diagnostics from exdqlmDiagnostics():\n")
+      print(diagnostics_summary)
       cat("\nFinal holdout forecast metrics:\n")
       print(forecast_metrics)
       cat("\nSensitivity forecast metrics:\n")
@@ -768,7 +785,7 @@ if (!need_ex3) {
       relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary.txt",
       manuscript_target = "Example 3 textual outputs",
       status = "reproduced",
-      notes = "Observed BTflow plus NOI/AMO Example 3 summary with validation-selected transfer settings and held-out forecast metrics."
+      notes = "Observed BTflow plus NOI/AMO Example 3 summary with validation-selected transfer settings, package diagnostics, and held-out forecast metrics."
     )
 
     model_dataset <- data.frame(
@@ -821,12 +838,20 @@ if (!need_ex3) {
       )
     )
     save_table_csv(
+      diagnostics_summary,
+      filename = "ex3_diagnostics_summary.csv",
+      artifact_id = "tab_ex3_diagnostics",
+      manuscript_target = "tab:ex3",
+      status = "reproduced",
+      notes = "Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models."
+    )
+    save_table_csv(
       forecast_metrics,
       filename = "ex3_forecast_metrics.csv",
       artifact_id = "tab_ex3_forecast_metrics",
-      manuscript_target = "tab:ex3",
+      manuscript_target = "support: Example 3 holdout forecast metrics",
       status = "reproduced",
-      notes = "Example 3 final 18-month holdout forecast metrics for the no-transfer and transfer-function models."
+      notes = "Support-side Example 3 final 18-month holdout forecast metrics computed by article replication helpers, not exdqlmDiagnostics."
     )
     save_table_csv(
       sensitivity_metrics,
