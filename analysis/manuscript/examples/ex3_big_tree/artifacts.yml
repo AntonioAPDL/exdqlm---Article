@@ -6,8 +6,9 @@ article_figures:
   - ex3forecast.png
 support_figures:
 tables:
-  - ex3_diagnostics_summary.csv
-  - ex3_lambda_scan.csv
+  - ex3_forecast_metrics.csv
+  - ex3_sensitivity_forecast_metrics.csv
+  - ex3_validation_selection.csv
   - ex3_model_dataset.csv
   - ex3_covariate_scaling.csv
 logs:
@@ -19,4 +20,4 @@ article_targets:
   fig:ex3quant: ex3quantcomps.png
   fig:ex3tftheta: ex3zetapsi.png
   fig:ex3forecast: ex3forecast.png
-  tab:ex3: ex3_diagnostics_summary.csv
+  tab:ex3: ex3_forecast_metrics.csv

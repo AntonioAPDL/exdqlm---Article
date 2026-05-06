@@ -26,7 +26,7 @@ These are the figures and tables cited directly in the manuscript.
 | `fig:ex3quant` | `analysis/manuscript/outputs/figures/ex3quantcomps.png` | `Figures/ex3quantcomps.png` |
 | `fig:ex3tftheta` | `analysis/manuscript/outputs/figures/ex3zetapsi.png` | `Figures/ex3zetapsi.png` |
 | `fig:ex3forecast` | `analysis/manuscript/outputs/figures/ex3forecast.png` | `Figures/ex3forecast.png` |
-| `tab:ex3` | `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` | tracked table only |
+| `tab:ex3` | `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` | tracked table only |
 | `fig:ex4static` | `analysis/manuscript/outputs/figures/ex4static.png` | `Figures/ex4static.png` |
 | `tab:ex4static` | `analysis/manuscript/outputs/tables/ex4static_summary.csv` | tracked table only |
 
@@ -109,10 +109,11 @@ Publication-facing:
 - [ex3quantcomps.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex3quantcomps.png)
 - [ex3zetapsi.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex3zetapsi.png)
 - [ex3forecast.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex3forecast.png)
-- [ex3_diagnostics_summary.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv)
+- [ex3_forecast_metrics.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv)
 
 Support-only:
-- [ex3_lambda_scan.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_lambda_scan.csv)
+- [ex3_validation_selection.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_validation_selection.csv)
+- [ex3_sensitivity_forecast_metrics.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv)
 - [ex3_model_dataset.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_model_dataset.csv)
 - [ex3_covariate_scaling.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv)
 

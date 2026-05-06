@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-05-04 20:07:46
+Generated: 2026-05-06 00:02:07
 Profile: standard
 Seed: 20260501
 
@@ -30,15 +30,16 @@ Seed: 20260501
 - [reproduced] `tab_ex2_diagnostics` -> `analysis/manuscript/outputs/tables/ex2_diagnostics_summary.csv` (Example 2 diagnostic narrative). Primary Example 2 diagnostics summary computed from the LDVB fits.
 - [reproduced] `tab_ex2_df_scan_ldvb` -> `analysis/manuscript/outputs/tables/ex2_df_scan_kl_ldvb.csv` (new: Example 2 discount-factor CRPS/KL selection (LDVB)). Best pair by CRPS in this run: (0.90, 0.85). Best pair by KL: (0.9, 0.85).
 - [reproduced] `tab_ex2_diagnostics_ldvb` -> `analysis/manuscript/outputs/tables/ex2_diagnostics_summary_ldvb.csv` (new: Example 2 diagnostic narrative (LDVB)). LDVB counterpart computed with exdqlmDiagnostics.
-- [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log observed monthly package BTflow. Bottom: standardized NOI and AMO over 1987-01 to 2022-12.
-- [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary including CRPS lambda scan and transfer persistence.
-- [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (support: Example 3 aligned model dataset). Aligned package BTflow and standardized climate-index inputs used by the canonical Example 3 fits.
-- [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (support: Example 3 covariate standardization). Centers and scales used to standardize the selected climate indices.
-- [reproduced] `tab_ex3_lambda_scan` -> `analysis/manuscript/outputs/tables/ex3_lambda_scan.csv` (Example 3 lambda selection output). Example 3 transfer-function lambda scan; best finite CRPS lambda=0.400.
-- [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Example 3 quantile, seasonal, and combined NOI/AMO climate-contribution comparison.
-- [reproduced] `fig_ex3zetapsi` -> `analysis/manuscript/outputs/figures/ex3zetapsi.png` (fig:ex3tftheta). Transfer-function zeta state and NOI/AMO psi states for the canonical Example 3 fit.
-- [reproduced] `fig_ex3forecast` -> `analysis/manuscript/outputs/figures/ex3forecast.png` (fig:ex3forecast). Example 3 18-step forecast over the final observed overlap window ending 2022-12.
-- [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (tab:ex3). Example 3 diagnostics table generated from the canonical NOI/AMO manuscript workflow.
+- [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log observed monthly package BTflow. Bottom: standardized NOI and AMO over 1987-01 to 2022-12; vertical line marks the 18-month forecast holdout.
+- [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary with validation-selected transfer settings and held-out forecast metrics.
+- [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (Example 3 modeling dataset). Aligned Big Tree flow and climate-index data used by Example 3, with training/validation/holdout phase labels.
+- [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (Example 3 covariate scaling). Training-window means and standard deviations used to standardize Example 3 climate indices.
+- [reproduced] `tab_ex3_validation_selection` -> `analysis/manuscript/outputs/tables/ex3_validation_selection.csv` (Example 3 transfer validation output). Example 3 transfer-function validation grid; selected lambda=0.800 and transfer psi discount=0.990 by held-out validation check loss.
+- [reproduced] `tab_ex3_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` (tab:ex3). Example 3 final 18-month holdout forecast metrics for the no-transfer and transfer-function models.
+- [reproduced] `tab_ex3_sensitivity_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv` (Example 3 sensitivity forecast metrics). Example 3 final 18-month holdout forecast metrics including the internal direct-regression sensitivity model.
+- [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Example 3 quantile, seasonal, and transfer-contribution comparison for M0 and MTF.
+- [reproduced] `fig_ex3zetapsi` -> `analysis/manuscript/outputs/figures/ex3zetapsi.png` (fig:ex3tftheta). Transfer-function zeta state and NOI/AMO psi states for the final Example 3 fit.
+- [reproduced] `fig_ex3forecast` -> `analysis/manuscript/outputs/figures/ex3forecast.png` (fig:ex3forecast). Example 3 18-step holdout forecast over 2021-07 to 2022-12.
 - [reproduced] `tab_ex4_seed_screen_p050_summary` -> `analysis/manuscript/outputs/tables/ex4_seed_screen_p050_summary.csv` (support: Example 4 seed screen metrics). Per-seed, per-quantile comparison of the Example 4 static fits. Seed selection targets p0 = 0.50 and requires full MCMC 95% slope-interval coverage.
 - [reproduced] `tab_ex4_seed_screen_p050_selection` -> `analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv` (support: Example 4 seed screen selection). Seed-level selection summary for the Example 4 screen. The selected seed is the first full-coverage p0 = 0.50 candidate after sorting by MCMC active RMSE, holdout RMSE, runtime, and seed.
 - [reproduced] `log_ex4_seed_screen_p050_summary` -> `analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt` (support: Example 4 seed screen summary). Selection criteria and chosen Example 4 dataset seed based on the p0 = 0.50 MCMC coverage screen.
@@ -59,8 +60,8 @@ Seed: 20260501
 - ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=200).
 - ex2: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
 - ex2_ldvb: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
-- ex3: Example 3 selected lambda=0.400 by finite CRPS over the documented grid.
-- ex3: Example 3 uses observed package BTflow and standardized NOI and AMO from climateIndices over 1987-01 to 2022-12.
+- ex3: Example 3 selected lambda=0.800 and transfer psi discount=0.990 using validation-window forecast check loss.
+- ex3: Example 3 final forecast metrics are computed only on the 18-month holdout window from 2021-07 to 2022-12.
 - ex4: Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0.
 - ex4: The static sparse benchmark uses the Nishimura-Suchard regularized horseshoe (rhs_ns) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept.
 - ex4: The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget.
