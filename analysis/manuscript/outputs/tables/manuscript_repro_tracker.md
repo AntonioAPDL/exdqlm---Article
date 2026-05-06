@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-05-06 02:22:44
+Generated: 2026-05-06 13:35:29
 Profile: standard
 Seed: 20260501
 
@@ -30,24 +30,24 @@ Seed: 20260501
 - [reproduced] `tab_ex2_diagnostics` -> `analysis/manuscript/outputs/tables/ex2_diagnostics_summary.csv` (Example 2 diagnostic narrative). Primary Example 2 diagnostics summary computed from the LDVB fits.
 - [reproduced] `tab_ex2_df_scan_ldvb` -> `analysis/manuscript/outputs/tables/ex2_df_scan_kl_ldvb.csv` (new: Example 2 discount-factor CRPS/KL selection (LDVB)). Best pair by CRPS in this run: (0.90, 0.85). Best pair by KL: (0.9, 0.85).
 - [reproduced] `tab_ex2_diagnostics_ldvb` -> `analysis/manuscript/outputs/tables/ex2_diagnostics_summary_ldvb.csv` (new: Example 2 diagnostic narrative (LDVB)). LDVB counterpart computed with exdqlmDiagnostics.
-- [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log observed monthly package BTflow. Bottom: standardized NOI and AMO over 1987-01 to 2022-12; vertical line marks the 18-month forecast holdout.
-- [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary with training-selected transfer settings, package diagnostics, and held-out forecast metrics.
-- [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (Example 3 modeling dataset). Aligned Big Tree flow and climate-index data used by Example 3, with training and forecast-holdout phase labels.
-- [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (Example 3 covariate scaling). Training-window means and standard deviations used to standardize Example 3 climate indices.
-- [reproduced] `tab_ex3_lambda_selection` -> `analysis/manuscript/outputs/tables/ex3_lambda_selection.csv` (Example 3 transfer training-selection output). Example 3 transfer-function training diagnostic grid; selected lambda=0.200 and transfer psi discount=1.000 by training PPLC.
-- [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (support: Example 3 final-training package diagnostics). Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models.
 - [reproduced] `tab_ex3_forecast_comparison` -> `analysis/manuscript/outputs/tables/ex3_forecast_comparison.csv` (tab:ex3). Example 3 manuscript table with 18-month holdout target-quantile check loss, empirical coverage, and exceedance counts.
-- [reproduced] `tab_ex3_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` (support: Example 3 holdout forecast metrics). Support-side Example 3 final 18-month holdout forecast metrics computed by article replication helpers, not exdqlmDiagnostics.
-- [reproduced] `tab_ex3_sensitivity_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv` (Example 3 sensitivity forecast metrics). Example 3 final 18-month holdout forecast metrics including the internal direct-regression sensitivity model.
-- [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Example 3 quantile, seasonal, and transfer-contribution comparison for M0 and MTF.
-- [reproduced] `fig_ex3zetapsi` -> `analysis/manuscript/outputs/figures/ex3zetapsi.png` (fig:ex3tftheta). Transfer-function zeta state and NOI/AMO psi states for the final Example 3 fit.
-- [reproduced] `fig_ex3forecast` -> `analysis/manuscript/outputs/figures/ex3forecast.png` (fig:ex3forecast). Example 3 18-step holdout forecast over 2021-07 to 2022-12.
 - [reproduced] `tab_ex4_seed_screen_p050_summary` -> `analysis/manuscript/outputs/tables/ex4_seed_screen_p050_summary.csv` (support: Example 4 seed screen metrics). Per-seed, per-quantile comparison of the Example 4 static fits. Seed selection targets p0 = 0.50 and requires full MCMC 95% slope-interval coverage.
 - [reproduced] `tab_ex4_seed_screen_p050_selection` -> `analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv` (support: Example 4 seed screen selection). Seed-level selection summary for the Example 4 screen. The selected seed is the first full-coverage p0 = 0.50 candidate after sorting by MCMC active RMSE, holdout RMSE, runtime, and seed.
 - [reproduced] `log_ex4_seed_screen_p050_summary` -> `analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt` (support: Example 4 seed screen summary). Selection criteria and chosen Example 4 dataset seed based on the p0 = 0.50 MCMC coverage screen.
 - [reproduced] `log_ex4_run_summary` -> `analysis/manuscript/outputs/logs/ex4_run_summary.txt` (Example 4 textual outputs). Sparse Nishimura-Suchard RHS static simulation settings and recovery metrics for Example 4.
 - [reproduced] `tab_ex4static_summary` -> `analysis/manuscript/outputs/tables/ex4static_summary.csv` (new: Example 4 static simulation summary). Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior.
 - [reproduced] `fig_ex4static` -> `analysis/manuscript/outputs/figures/ex4static.png` (fig:ex4static). Sparse Nishimura-Suchard RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50.
+- [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log observed monthly package BTflow. Bottom: standardized NOI and AMO over 1987-01 to 2022-12; vertical line marks the 18-month forecast holdout.
+- [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary with training-selected transfer settings, package diagnostics, and held-out forecast metrics.
+- [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (Example 3 modeling dataset). Aligned Big Tree flow and climate-index data used by Example 3, with training and forecast-holdout phase labels.
+- [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (Example 3 covariate scaling). Training-window means and standard deviations used to standardize Example 3 climate indices.
+- [reproduced] `tab_ex3_lambda_selection` -> `analysis/manuscript/outputs/tables/ex3_lambda_selection.csv` (Example 3 transfer training-selection output). Example 3 transfer-function training diagnostic grid; selected lambda=0.900 and transfer psi discount=0.990 by training PPLC.
+- [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (tab:ex3). Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models.
+- [reproduced] `tab_ex3_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` (support: Example 3 holdout forecast metrics). Support-side Example 3 final 18-month holdout forecast metrics computed by article replication helpers, not exdqlmDiagnostics.
+- [reproduced] `tab_ex3_sensitivity_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv` (Example 3 sensitivity forecast metrics). Example 3 final 18-month holdout forecast metrics including the internal direct-regression sensitivity model.
+- [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Example 3 quantile, seasonal, and transfer-contribution comparison for M0 and MTF.
+- [reproduced] `fig_ex3zetapsi` -> `analysis/manuscript/outputs/figures/ex3zetapsi.png` (fig:ex3tftheta). Transfer-function zeta state and NOI/AMO psi states for the final Example 3 fit.
+- [reproduced] `fig_ex3forecast` -> `analysis/manuscript/outputs/figures/ex3forecast.png` (fig:ex3forecast). Example 3 18-step holdout forecast over 2021-07 to 2022-12.
 - [reproduced] `tab_api_migration_map` -> `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv` (global code migration). Maps deprecated manuscript calls to current package API.
 - [reproduced] `tab_benchmark_backend_profiles` -> `analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv` (support: benchmark backend profiles). Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend).
 - [reproduced] `tab_benchmark_environment` -> `analysis/manuscript/outputs/tables/benchmark_environment.csv` (support: benchmark environment details). CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.
@@ -75,3 +75,5 @@ Seed: 20260501
 - benchmark: Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.
 - benchmark: benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.
 - scope: Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.
+- ex3: Example 3 selected lambda=0.900 using training-data PPLC with transfer psi discount fixed at 0.990.
+- coverage: Targeted run; requested targets: ex3.

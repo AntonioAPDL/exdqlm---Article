@@ -235,7 +235,7 @@ if (!need_ex3) {
   }
 
   ex3_cfg <- cfg_profile$ex3
-  p0 <- as.numeric(ex3_cfg$p0 %||% 0.95)
+  p0 <- as.numeric(ex3_cfg$p0 %||% 0.15)
   selected_indices <- tolower(as.character(ex3_cfg$selected_indices %||% c("noi", "amo")))
   selected_indices <- selected_indices[nzchar(selected_indices)]
   if (!length(selected_indices)) {
@@ -342,7 +342,7 @@ if (!need_ex3) {
   covariate_df <- as.numeric(ex3_cfg$covariate_df %||% 0.99)
   transfer_zeta_df <- as.numeric(ex3_cfg$transfer_zeta_df %||% 0.99)
   transfer_psi_df <- as.numeric(ex3_cfg$transfer_psi_df %||% 0.99)
-  transfer_psi_df_grid <- as.numeric(ex3_cfg$transfer_psi_df_grid %||% c(transfer_psi_df, 1.0))
+  transfer_psi_df_grid <- as.numeric(ex3_cfg$transfer_psi_df_grid %||% transfer_psi_df)
   transfer_psi_df_grid <- sort(unique(transfer_psi_df_grid[is.finite(transfer_psi_df_grid) &
                                                              transfer_psi_df_grid > 0 &
                                                              transfer_psi_df_grid <= 1]))
@@ -531,7 +531,7 @@ if (!need_ex3) {
     metric_tag <- gsub("[^0-9A-Za-z]+", "_", selection_metric)
     p0_tag <- sprintf("p%03d", round(100 * p0))
     cache_key <- sprintf(
-      "ex3_models_trainselect_v2_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
+      "ex3_models_trainselect_v3_diagtable_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
       paste(selected_indices, collapse = "_"),
       pkg_commit %||% "unknown",
       window_tag,
@@ -761,9 +761,6 @@ if (!need_ex3) {
       PPLC = c(diagnostics_out$m1.pplc, diagnostics_out$m2.pplc),
       stringsAsFactors = FALSE
     )
-    forecast_comparison <- forecast_metrics[, c("model", "label", "mean_check_loss", "quantile_coverage", "n_exceedances"), drop = FALSE]
-    names(forecast_comparison)[names(forecast_comparison) == "mean_check_loss"] <- "holdout_check_loss"
-
     capture_output_file("ex3_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("package_commit=%s\n", git_short_head(resolve_pkg_path()$path)))
@@ -794,8 +791,6 @@ if (!need_ex3) {
       print(diagnostics_summary)
       cat("\nFinal holdout forecast metrics:\n")
       print(forecast_metrics)
-      cat("\nManuscript forecast comparison table:\n")
-      print(forecast_comparison)
       cat("\nSensitivity forecast metrics:\n")
       print(sensitivity_metrics)
     })
@@ -859,17 +854,9 @@ if (!need_ex3) {
       diagnostics_summary,
       filename = "ex3_diagnostics_summary.csv",
       artifact_id = "tab_ex3_diagnostics",
-      manuscript_target = "support: Example 3 final-training package diagnostics",
-      status = "reproduced",
-      notes = "Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models."
-    )
-    save_table_csv(
-      forecast_comparison,
-      filename = "ex3_forecast_comparison.csv",
-      artifact_id = "tab_ex3_forecast_comparison",
       manuscript_target = "tab:ex3",
       status = "reproduced",
-      notes = "Example 3 manuscript table with 18-month holdout target-quantile check loss, empirical coverage, and exceedance counts."
+      notes = "Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models."
     )
     save_table_csv(
       forecast_metrics,
@@ -888,10 +875,10 @@ if (!need_ex3) {
       notes = "Example 3 final 18-month holdout forecast metrics including the internal direct-regression sensitivity model."
     )
     register_note("ex3", sprintf(
-      "Example 3 selected lambda=%0.3f and transfer psi discount=%0.3f using training-data %s.",
+      "Example 3 selected lambda=%0.3f using training-data %s with transfer psi discount fixed at %0.3f.",
       lambda_star,
-      psi_df_star,
-      ex3_models$selection_metric
+      ex3_models$selection_metric,
+      psi_df_star
     ))
     register_note("ex3", sprintf(
       "Example 3 final forecast metrics are computed only on the %d-month holdout window from %s to %s.",

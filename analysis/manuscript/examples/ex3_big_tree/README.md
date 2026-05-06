@@ -32,15 +32,15 @@ Rscript analysis/run_all.R --stage manuscript --tests-only
 ```
 
 The article currently uses `ex3data.png`, `ex3quantcomps.png`,
-`ex3zetapsi.png`, `ex3forecast.png`, and the values in
-`ex3_forecast_comparison.csv`. The transfer-function training screen is stored
-in `ex3_lambda_selection.csv` and selects the transfer-function rate and
-instantaneous-coefficient discount factor by final-training PPLC from the
-exported `exdqlmDiagnostics()` workflow. The support tables
-`ex3_diagnostics_summary.csv`, `ex3_forecast_metrics.csv`, and
-`ex3_sensitivity_forecast_metrics.csv` retain package diagnostics, 18-month
-holdout forecast scores, and the direct-regression sensitivity fit. The lambda
-selection table records fit/diagnostic failures and package convergence flags
-separately: `status == "ok"` means the fit completed and produced finite
-training diagnostics, while `converged` reports the LDVB joint stopping rule
-from the package.
+`ex3zetapsi.png`, `ex3forecast.png`, and the package diagnostics in
+`ex3_diagnostics_summary.csv`. The transfer-function training screen is stored
+in `ex3_lambda_selection.csv` and selects the transfer-function rate by
+final-training PPLC from the exported `exdqlmDiagnostics()` workflow, with the
+trend, seasonal, and transfer-function discount factors fixed by the manuscript
+configuration. The support tables `ex3_forecast_metrics.csv` and
+`ex3_sensitivity_forecast_metrics.csv` retain 18-month holdout forecast scores
+and the direct-regression sensitivity fit. The lambda selection table records
+fit/diagnostic failures and package convergence flags separately:
+`status == "ok"` means the fit completed and produced finite training
+diagnostics, while `converged` reports the LDVB joint stopping rule from the
+package.

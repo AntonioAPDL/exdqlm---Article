@@ -743,9 +743,26 @@ save_table_csv <- function(df, filename, artifact_id, manuscript_target = "", st
 
 write_tracker <- function() {
   tracker_csv <- file.path(tables_dir, "manuscript_repro_tracker.csv")
+  if (targeted_run && file.exists(tracker_csv) && nrow(artifact_registry) > 0L) {
+    existing <- utils::read.csv(tracker_csv, stringsAsFactors = FALSE)
+    required <- names(artifact_registry)
+    if (all(required %in% names(existing))) {
+      existing <- existing[, required, drop = FALSE]
+      existing <- existing[!existing$artifact_id %in% artifact_registry$artifact_id, , drop = FALSE]
+      artifact_registry <<- rbind(existing, artifact_registry)
+    }
+  }
   utils::write.csv(artifact_registry, tracker_csv, row.names = FALSE)
 
   notes_csv <- file.path(tables_dir, "manuscript_repro_notes.csv")
+  if (targeted_run && file.exists(notes_csv) && nrow(run_notes) > 0L) {
+    existing_notes <- utils::read.csv(notes_csv, stringsAsFactors = FALSE)
+    required_notes <- names(run_notes)
+    if (all(required_notes %in% names(existing_notes))) {
+      existing_notes <- existing_notes[, required_notes, drop = FALSE]
+      run_notes <<- unique(rbind(existing_notes, run_notes))
+    }
+  }
   utils::write.csv(run_notes, notes_csv, row.names = FALSE)
 
   md_path <- file.path(tables_dir, "manuscript_repro_tracker.md")
