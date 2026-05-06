@@ -1,3 +1,3 @@
-"model","label","horizon","mean_check_loss","CRPS","interval_score","coverage","mean_interval_width"
-"M0_no_transfer","M0 no transfer",18,0.118543263795041,0.491538060847831,8.64808531229834,0.833333333333333,1.85080294402087
-"MTF_transfer_function","MTF transfer function",18,0.149067252633261,0.522019680465483,6.98490426002064,0.888888888888889,2.31678067035107
+"model","label","horizon","mean_check_loss","quantile_coverage","n_exceedances","CRPS","interval_score","coverage","mean_interval_width"
+"M0_no_transfer","M0 no transfer",18,0.176578677124049,0.833333333333333,3,336.533793801462,1834.06942601669,1,1834.06942601669
+"MTF_transfer_function","MTF transfer function",18,0.154857853569717,0.833333333333333,3,385.25054992099,2074.53664956628,1,2074.53664956628

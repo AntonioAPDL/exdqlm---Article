@@ -20,7 +20,7 @@ testthat::test_that("core manuscript figure targets are reproduced", {
     "fig_ex3quantcomps",
     "fig_ex3zetapsi",
     "fig_ex3forecast",
-    "tab_ex3_diagnostics",
+    "tab_ex3_forecast_comparison",
     "fig_ex4static",
     "tab_ex4static_summary"
   )

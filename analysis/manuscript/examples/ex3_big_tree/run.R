@@ -78,19 +78,42 @@ if (!need_ex3) {
     diff * (p0 - as.numeric(diff < 0))
   }
 
-  sample_crps_row <- function(y_true, draws_vec) {
-    z <- sort(as.numeric(draws_vec))
+  empirical_quantile_type7 <- function(z, probs) {
+    z <- sort(as.numeric(z))
     z <- z[is.finite(z)]
     m <- length(z)
-    if (m < 2L || !is.finite(y_true)) return(NA_real_)
-    mean(abs(z - y_true)) - sum((2 * seq_len(m) - m - 1) * z) / (m^2)
+    if (!m) return(rep(NA_real_, length(probs)))
+    h <- 1 + (m - 1) * probs
+    lo <- floor(h)
+    hi <- ceiling(h)
+    z[lo] + (h - lo) * (z[hi] - z[lo])
   }
 
-  sample_crps_vec <- function(y_true, draws_mat) {
+  iqs_crps_vec <- function(y_true, draws_mat, probs, weights = NULL) {
+    probs <- sort(as.numeric(probs))
+    if (!length(probs) || any(!is.finite(probs)) || any(probs <= 0 | probs >= 1)) {
+      stop("Example 3 CRPS probabilities must lie strictly between 0 and 1.", call. = FALSE)
+    }
+    if (is.null(weights)) {
+      weights <- rep(1 / length(probs), length(probs))
+    } else {
+      weights <- as.numeric(weights)
+      if (length(weights) != length(probs) ||
+          any(!is.finite(weights)) ||
+          any(weights < 0) ||
+          sum(weights) <= 0) {
+        stop("Example 3 CRPS weights must be non-negative and match the CRPS probabilities.", call. = FALSE)
+      }
+      weights <- weights / sum(weights)
+    }
+
     draws_mat <- as.matrix(draws_mat)
     stopifnot(length(y_true) == nrow(draws_mat))
     vapply(seq_len(nrow(draws_mat)), function(i) {
-      sample_crps_row(y_true[[i]], draws_mat[i, ])
+      if (!is.finite(y_true[[i]])) return(NA_real_)
+      qhat <- empirical_quantile_type7(draws_mat[i, ], probs)
+      if (!any(is.finite(qhat))) return(NA_real_)
+      2 * sum(weights * check_loss_vec(probs, y_true[[i]] - qhat))
     }, numeric(1))
   }
 
@@ -116,6 +139,7 @@ if (!need_ex3) {
   }
 
   forecast_metrics_row <- function(model, label, forecast_obj, y_future, p0,
+                                   crps_probs, crps_weights = NULL,
                                    interval_level = 0.95) {
     qhat <- as.numeric(forecast_obj$ff[seq_along(y_future)])
     draws <- as.matrix(forecast_obj$samp.fore)
@@ -129,7 +153,9 @@ if (!need_ex3) {
       label = label,
       horizon = length(y_future),
       mean_check_loss = mean(check_loss_vec(p0, y_future - qhat)),
-      CRPS = safe_metric_mean(sample_crps_vec(y_future, draws)),
+      quantile_coverage = mean(y_future <= qhat),
+      n_exceedances = sum(y_future > qhat),
+      CRPS = safe_metric_mean(iqs_crps_vec(y_future, draws, probs = crps_probs, weights = crps_weights)),
       interval_score = mean(interval_score_vec(y_future, int[, "lower"], int[, "upper"], level = interval_level)),
       coverage = mean(y_future >= int[, "lower"] & y_future <= int[, "upper"]),
       mean_interval_width = mean(int[, "upper"] - int[, "lower"]),
@@ -209,7 +235,7 @@ if (!need_ex3) {
   }
 
   ex3_cfg <- cfg_profile$ex3
-  p0 <- as.numeric(ex3_cfg$p0 %||% 0.15)
+  p0 <- as.numeric(ex3_cfg$p0 %||% 0.95)
   selected_indices <- tolower(as.character(ex3_cfg$selected_indices %||% c("noi", "amo")))
   selected_indices <- selected_indices[nzchar(selected_indices)]
   if (!length(selected_indices)) {
@@ -286,27 +312,11 @@ if (!need_ex3) {
   final_train_idx <- seq_len(final_train_n)
   holdout_idx <- seq.int(final_train_n + 1L, nrow(model_df))
 
-  validation_start <- as.Date(ex3_cfg$validation_start %||% "2020-01-01")
-  validation_idx <- which(model_df$date >= validation_start & seq_len(nrow(model_df)) <= final_train_n)
-  if (!length(validation_idx)) {
-    stop("Example 3 validation window is empty; check validation_start and forecast_horizon.", call. = FALSE)
-  }
-  subtrain_idx <- seq_len(min(validation_idx) - 1L)
-  if (length(subtrain_idx) < 36L) {
-    stop("Example 3 subtraining window has fewer than 36 monthly observations.", call. = FALSE)
-  }
-
   final_scaling <- scale_with_training(X_raw, final_train_idx)
-  validation_scaling <- scale_with_training(X_raw, subtrain_idx)
   X_final_scaled <- final_scaling$X_scaled
-  X_validation_scaled <- validation_scaling$X_scaled
 
-  y_subtrain_ts <- make_monthly_ts(y_log[subtrain_idx], model_df$date[subtrain_idx])
-  y_validation <- y_log[validation_idx]
   y_train_ts <- make_monthly_ts(y_log[final_train_idx], model_df$date[final_train_idx])
   y_holdout <- y_log[holdout_idx]
-  X_subtrain <- X_validation_scaled[subtrain_idx, , drop = FALSE]
-  X_validation <- X_validation_scaled[validation_idx, , drop = FALSE]
   X_train <- X_final_scaled[final_train_idx, , drop = FALSE]
   X_holdout <- X_final_scaled[holdout_idx, , drop = FALSE]
 
@@ -337,9 +347,14 @@ if (!need_ex3) {
                                                              transfer_psi_df_grid > 0 &
                                                              transfer_psi_df_grid <= 1]))
   if (!length(transfer_psi_df_grid)) transfer_psi_df_grid <- transfer_psi_df
-  validation_check_rel_tol <- as.numeric(ex3_cfg$validation_check_rel_tol %||% 0.0)
-  if (!is.finite(validation_check_rel_tol) || validation_check_rel_tol < 0) {
-    validation_check_rel_tol <- 0
+  selection_metric <- toupper(as.character(ex3_cfg$selection_metric %||% "PPLC"))
+  if (!selection_metric %in% c("PPLC", "CRPS", "KL")) {
+    stop("Example 3 selection_metric must be one of PPLC, CRPS, or KL.", call. = FALSE)
+  }
+  crps_probs <- as.numeric(ex3_cfg$crps_probs %||% seq(0.01, 0.99, by = 0.01))
+  crps_probs <- sort(unique(crps_probs[is.finite(crps_probs) & crps_probs > 0 & crps_probs < 1]))
+  if (!length(crps_probs)) {
+    stop("Example 3 crps_probs must contain values strictly between 0 and 1.", call. = FALSE)
   }
   trend_c0 <- as.numeric(ex3_cfg$trend_c0 %||% 0.1)
   seasonal_c0 <- as.numeric(ex3_cfg$seasonal_c0 %||% 1)
@@ -454,6 +469,16 @@ if (!need_ex3) {
     eval.parent(substitute(expr))
   }
 
+  ex3_diagnostics <- function(..., ref) {
+    args <- list(...)
+    args$plot <- FALSE
+    args$ref <- ref
+    if ("crps_probs" %in% names(formals(exdqlm::exdqlmDiagnostics))) {
+      args$crps_probs <- crps_probs
+    }
+    do.call(exdqlm::exdqlmDiagnostics, args)
+  }
+
   if (need_ex3data) {
     save_png_plot("ex3data.png", {
       old_par <- graphics::par(mfrow = c(2, 1), mar = c(3.0, 4.2, 1.0, 0.8), oma = c(1.6, 0, 0, 0))
@@ -503,35 +528,40 @@ if (!need_ex3) {
     grid_tag <- paste(sprintf("%03d", round(100 * lambda_grid)), collapse = "_")
     psi_tag <- paste(sprintf("%03d", round(100 * transfer_psi_df_grid)), collapse = "_")
     window_tag <- paste(fmt_month(range(model_df$date)), collapse = "_")
+    metric_tag <- gsub("[^0-9A-Za-z]+", "_", selection_metric)
+    p0_tag <- sprintf("p%03d", round(100 * p0))
     cache_key <- sprintf(
-      "ex3_models_holdout_v1_%s_%s_%s_grid%s_psidf%s_nsamp%d_tol%s_h%d",
+      "ex3_models_trainselect_v2_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
       paste(selected_indices, collapse = "_"),
       pkg_commit %||% "unknown",
       window_tag,
+      p0_tag,
       grid_tag,
       psi_tag,
+      metric_tag,
       n_samp,
       gsub("[^0-9A-Za-z]+", "_", format(tol)),
       forecast_horizon
     )
 
     ex3_models <- load_or_fit_cache(cache_key, {
-      validation_rows <- list()
+      selection_rows <- list()
       row_id <- 0L
+      selection_ref_samp <- with_local_seed(seed_value + 3400L, stats::rnorm(length(y_train_ts)))
 
       for (psi_df in transfer_psi_df_grid) {
         for (i in seq_along(lambda_grid)) {
           row_id <- row_id + 1L
           lambda <- lambda_grid[[i]]
-          validation_seed <- seed_value + 3500L + row_id
+          selection_seed <- seed_value + 3500L + row_id
           log_msg(sprintf(
-            "Example 3 validation fit %d/%d: lambda = %.3f, transfer psi df = %.3f",
+            "Example 3 training-selection fit %d/%d: lambda = %.3f, transfer psi df = %.3f",
             row_id, length(lambda_grid) * length(transfer_psi_df_grid), lambda, psi_df
           ))
           fit <- tryCatch(
             with_ex3_max_iter(with_local_seed(
-              validation_seed,
-              fit_transfer_model(y_subtrain_ts, X_subtrain, lambda = lambda, psi_df = psi_df)
+              selection_seed,
+              fit_transfer_model(y_train_ts, X_train, lambda = lambda, psi_df = psi_df)
             )),
             error = function(e) e
           )
@@ -540,25 +570,25 @@ if (!need_ex3) {
             lambda = lambda,
             transfer_zeta_df = transfer_zeta_df,
             transfer_psi_df = psi_df,
-            horizon = length(validation_idx),
-            mean_check_loss = NA_real_,
+            selection_metric = selection_metric,
+            selection_value = NA_real_,
+            KL = NA_real_,
+            KL_flipped = NA_real_,
             CRPS = NA_real_,
-            interval_score = NA_real_,
-            coverage = NA_real_,
-            mean_interval_width = NA_real_,
+            PPLC = NA_real_,
             runtime = NA_real_,
             iter = NA_integer_,
             converged = NA,
             status = "ok",
             error_message = "",
-            seed = validation_seed,
+            seed = selection_seed,
             stringsAsFactors = FALSE
           )
 
           if (!fit_ok(fit)) {
             row$status <- "fit_error"
             row$error_message <- conditionMessage(fit)
-            validation_rows[[row_id]] <- row
+            selection_rows[[row_id]] <- row
             next
           }
 
@@ -566,60 +596,49 @@ if (!need_ex3) {
           row$iter <- as.integer(fit$iter %||% NA_integer_)
           row$converged <- isTRUE(fit$converged)
 
-          base_model <- attr(fit, "ex3_base_model")
-          mats <- build_transfer_forecast_mats(base_model, X_validation, lambda = lambda)
-          fc <- tryCatch(
-            forecast_with_mats(fit, k = length(validation_idx), mats = mats, seed = seed_value + 4500L + row_id),
+          diag_fit <- tryCatch(
+            ex3_diagnostics(fit, ref = selection_ref_samp),
             error = function(e) e
           )
-          if (!fit_ok(fc)) {
-            row$status <- "forecast_error"
-            row$error_message <- conditionMessage(fc)
-            validation_rows[[row_id]] <- row
+          if (!fit_ok(diag_fit)) {
+            row$status <- "diagnostics_error"
+            row$error_message <- conditionMessage(diag_fit)
+            selection_rows[[row_id]] <- row
             next
           }
 
-          met <- forecast_metrics_row(
-            model = "MTF_validation",
-            label = "transfer function",
-            forecast_obj = fc,
-            y_future = y_validation,
-            p0 = p0
-          )
-          row$mean_check_loss <- met$mean_check_loss
-          row$CRPS <- met$CRPS
-          row$interval_score <- met$interval_score
-          row$coverage <- met$coverage
-          row$mean_interval_width <- met$mean_interval_width
-          if (!all(is.finite(c(row$mean_check_loss, row$CRPS)))) {
+          row$KL <- as.numeric(diag_fit$m1.KL %||% NA_real_)
+          row$KL_flipped <- as.numeric(diag_fit$m1.KL.flip %||% NA_real_)
+          row$CRPS <- as.numeric(diag_fit$m1.CRPS %||% NA_real_)
+          row$PPLC <- as.numeric(diag_fit$m1.pplc %||% NA_real_)
+          row$selection_value <- as.numeric(row[[selection_metric]])
+          if (!is.finite(row$selection_value)) {
             row$status <- "nonfinite_metrics"
           }
-          validation_rows[[row_id]] <- row
+          selection_rows[[row_id]] <- row
         }
       }
 
-      validation_table <- do.call(rbind, validation_rows)
-      ok <- validation_table$status == "ok" & is.finite(validation_table$mean_check_loss)
+      selection_table <- do.call(rbind, selection_rows)
+      ok <- selection_table$status == "ok" & is.finite(selection_table$selection_value)
       if (!any(ok)) {
-        stop("No finite validation forecast check-loss values were produced by the Example 3 transfer grid.", call. = FALSE)
+        stop("No finite training-selection diagnostics were produced by the Example 3 transfer grid.", call. = FALSE)
       }
-      best_loss <- min(validation_table$mean_check_loss[ok])
-      eligible <- ok & validation_table$mean_check_loss <= best_loss * (1 + validation_check_rel_tol)
-      if (!any(eligible)) eligible <- ok
-      eligible_idx <- which(eligible)
+      eligible_idx <- which(ok)
       order_key <- order(
-        -validation_table$transfer_psi_df[eligible_idx],
-        validation_table$mean_check_loss[eligible_idx],
-        validation_table$CRPS[eligible_idx],
-        validation_table$lambda[eligible_idx]
+        selection_table$selection_value[eligible_idx],
+        -selection_table$transfer_psi_df[eligible_idx],
+        selection_table$CRPS[eligible_idx],
+        selection_table$KL[eligible_idx],
+        selection_table$lambda[eligible_idx]
       )
       selected_idx <- eligible_idx[order_key[[1L]]]
-      validation_table$selected <- seq_len(nrow(validation_table)) == selected_idx
-      lambda_star <- validation_table$lambda[[selected_idx]]
-      psi_df_star <- validation_table$transfer_psi_df[[selected_idx]]
+      selection_table$selected <- seq_len(nrow(selection_table)) == selected_idx
+      lambda_star <- selection_table$lambda[[selected_idx]]
+      psi_df_star <- selection_table$transfer_psi_df[[selected_idx]]
       log_msg(sprintf(
-        "Example 3 selected transfer settings: lambda = %.3f, transfer psi df = %.3f",
-        lambda_star, psi_df_star
+        "Example 3 selected transfer settings: lambda = %.3f, transfer psi df = %.3f by training %s",
+        lambda_star, psi_df_star, selection_metric
       ))
 
       log_msg("Example 3 final fit: M0 no-transfer baseline")
@@ -671,14 +690,17 @@ if (!need_ex3) {
       }
 
       forecast_metrics <- rbind(
-        forecast_metrics_row("M0_no_transfer", "M0 no transfer", fc_M0, y_holdout, p0),
-        forecast_metrics_row("MTF_transfer_function", "MTF transfer function", fc_MTF, y_holdout, p0)
+        forecast_metrics_row("M0_no_transfer", "M0 no transfer", fc_M0, y_holdout, p0,
+                             crps_probs = crps_probs),
+        forecast_metrics_row("MTF_transfer_function", "MTF transfer function", fc_MTF, y_holdout, p0,
+                             crps_probs = crps_probs)
       )
       sensitivity_metrics <- forecast_metrics
       if (fit_ok(fc_MREG)) {
         sensitivity_metrics <- rbind(
           sensitivity_metrics,
-          forecast_metrics_row("MREG_direct_regression", "MREG direct regression", fc_MREG, y_holdout, p0)
+          forecast_metrics_row("MREG_direct_regression", "MREG direct regression", fc_MREG, y_holdout, p0,
+                               crps_probs = crps_probs)
         )
       }
 
@@ -689,7 +711,7 @@ if (!need_ex3) {
         fc_M0 = fc_M0,
         fc_MTF = fc_MTF,
         fc_MREG = fc_MREG,
-        validation_table = validation_table,
+        selection_table = selection_table,
         forecast_metrics = forecast_metrics,
         sensitivity_metrics = sensitivity_metrics,
         lambda_star = lambda_star,
@@ -698,8 +720,8 @@ if (!need_ex3) {
         selected_labels = selected_labels,
         X_center = final_scaling$center,
         X_scale = final_scaling$scale,
-        validation_X_center = validation_scaling$center,
-        validation_X_scale = validation_scaling$scale,
+        selection_metric = selection_metric,
+        crps_probs = crps_probs,
         n_samp = n_samp,
         forecast_n_samp = forecast_n_samp,
         tol = tol,
@@ -725,15 +747,11 @@ if (!need_ex3) {
     psi_df_star <- ex3_models$psi_df_star
     selected_labels <- ex3_models$selected_labels
     selected_indices <- ex3_models$selected_indices
-    validation_table <- ex3_models$validation_table
+    selection_table <- ex3_models$selection_table
     forecast_metrics <- ex3_models$forecast_metrics
     sensitivity_metrics <- ex3_models$sensitivity_metrics
     diag_ref_samp <- with_local_seed(seed_value + 4900L, stats::rnorm(length(y_train_ts)))
-    diagnostics_out <- exdqlm::exdqlmDiagnostics(
-      M0, MTF,
-      plot = FALSE,
-      ref = diag_ref_samp
-    )
+    diagnostics_out <- ex3_diagnostics(M0, MTF, ref = diag_ref_samp)
     diagnostics_summary <- data.frame(
       model = c("M0_no_transfer", "MTF_transfer_function"),
       label = c("M0 no transfer", "MTF transfer function"),
@@ -743,23 +761,23 @@ if (!need_ex3) {
       PPLC = c(diagnostics_out$m1.pplc, diagnostics_out$m2.pplc),
       stringsAsFactors = FALSE
     )
+    forecast_comparison <- forecast_metrics[, c("model", "label", "mean_check_loss", "quantile_coverage", "n_exceedances"), drop = FALSE]
+    names(forecast_comparison)[names(forecast_comparison) == "mean_check_loss"] <- "holdout_check_loss"
 
     capture_output_file("ex3_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("package_commit=%s\n", git_short_head(resolve_pkg_path()$path)))
       cat(sprintf("p0=%0.2f\n", p0))
       cat(sprintf("data_window=%s to %s\n", fmt_month(min(model_df$date)), fmt_month(max(model_df$date))))
-      cat(sprintf("subtraining_window=%s to %s\n", fmt_month(model_df$date[min(subtrain_idx)]), fmt_month(model_df$date[max(subtrain_idx)])))
-      cat(sprintf("validation_window=%s to %s\n", fmt_month(model_df$date[min(validation_idx)]), fmt_month(model_df$date[max(validation_idx)])))
       cat(sprintf("final_training_window=%s to %s\n", fmt_month(model_df$date[min(final_train_idx)]), fmt_month(model_df$date[max(final_train_idx)])))
       cat(sprintf("forecast_holdout_window=%s to %s\n", fmt_month(model_df$date[min(holdout_idx)]), fmt_month(model_df$date[max(holdout_idx)])))
       cat(sprintf("n_observations=%d, n_train=%d, n_holdout=%d\n", nrow(model_df), length(final_train_idx), length(holdout_idx)))
       cat(sprintf("selected_indices=%s\n", paste(selected_labels, collapse = ", ")))
       cat(sprintf("n.samp=%d, forecast_n.samp=%d, tol=%s, max_iter=%d\n", ex3_models$n_samp, ex3_models$forecast_n_samp, format(ex3_models$tol), ex3_models$max_iter))
-      cat(sprintf("lambda_star_by_validation_check_loss=%0.3f\n", lambda_star))
+      cat(sprintf("lambda_star_by_training_%s=%0.3f\n", tolower(ex3_models$selection_metric), lambda_star))
       cat(sprintf("transfer_psi_df_star=%0.3f\n\n", psi_df_star))
-      cat("Validation transfer grid:\n")
-      print(validation_table)
+      cat("Training transfer grid diagnostics:\n")
+      print(selection_table)
       cat("\nFinal-training covariate scaling:\n")
       print(data.frame(index = selected_indices, label = selected_labels, center = ex3_models$X_center, scale = ex3_models$X_scale))
       cat("\nMTF$median.kt:\n")
@@ -776,6 +794,8 @@ if (!need_ex3) {
       print(diagnostics_summary)
       cat("\nFinal holdout forecast metrics:\n")
       print(forecast_metrics)
+      cat("\nManuscript forecast comparison table:\n")
+      print(forecast_comparison)
       cat("\nSensitivity forecast metrics:\n")
       print(sensitivity_metrics)
     })
@@ -785,15 +805,14 @@ if (!need_ex3) {
       relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary.txt",
       manuscript_target = "Example 3 textual outputs",
       status = "reproduced",
-      notes = "Observed BTflow plus NOI/AMO Example 3 summary with validation-selected transfer settings, package diagnostics, and held-out forecast metrics."
+      notes = "Observed BTflow plus NOI/AMO Example 3 summary with training-selected transfer settings, package diagnostics, and held-out forecast metrics."
     )
 
     model_dataset <- data.frame(
       date = model_df$date,
       flow_cfs = model_df$flow_cfs,
       log_flow = y_log,
-      phase = ifelse(seq_len(nrow(model_df)) %in% holdout_idx, "forecast_holdout",
-                     ifelse(seq_len(nrow(model_df)) %in% validation_idx, "validation", "subtraining")),
+      phase = ifelse(seq_len(nrow(model_df)) %in% holdout_idx, "forecast_holdout", "training"),
       model_train = seq_len(nrow(model_df)) %in% final_train_idx,
       model_holdout = seq_len(nrow(model_df)) %in% holdout_idx,
       X_final_scaled,
@@ -805,7 +824,7 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_model_dataset",
       manuscript_target = "Example 3 modeling dataset",
       status = "reproduced",
-      notes = "Aligned Big Tree flow and climate-index data used by Example 3, with training/validation/holdout phase labels."
+      notes = "Aligned Big Tree flow and climate-index data used by Example 3, with training and forecast-holdout phase labels."
     )
 
     covariate_scaling <- data.frame(
@@ -813,8 +832,6 @@ if (!need_ex3) {
       label = selected_labels,
       center = as.numeric(ex3_models$X_center),
       scale = as.numeric(ex3_models$X_scale),
-      validation_center = as.numeric(ex3_models$validation_X_center),
-      validation_scale = as.numeric(ex3_models$validation_X_scale),
       stringsAsFactors = FALSE
     )
     save_table_csv(
@@ -826,24 +843,33 @@ if (!need_ex3) {
       notes = "Training-window means and standard deviations used to standardize Example 3 climate indices."
     )
     save_table_csv(
-      validation_table,
-      filename = "ex3_validation_selection.csv",
-      artifact_id = "tab_ex3_validation_selection",
-      manuscript_target = "Example 3 transfer validation output",
+      selection_table,
+      filename = "ex3_lambda_selection.csv",
+      artifact_id = "tab_ex3_lambda_selection",
+      manuscript_target = "Example 3 transfer training-selection output",
       status = "reproduced",
       notes = sprintf(
-        "Example 3 transfer-function validation grid; selected lambda=%0.3f and transfer psi discount=%0.3f by held-out validation check loss.",
+        "Example 3 transfer-function training diagnostic grid; selected lambda=%0.3f and transfer psi discount=%0.3f by training %s.",
         lambda_star,
-        psi_df_star
+        psi_df_star,
+        ex3_models$selection_metric
       )
     )
     save_table_csv(
       diagnostics_summary,
       filename = "ex3_diagnostics_summary.csv",
       artifact_id = "tab_ex3_diagnostics",
-      manuscript_target = "tab:ex3",
+      manuscript_target = "support: Example 3 final-training package diagnostics",
       status = "reproduced",
       notes = "Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models."
+    )
+    save_table_csv(
+      forecast_comparison,
+      filename = "ex3_forecast_comparison.csv",
+      artifact_id = "tab_ex3_forecast_comparison",
+      manuscript_target = "tab:ex3",
+      status = "reproduced",
+      notes = "Example 3 manuscript table with 18-month holdout target-quantile check loss, empirical coverage, and exceedance counts."
     )
     save_table_csv(
       forecast_metrics,
@@ -862,9 +888,10 @@ if (!need_ex3) {
       notes = "Example 3 final 18-month holdout forecast metrics including the internal direct-regression sensitivity model."
     )
     register_note("ex3", sprintf(
-      "Example 3 selected lambda=%0.3f and transfer psi discount=%0.3f using validation-window forecast check loss.",
+      "Example 3 selected lambda=%0.3f and transfer psi discount=%0.3f using training-data %s.",
       lambda_star,
-      psi_df_star
+      psi_df_star,
+      ex3_models$selection_metric
     ))
     register_note("ex3", sprintf(
       "Example 3 final forecast metrics are computed only on the %d-month holdout window from %s to %s.",
@@ -947,8 +974,6 @@ if (!need_ex3) {
         } else {
           graphics::par(mfrow = c(1, k_cov + 1L))
         }
-        psi_ylim_by_index <- list(noi = c(-0.3, 0.1), amo = c(-0.1, 0.3))
-
         graphics::par(mar = c(3.0, 4.2, 2.1, 0.8), oma = c(0, 0, 0, 0))
         zeta <- component_summary_from_fit(MTF, index = transfer_zeta_idx, just.theta = TRUE)
         plot_component_summary(zeta, col = ex3_cols$mtf, add = FALSE, xlab = "")
@@ -959,7 +984,7 @@ if (!need_ex3) {
         graphics::par(mar = c(3.8, 4.2, 2.1, 0.8))
         for (j in seq_len(k_cov)) {
           psi <- component_summary_from_fit(MTF, index = transfer_psi_idx[[j]], just.theta = TRUE)
-          psi_ylim <- psi_ylim_by_index[[selected_indices[[j]]]]
+          psi_ylim <- padded_range(psi$lb, psi$ub, 0)
           plot_component_summary(psi, col = index_cols[[j]], add = FALSE, ylim = psi_ylim)
           graphics::grid(col = "grey90")
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)

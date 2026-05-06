@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-05-06 00:20:16
+Generated: 2026-05-06 02:22:44
 Profile: standard
 Seed: 20260501
 
@@ -31,11 +31,12 @@ Seed: 20260501
 - [reproduced] `tab_ex2_df_scan_ldvb` -> `analysis/manuscript/outputs/tables/ex2_df_scan_kl_ldvb.csv` (new: Example 2 discount-factor CRPS/KL selection (LDVB)). Best pair by CRPS in this run: (0.90, 0.85). Best pair by KL: (0.9, 0.85).
 - [reproduced] `tab_ex2_diagnostics_ldvb` -> `analysis/manuscript/outputs/tables/ex2_diagnostics_summary_ldvb.csv` (new: Example 2 diagnostic narrative (LDVB)). LDVB counterpart computed with exdqlmDiagnostics.
 - [reproduced] `fig_ex3data` -> `analysis/manuscript/outputs/figures/ex3data.png` (fig:ex3data). Top: log observed monthly package BTflow. Bottom: standardized NOI and AMO over 1987-01 to 2022-12; vertical line marks the 18-month forecast holdout.
-- [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary with validation-selected transfer settings, package diagnostics, and held-out forecast metrics.
-- [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (Example 3 modeling dataset). Aligned Big Tree flow and climate-index data used by Example 3, with training/validation/holdout phase labels.
+- [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary with training-selected transfer settings, package diagnostics, and held-out forecast metrics.
+- [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (Example 3 modeling dataset). Aligned Big Tree flow and climate-index data used by Example 3, with training and forecast-holdout phase labels.
 - [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (Example 3 covariate scaling). Training-window means and standard deviations used to standardize Example 3 climate indices.
-- [reproduced] `tab_ex3_validation_selection` -> `analysis/manuscript/outputs/tables/ex3_validation_selection.csv` (Example 3 transfer validation output). Example 3 transfer-function validation grid; selected lambda=0.800 and transfer psi discount=0.990 by held-out validation check loss.
-- [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (tab:ex3). Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models.
+- [reproduced] `tab_ex3_lambda_selection` -> `analysis/manuscript/outputs/tables/ex3_lambda_selection.csv` (Example 3 transfer training-selection output). Example 3 transfer-function training diagnostic grid; selected lambda=0.200 and transfer psi discount=1.000 by training PPLC.
+- [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (support: Example 3 final-training package diagnostics). Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models.
+- [reproduced] `tab_ex3_forecast_comparison` -> `analysis/manuscript/outputs/tables/ex3_forecast_comparison.csv` (tab:ex3). Example 3 manuscript table with 18-month holdout target-quantile check loss, empirical coverage, and exceedance counts.
 - [reproduced] `tab_ex3_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` (support: Example 3 holdout forecast metrics). Support-side Example 3 final 18-month holdout forecast metrics computed by article replication helpers, not exdqlmDiagnostics.
 - [reproduced] `tab_ex3_sensitivity_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv` (Example 3 sensitivity forecast metrics). Example 3 final 18-month holdout forecast metrics including the internal direct-regression sensitivity model.
 - [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Example 3 quantile, seasonal, and transfer-contribution comparison for M0 and MTF.
@@ -61,7 +62,7 @@ Seed: 20260501
 - ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=200).
 - ex2: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
 - ex2_ldvb: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
-- ex3: Example 3 selected lambda=0.800 and transfer psi discount=0.990 using validation-window forecast check loss.
+- ex3: Example 3 selected lambda=0.200 and transfer psi discount=1.000 using training-data PPLC.
 - ex3: Example 3 final forecast metrics are computed only on the 18-month holdout window from 2021-07 to 2022-12.
 - ex4: Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0.
 - ex4: The static sparse benchmark uses the Nishimura-Suchard regularized horseshoe (rhs_ns) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept.
