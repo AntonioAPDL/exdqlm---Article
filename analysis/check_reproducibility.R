@@ -137,7 +137,9 @@ check_r_version <- function(required = "") {
   current <- as.character(getRversion())
   line("R.version.string", R.version.string)
   line("R.home", R.home())
-  line("R executable", Sys.which("R") %||% NA_character_)
+  line("R binary", normalizePath(file.path(R.home("bin"), "R"), mustWork = FALSE))
+  line("Rscript binary", normalizePath(file.path(R.home("bin"), "Rscript"), mustWork = FALSE))
+  line("PATH R", Sys.which("R") %||% NA_character_)
   if (!nzchar(required)) {
     warn("No required R version was supplied. Use --require-r-version before final example relaunches.")
     return(invisible(FALSE))

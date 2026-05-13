@@ -35,6 +35,13 @@ version:
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/check_reproducibility.R --fetch --strict --require-r-version 4.6.0
 ```
 
+If the default `Rscript` on the machine is older, call the target R
+installation directly:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript analysis/check_reproducibility.R --fetch --strict --require-r-version 4.6.0
+```
+
 Run the cheap manuscript structure/tests pass:
 
 ```sh
