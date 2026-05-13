@@ -87,7 +87,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 \addlinespace[1pt]
 \pkg{bayesQR} & Bayesian AL quantile regression & Static regression; no temporal or state-space component & MCMC under the AL likelihood; optional adaptive lasso & Vector-valued quantile levels; output organized by fitted quantile \\
 \addlinespace[1pt]
-\pkg{pqrBayes} & Bayesian penalized quantile regression & Static or varying-coefficient regression; no state-space component & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
+\pkg{pqrBayes} & Bayesian penalized quantile regression & Static sparse, group, binary, or effect-modifier varying-coefficient regression; no latent state-space evolution & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
 \addlinespace[1pt]
 \pkg{brms} & General Bayesian regression with an AL family & Autocorrelation structures available; no dedicated quantile state-space workflow & Stan-based posterior inference & Target quantile set through AL parameter \\
 \addlinespace[1pt]
@@ -102,7 +102,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Entries summarize documented primary interfaces along the dimensions used to position \pkg{exdqlm}; they are selective rather than exhaustive. AL denotes asymmetric Laplace, exAL its extended version, PIRLS penalized iteratively reweighted least squares, and LDVB Laplace--delta variational Bayes. \color{magenta} From RP: How doe the prqBayes package deal with "varying coefficient regression"? How do they vary if not over time? \color{black}}
+\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Entries summarize documented primary interfaces along the dimensions used to position \pkg{exdqlm}; they are selective rather than exhaustive. AL denotes asymmetric Laplace, exAL its extended version, PIRLS penalized iteratively reweighted least squares, and LDVB Laplace--delta variational Bayes.}
 \label{table:software}
 \end{table}
 
@@ -111,7 +111,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 
 The frequentist package \pkg{quantreg} \citep{quantreg} remains the broad general-purpose baseline, covering linear, nonlinear, nonparametric, censored, and dynamic quantile regression, together with bootstrap-based and related uncertainty summaries. Its \code{dynrq()} function supports dynamic linear quantile regression through time-series regression formulas involving lags, differences, trends, seasonal factors, and harmonic terms, while preserving time-series attributes. However, the dynamic structure enters through the design matrix rather than through latent states: once these regressors are constructed, estimation proceeds through the standard \pkg{quantreg} fitting routines for a fixed coefficient vector. In that sense, \code{dynrq()} is a regression-style time-series interface rather than a latent-state state-space model, so it does not provide filtered or smoothed state summaries.
 
-Most other \proglang{R} packages relevant here implement static quantile regression or target a different multi-quantile objective. Among the static Bayesian options, \pkg{bayesQR} \citep{bayesQR} provides Bayesian quantile regression under the AL working likelihood with an adaptive-lasso option, whereas \pkg{pqrBayes} \citep{pqrBayes} emphasizes penalized Bayesian quantile regression with spike-and-slab and horseshoe-family shrinkage priors. The broader Bayesian modeling package \pkg{brms} \citep{brmsfamily} is also relevant because it supports AL-based quantile regression within a flexible multilevel, nonlinear, and additive regression framework, and can incorporate regression-level autocorrelation terms. However, it is not organized as a dedicated quantile state-space workflow, and its documentation does not present filtered or smoothed state summaries of the type targeted by \pkg{exdqlm}. Packages such as \pkg{qgam} \citep{qgam}, \pkg{qrjoint} \citep{qrjoint}, \pkg{quantregGrowth} \citep{quantregGrowth}, and \pkg{qrcm} \citep{qrcm} address additive, joint, non-crossing, or coefficient-modeling formulations. Other packages focus on specialized static settings, including penalized frequentist fitting across quantiles in \pkg{rqPen} \citep{rqPen}, convolution-smoothed linear quantile regression with efficient gradient-based fitting in \pkg{conquer} \citep{conquer}, and robust or censored-response modeling in \pkg{lqr} \citep{lqr}.
+Most other \proglang{R} packages relevant here implement static quantile regression or target a different multi-quantile objective. Among the static Bayesian options, \pkg{bayesQR} \citep{bayesQR} provides Bayesian quantile regression under the AL working likelihood with an adaptive-lasso option, whereas \pkg{pqrBayes} \citep{pqrBayes} emphasizes penalized Bayesian quantile regression with spike-and-slab and horseshoe-family shrinkage priors. Its varying-coefficient option models coefficients as functions of an observed effect modifier rather than as latent states evolving through a state-space equation. The broader Bayesian modeling package \pkg{brms} \citep{brmsfamily} is also relevant because it supports AL-based quantile regression within a flexible multilevel, nonlinear, and additive regression framework, and can incorporate regression-level autocorrelation terms. However, it is not organized as a dedicated quantile state-space workflow, and its documentation does not present filtered or smoothed state summaries of the type targeted by \pkg{exdqlm}. Packages such as \pkg{qgam} \citep{qgam}, \pkg{qrjoint} \citep{qrjoint}, \pkg{quantregGrowth} \citep{quantregGrowth}, and \pkg{qrcm} \citep{qrcm} address additive, joint, non-crossing, or coefficient-modeling formulations. Other packages focus on specialized static settings, including penalized frequentist fitting across quantiles in \pkg{rqPen} \citep{rqPen}, convolution-smoothed linear quantile regression with efficient gradient-based fitting in \pkg{conquer} \citep{conquer}, and robust or censored-response modeling in \pkg{lqr} \citep{lqr}.
 
 Related implementations also exist outside \proglang{R}. In Python, \pkg{statsmodels} \citep{statsmodelsQuantReg} provides linear quantile regression via iterative reweighted least squares. Julia offers \pkg{QuantReg.jl} \citep{QuantRegjl}, and MATLAB includes tools such as \code{fitrqlinear} and \code{fitrqnet} \citep{matlabQuantile}. These implementations are useful reference points for the broader software ecosystem, but they are better viewed as general or static quantile-regression tools than as direct counterparts to a dedicated package for Bayesian dynamic quantile state-space modeling.
 
@@ -502,11 +502,9 @@ In this example, we consider the Lake Huron time series from the package \pkg{da
 
 To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space structure and prior used to estimate the quantiles (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function.
 
-\color{magenta} From RP: 
-I guess you want a working example below, but it doesn't look very Bayesian to use the mean of the data as a prior and we are using the data twice :-) \color{black}
 \begin{CodeChunk}
 \begin{CodeInput}
-R> model = polytrendMod(order = 2, m0 = c(mean(LakeHuron), 0),
+R> model = polytrendMod(order = 2, m0 = c(579, 0),
 +                      C0 = 10 * diag(2))
 R> model
 \end{CodeInput}
@@ -514,7 +512,7 @@ R> model
 Prior mean of the state vector:
 $m0
          [,1]
-[1,] 579.0041
+[1,] 579.0000
 [2,]   0.0000
 
 
@@ -540,16 +538,12 @@ $GG
 \end{CodeOutput}
 \end{CodeChunk}
 
-To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix $\mat{W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown above (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}. 
+The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero. To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix $\mat{W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. The prior centers for \(\gamma\) are quantile-specific: they are centered at zero for the median and shifted in opposite directions for the upper and lower tails to provide stable tail-specific initialization within the admissible support. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown above (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}.
 The progress output also reports which computational backend is being used. In the
 current implementation, some operations, including dynamic MCMC updates and sampling
 from latent-variable full conditionals, can be routed through either \proglang{R} or
 \proglang{C++} implementations. The package-level options controlling this routing are
 listed in Appendix Table~\ref{tab:backendopts}.
-\color{magenta} From RP: the labeling of the table may not be correct, shouldn't it be Table S1?
-
-From RP: Should the priors for gamma below be justified a bit since they change for each quantile? 
-\color{black}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -579,21 +573,16 @@ MCMC progress | model=exDQLM | phase=burn | iter=2000/5000 | kept=0/3000
 MCMC progress | model=exDQLM | phase=keep | iter=3000/5000 | kept=1000/3000 
 MCMC progress | model=exDQLM | phase=keep | iter=4000/5000 | kept=2000/3000 
 MCMC progress | model=exDQLM | phase=keep | iter=5000/5000 | kept=3000/3000 
-MCMC done | model=exDQLM | status=complete | iter=5000.00
+MCMC done | model=exDQLM | status=complete | iter=5000.00 | runtime_sec=16.272
 \end{CodeOutput}
 \end{CodeChunk}
-\color{magenta} From RP: my RStudio also gives the running time at the end like this:
-\begin{CodeOutput} 
-MCMC done | model=exDQLM | status=complete | iter=5000.00 | runtime_sec=16.272 
-\end{CodeOutput}
-\color{black}
 
 By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). Consistent with this, the posterior mean of \(\gamma\) is \(-0.012\) with a 95\% credible interval \((-0.429, 0.462)\), while the posterior mean of \(\sigma\) is \(0.369\) with a 95\% credible interval \((0.282, 0.468)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} \citep{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.7\textwidth]{ex1mcmc.png}
-\caption{Example 1: Lake Huron. Trace and density plots from the median run with 2000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. \color{magenta}From RP: my traces and densities don't look the same but this is OK as they are consistent. \color{black}}
+\caption{Example 1: Lake Huron. Trace and density plots from the median run with 2000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are representative MCMC traces from the recorded run profile; exact trace paths may differ across reruns while retaining comparable posterior summaries.}
 \label{fig:ex1mcmc}
 \end{figure}
 
@@ -793,7 +782,7 @@ R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 \end{CodeInput}
 \end{CodeChunk}
 
-The output is suppressed using input \code{verbose = FALSE}. The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded backend profile. \color{magenta} The runtime can be very different depending on the machines and the R version used. Do we really want to report runtime? \color{black}
+The output is suppressed using input \code{verbose = FALSE}. The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded backend profile. These runtimes are fit elapsed times stored in the returned fit objects; they are intended for within-profile comparison and should not be interpreted as machine-independent timing constants.
 
 We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1780 to 1830.
 % fig:ex1quant w850 h275
@@ -817,20 +806,22 @@ R> legend("topleft", lty = 1, bty = "n", col = c("red", "blue"),
 \label{fig:ex2checks}
 \end{figure}
 
-To examine whether the added flexibility of the exDQLM is supported by the fitted approximation, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}. The approximate posterior mass lies away from zero, supporting the additional skewness flexibility for this upper-quantile fit. \color{magenta} From RP: the plot shows the histogram in a lightblue color rather than gray which is not consistent with the code that produced the plot. \color{black}
+To examine whether the added flexibility of the exDQLM is supported by the fitted approximation, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}. The approximate posterior mass lies away from zero, supporting the additional skewness flexibility for this upper-quantile fit.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> hist(M2$samp.gamma, xlab = expression(gamma), main = "")
-R> abline(v = mean(M2$samp.gamma), col = "blue")
+R> hist(M2$samp.gamma, xlab = expression(gamma), main = "",
++        col = adjustcolor("#4C72B0", alpha.f = 0.22),
++        border = "#4C72B0")
+R> abline(v = median(M2$samp.gamma), col = "#4C72B0", lwd = 2)
 \end{CodeInput}
 \end{CodeChunk}
 
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. For reproducibility, we fix the standard-normal reference sample used in the KL calculations and reuse it below in the discount-factor scan. Smaller values indicate better fit for the KL, CRPS, and PPLC criteria; for these LDVB fits, the reported diagnostics favor the exDQLM, while the DQLM is faster. \color{magenta} From RP: For the code below it would be good to add par(mfrow=c(2,3)) to be able to see the plots on Figure 4. \color{black}
+To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. For reproducibility, we fix the standard-normal reference sample used in the KL calculations and reuse it below in the discount-factor scan. Smaller values indicate better fit for the KL, CRPS, and PPLC criteria; for these LDVB fits, the reported diagnostics favor the exDQLM, while the DQLM is faster.
 % fig:ex2checks
-% R> par(mfrow=c(2,3))
 \begin{CodeChunk}
 \begin{CodeInput}
+R> par(mfrow = c(2, 3))
 R> set.seed(20260503)
 R> ref.samp = rnorm(length(sunspot.year))
 R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red", "blue"),

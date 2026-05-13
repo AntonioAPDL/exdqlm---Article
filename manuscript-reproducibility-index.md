@@ -34,10 +34,10 @@ These are the figures and tables cited directly in the manuscript.
 
 The manuscript-facing workflow is organized under the article repository:
 
-- [analysis/README.md](/data/muscat_data/jaguir26/exdqlm---Article/analysis/README.md)
-- [analysis/manuscript/README.md](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/README.md)
-- [analysis/run_all.R](/data/muscat_data/jaguir26/exdqlm---Article/analysis/run_all.R)
-- [exdqlm-jss.tex](/data/muscat_data/jaguir26/exdqlm---Article/exdqlm-jss.tex)
+- [analysis/README.md](analysis/README.md)
+- [analysis/manuscript/README.md](analysis/manuscript/README.md)
+- [analysis/run_all.R](analysis/run_all.R)
+- [exdqlm-jss.tex](exdqlm-jss.tex)
 
 The canonical executable scripts for the paper examples are under
 `analysis/manuscript/examples/`. Manuscript figures are generated into
@@ -49,18 +49,19 @@ with the corresponding generated CSV/log outputs whenever a model is rerun.
 
 The main reproducibility outputs written by the manuscript stage are:
 
-- [manuscript_repro_tracker.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv)
-- [manuscript_repro_tracker.md](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/manuscript_repro_tracker.md)
-- [manuscript_repro_notes.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/manuscript_repro_notes.csv)
-- [manuscript_api_migration_map.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv)
-- [benchmark_backend_profiles.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv)
-- [benchmark_environment.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/benchmark_environment.csv)
+- [manuscript_repro_tracker.csv](analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv)
+- [manuscript_repro_tracker.md](analysis/manuscript/outputs/tables/manuscript_repro_tracker.md)
+- [manuscript_repro_notes.csv](analysis/manuscript/outputs/tables/manuscript_repro_notes.csv)
+- [manuscript_api_migration_map.csv](analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv)
+- [benchmark_backend_profiles.csv](analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv)
+- [benchmark_environment.csv](analysis/manuscript/outputs/tables/benchmark_environment.csv)
 
 ## 3. Main Rerun Entry Points
 
 From the repository root:
 
 ```bash
+EXDQLM_PKG_PATH=../exdqlm Rscript analysis/check_reproducibility.R
 Rscript analysis/run_all.R --stage manuscript
 Rscript analysis/run_all.R --stage manuscript --profile standard --promote
 ```
@@ -81,53 +82,53 @@ Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --profile stan
 ### Example 1: Lake Huron
 
 Publication-facing:
-- [ex1mcmc.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex1mcmc.png)
-- [ex1quants.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex1quants.png)
+- [ex1mcmc.png](analysis/manuscript/outputs/figures/ex1mcmc.png)
+- [ex1quants.png](analysis/manuscript/outputs/figures/ex1quants.png)
 
 Support-only:
-- [ex1synth.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex1synth.png)
-- [ex1_synthesis_summary.txt](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt)
-- [ex1_kernel_summary.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex1_kernel_summary.csv)
-- [ex1_kernel_chain_stability.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex1_kernel_chain_stability.csv)
-- [ex1_kernel_compare_summary.txt](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt)
+- [ex1synth.png](analysis/manuscript/outputs/figures/ex1synth.png)
+- [ex1_synthesis_summary.txt](analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt)
+- [ex1_kernel_summary.csv](analysis/manuscript/outputs/tables/ex1_kernel_summary.csv)
+- [ex1_kernel_chain_stability.csv](analysis/manuscript/outputs/tables/ex1_kernel_chain_stability.csv)
+- [ex1_kernel_compare_summary.txt](analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt)
 
 ### Example 2: Sunspots
 
 Publication-facing:
-- [ex2quant.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex2quant.png)
-- [ex2checks.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex2checks.png)
-- [ex2_dynamic_benchmark.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv)
+- [ex2quant.png](analysis/manuscript/outputs/figures/ex2quant.png)
+- [ex2checks.png](analysis/manuscript/outputs/figures/ex2checks.png)
+- [ex2_dynamic_benchmark.csv](analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv)
 
 Support-only:
-- [ex2_df_scan_kl.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
-- [ex2_ldvb_diagnostics.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png)
+- [ex2_df_scan_kl.csv](analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
+- [ex2_ldvb_diagnostics.png](analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png)
 
 ### Example 3: Big Tree
 
 Publication-facing:
-- [ex3data.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex3data.png)
-- [ex3quantcomps.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex3quantcomps.png)
-- [ex3zetapsi.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex3zetapsi.png)
-- [ex3forecast.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex3forecast.png)
-- [ex3_diagnostics_summary.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv)
+- [ex3data.png](analysis/manuscript/outputs/figures/ex3data.png)
+- [ex3quantcomps.png](analysis/manuscript/outputs/figures/ex3quantcomps.png)
+- [ex3zetapsi.png](analysis/manuscript/outputs/figures/ex3zetapsi.png)
+- [ex3forecast.png](analysis/manuscript/outputs/figures/ex3forecast.png)
+- [ex3_diagnostics_summary.csv](analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv)
 
 Support-only:
-- [ex3_lambda_selection.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_lambda_selection.csv)
-- [ex3_forecast_metrics.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv)
-- [ex3_sensitivity_forecast_metrics.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv)
-- [ex3_model_dataset.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_model_dataset.csv)
-- [ex3_covariate_scaling.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv)
+- [ex3_lambda_selection.csv](analysis/manuscript/outputs/tables/ex3_lambda_selection.csv)
+- [ex3_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv)
+- [ex3_sensitivity_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv)
+- [ex3_model_dataset.csv](analysis/manuscript/outputs/tables/ex3_model_dataset.csv)
+- [ex3_covariate_scaling.csv](analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv)
 
 ### Example 4: Static exAL benchmark
 
 Publication-facing:
-- [ex4static.png](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/figures/ex4static.png)
-- [ex4static_summary.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex4static_summary.csv)
+- [ex4static.png](analysis/manuscript/outputs/figures/ex4static.png)
+- [ex4static_summary.csv](analysis/manuscript/outputs/tables/ex4static_summary.csv)
 
 Support-only:
-- [ex4_seed_screen_p050_summary.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_p050_summary.csv)
-- [ex4_seed_screen_p050_selection.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
-- [ex4_seed_screen_p050_summary.txt](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
+- [ex4_seed_screen_p050_summary.csv](analysis/manuscript/outputs/tables/ex4_seed_screen_p050_summary.csv)
+- [ex4_seed_screen_p050_selection.csv](analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
+- [ex4_seed_screen_p050_summary.txt](analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
 
 ## 5. Supplementary Robustness Note
 
@@ -137,8 +138,8 @@ workflow where this is most informative.
 
 The most important of these is the Example 4 \(p_0 = 0.50\) seed screen:
 
-- [ex4_seed_screen_p050_selection.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
-- [ex4_seed_screen_p050_summary.txt](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
+- [ex4_seed_screen_p050_selection.csv](analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
+- [ex4_seed_screen_p050_summary.txt](analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
 
 In the tracked standard-profile run, a fixed seed grid is screened in
 deterministic batches until at least one candidate satisfies the illustration
@@ -156,9 +157,9 @@ possible simulated datasets.
 
 Two smaller support-side robustness checks are also retained:
 - Example 1 kernel comparison:
-  [ex1_kernel_summary.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex1_kernel_summary.csv)
+  [ex1_kernel_summary.csv](analysis/manuscript/outputs/tables/ex1_kernel_summary.csv)
 - Example 2 discount-factor scan:
-  [ex2_df_scan_kl.csv](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
+  [ex2_df_scan_kl.csv](analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
 
 ## 6. Practical Reading Order
 
@@ -167,6 +168,6 @@ For a reader who wants only the core article artifacts:
 2. consult the reproducibility tracker files in Section 2
 
 For a reader who wants the computational support layer:
-1. read [analysis/manuscript/README.md](/data/muscat_data/jaguir26/exdqlm---Article/analysis/manuscript/README.md)
+1. read [analysis/manuscript/README.md](analysis/manuscript/README.md)
 2. use the rerun commands in Section 3
 3. inspect the example-specific support artifacts in Sections 4 and 5

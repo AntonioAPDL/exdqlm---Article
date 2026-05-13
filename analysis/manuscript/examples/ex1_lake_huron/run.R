@@ -15,7 +15,7 @@ if (!need_ex1) {
 
   y_ts <- datasets::LakeHuron
   y <- as.numeric(y_ts)
-  model <- exdqlm::polytrendMod(order = 2, m0 = c(mean(y), 0), C0 = 10 * diag(2))
+  model <- exdqlm::polytrendMod(order = 2, m0 = c(579, 0), C0 = 10 * diag(2))
 
   capture_output_file("ex1_model_output.txt", {
     print(model)
@@ -203,7 +203,7 @@ if (!need_ex1) {
   synth_fore_col <- grDevices::adjustcolor("#D98A9B", alpha.f = 0.38)
 
   if (need_ex1_quants_models) {
-    ex1_quants <- load_or_fit_cache(sprintf("ex1_quants_models_v3_main_2000_3000_seed%s", seed_value), {
+    ex1_quants <- load_or_fit_cache(sprintf("ex1_quants_models_v4_prior579_main_2000_3000_seed%s", seed_value), {
       M95 <- exdqlm::exdqlmMCMC(
         y = y, p0 = 0.95, model = model,
         df = 0.9, dim.df = 2,
@@ -226,7 +226,7 @@ if (!need_ex1) {
         verbose = FALSE
       )
       list(model = model, M95 = M95, M50_dqlm = M50_dqlm, M5 = M5)
-    }, note = sprintf("ex1_quants_models_v3_main_2000_3000_seed%s", seed_value))
+    }, note = sprintf("ex1_quants_models_v4_prior579_main_2000_3000_seed%s", seed_value))
 
     M95 <- ex1_quants$M95
     M50_dqlm <- ex1_quants$M50_dqlm
@@ -241,7 +241,7 @@ if (!need_ex1) {
   }
 
   if (need_ex1_trace_model) {
-    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v8_slice_vbinit_2000_3000_seed%s", trace_seed), {
+    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v9_prior579_slice_vbinit_2000_3000_seed%s", trace_seed), {
       M50_trace <- with_local_seed(trace_seed, {
         exdqlm::exdqlmMCMC(
           y = y, p0 = 0.50, model = model,
@@ -255,7 +255,7 @@ if (!need_ex1) {
         )
       })
       list(M50_trace = M50_trace)
-    }, note = sprintf("ex1_trace_model_v8_slice_vbinit_2000_3000_seed%s", trace_seed))
+    }, note = sprintf("ex1_trace_model_v9_prior579_slice_vbinit_2000_3000_seed%s", trace_seed))
 
     M50_trace <- ex1_trace$M50_trace
     sigma_trace <- as.numeric(M50_trace$samp.sigma)
@@ -350,7 +350,7 @@ if (!need_ex1) {
   }
 
   if (need_ex1_synthesis) {
-    ex1_synthesis <- load_or_fit_cache(sprintf("ex1_synthesis_v5_s3_plot_seed%s", seed_value), {
+    ex1_synthesis <- load_or_fit_cache(sprintf("ex1_synthesis_v6_prior579_s3_plot_seed%s", seed_value), {
       syn_obs <- with_local_seed(seed_value + 111L, {
         exdqlm::quantileSynthesis(
           draws_list = list(M5, M50_dqlm, M95),
@@ -375,7 +375,7 @@ if (!need_ex1) {
         syn_obs = syn_obs,
         syn_future = syn_future
       )
-    }, note = sprintf("ex1_synthesis_v5_s3_plot_seed%s", seed_value))
+    }, note = sprintf("ex1_synthesis_v6_prior579_s3_plot_seed%s", seed_value))
 
     ex1_synthesis_bridge_check <- synthesis_forecast_origin_check(
       ex1_synthesis$syn_obs,
@@ -734,14 +734,14 @@ if (!need_ex1) {
       build_kernel_diag(fits)
     }
 
-    ex1_kernel <- load_or_fit_cache("ex1_kernel_compare_v3_free_sigma_longer", {
+    ex1_kernel <- load_or_fit_cache("ex1_kernel_compare_v4_prior579_free_sigma_longer", {
       slice_seeds <- seed_value + 1100L + seq_len(n_chains_kernel)
       laplace_seeds <- seed_value + 1200L + seq_len(n_chains_kernel)
       list(
         slice = run_kernel_multichain("slice", slice_seeds),
         laplace_rw = run_kernel_multichain("laplace_rw", laplace_seeds)
       )
-    }, note = "ex1_kernel_compare_v3_free_sigma_longer")
+    }, note = "ex1_kernel_compare_v4_prior579_free_sigma_longer")
 
     kernel_summary <- do.call(
       rbind,

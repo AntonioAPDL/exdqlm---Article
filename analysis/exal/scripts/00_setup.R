@@ -38,151 +38,18 @@ cfg_style <- yaml::read_yaml(file.path(analysis_root, "config", "style.yml"))
 seed_value <- seed_override %||% cfg_params$seed
 set.seed(seed_value)
 
-resolve_pkg_path <- function() {
-  env_pkg_path <- Sys.getenv("EXDQLM_PKG_PATH", unset = "")
-  env_pkg_path <- if (nzchar(env_pkg_path)) env_pkg_path else NULL
-  default_pkg_path <- normalizePath(
-    file.path(repo_root, "..", "exdqlm__wt__0.5.0-crps-iqs"),
-    winslash = "/",
-    mustWork = FALSE
+source(file.path(analysis_root, "lib", "exdqlm_package_resolver.R"), local = TRUE)
+
+resolve_pkg_path <- function(fail_if_missing = FALSE) {
+  exdqlm_resolve_source_spec(
+    repo_root = repo_root,
+    pkg_path = pkg_path,
+    fail_if_missing = fail_if_missing
   )
-
-  selected_path <- pkg_path %||% env_pkg_path %||% default_pkg_path
-  selected_source <- if (!is.null(pkg_path) && nzchar(pkg_path)) {
-    "--pkg-path"
-  } else if (!is.null(env_pkg_path)) {
-    "EXDQLM_PKG_PATH"
-  } else {
-    "default"
-  }
-
-  list(
-    path = normalizePath(selected_path, winslash = "/", mustWork = FALSE),
-    source = selected_source
-  )
-}
-
-resolve_load_spec <- function() {
-  load_mode <- tolower(trimws(Sys.getenv("EXDQLM_LOAD_MODE", unset = "source")))
-  load_mode <- if (nzchar(load_mode)) load_mode else "source"
-  if (!load_mode %in% c("source", "installed")) {
-    stop(
-      sprintf(
-        "Unsupported EXDQLM_LOAD_MODE '%s'. Use 'source' or 'installed'.",
-        load_mode
-      ),
-      call. = FALSE
-    )
-  }
-  installed_lib <- Sys.getenv("EXDQLM_INSTALLED_LIB", unset = "")
-  installed_lib <- if (nzchar(installed_lib)) {
-    normalizePath(installed_lib, winslash = "/", mustWork = FALSE)
-  } else {
-    NULL
-  }
-  list(mode = load_mode, installed_lib = installed_lib)
 }
 
 load_exdqlm <- function() {
-  load_spec <- resolve_load_spec()
-  if (identical(load_spec$mode, "installed")) {
-    if (!is.null(pkg_path) || nzchar(Sys.getenv("EXDQLM_PKG_PATH", unset = ""))) {
-      log_msg("EXDQLM_LOAD_MODE=installed: ignoring source-path overrides and loading installed exdqlm.")
-    }
-    if (!is.null(load_spec$installed_lib)) {
-      if (!dir.exists(load_spec$installed_lib)) {
-        stop(
-          sprintf(
-            "EXDQLM_INSTALLED_LIB does not exist: %s",
-            load_spec$installed_lib
-          ),
-          call. = FALSE
-        )
-      }
-      .libPaths(unique(c(load_spec$installed_lib, .libPaths())))
-    }
-    if (!requireNamespace("exdqlm", quietly = TRUE)) {
-      stop(
-        paste(
-          "Installed exdqlm package not found.",
-          "Set EXDQLM_INSTALLED_LIB to the library containing exdqlm or switch back to source mode.",
-          sep = "\n"
-        ),
-        call. = FALSE
-      )
-    }
-    pkg_loc <- tryCatch(find.package("exdqlm"), error = function(e) NA_character_)
-    version <- as.character(utils::packageVersion("exdqlm"))
-    log_msg(sprintf(
-      "Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed): %s [version %s]",
-      pkg_loc,
-      version
-    ))
-    return(invisible(TRUE))
-  }
-
-  pkg_spec <- resolve_pkg_path()
-  desc_path <- file.path(pkg_spec$path, "DESCRIPTION")
-
-  if (!dir.exists(pkg_spec$path)) {
-    stop(
-      sprintf(
-        paste(
-          "Local exdqlm package path (%s) does not exist: %s",
-          "Use --pkg-path /path/to/exdqlm or set EXDQLM_PKG_PATH to a valid exdqlm source checkout.",
-          sep = "\n"
-        ),
-        pkg_spec$source,
-        pkg_spec$path
-      ),
-      call. = FALSE
-    )
-  }
-  if (!file.exists(desc_path)) {
-    stop(
-      sprintf(
-        paste(
-          "Local exdqlm package path (%s) is not an R package checkout (DESCRIPTION not found): %s",
-          "Use --pkg-path /path/to/exdqlm or set EXDQLM_PKG_PATH to a valid exdqlm source checkout.",
-          sep = "\n"
-        ),
-        pkg_spec$source,
-        pkg_spec$path
-      ),
-      call. = FALSE
-    )
-  }
-
-  loader_name <- if (requireNamespace("pkgload", quietly = TRUE)) {
-    "pkgload::load_all"
-  } else if (requireNamespace("devtools", quietly = TRUE)) {
-    "devtools::load_all"
-  } else {
-    stop(
-      paste(
-        "pkgload (preferred) or devtools is required to load local exdqlm package source.",
-        "Install pkgload, or provide an environment where one of these loaders is available.",
-        sep = "\n"
-      ),
-      call. = FALSE
-    )
-  }
-
-  if (identical(loader_name, "pkgload::load_all")) {
-    pkgload::load_all(path = pkg_spec$path, quiet = TRUE, export_all = FALSE, helpers = FALSE)
-  } else {
-    devtools::load_all(path = pkg_spec$path, quiet = TRUE, export_all = FALSE, helpers = FALSE)
-  }
-
-  version <- as.character(utils::packageVersion("exdqlm"))
-  log_msg(sprintf(
-    "Loaded local exdqlm from source (%s via %s): %s [version %s]",
-    pkg_spec$source,
-    loader_name,
-    pkg_spec$path,
-    version
-  ))
-  invisible(TRUE)
+  exdqlm_load_package(repo_root = repo_root, pkg_path = pkg_path, log_msg = log_msg)
 }
 
 load_exdqlm()

@@ -5,8 +5,8 @@ and compact console-output equivalents) using the current `exdqlm` package API,
 without modifying `exdqlm-jss.tex`.
 
 For a reader-facing index of the publication artifacts, support-only outputs,
-and recommended rerun entry points, see
-`/data/muscat_data/jaguir26/exdqlm---Article/manuscript-reproducibility-index.md`.
+and recommended rerun entry points, see `manuscript-reproducibility-index.md`
+in the repository root.
 
 ## Canonical Example Workflow
 
@@ -68,6 +68,7 @@ Overleaf in sync.
 From repository root:
 
 ```bash
+Rscript analysis/check_reproducibility.R
 Rscript analysis/run_all.R --stage manuscript
 ```
 
@@ -100,10 +101,11 @@ Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit --skip-tests
 ```
 
-By default, this stage loads local `exdqlm` source from a sibling checkout at
-`../exdqlm__wt__0.5.0-crps-iqs`. Override that with
-`--pkg-path /path/to/exdqlm` or `EXDQLM_PKG_PATH=/path/to/exdqlm`.
-If both are set, `--pkg-path` takes precedence over `EXDQLM_PKG_PATH`.
+By default, this stage loads local `exdqlm` source. It first uses
+`--pkg-path /path/to/exdqlm`, then `EXDQLM_PKG_PATH=/path/to/exdqlm`, then a
+small set of common sibling checkout names such as `../exdqlm`.
+If both explicit source paths are set, `--pkg-path` takes precedence over
+`EXDQLM_PKG_PATH`.
 For constrained environments where rebuilding local source is not feasible,
 set `EXDQLM_LOAD_MODE=installed` and optionally
 `EXDQLM_INSTALLED_LIB=/path/to/R/library` to use an installed `exdqlm`

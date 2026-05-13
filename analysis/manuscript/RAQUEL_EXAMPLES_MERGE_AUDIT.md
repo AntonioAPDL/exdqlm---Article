@@ -30,9 +30,9 @@ by maintaining separate example workflows.
 ## Canonical Repositories
 
 - Article repo:
-  `/data/muscat_data/jaguir26/exdqlm---Article`
+  `AntonioAPDL/exdqlm---Article`
 - Package repo for the current article-facing package branch:
-  `/data/muscat_data/jaguir26/exdqlm__wt__0.5.0-crps-iqs`
+  `AntonioAPDL/exdqlm`
 - Package branch:
   `feature/0.5.0-crps-iqs`
 
