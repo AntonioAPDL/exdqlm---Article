@@ -46,10 +46,25 @@ exdqlm_is_source_checkout <- function(path) {
     identical(exdqlm_read_description_field(path, "Package"), "exdqlm")
 }
 
+exdqlm_git_ahead_behind <- function(path) {
+  counts <- exdqlm_safe_system_output(
+    "git",
+    c("-C", path, "rev-list", "--left-right", "--count", "HEAD...@{u}")
+  )
+  counts <- counts[grepl("^[0-9]+[[:space:]]+[0-9]+$", counts)]
+  if (!length(counts)) {
+    return(c(ahead = NA_integer_, behind = NA_integer_))
+  }
+
+  values <- as.integer(strsplit(counts[[1]], "[[:space:]]+")[[1]])
+  c(ahead = values[[1]], behind = values[[2]])
+}
+
 exdqlm_git_info <- function(path) {
   if (is.null(path) || !dir.exists(path)) {
     return(list(branch = NA_character_, upstream = NA_character_, commit = NA_character_,
-                dirty = NA, remote = NA_character_))
+                dirty = NA, remote = NA_character_, ahead = NA_integer_,
+                behind = NA_integer_))
   }
 
   branch <- exdqlm_safe_system_output("git", c("-C", path, "branch", "--show-current"))
@@ -57,13 +72,16 @@ exdqlm_git_info <- function(path) {
   commit <- exdqlm_safe_system_output("git", c("-C", path, "rev-parse", "HEAD"))
   status <- exdqlm_safe_system_output("git", c("-C", path, "status", "--porcelain", "--untracked-files=no"))
   remote <- exdqlm_safe_system_output("git", c("-C", path, "remote", "get-url", "origin"))
+  counts <- exdqlm_git_ahead_behind(path)
 
   list(
     branch = branch[[1]] %||% NA_character_,
     upstream = upstream[[1]] %||% NA_character_,
     commit = commit[[1]] %||% NA_character_,
     dirty = length(status) > 0L,
-    remote = remote[[1]] %||% NA_character_
+    remote = remote[[1]] %||% NA_character_,
+    ahead = counts[["ahead"]],
+    behind = counts[["behind"]]
   )
 }
 

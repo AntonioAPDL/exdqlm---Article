@@ -26,6 +26,15 @@ Run the read-only preflight check:
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/check_reproducibility.R
 ```
 
+Before regenerating any examples, refresh remote refs and require both the local
+package checkout and R runtime to be current. As of 2026-05-13, the current
+official R release is R 4.6.0, so final reference runs should use at least that
+version:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm Rscript analysis/check_reproducibility.R --fetch --strict --require-r-version 4.6.0
+```
+
 Run the cheap manuscript structure/tests pass:
 
 ```sh
@@ -95,8 +104,10 @@ LaTeX and must be synchronized from generated CSV/log outputs after reruns.
 
 ## Reproducibility Notes
 
-- `analysis/check_reproducibility.R` is read-only and should be the first command
-  run in a fresh clone.
+- `analysis/check_reproducibility.R` is read-only unless `--fetch` is supplied
+  and should be the first command run in a fresh clone. Use `--fetch --strict`
+  with `--require-r-version` before regenerating examples so stale package
+  checkouts or stale R runtimes are caught before expensive relaunches.
 - `analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv` maps tracked
   artifacts to manuscript targets.
 - Runtime values are hardware-, R-version-, backend-, and profile-dependent.

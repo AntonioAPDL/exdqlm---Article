@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+`%||%` <- function(x, y) if (is.null(x) || length(x) == 0L) y else x
+
 find_repo_root <- function(start = getwd()) {
   cur <- normalizePath(start, mustWork = TRUE)
   repeat {
@@ -13,7 +15,14 @@ find_repo_root <- function(start = getwd()) {
 }
 
 parse_args <- function(args) {
-  out <- list(stage = "manuscript", profile = "quick", pkg_path = NULL, strict = FALSE)
+  out <- list(
+    stage = "manuscript",
+    profile = "quick",
+    pkg_path = NULL,
+    strict = FALSE,
+    fetch = FALSE,
+    require_r_version = Sys.getenv("EXDQLM_REQUIRED_R_VERSION", unset = "")
+  )
   i <- 1L
   while (i <= length(args)) {
     a <- args[[i]]
@@ -28,6 +37,11 @@ parse_args <- function(args) {
       out$pkg_path <- args[[i]]
     } else if (a == "--strict") {
       out$strict <- TRUE
+    } else if (a == "--fetch") {
+      out$fetch <- TRUE
+    } else if (a == "--require-r-version") {
+      i <- i + 1L
+      out$require_r_version <- args[[i]]
     } else if (a %in% c("--help", "-h")) {
       cat(
         "Usage: Rscript analysis/check_reproducibility.R [options]\n\n",
@@ -35,6 +49,8 @@ parse_args <- function(args) {
         "  --stage exal|manuscript   Stage to check. Default: manuscript\n",
         "  --profile NAME            Manuscript profile to validate. Default: quick\n",
         "  --pkg-path PATH           exdqlm source checkout to use/check\n",
+        "  --fetch                   Fetch article/package remotes before freshness checks\n",
+        "  --require-r-version X.Y.Z Require at least this R version\n",
         "  --strict                  Treat warnings as failures\n",
         "  --help                    Show this message\n",
         sep = ""
@@ -45,6 +61,7 @@ parse_args <- function(args) {
     }
     i <- i + 1L
   }
+  out$require_r_version <- trimws(out$require_r_version)
   out
 }
 
@@ -81,6 +98,66 @@ check_packages <- function(pkgs, label) {
   invisible(missing)
 }
 
+fetch_git_remote <- function(path, label) {
+  if (is.null(path) || !dir.exists(path) || !file.exists(file.path(path, ".git"))) {
+    warn(sprintf("Cannot fetch %s remote because path is not a git checkout: %s", label, path %||% "<null>"))
+    return(invisible(FALSE))
+  }
+  status <- system2("git", c("-C", path, "fetch", "--all", "--prune"), stdout = TRUE, stderr = TRUE)
+  fetch_status <- attr(status, "status") %||% 0L
+  if (!identical(as.integer(fetch_status), 0L)) {
+    fail(sprintf("git fetch failed for %s checkout: %s", label, path))
+    if (length(status)) cat(paste0("  ", status, "\n"), sep = "")
+    return(invisible(FALSE))
+  }
+  ok(sprintf("fetched %s remote refs", label))
+  invisible(TRUE)
+}
+
+report_git_freshness <- function(info, label, fail_when_behind = FALSE) {
+  if (is.na(info$ahead) || is.na(info$behind)) {
+    warn(sprintf("%s upstream freshness could not be determined.", label))
+    return(invisible(FALSE))
+  }
+
+  line("ahead/behind", sprintf("%s/%s relative to upstream", info$ahead, info$behind))
+  if (info$behind > 0L) {
+    msg <- sprintf("%s checkout is behind upstream by %d commit(s). Pull/update before relaunching examples.", label, info$behind)
+    if (fail_when_behind) fail(msg) else warn(msg)
+  } else if (info$ahead > 0L) {
+    warn(sprintf("%s checkout is ahead of upstream by %d commit(s); generated artifacts may not match the remote branch.", label, info$ahead))
+  } else {
+    ok(sprintf("%s checkout is up to date with upstream", label))
+  }
+  invisible(TRUE)
+}
+
+check_r_version <- function(required = "") {
+  section("R Runtime")
+  current <- as.character(getRversion())
+  line("R.version.string", R.version.string)
+  line("R.home", R.home())
+  line("R executable", Sys.which("R") %||% NA_character_)
+  if (!nzchar(required)) {
+    warn("No required R version was supplied. Use --require-r-version before final example relaunches.")
+    return(invisible(FALSE))
+  }
+
+  line("required minimum", required)
+  current_v <- numeric_version(current)
+  required_v <- numeric_version(required)
+  if (current_v < required_v) {
+    fail(sprintf(
+      "R %s is older than required R %s. Update R before relaunching final examples.",
+      current,
+      required
+    ))
+  } else {
+    ok(sprintf("R %s satisfies required minimum R %s", current, required))
+  }
+  invisible(TRUE)
+}
+
 read_csv_safely <- function(path) {
   tryCatch(utils::read.csv(path, stringsAsFactors = FALSE), error = function(e) NULL)
 }
@@ -91,6 +168,26 @@ main <- function() {
   analysis_root <- file.path(repo_root, "analysis")
   source(file.path(analysis_root, "lib", "exdqlm_package_resolver.R"), local = TRUE)
 
+  load_spec <- exdqlm_resolve_load_spec()
+  pkg_spec <- NULL
+  if (identical(load_spec$mode, "source")) {
+    pkg_spec <- exdqlm_resolve_source_spec(repo_root, pkg_path = args$pkg_path, fail_if_missing = FALSE)
+  }
+
+  if (isTRUE(args$fetch)) {
+    section("Remote Freshness Fetch")
+    fetch_git_remote(repo_root, "article")
+    if (identical(load_spec$mode, "source") && isTRUE(pkg_spec$is_package)) {
+      fetch_git_remote(pkg_spec$path, "package")
+    } else if (identical(load_spec$mode, "source")) {
+      warn("Package source checkout is unresolved, so package remote refs were not fetched.")
+    } else {
+      warn("EXDQLM_LOAD_MODE=installed: package source remote freshness cannot be fetched.")
+    }
+  }
+
+  check_r_version(args$require_r_version)
+
   section("Article Repository")
   line("path", repo_root)
   article_git <- exdqlm_git_info(repo_root)
@@ -99,6 +196,7 @@ main <- function() {
   line("commit", article_git$commit)
   line("remote", article_git$remote)
   line("dirty tracked files", article_git$dirty)
+  report_git_freshness(article_git, "article", fail_when_behind = FALSE)
   if (!grepl("exdqlm---Article", article_git$remote, fixed = TRUE)) {
     fail("Article remote does not look like AntonioAPDL/exdqlm---Article.")
   } else {
@@ -106,10 +204,8 @@ main <- function() {
   }
 
   section("exdqlm Package Source")
-  load_spec <- exdqlm_resolve_load_spec()
   line("load mode", load_spec$mode)
   if (identical(load_spec$mode, "source")) {
-    pkg_spec <- exdqlm_resolve_source_spec(repo_root, pkg_path = args$pkg_path, fail_if_missing = FALSE)
     if (!isTRUE(pkg_spec$is_package)) {
       fail("No valid local exdqlm source checkout found.")
       cat("Candidate sibling paths checked:\n")
@@ -123,6 +219,7 @@ main <- function() {
       line("commit", pkg_spec$git$commit)
       line("remote", pkg_spec$git$remote)
       line("dirty tracked files", pkg_spec$git$dirty)
+      report_git_freshness(pkg_spec$git, "package", fail_when_behind = TRUE)
       if (!grepl("AntonioAPDL/exdqlm", pkg_spec$git$remote, fixed = TRUE)) {
         warn("Package remote does not look like AntonioAPDL/exdqlm.")
       } else {
