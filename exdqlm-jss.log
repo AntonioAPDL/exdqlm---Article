@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2026.5.1)  14 MAY 2026 19:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2026.5.1)  14 MAY 2026 19:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -911,7 +911,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [34 <./analysis/manuscript/outputs/figures/ex4static.png (PNG copy)>]
 (./exdqlm-jss.bbl
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 1286) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -1018,7 +1018,7 @@ ic/lm/lmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtt10.pfb
 live/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on exdqlm-jss.pdf (39 pages, 3140506 bytes).
+Output written on exdqlm-jss.pdf (39 pages, 3140660 bytes).
 PDF statistics:
  765 PDF objects out of 1000 (max. 8388607)
  674 compressed objects within 7 object streams
