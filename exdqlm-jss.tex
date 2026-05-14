@@ -1026,7 +1026,7 @@ R> lambda.star = lambda.grid[which.min(pplc.grid)]
 R> lambda.star
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 0.9
+[1] 0.8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1142,14 +1142,14 @@ R> title(expression(psi[list(AMO, t)]))
 The fitted object also reports \code{median.kt}, the median number of time steps
 until the transfer effect on the \(0.15\) quantile is less than or equal to
 \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here
-\code{median.kt} is approximately 35.28, indicating a persistent transfer effect
+\code{median.kt} is approximately 19.19, indicating a persistent transfer effect
 under the selected \(\lambda\).
 \begin{CodeChunk}
 \begin{CodeInput}
 R> MTF$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 35.27921
+[1] 19.18759
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1214,8 +1214,8 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no transfer & 0.243 & 0.481 & \textbf{100.901} \\
- \code{MTF} transfer function & \textbf{0.153} & \textbf{0.371} & 120.404 \\
+ \code{M0} no transfer & 0.168 & 0.472 & \textbf{99.620} \\
+ \code{MTF} transfer function & \textbf{0.122} & \textbf{0.362} & 123.697 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
