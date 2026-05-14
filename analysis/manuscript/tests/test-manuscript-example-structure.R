@@ -56,6 +56,27 @@ testthat::test_that("canonical manuscript example manifests parse cleanly", {
   }
 })
 
+testthat::test_that("Example 4 seed screen is an explicit support target", {
+  seed_screen_lines <- readLines(file.path(example_root, "ex4_static", "seed_screen.R"), warn = FALSE)
+
+  testthat::expect_true(any(grepl(
+    "need_ex4screen <- targeted_run && target_enabled(\"ex4screen\")",
+    seed_screen_lines,
+    fixed = TRUE
+  )))
+})
+
+testthat::test_that("Example 4 publication seed is configured, not output-dependent", {
+  testthat::skip_if_not_installed("yaml")
+
+  params <- yaml::read_yaml(file.path(repo_root, "analysis", "config", "params_manuscript.yml"))
+  for (profile_name in c("quick", "standard", "full")) {
+    ex4 <- params$profiles[[profile_name]]$ex4
+    testthat::expect_equal(as.integer(ex4$dataset_seed), 20260712L, info = profile_name)
+    testthat::expect_equal(as.character(ex4$dataset_seed_mode), "configured", info = profile_name)
+  }
+})
+
 testthat::test_that("article figures are declared by the canonical example manifests", {
   testthat::skip_if_not_installed("yaml")
 

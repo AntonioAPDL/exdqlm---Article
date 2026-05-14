@@ -30,3 +30,21 @@ testthat::test_that("reader-facing analysis docs avoid stale machine-specific pa
     )
   }
 })
+
+testthat::test_that("manuscript setup records run-start provenance and headless PNG output", {
+  setup_lines <- readLines(file.path(repo_root, "analysis", "lib", "manuscript_setup.R"), warn = FALSE)
+
+  testthat::expect_true(any(grepl("article_git_at_setup <- git_state_snapshot\\(repo_root\\)", setup_lines)))
+  testthat::expect_true(any(grepl("pkg_git_at_setup <- git_state_snapshot\\(pkg_source_at_setup\\$path\\)", setup_lines)))
+  testthat::expect_true(any(grepl("article_git_at_setup$dirty", setup_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("pkg_git_at_setup$dirty", setup_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("capabilities\\(\"cairo\"\\)", setup_lines)))
+  testthat::expect_true(any(grepl("type = png_type", setup_lines, fixed = TRUE)))
+})
+
+testthat::test_that("preflight warns about dirty tracked checkouts for final reruns", {
+  check_lines <- readLines(file.path(repo_root, "analysis", "check_reproducibility.R"), warn = FALSE)
+
+  testthat::expect_true(any(grepl("Article checkout has dirty tracked files", check_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("Package checkout has dirty tracked files", check_lines, fixed = TRUE)))
+})

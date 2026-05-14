@@ -469,10 +469,9 @@ if (!need_ex3) {
     eval.parent(substitute(expr))
   }
 
-  ex3_diagnostics <- function(..., ref) {
+  ex3_diagnostics <- function(...) {
     args <- list(...)
     args$plot <- FALSE
-    args$ref <- ref
     if ("crps_probs" %in% names(formals(exdqlm::exdqlmDiagnostics))) {
       args$crps_probs <- crps_probs
     }
@@ -531,7 +530,7 @@ if (!need_ex3) {
     metric_tag <- gsub("[^0-9A-Za-z]+", "_", selection_metric)
     p0_tag <- sprintf("p%03d", round(100 * p0))
     cache_key <- sprintf(
-      "ex3_models_trainselect_v3_diagtable_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
+      "ex3_models_trainselect_v4_diagtable_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
       paste(selected_indices, collapse = "_"),
       pkg_commit %||% "unknown",
       window_tag,
@@ -547,8 +546,6 @@ if (!need_ex3) {
     ex3_models <- load_or_fit_cache(cache_key, {
       selection_rows <- list()
       row_id <- 0L
-      selection_ref_samp <- with_local_seed(seed_value + 3400L, stats::rnorm(length(y_train_ts)))
-
       for (psi_df in transfer_psi_df_grid) {
         for (i in seq_along(lambda_grid)) {
           row_id <- row_id + 1L
@@ -597,7 +594,7 @@ if (!need_ex3) {
           row$converged <- isTRUE(fit$converged)
 
           diag_fit <- tryCatch(
-            ex3_diagnostics(fit, ref = selection_ref_samp),
+            ex3_diagnostics(fit),
             error = function(e) e
           )
           if (!fit_ok(diag_fit)) {
@@ -750,8 +747,7 @@ if (!need_ex3) {
     selection_table <- ex3_models$selection_table
     forecast_metrics <- ex3_models$forecast_metrics
     sensitivity_metrics <- ex3_models$sensitivity_metrics
-    diag_ref_samp <- with_local_seed(seed_value + 4900L, stats::rnorm(length(y_train_ts)))
-    diagnostics_out <- ex3_diagnostics(M0, MTF, ref = diag_ref_samp)
+    diagnostics_out <- ex3_diagnostics(M0, MTF)
     diagnostics_summary <- data.frame(
       model = c("M0_no_transfer", "MTF_transfer_function"),
       label = c("M0 no transfer", "MTF transfer function"),

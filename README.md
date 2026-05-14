@@ -48,6 +48,9 @@ Run the cheap manuscript structure/tests pass:
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --tests-only
 ```
 
+The detailed regeneration and acceptance protocol is maintained in
+[`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`](analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md).
+
 ## Package Loading Modes
 
 Source mode is the default. The article workflow tries, in order:
@@ -90,11 +93,23 @@ Targeted regeneration:
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --targets ex2checks --profile standard --skip-tests
 ```
 
-Full manuscript regeneration can be expensive:
+Full manuscript regeneration can be expensive. It regenerates the publication
+artifacts, including the Example 4 simulation figure/table from the committed
+`dataset_seed`, but it does not redo the optional Example 4 seed screen:
 
 ```sh
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --profile standard
 ```
+
+To re-run the support-only Example 4 seed screen intentionally:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --force-refit --skip-tests
+EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --profile standard --force-refit --skip-tests
+```
+
+If `ex4screen` selects a different seed, update `analysis/config/params_manuscript.yml`
+before rerunning the Example 4 figure/table target.
 
 ## Outputs
 

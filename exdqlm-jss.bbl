@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{47}
+\begin{thebibliography}{48}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -213,6 +213,12 @@ Plummer M, Best N, Cowles K, Vines K (2006).
 \newblock \emph{R News}, \textbf{6}(1), 7--11.
 \newblock \urlprefix\url{https://journal.r-project.org/archive/}.
 
+\bibitem[{Prado \emph{et~al.}(2021)Prado, Ferreira, and
+  West}]{prado_ferreira_west2021}
+Prado R, Ferreira MA, West M (2021).
+\newblock \emph{Time Series: Modeling, Computation and Inference}.
+\newblock 2nd edition. Chapman and Hall/CRC Press.
+
 \bibitem[{Prado \emph{et~al.}(2006)Prado, Molina, and
   Huerta}]{prado2006multivariate}
 Prado R, Molina F, Huerta G (2006).
@@ -284,12 +290,11 @@ Wang C, Blei DM (2013).
 \newblock \emph{arXiv preprint arXiv:1209.4360}.
 \newblock \urlprefix\url{https://arxiv.org/abs/1209.4360}.
 
-\bibitem[{West \emph{et~al.}(1985)West, Harrison, and Migon}]{west1985dynamic}
-West M, Harrison PJ, Migon HS (1985).
-\newblock \enquote{Dynamic generalized linear models and {B}ayesian
-  forecasting.}
-\newblock \emph{Journal of the American Statistical Association},
-  \textbf{80}(389), 73--83.
+\bibitem[{West and Harrison(1997)}]{west1997bayesian}
+West M, Harrison J (1997).
+\newblock \emph{Bayesian Forecasting and Dynamic Models}.
+\newblock 2 edition. Springer, New York.
+\newblock \doi{10.1007/b98971}.
 
 \bibitem[{Yan \emph{et~al.}(2025)Yan, Zheng, and Kottas}]{yan2025family}
 Yan Y, Zheng X, Kottas A (2025).

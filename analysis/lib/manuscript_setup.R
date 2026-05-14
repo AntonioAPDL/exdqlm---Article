@@ -4,7 +4,7 @@ if (!exists("repo_root")) {
   stop("repo_root is not defined. Run via analysis/run_all.R.", call. = FALSE)
 }
 
-required_pkgs <- c("yaml", "matrixStats", "coda", "dlm", "FNN")
+required_pkgs <- c("yaml", "matrixStats", "coda", "dlm")
 for (p in required_pkgs) {
   if (!requireNamespace(p, quietly = TRUE)) {
     stop(sprintf("Package '%s' is required for manuscript stage.", p), call. = FALSE)
@@ -138,12 +138,46 @@ git_short_head <- function(path) {
   if (length(out)) out[[1]] else NA_character_
 }
 
+git_branch <- function(path) {
+  out <- safe_system_output("git", c("-C", path, "branch", "--show-current"))
+  if (length(out)) out[[1]] else NA_character_
+}
+
+git_upstream <- function(path) {
+  out <- safe_system_output("git", c("-C", path, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"))
+  if (length(out)) out[[1]] else NA_character_
+}
+
 git_dirty_state <- function(path) {
   nzchar(paste(
     safe_system_output("git", c("-C", path, "status", "--porcelain", "--untracked-files=no")),
     collapse = ""
   ))
 }
+
+git_state_snapshot <- function(path) {
+  has_path <- !is.null(path) && dir.exists(path)
+  if (!has_path) {
+    return(list(
+      path = NA_character_,
+      commit = NA_character_,
+      branch = NA_character_,
+      upstream = NA_character_,
+      dirty = NA_character_
+    ))
+  }
+  list(
+    path = path,
+    commit = git_short_head(path),
+    branch = git_branch(path),
+    upstream = git_upstream(path),
+    dirty = as.character(git_dirty_state(path))
+  )
+}
+
+article_git_at_setup <- git_state_snapshot(repo_root)
+pkg_source_at_setup <- resolve_pkg_path(fail_if_missing = FALSE)
+pkg_git_at_setup <- git_state_snapshot(pkg_source_at_setup$path)
 
 detect_cpu_model <- function() {
   if (.Platform$OS.type == "unix" && file.exists("/proc/cpuinfo")) {
@@ -158,22 +192,6 @@ detect_cpu_model <- function() {
     if (length(cpu_line)) return(cpu_line[[1]])
   }
   as.character(Sys.info()[["machine"]] %||% NA_character_)
-}
-
-seeded_rnorm <- function(n, seed) {
-  old_exists <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-  if (old_exists) {
-    old_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-  }
-  on.exit({
-    if (old_exists) {
-      assign(".Random.seed", old_seed, envir = .GlobalEnv)
-    } else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-      rm(".Random.seed", envir = .GlobalEnv)
-    }
-  }, add = TRUE)
-  set.seed(as.integer(seed))
-  stats::rnorm(n)
 }
 
 benchmark_profiles_table <- function() {
@@ -225,9 +243,6 @@ resolve_ex4_dataset_seed_for_reporting <- function(cfg_ex4 = cfg_profile$ex4) {
 benchmark_environment_table <- function() {
   cpu_model <- detect_cpu_model()
   pkg_version <- tryCatch(as.character(utils::packageVersion("exdqlm")), error = function(e) NA_character_)
-  pkg_source <- resolve_pkg_path(fail_if_missing = FALSE)
-  pkg_git_path <- pkg_source$path
-  has_pkg_git_path <- !is.null(pkg_git_path) && dir.exists(pkg_git_path)
   ex1_len <- tryCatch({
     utils::data("LakeHuron", package = "datasets", envir = environment())
     length(datasets::LakeHuron)
@@ -246,11 +261,19 @@ benchmark_environment_table <- function() {
       "cpu_model",
       "os",
       "r_version",
+      "r_binary",
+      "rscript_binary",
       "exdqlm_version",
       "exdqlm_commit",
+      "exdqlm_branch",
+      "exdqlm_upstream",
       "exdqlm_dirty",
       "article_commit",
+      "article_branch",
+      "article_upstream",
       "article_dirty",
+      "runtime_definition",
+      "diagnostics_runtime_included",
       "exdqlm.use_cpp_kf",
       "exdqlm.use_cpp_builders",
       "exdqlm.use_cpp_samplers",
@@ -271,12 +294,20 @@ benchmark_environment_table <- function() {
       as.character(seed_value),
       cpu_model,
       paste(Sys.info()[c("sysname", "release", "machine")], collapse = " | "),
-      paste(R.version$major, R.version$minor, sep = "."),
+      R.version.string,
+      normalizePath(file.path(R.home("bin"), "R"), mustWork = FALSE),
+      normalizePath(file.path(R.home("bin"), "Rscript"), mustWork = FALSE),
       pkg_version,
-      if (has_pkg_git_path) git_short_head(pkg_git_path) else NA_character_,
-      if (has_pkg_git_path) as.character(git_dirty_state(pkg_git_path)) else NA_character_,
-      git_short_head(repo_root),
-      as.character(git_dirty_state(repo_root)),
+      pkg_git_at_setup$commit,
+      pkg_git_at_setup$branch,
+      pkg_git_at_setup$upstream,
+      pkg_git_at_setup$dirty,
+      article_git_at_setup$commit,
+      article_git_at_setup$branch,
+      article_git_at_setup$upstream,
+      article_git_at_setup$dirty,
+      "fit elapsed time stored in returned fit objects (`run.time`)",
+      "FALSE",
       as.character(isTRUE(getOption("exdqlm.use_cpp_kf"))),
       as.character(isTRUE(getOption("exdqlm.use_cpp_builders"))),
       as.character(isTRUE(getOption("exdqlm.use_cpp_samplers"))),
@@ -354,7 +385,12 @@ save_png_plot <- function(filename, expr,
                           res = cfg_params$figures$res,
                           pointsize = cfg_params$figures$pointsize) {
   path <- file.path(figures_dir, filename)
-  grDevices::png(filename = path, width = width, height = height, units = "in", res = res, pointsize = pointsize)
+  png_type <- if (isTRUE(capabilities("cairo"))) "cairo" else getOption("bitmapType", "Xlib")
+  grDevices::png(
+    filename = path, width = width, height = height,
+    units = "in", res = res, pointsize = pointsize,
+    type = png_type
+  )
   on.exit(grDevices::dev.off(), add = TRUE)
   eval.parent(substitute(expr))
   invisible(path)
@@ -508,11 +544,18 @@ forecast_from_fit <- function(start.t, k, m1, fFF = NULL, fGG = NULL, plot = TRU
   )
 }
 
-diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "blue"), ref = NULL, y_data = NULL) {
+diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "blue"),
+                                 ref = NULL, y_data = NULL,
+                                 crps_probs = seq(0.01, 0.99, by = 0.01),
+                                 crps_weights = NULL,
+                                 kl_k = NULL) {
   safe_metric_mean <- function(x) {
     x <- as.numeric(x)
     x <- x[is.finite(x)]
     if (!length(x)) NA_real_ else mean(x)
+  }
+  kl_normality <- function(x, ref = NULL, kl_k = NULL) {
+    exdqlm:::.exdqlm_kl_normality_1d(x, ref = ref, kl_k = kl_k)
   }
   y_full <- if (!is.null(y_data)) as.numeric(y_data) else as.numeric(m1$y)
   has_y <- length(y_full) > 0L
@@ -538,21 +581,22 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
   cols <- c(matrix(cols, 2, 1))
 
   m1.uts <- stats::pnorm(m1_msfe)
-  if (is.null(ref)) {
-    ref <- stats::rnorm(TT)
-  } else {
+  if (!is.null(ref)) {
     ref <- c(ref)
     if (length(ref) != TT) stop("ref must have size equal to diagnostics span", call. = FALSE)
   }
-  m1.KL <- mean(FNN::KL.divergence(ref, m1_msfe))
-  m1.KL.flip <- mean(FNN::KL.divergence(m1_msfe, ref))
+  m1.kl <- kl_normality(m1_msfe, ref = ref, kl_k = kl_k)
+  m1.KL <- m1.kl$KL
+  m1.KL.flip <- m1.kl$KL.flip
   if (has_y) {
     m1.loss <- matrix(NA_real_, TT, dim(m1_post_pred)[2])
     for (t in seq_len(TT)) {
       m1.loss[t, ] <- exdqlm:::CheckLossFn(m1$p0, y[t] - m1_post_pred[t, ])
     }
     m1.pplc <- sum(rowMeans(m1.loss))
-    m1.CRPS <- safe_metric_mean(exdqlm:::.exdqlm_crps_vec(y, m1_post_pred))
+    m1.CRPS <- safe_metric_mean(exdqlm:::.exdqlm_crps_vec(
+      y, m1_post_pred, probs = crps_probs, weights = crps_weights
+    ))
   } else {
     m1.pplc <- NA_real_
     m1.CRPS <- NA_real_
@@ -563,7 +607,21 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
   retlist <- list(
     m1.uts = m1.uts, m1.KL = m1.KL, m1.KL.flip = m1.KL.flip, m1.CRPS = m1.CRPS, m1.pplc = m1.pplc,
     m1.qq = m1.qq, m1.acf = m1.acf, m1.rt = m1$run.time,
-    m1.msfe = m1_msfe, y = y
+    m1.msfe = m1_msfe, y = y,
+    m1.KL.by_k = m1.kl$KL.by_k,
+    m1.KL.flip.by_k = m1.kl$KL.flip.by_k,
+    m1.KL.gaussian = m1.kl$KL.gaussian,
+    m1.KL.flip.gaussian = m1.kl$KL.flip.gaussian,
+    crps.method = "integrated_quantile_score",
+    crps.probs = crps_probs,
+    crps.weights = crps_weights,
+    kl.method = m1.kl$method,
+    kl.k = m1.kl$k,
+    kl.aggregate = m1.kl$aggregate,
+    kl.reference = m1.kl$reference,
+    kl.n_finite = c(m1 = m1.kl$n_finite),
+    kl.n_ref = c(m1 = m1.kl$n_ref),
+    kl.zero_distance_count = c(m1 = m1.kl$zero_distance_count)
   )
 
   if (!is.null(m2)) {
@@ -582,12 +640,26 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
     } else {
       m2.pplc <- NA_real_
     }
+    m2.kl <- kl_normality(m2_msfe, ref = ref, kl_k = retlist$kl.k)
     retlist$m2.msfe <- m2_msfe
     retlist$m2.uts <- m2.uts
-    retlist$m2.KL <- mean(FNN::KL.divergence(ref, m2_msfe))
-    retlist$m2.KL.flip <- mean(FNN::KL.divergence(m2_msfe, ref))
+    retlist$m2.KL <- m2.kl$KL
+    retlist$m2.KL.flip <- m2.kl$KL.flip
+    retlist$m2.KL.by_k <- m2.kl$KL.by_k
+    retlist$m2.KL.flip.by_k <- m2.kl$KL.flip.by_k
+    retlist$m2.KL.gaussian <- m2.kl$KL.gaussian
+    retlist$m2.KL.flip.gaussian <- m2.kl$KL.flip.gaussian
+    retlist$kl.n_finite <- c(retlist$kl.n_finite, m2 = m2.kl$n_finite)
+    retlist$kl.n_ref <- c(retlist$kl.n_ref, m2 = m2.kl$n_ref)
+    retlist$kl.zero_distance_count <- c(retlist$kl.zero_distance_count, m2 = m2.kl$zero_distance_count)
     retlist$m2.pplc <- m2.pplc
-    retlist$m2.CRPS <- if (has_y) safe_metric_mean(exdqlm:::.exdqlm_crps_vec(y, m2_post_pred)) else NA_real_
+    retlist$m2.CRPS <- if (has_y) {
+      safe_metric_mean(exdqlm:::.exdqlm_crps_vec(
+        y, m2_post_pred, probs = crps_probs, weights = crps_weights
+      ))
+    } else {
+      NA_real_
+    }
     retlist$m2.qq <- stats::qqnorm(m2_msfe, plot = FALSE)
     retlist$m2.acf <- stats::acf(m2.uts, plot = FALSE)
     retlist$m2.rt <- m2$run.time

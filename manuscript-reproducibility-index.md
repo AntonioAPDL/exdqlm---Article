@@ -36,6 +36,7 @@ The manuscript-facing workflow is organized under the article repository:
 
 - [analysis/README.md](analysis/README.md)
 - [analysis/manuscript/README.md](analysis/manuscript/README.md)
+- [analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md](analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md)
 - [analysis/run_all.R](analysis/run_all.R)
 - [exdqlm-jss.tex](exdqlm-jss.tex)
 

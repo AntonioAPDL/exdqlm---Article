@@ -1,6 +1,6 @@
-need_ex4screen <- target_enabled("ex4screen")
+need_ex4screen <- targeted_run && target_enabled("ex4screen")
 if (!need_ex4screen) {
-  log_msg("Example 4 seed screen: skipped (target filter)")
+  log_msg("Example 4 seed screen: skipped (explicit ex4screen target not requested)")
 } else {
   log_msg("Example 4 seed screen: start")
 

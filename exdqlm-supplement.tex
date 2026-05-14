@@ -1822,10 +1822,14 @@ transform are
 \end{equation}
 The quantile--quantile (QQ) plot, autocorrelation function (ACF) plot, and standardized forecast-error plot are computed from
 $\{\widehat e_t\}$ or $\{\widehat u_t\}$ rather than from posterior uncertainty
-bands for residuals. The reported Kullback--Leibler (KL) summaries are nearest-neighbor estimates
-of the divergence between this empirical standardized-error sample and a
-reference standard-normal sample supplied through \code{ref} or generated
-internally; the flipped version reverses the two arguments.
+bands for residuals. The reported Kullback--Leibler (KL) summaries are deterministic
+one-dimensional normality diagnostics for the MAP standardized forecast-error
+sample. The forward value estimates \(\KL(P_e\,||\,N(0,1))\), where \(P_e\) is the
+diagnostic-error distribution represented by \(\{\widehat e_t\}\); the flipped
+value estimates the reversed diagnostic \(\KL(N(0,1)\,||\,P_e)\). The package
+default uses a deterministic standard-normal quantile grid rather than a random
+reference sample, so repeated diagnostic calls are reproducible for fixed fitted
+objects.
 
 For predictive draws $y_t^{(1)},\ldots,y_t^{(M)}$, let
 \(\widehat q_t(\tau_k)\) denote the empirical posterior predictive quantile at

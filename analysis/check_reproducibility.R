@@ -198,6 +198,9 @@ main <- function() {
   line("commit", article_git$commit)
   line("remote", article_git$remote)
   line("dirty tracked files", article_git$dirty)
+  if (isTRUE(article_git$dirty)) {
+    warn("Article checkout has dirty tracked files. Commit or intentionally discard regenerated artifacts before the final reproducibility gate.")
+  }
   report_git_freshness(article_git, "article", fail_when_behind = FALSE)
   if (!grepl("exdqlm---Article", article_git$remote, fixed = TRUE)) {
     fail("Article remote does not look like AntonioAPDL/exdqlm---Article.")
@@ -221,6 +224,9 @@ main <- function() {
       line("commit", pkg_spec$git$commit)
       line("remote", pkg_spec$git$remote)
       line("dirty tracked files", pkg_spec$git$dirty)
+      if (isTRUE(pkg_spec$git$dirty)) {
+        warn("Package checkout has dirty tracked files. Final article reruns should use a committed package state.")
+      }
       report_git_freshness(pkg_spec$git, "package", fail_when_behind = TRUE)
       if (!grepl("AntonioAPDL/exdqlm", pkg_spec$git$remote, fixed = TRUE)) {
         warn("Package remote does not look like AntonioAPDL/exdqlm.")
@@ -245,7 +251,7 @@ main <- function() {
   }
 
   common_pkgs <- c("yaml", "testthat")
-  manuscript_pkgs <- c("matrixStats", "coda", "dlm", "FNN", "pkgload", "png")
+  manuscript_pkgs <- c("matrixStats", "coda", "dlm", "pkgload", "png")
   exal_pkgs <- c("ggplot2", "pkgload")
   if (args$stage == "manuscript") {
     check_packages(unique(c(common_pkgs, manuscript_pkgs)), "manuscript")
@@ -323,6 +329,30 @@ main <- function() {
     } else {
       ok("Example 3 model dataset begins on 1987-01-01")
     }
+  }
+
+  section("Canonical KL Diagnostics Wiring")
+  kl_files <- file.path(repo_root, c(
+    "analysis/lib/manuscript_setup.R",
+    "analysis/manuscript/examples/ex2_sunspots/run.R",
+    "analysis/manuscript/examples/ex3_big_tree/run.R",
+    "exdqlm-jss.tex",
+    "exdqlm-supplement.tex"
+  ))
+  kl_patterns <- c("FNN::KL", "KL\\.divergence", "ref\\.samp", "reference sample used in the KL", "nearest-neighbor estimates")
+  stale_hits <- character()
+  for (path in kl_files[file.exists(kl_files)]) {
+    lines <- readLines(path, warn = FALSE)
+    hits <- which(vapply(kl_patterns, function(pat) any(grepl(pat, lines)), logical(1)))
+    if (length(hits)) {
+      stale_hits <- c(stale_hits, sprintf("%s [%s]", basename(path), paste(kl_patterns[hits], collapse = ", ")))
+    }
+  }
+  line("stale KL markers", length(stale_hits))
+  if (length(stale_hits)) {
+    fail(sprintf("Canonical article files still contain stale stochastic/FNN KL wording or code: %s", paste(stale_hits, collapse = "; ")))
+  } else {
+    ok("canonical article files use the deterministic exdqlm 0.5.0 KL diagnostics wording/code")
   }
 
   section("Manuscript Review Markers")

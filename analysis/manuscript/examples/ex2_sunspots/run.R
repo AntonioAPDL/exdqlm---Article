@@ -29,7 +29,6 @@ if (!need_ex2) {
 
   y_ts <- datasets::sunspot.year
   y <- as.numeric(y_ts)
-  diag_ref_samp <- seeded_rnorm(length(y_ts), seed_value + 201L)
 
   dlm_trend_comp <- dlm::dlmModPoly(1, m0 = mean(y), C0 = 10)
   trend_comp <- exdqlm::as.exdqlm(dlm_trend_comp)
@@ -62,7 +61,7 @@ if (!need_ex2) {
 
   if (need_ex2_ldvb_core) {
     ex2_core_ldvb <- load_or_fit_cache(
-      sprintf("ex2_core_models_ldvb_nsamp%d_tol%s_v3", n_samp, format(tol)),
+      sprintf("ex2_core_models_ldvb_nsamp%d_tol%s_v4", n_samp, format(tol)),
       {
       M_sigma_ldvb <- tryCatch(
         exdqlm::exdqlmLDVB(
@@ -98,7 +97,7 @@ if (!need_ex2) {
       )
 
       list(M_sigma_ldvb = M_sigma_ldvb, M1_ldvb = M1_ldvb, M2_ldvb = M2_ldvb)
-    }, note = sprintf("ex2_core_models_ldvb_nsamp%d_tol%s_v3", n_samp, format(tol)))
+    }, note = sprintf("ex2_core_models_ldvb_nsamp%d_tol%s_v4", n_samp, format(tol)))
     M_sigma_ldvb <- ex2_core_ldvb$M_sigma_ldvb
     M1_ldvb <- ex2_core_ldvb$M1_ldvb
     M2_ldvb <- ex2_core_ldvb$M2_ldvb
@@ -147,7 +146,7 @@ if (!need_ex2) {
 
   if (need_ex2benchmark && ex2_ldvb_pair_ok) {
     benchmark_cache_key <- sprintf(
-      "ex2_dynamic_benchmark_%s_nsamp%d_b%d_k%d_v3",
+      "ex2_dynamic_benchmark_%s_nsamp%d_b%d_k%d_v4",
       selected_benchmark_profile,
       n_samp,
       benchmark_n_burn,
@@ -174,8 +173,8 @@ if (!need_ex2) {
         )
       })
 
-      diag_vb <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
-      diag_mcmc <- diagnostics_from_fit(M1_mcmc, M2_mcmc, plot = FALSE, ref = diag_ref_samp, y_data = y)
+      diag_vb <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, y_data = y)
+      diag_mcmc <- diagnostics_from_fit(M1_mcmc, M2_mcmc, plot = FALSE, y_data = y)
 
       list(
         M1_mcmc = M1_mcmc,
@@ -367,7 +366,7 @@ if (!need_ex2) {
 
     if (need_ex2quant_ldvb) {
       ex2_extreme_ldvb <- load_or_fit_cache(
-        sprintf("ex2_quant_grid_ldvb_nsamp%d_tol%s_v3", n_samp, format(tol)),
+        sprintf("ex2_quant_grid_ldvb_nsamp%d_tol%s_v4", n_samp, format(tol)),
         {
         M99_dqlm_ldvb <- tryCatch(
           exdqlm::exdqlmLDVB(
@@ -414,7 +413,7 @@ if (!need_ex2) {
           M99_dqlm_ldvb = M99_dqlm_ldvb, M99_exdqlm_ldvb = M99_exdqlm_ldvb,
           M05_dqlm_ldvb = M05_dqlm_ldvb, M05_exdqlm_ldvb = M05_exdqlm_ldvb
         )
-      }, note = sprintf("ex2_quant_grid_ldvb_nsamp%d_tol%s_v3", n_samp, format(tol)))
+      }, note = sprintf("ex2_quant_grid_ldvb_nsamp%d_tol%s_v4", n_samp, format(tol)))
 
       ldvb_p099_ok <- fit_ok(ex2_extreme_ldvb$M99_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M99_exdqlm_ldvb)
       ldvb_p005_ok <- fit_ok(ex2_extreme_ldvb$M05_dqlm_ldvb) && fit_ok(ex2_extreme_ldvb$M05_exdqlm_ldvb)
@@ -467,7 +466,7 @@ if (!need_ex2) {
     if (ex2_ldvb_pair_ok) {
       save_png_plot("ex2checks.png", {
         graphics::par(mfrow = c(2, 3))
-        diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ex2_cols$dqlm, ex2_cols$exdqlm), ref = diag_ref_samp, y_data = y)
+        diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ex2_cols$dqlm, ex2_cols$exdqlm), y_data = y)
       })
       register_artifact(
         artifact_id = "fig_ex2checks",
@@ -493,8 +492,8 @@ if (!need_ex2) {
     if (ex2_ldvb_pair_ok) {
       save_png_plot("ex2checks_ldvb.png", {
         graphics::par(mfrow = c(2, 3))
-        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1), ref = diag_ref_samp, y_data = y)
-        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2), ref = diag_ref_samp, y_data = y)
+        diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1), y_data = y)
+        diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2), y_data = y)
       })
       register_artifact(
         artifact_id = "fig_ex2checks_ldvb",
@@ -518,7 +517,7 @@ if (!need_ex2) {
 
   if (need_ex2_ldvb_diag) {
     ldvb_diag <- load_or_fit_cache(
-      sprintf("ex2_ldvb_diagnostics_fit_nsamp%d_tol%s_v3", ldvb_diag_n_samp, format(ldvb_diag_tol)),
+      sprintf("ex2_ldvb_diagnostics_fit_nsamp%d_tol%s_v4", ldvb_diag_n_samp, format(ldvb_diag_tol)),
       {
       exdqlm::exdqlmLDVB(
         y = y_ts, p0 = 0.85, model = model,
@@ -527,7 +526,7 @@ if (!need_ex2) {
         n.samp = ldvb_diag_n_samp, tol = ldvb_diag_tol,
         verbose = FALSE
       )
-    }, note = sprintf("ex2_ldvb_diagnostics_fit_nsamp%d_tol%s_v3", ldvb_diag_n_samp, format(ldvb_diag_tol)))
+    }, note = sprintf("ex2_ldvb_diagnostics_fit_nsamp%d_tol%s_v4", ldvb_diag_n_samp, format(ldvb_diag_tol)))
     seq_g <- as.numeric(ldvb_diag$seq.gamma)
     seq_s <- as.numeric(ldvb_diag$seq.sigma)
     el <- as.numeric(ldvb_diag$diagnostics$elbo)
@@ -627,7 +626,7 @@ if (!need_ex2) {
 
   if (need_ex2_tables) {
     ex2_df_scan <- load_or_fit_cache(
-      sprintf("ex2_df_scan_ldvb_primary_nsamp%d_tol%s_v3", n_samp, format(tol)),
+      sprintf("ex2_df_scan_ldvb_primary_nsamp%d_tol%s_v4", n_samp, format(tol)),
       {
       possible_dfs <- cbind(0.9, df_grid)
       KLs <- rep(NA_real_, nrow(possible_dfs))
@@ -644,13 +643,13 @@ if (!need_ex2) {
           error = function(e) e
         )
         if (!inherits(temp_M, "error")) {
-          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = diag_ref_samp, y_data = y)
+          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, y_data = y)
           KLs[i] <- temp_check$m1.KL
           CRPSs[i] <- temp_check$m1.CRPS
         }
       }
       list(possible_dfs = possible_dfs, KLs = KLs, CRPSs = CRPSs)
-    }, note = sprintf("ex2_df_scan_ldvb_primary_nsamp%d_tol%s_v3", n_samp, format(tol)))
+    }, note = sprintf("ex2_df_scan_ldvb_primary_nsamp%d_tol%s_v4", n_samp, format(tol)))
 
     possible_dfs <- ex2_df_scan$possible_dfs
     KLs <- ex2_df_scan$KLs
@@ -701,7 +700,7 @@ if (!need_ex2) {
     }
 
     if (ex2_ldvb_pair_ok) {
-      diag_2 <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
+      diag_2 <- diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = FALSE, y_data = y)
       diag_table <- data.frame(
         model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
         KL = c(diag_2$m1.KL, diag_2$m2.KL),
@@ -731,7 +730,7 @@ if (!need_ex2) {
 
   if (need_ex2_tables_ldvb) {
     ex2_df_scan_ldvb <- load_or_fit_cache(
-      sprintf("ex2_df_scan_ldvb_support_nsamp%d_tol%s_v3", n_samp, format(tol)),
+      sprintf("ex2_df_scan_ldvb_support_nsamp%d_tol%s_v4", n_samp, format(tol)),
       {
       possible_dfs <- cbind(0.9, df_grid)
       KLs <- rep(NA_real_, nrow(possible_dfs))
@@ -748,13 +747,13 @@ if (!need_ex2) {
           error = function(e) e
         )
         if (!inherits(temp_M, "error")) {
-          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, ref = diag_ref_samp, y_data = y)
+          temp_check <- diagnostics_from_fit(temp_M, plot = FALSE, y_data = y)
           KLs[i] <- temp_check$m1.KL
           CRPSs[i] <- temp_check$m1.CRPS
         }
       }
       list(possible_dfs = possible_dfs, KLs = KLs, CRPSs = CRPSs)
-    }, note = sprintf("ex2_df_scan_ldvb_support_nsamp%d_tol%s_v3", n_samp, format(tol)))
+    }, note = sprintf("ex2_df_scan_ldvb_support_nsamp%d_tol%s_v4", n_samp, format(tol)))
 
     possible_dfs_ld <- ex2_df_scan_ldvb$possible_dfs
     KLs_ld <- ex2_df_scan_ldvb$KLs
@@ -804,8 +803,8 @@ if (!need_ex2) {
     }
 
     if (ex2_ldvb_pair_ok) {
-      diag_m1_ld <- diagnostics_from_fit(M1_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
-      diag_m2_ld <- diagnostics_from_fit(M2_ldvb, plot = FALSE, ref = diag_ref_samp, y_data = y)
+      diag_m1_ld <- diagnostics_from_fit(M1_ldvb, plot = FALSE, y_data = y)
+      diag_m2_ld <- diagnostics_from_fit(M2_ldvb, plot = FALSE, y_data = y)
       diag_table_ld <- data.frame(
         model = c("M1_dqlm_ldvb", "M2_exdqlm_ldvb"),
         KL = c(diag_m1_ld$m1.KL, diag_m2_ld$m1.KL),

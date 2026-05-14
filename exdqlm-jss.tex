@@ -87,7 +87,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 \addlinespace[1pt]
 \pkg{bayesQR} & Bayesian AL quantile regression & Static regression; no temporal or state-space component & MCMC under the AL likelihood; optional adaptive lasso & Vector-valued quantile levels; output organized by fitted quantile \\
 \addlinespace[1pt]
-\pkg{pqrBayes} & Bayesian penalized quantile regression & Static sparse, group, binary, or effect-modifier varying-coefficient regression; no latent state-space evolution & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
+\pkg{pqrBayes} & Bayesian penalized quantile regression & Static sparse, group, binary, or effect-modifier varying-coefficient regression; varying coefficients are functions of an observed modifier, not latent state-space trajectories & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
 \addlinespace[1pt]
 \pkg{brms} & General Bayesian regression with an AL family & Autocorrelation structures available; no dedicated quantile state-space workflow & Stan-based posterior inference & Target quantile set through AL parameter \\
 \addlinespace[1pt]
@@ -111,7 +111,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 
 The frequentist package \pkg{quantreg} \citep{quantreg} remains the broad general-purpose baseline, covering linear, nonlinear, nonparametric, censored, and dynamic quantile regression, together with bootstrap-based and related uncertainty summaries. Its \code{dynrq()} function supports dynamic linear quantile regression through time-series regression formulas involving lags, differences, trends, seasonal factors, and harmonic terms, while preserving time-series attributes. However, the dynamic structure enters through the design matrix rather than through latent states: once these regressors are constructed, estimation proceeds through the standard \pkg{quantreg} fitting routines for a fixed coefficient vector. In that sense, \code{dynrq()} is a regression-style time-series interface rather than a latent-state state-space model, so it does not provide filtered or smoothed state summaries.
 
-Most other \proglang{R} packages relevant here implement static quantile regression or target a different multi-quantile objective. Among the static Bayesian options, \pkg{bayesQR} \citep{bayesQR} provides Bayesian quantile regression under the AL working likelihood with an adaptive-lasso option, whereas \pkg{pqrBayes} \citep{pqrBayes} emphasizes penalized Bayesian quantile regression with spike-and-slab and horseshoe-family shrinkage priors. Its varying-coefficient option models coefficients as functions of an observed effect modifier rather than as latent states evolving through a state-space equation. The broader Bayesian modeling package \pkg{brms} \citep{brmsfamily} is also relevant because it supports AL-based quantile regression within a flexible multilevel, nonlinear, and additive regression framework, and can incorporate regression-level autocorrelation terms. However, it is not organized as a dedicated quantile state-space workflow, and its documentation does not present filtered or smoothed state summaries of the type targeted by \pkg{exdqlm}. Packages such as \pkg{qgam} \citep{qgam}, \pkg{qrjoint} \citep{qrjoint}, \pkg{quantregGrowth} \citep{quantregGrowth}, and \pkg{qrcm} \citep{qrcm} address additive, joint, non-crossing, or coefficient-modeling formulations. Other packages focus on specialized static settings, including penalized frequentist fitting across quantiles in \pkg{rqPen} \citep{rqPen}, convolution-smoothed linear quantile regression with efficient gradient-based fitting in \pkg{conquer} \citep{conquer}, and robust or censored-response modeling in \pkg{lqr} \citep{lqr}.
+Most other \proglang{R} packages relevant here implement static quantile regression or target a different multi-quantile objective. Among the static Bayesian options, \pkg{bayesQR} \citep{bayesQR} provides Bayesian quantile regression under the AL working likelihood with an adaptive-lasso option, whereas \pkg{pqrBayes} \citep{pqrBayes} emphasizes penalized Bayesian quantile regression with spike-and-slab and horseshoe-family shrinkage priors. Its varying-coefficient option models coefficients as functions of an observed effect modifier rather than as latent states evolving through a time-indexed state-space equation; this distinction is the reason Table \ref{table:software} classifies it as static with respect to latent temporal state evolution. The broader Bayesian modeling package \pkg{brms} \citep{brmsfamily} is also relevant because it supports AL-based quantile regression within a flexible multilevel, nonlinear, and additive regression framework, and can incorporate regression-level autocorrelation terms. However, it is not organized as a dedicated quantile state-space workflow, and its documentation does not present filtered or smoothed state summaries of the type targeted by \pkg{exdqlm}. Packages such as \pkg{qgam} \citep{qgam}, \pkg{qrjoint} \citep{qrjoint}, \pkg{quantregGrowth} \citep{quantregGrowth}, and \pkg{qrcm} \citep{qrcm} address additive, joint, non-crossing, or coefficient-modeling formulations. Other packages focus on specialized static settings, including penalized frequentist fitting across quantiles in \pkg{rqPen} \citep{rqPen}, convolution-smoothed linear quantile regression with efficient gradient-based fitting in \pkg{conquer} \citep{conquer}, and robust or censored-response modeling in \pkg{lqr} \citep{lqr}.
 
 Related implementations also exist outside \proglang{R}. In Python, \pkg{statsmodels} \citep{statsmodelsQuantReg} provides linear quantile regression via iterative reweighted least squares. Julia offers \pkg{QuantReg.jl} \citep{QuantRegjl}, and MATLAB includes tools such as \code{fitrqlinear} and \code{fitrqnet} \citep{matlabQuantile}. These implementations are useful reference points for the broader software ecosystem, but they are better viewed as general or static quantile-regression tools than as direct counterparts to a dedicated package for Bayesian dynamic quantile state-space modeling.
 
@@ -364,7 +364,7 @@ and the plug-in PIT diagnostic is
 \end{align}
 where $\Phi$ denotes the standard normal CDF. These plug-in quantities are diagnostic summaries of the fitted one-step-ahead sequence rather than posterior uncertainty bands for residuals.
 
-Using this estimated sequence $\{\hat u_t\}$, we can assess the model performance in several ways. First, we visually examine the correlation of the estimated sequence via an autocorrelation function (ACF) plot. Second, by transforming the values with a standard normal inverse CDF, we compare their distributional shape to that of a standard normal with a normal quantile--quantile (QQ) plot. To quantify the divergence of this transformed sequence from normality we use the KL divergence \citep{kullback1951information}, $\KL(h,\phi) = \int_{-\infty}^{\infty} h(x)\log \frac{h(x)}{\phi(x)}\mathrm{d}x$, where $h$ denotes the diagnostic sample distribution and $\phi$ is the standard normal density. The package reports nearest-neighbor estimates of this divergence by comparing the transformed forecast-error sample with a standard-normal reference sample, together with a flipped version that reverses the two arguments. Smaller values suggest better calibration. The MAP standardized forecast errors in \eqref{eq:standardized_error} can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
+Using this estimated sequence $\{\hat u_t\}$, we can assess the model performance in several ways. First, we visually examine the correlation of the estimated sequence via an autocorrelation function (ACF) plot. Second, by transforming the values with a standard normal inverse CDF, we compare their distributional shape to that of a standard normal with a normal quantile--quantile (QQ) plot. To quantify the divergence of this transformed sequence from normality we use the KL divergence \citep{kullback1951information}, $\KL(h,\phi) = \int_{-\infty}^{\infty} h(x)\log \frac{h(x)}{\phi(x)}\mathrm{d}x$, where $h$ denotes the diagnostic sample distribution and $\phi$ is the standard normal density. The package reports a deterministic one-dimensional KL normality diagnostic: the forward value estimates $\KL(P_e\,||\,N(0,1))$ for the MAP standardized forecast-error distribution $P_e$, and the flipped value estimates the reversed diagnostic $\KL(N(0,1)\,||\,P_e)$. The forward calculation uses the semiclosed identity based on analytic normal cross-entropy and a one-dimensional entropy estimate; the flipped calculation is reported as a secondary sensitivity diagnostic. Smaller values suggest better calibration. The MAP standardized forecast errors in \eqref{eq:standardized_error} can also be used as an additional graphical aid in examining the distribution at specific time points. These MAP standardized forecast errors are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
 In addition to the calibration-based diagnostics above, we compute the mean continuous ranked probability score (CRPS) from the posterior predictive distribution \citep{gneiting2007}. Let $\rho_p(x)=x[p-I(x<0)]$ denote the check loss at level $p$. For a predictive distribution $G$ with quantile function $G^{-1}$ and an observation $y$, the CRPS is
 \begin{equation}
@@ -687,20 +687,32 @@ R> syn.fore = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. \color{magenta} From RP: I don't get the same 2 plots shown at the bottom of Figure 2. The two at the top are OK. \color{black}
+The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. The first synthesis panel shows the observed-period synthesized predictive interval, and the second panel uses the same observed-period synthesis near the forecast origin, overlays the forecast synthesis, and shades the one-step bridge from the final observed synthesis interval to the first forecast synthesis interval. The replication script uses the same plotting construction.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> synth.obs.col = adjustcolor("#F7D6DE", alpha.f = 0.40)
 R> synth.fore.col = adjustcolor("#D98A9B", alpha.f = 0.38)
 R> t.end = tail(time(LakeHuron), 1)
-R> t.fore = seq(t.end + 1, t.end + 8)
+R> dt = 1 / frequency(LakeHuron)
+R> t.fore = seq(from = t.end + dt, by = dt, length.out = 8)
+R> idx.obs = which(time(LakeHuron) >= 1952)
+R> idx.zoom = which(time(LakeHuron) >= 1952)
+R> ylim.obs = range(LakeHuron[idx.obs], syn.obs$summary$q025[idx.obs],
++                  syn.obs$summary$q975[idx.obs])
+R> ylim.fore = range(LakeHuron[idx.zoom], syn.obs$summary$q025[idx.zoom],
++                   syn.obs$summary$q975[idx.zoom],
++                   syn.fore$summary$q025, syn.fore$summary$q975)
 R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
-+       xlim = c(1952, t.end), ylab = "predictive synthesis",
-+       show.median = FALSE, band.col = synth.obs.col)
++       xlim = c(1952, t.end), ylim = ylim.obs,
++       ylab = "predictive synthesis",
++       show.median = FALSE, band.col = synth.obs.col,
++       y.col = adjustcolor("grey30", alpha.f = 0.62))
 R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
-+       xlim = c(1952, max(t.fore)), ylab = "predictive synthesis",
-+       show.median = FALSE, band.col = synth.obs.col)
++       xlim = c(1952, max(t.fore)), ylim = ylim.fore,
++       ylab = "predictive synthesis",
++       show.median = FALSE, band.col = synth.obs.col,
++       y.col = adjustcolor("grey30", alpha.f = 0.62))
 R> polygon(c(t.end, t.fore[1], t.fore[1], t.end),
 +          c(tail(syn.obs$summary$q025, 1), syn.fore$summary$q025[1],
 +            syn.fore$summary$q975[1], tail(syn.obs$summary$q975, 1)),
@@ -817,15 +829,12 @@ R> abline(v = median(M2$samp.gamma), col = "#4C72B0", lwd = 2)
 \end{CodeInput}
 \end{CodeChunk}
 
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. For reproducibility, we fix the standard-normal reference sample used in the KL calculations and reuse it below in the discount-factor scan. Smaller values indicate better fit for the KL, CRPS, and PPLC criteria; for these LDVB fits, the reported diagnostics favor the exDQLM, while the DQLM is faster.
+To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. The KL values are computed by the deterministic package default, so repeated diagnostic calls give the same KL and flipped-KL values for the same fitted object. Smaller values indicate better fit for the KL, CRPS, and PPLC criteria; for these LDVB fits, the reported diagnostics favor the exDQLM, while the DQLM is faster.
 % fig:ex2checks
 \begin{CodeChunk}
 \begin{CodeInput}
 R> par(mfrow = c(2, 3))
-R> set.seed(20260503)
-R> ref.samp = rnorm(length(sunspot.year))
-R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red", "blue"),
-+                               ref = ref.samp)
+R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red", "blue"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -851,8 +860,7 @@ R> for (i in 1:nrow(possible.dfs)) {
 +                  df = possible.dfs[i, ], dim.df = c(1, 8),
 +                  sig.init = 2, fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
-+   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE,
-+                              ref = ref.samp)
++   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE)
 +   metrics[i, ] = c(temp.check$m1.CRPS, temp.check$m1.KL)
 + }
 R> possible.dfs[which.min(metrics[, "CRPS"]), ]
@@ -885,41 +893,18 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{24.70} & \textbf{0.059} & 8.689 & 3909.2 \\
- & MCMC & 268.39 & 0.101 & \textbf{7.759} & \textbf{3036.2} \\
+ \tworowcell{DQLM} & LDVB & \textbf{23.89} & \textbf{0.155} & 8.712 & 3911.3 \\
+ & MCMC & 282.45 & 0.179 & \textbf{7.745} & \textbf{3022.7} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{107.16} & \textbf{0.037} & 6.473 & 2342.1 \\
- & MCMC & 322.34 & 0.177 & \textbf{5.220} & \textbf{2247.1} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{112.18} & \textbf{0.105} & 6.493 & 2351.8 \\
+ & MCMC & 360.84 & 0.184 & \textbf{5.200} & \textbf{2234.4} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the KL divergence, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.5.3, \pkg{exdqlm} development version 0.5.0.9000, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; diagnostic calculations are not included in the runtime column. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} development version 0.5.0.9000 at package commit \code{f937842}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
 Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. Within each model class, LDVB is substantially faster. For both DQLM and exDQLM, LDVB gives the smaller KL value, while MCMC gives smaller CRPS and PPLC values. Comparing model classes within each inferential method, the exDQLM improves the LDVB diagnostics relative to the DQLM, and under MCMC it improves the predictive-score criteria CRPS and PPLC. These results reinforce the importance of reporting runtime together with predictive criteria rather than runtime alone.
-\color{magenta} From RP: These are the results I get for DQLM (M1) and exDQLM(M2) using LDVB: 
-\begin{CodeInput}
-Diagnostic      M1         M2
-KL            0.0976  0.00447
-KL(flipped)   0.1625  0.01981
-CRPS          8.6176  6.44711
-pplc       3920.9982 2337.85914
-run-time (s)  4.8110  9.36000
-\end{CodeInput}
-
-And these are the results I get for DQLM (M1) and exQDLM(M2) using MCMC: 
-\begin{CodeInput}
-Diagnostic    M1       M2
-KL           0.0951    0.158
-KL(flipped)  0.0805    0.161
-CRPS         7.7094    5.103
-pplc      3060.3923 2217.666
-run-time(s) 46.9710   54.889
-\end{CodeInput}
-
-Also, if I rerun the command
-exdqlmDiagnostics(M1mcmc,M2mcmc) again I get different values for KL, KL(flipped), for the first model (same for the second). Why is this happening? 
-\color{black}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1021,8 +1006,6 @@ script.
 \begin{CodeInput}
 R> lambda.grid = seq(0.1, 0.9, by = 0.1)
 R> pplc.grid = rep(NA_real_, length(lambda.grid))
-R> set.seed(20263901)
-R> ref.samp = rnorm(length(y.train))
 R> for (i in seq_along(lambda.grid)) {
 +     set.seed(20264001 + i)
 +     temp.MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
@@ -1032,7 +1015,7 @@ R> for (i in seq_along(lambda.grid)) {
 +                 tf.C0 = diag(c(0.1, 0.005, 0.005), 3),
 +                 sig.init = 0.1, gam.init = -0.1,
 +                 n.samp = 1000, tol = 0.05, verbose = FALSE)
-+     temp.diag = exdqlmDiagnostics(temp.MTF, plot = FALSE, ref = ref.samp)
++     temp.diag = exdqlmDiagnostics(temp.MTF, plot = FALSE)
 +     pplc.grid[i] = temp.diag$m1.pplc
 +   }
 R> lambda.star = lambda.grid[which.min(pplc.grid)]
@@ -1209,9 +1192,7 @@ diagnostics are computed from the final-training fitted objects.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> set.seed(20265401)
-R> ref.samp = rnorm(length(y.train))
-R> diag.ex3 = exdqlmDiagnostics(M0, MTF, plot = FALSE, ref = ref.samp)
+R> diag.ex3 = exdqlmDiagnostics(M0, MTF, plot = FALSE)
 R> tab.ex3 = data.frame(
 +     model = c("M0", "MTF"),
 +     KL = c(diag.ex3$m1.KL, diag.ex3$m2.KL),
@@ -1229,15 +1210,15 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no transfer & 0.212 & 0.483 & \textbf{101.163} \\
- \code{MTF} transfer function & \textbf{0.135} & \textbf{0.371} & 120.191 \\
+ \code{M0} no transfer & 0.243 & 0.481 & \textbf{100.901} \\
+ \code{MTF} transfer function & \textbf{0.153} & \textbf{0.371} & 120.404 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
 \code{exdqlmDiagnostics()} for the no-transfer baseline \code{M0} and the
 transfer-function model \code{MTF}, computed on the final-training fitted
-objects. KL denotes the nearest-neighbor Kullback--Leibler divergence diagnostic,
-CRPS denotes the continuous ranked probability score, and PPLC denotes the
+objects. KL denotes the deterministic Kullback--Leibler normality diagnostic for
+the MAP standardized forecast errors, CRPS denotes the continuous ranked probability score, and PPLC denotes the
 posterior predictive loss criterion. Lower values are preferred; bold entries
 mark the smaller value for each diagnostic.}
 \label{tab:ex3}
@@ -1341,7 +1322,7 @@ R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. In the median panel, the MCMC reference intervals cover all plotted coefficients, while the LDVB intervals remain close for the active signals.
+Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. In the median panel, both methods cover all plotted coefficients, while the MCMC reference fit gives the smaller holdout quantile error.
 
 \begin{table}[t!]
 \centering
@@ -1351,21 +1332,21 @@ Figure \ref{fig:ex4static} shows that both methods recover the active coefficien
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{18.64} & 0.083 & 0.043 & 0.667 \\
- & MCMC & 84.52 & \textbf{0.058} & \textbf{0.041} & \textbf{0.579} \\
+ \tworowcell{0.05} & LDVB & \textbf{20.31} & 0.107 & \textbf{0.034} & 0.674 \\
+ & MCMC & 135.05 & \textbf{0.065} & 0.036 & \textbf{0.589} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{10.50} & \textbf{0.106} & 0.046 & \textbf{0.215} \\
- & MCMC & 85.60 & 0.133 & \textbf{0.029} & 0.225 \\
+ \tworowcell{0.25} & LDVB & \textbf{11.50} & \textbf{0.148} & 0.069 & 0.295 \\
+ & MCMC & 140.25 & 0.160 & \textbf{0.046} & \textbf{0.254} \\
  \midrule
- \tworowcell{0.50} & LDVB & \textbf{7.95} & \textbf{0.106} & 0.084 & 0.359 \\
- & MCMC & 91.54 & 0.110 & \textbf{0.067} & \textbf{0.322} \\
+ \tworowcell{0.50} & LDVB & \textbf{4.64} & 0.086 & \textbf{0.015} & 0.167 \\
+ & MCMC & 145.36 & \textbf{0.070} & 0.019 & \textbf{0.131} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference fit has the smaller null-coefficient MAE at all three quantile levels and the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is slightly smaller on active-signal RMSE for \(p_0 = 0.25\) and \(p_0 = 0.50\) and on holdout quantile RMSE for \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 5-fold at \(p_0 = 0.05\), 8-fold at \(p_0 = 0.25\), and 12-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner posterior-interval coverage for the plotted coefficients. Accordingly, the static \code{rhs\_ns} specification still supports both roles cleanly: LDVB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference fit has the smaller holdout quantile RMSE at all three quantile levels and the smaller active-signal RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is slightly smaller on active-signal RMSE at \(p_0 = 0.25\) and on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.50\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 12-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner holdout quantile accuracy. Accordingly, the static \code{rhs\_ns} specification still supports both roles cleanly: LDVB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}

@@ -4,10 +4,12 @@ article_figures:
 support_figures: []
 tables:
   - ex4static_summary.csv
+support_tables:
   - ex4_seed_screen_p050_summary.csv
   - ex4_seed_screen_p050_selection.csv
 logs:
   - ex4_run_summary.txt
+support_logs:
   - ex4_seed_screen_p050_summary.txt
 cache_prefixes:
   - ex4_

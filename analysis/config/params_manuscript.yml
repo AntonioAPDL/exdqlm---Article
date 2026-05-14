@@ -83,8 +83,8 @@ profiles:
       n_train: 160
       holdout_n: 450
       n_predictors: 8
-      dataset_seed: 20260714
-      dataset_seed_mode: screen_selection
+      dataset_seed: 20260712
+      dataset_seed_mode: configured
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
@@ -165,8 +165,8 @@ profiles:
       n_train: 160
       holdout_n: 800
       n_predictors: 8
-      dataset_seed: 20260714
-      dataset_seed_mode: screen_selection
+      dataset_seed: 20260712
+      dataset_seed_mode: configured
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
@@ -248,8 +248,8 @@ profiles:
       n_train: 160
       holdout_n: 1200
       n_predictors: 8
-      dataset_seed: 20260714
-      dataset_seed_mode: screen_selection
+      dataset_seed: 20260712
+      dataset_seed_mode: configured
       cov_rho: 0.5
       sigma_eps: 1.5
       true_beta: [3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]

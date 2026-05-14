@@ -6,7 +6,9 @@ without modifying `exdqlm-jss.tex`.
 
 For a reader-facing index of the publication artifacts, support-only outputs,
 and recommended rerun entry points, see `manuscript-reproducibility-index.md`
-in the repository root.
+in the repository root. For the required preflight, package-test gate, runtime
+policy, targeted-rerun order, and final acceptance criteria, see
+`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`.
 
 ## Canonical Example Workflow
 
@@ -94,7 +96,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_
 Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --profile standard --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4screen --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4screen --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
 Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
@@ -110,6 +112,14 @@ For constrained environments where rebuilding local source is not feasible,
 set `EXDQLM_LOAD_MODE=installed` and optionally
 `EXDQLM_INSTALLED_LIB=/path/to/R/library` to use an installed `exdqlm`
 package instead. Source mode remains the default.
+
+The support-only Example 4 seed screen is intentionally explicit-only. A full
+standard manuscript run regenerates the Example 4 figure/table from the
+committed `dataset_seed` in `analysis/config/params_manuscript.yml`, but does
+not redo the seed screen unless `--targets ex4screen` is supplied. After
+re-running `ex4screen`, update the configured seed if needed and rerun
+`--targets ex4figure,ex4table` so the selected seed and displayed simulation
+artifacts stay synchronized.
 
 ## Outputs
 
