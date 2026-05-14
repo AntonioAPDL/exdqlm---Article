@@ -1273,48 +1273,33 @@ Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-re
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> check.loss.fn = function(y, q, p0) (y - q) * (p0 - as.numeric(y < q))
-R> interval.score.fn = function(y, lower, upper, level = 0.95) {
-+     alpha = 1 - level
-+     (upper - lower) + (2 / alpha) * pmax(lower - y, 0) +
-+       (2 / alpha) * pmax(y - upper, 0)
-+   }
-R> crps.iqs = function(y, draws) {
-+     probs = seq(0.01, 0.99, by = 0.01)
-+     mean(vapply(seq_along(y), function(i) {
-+       q = quantile(draws[i, ], probs = probs, names = FALSE)
-+       2 * mean((y[i] - q) * (probs - as.numeric(y[i] < q)))
-+     }, numeric(1)))
-+   }
-R> forecast.row = function(name, fc) {
-+     draws = as.matrix(fc$samp.fore)
-+     qhat = as.numeric(fc$ff[seq_along(y.holdout)])
-+     int = t(apply(draws, 1, quantile, probs = c(0.025, 0.975)))
-+     data.frame(model = name,
-+       check.loss = mean(check.loss.fn(y.holdout, qhat, 0.15)),
-+       CRPS = crps.iqs(y.holdout, draws),
-+       interval.score = mean(interval.score.fn(y.holdout, int[, 1], int[, 2])),
-+       coverage = mean(y.holdout >= int[, 1] & y.holdout <= int[, 2]))
-+   }
-R> tab.ex3.fc = rbind(forecast.row("M0", fc.M0),
-+                    forecast.row("MREG", fc.MREG),
-+                    forecast.row("MTF", fc.MTF))
+R> fc.diag.M0 = exdqlmForecastDiagnostics(fc.M0, y = y.holdout)
+R> fc.diag.MREG = exdqlmForecastDiagnostics(fc.MREG, y = y.holdout)
+R> fc.diag.MTF = exdqlmForecastDiagnostics(fc.MTF, y = y.holdout)
+R> tab.ex3.fc = data.frame(
++     model = c("M0", "MREG", "MTF"),
++     check.loss = c(fc.diag.M0$m1.check_loss,
++                    fc.diag.MREG$m1.check_loss,
++                    fc.diag.MTF$m1.check_loss),
++     CRPS = c(fc.diag.M0$m1.CRPS,
++              fc.diag.MREG$m1.CRPS,
++              fc.diag.MTF$m1.CRPS))
 \end{CodeInput}
 \end{CodeChunk}
 
 \begin{table}[h!]
 \centering
 \TableStyle
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}lrr@{}}
  \toprule
- Model & Check loss & CRPS & Interval score & 95\% coverage \\
+ Model & Check loss & CRPS \\
  \midrule
- \code{M0} no covariates & 0.119 & 0.498 & 8.754 & 0.833 \\
- \code{MREG} direct regression & \textbf{0.114} & \textbf{0.401} & \textbf{2.906} & 1.000 \\
- \code{MTF} transfer function & 0.155 & 0.550 & 7.167 & 0.889 \\
+ \code{M0} no covariates & 0.119 & 0.498 \\
+ \code{MREG} direct regression & \textbf{0.114} & \textbf{0.401} \\
+ \code{MTF} transfer function & 0.155 & 0.550 \\
  \bottomrule
 \end{tabular}
-\caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022. Check loss is computed at \(p_0=0.15\). CRPS is computed from posterior predictive draws using the integrated-quantile-score approximation. Interval score and coverage use pointwise 95\% posterior predictive intervals. Lower values are preferred for check loss, CRPS, and interval score; bold entries mark the smallest value in those columns.}
+\caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022, computed with \code{exdqlmForecastDiagnostics()} from \code{exdqlmForecast(..., return.draws = TRUE)} objects. Check loss is computed at \(p_0=0.15\), and CRPS is computed from posterior predictive forecast draws using the integrated-quantile-score approximation. Lower values are preferred; bold entries mark the smallest value in each column.}
 \label{tab:ex3forecastmetrics}
 \end{table}
 

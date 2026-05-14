@@ -108,7 +108,7 @@ if (!need_ex4) {
       summary_rows,
       filename = "ex4static_summary.csv",
       artifact_id = "tab_ex4static_summary",
-      manuscript_target = "new: Example 4 static simulation summary",
+      manuscript_target = "tab:ex4static",
       status = "reproduced",
       notes = "Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior."
     )

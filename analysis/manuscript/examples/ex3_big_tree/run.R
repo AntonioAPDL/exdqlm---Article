@@ -74,91 +74,20 @@ if (!need_ex3) {
     as.expression(substitute(psi[list(LABEL, t)], list(LABEL = label)))
   }
 
-  check_loss_vec <- function(p0, diff) {
-    diff * (p0 - as.numeric(diff < 0))
-  }
-
-  empirical_quantile_type7 <- function(z, probs) {
-    z <- sort(as.numeric(z))
-    z <- z[is.finite(z)]
-    m <- length(z)
-    if (!m) return(rep(NA_real_, length(probs)))
-    h <- 1 + (m - 1) * probs
-    lo <- floor(h)
-    hi <- ceiling(h)
-    z[lo] + (h - lo) * (z[hi] - z[lo])
-  }
-
-  iqs_crps_vec <- function(y_true, draws_mat, probs, weights = NULL) {
-    probs <- sort(as.numeric(probs))
-    if (!length(probs) || any(!is.finite(probs)) || any(probs <= 0 | probs >= 1)) {
-      stop("Example 3 CRPS probabilities must lie strictly between 0 and 1.", call. = FALSE)
-    }
-    if (is.null(weights)) {
-      weights <- rep(1 / length(probs), length(probs))
-    } else {
-      weights <- as.numeric(weights)
-      if (length(weights) != length(probs) ||
-          any(!is.finite(weights)) ||
-          any(weights < 0) ||
-          sum(weights) <= 0) {
-        stop("Example 3 CRPS weights must be non-negative and match the CRPS probabilities.", call. = FALSE)
-      }
-      weights <- weights / sum(weights)
-    }
-
-    draws_mat <- as.matrix(draws_mat)
-    stopifnot(length(y_true) == nrow(draws_mat))
-    vapply(seq_len(nrow(draws_mat)), function(i) {
-      if (!is.finite(y_true[[i]])) return(NA_real_)
-      qhat <- empirical_quantile_type7(draws_mat[i, ], probs)
-      if (!any(is.finite(qhat))) return(NA_real_)
-      2 * sum(weights * check_loss_vec(probs, y_true[[i]] - qhat))
-    }, numeric(1))
-  }
-
-  interval_score_vec <- function(y, lower, upper, level = 0.95) {
-    alpha <- 1 - level
-    if (!is.finite(alpha) || alpha <= 0 || alpha >= 1) {
-      stop("Interval level must lie strictly between 0 and 1.", call. = FALSE)
-    }
-    (upper - lower) + (2 / alpha) * pmax(lower - y, 0) + (2 / alpha) * pmax(y - upper, 0)
-  }
-
-  safe_metric_mean <- function(x) {
-    x <- as.numeric(x)
-    x <- x[is.finite(x)]
-    if (!length(x)) NA_real_ else mean(x)
-  }
-
-  forecast_interval <- function(draws_mat, probs = c(0.025, 0.975)) {
-    draws_mat <- as.matrix(draws_mat)
-    vals <- t(apply(draws_mat, 1, stats::quantile, probs = probs, na.rm = TRUE, names = FALSE))
-    colnames(vals) <- c("lower", "upper")
-    vals
-  }
-
-  forecast_metrics_row <- function(model, label, forecast_obj, y_future, p0,
-                                   crps_probs, crps_weights = NULL,
-                                   interval_level = 0.95) {
-    qhat <- as.numeric(forecast_obj$ff[seq_along(y_future)])
-    draws <- as.matrix(forecast_obj$samp.fore)
-    if (nrow(draws) != length(y_future)) {
-      stop("Forecast draw matrix row count does not match the forecast horizon.", call. = FALSE)
-    }
-    interval_probs <- c((1 - interval_level) / 2, 1 - (1 - interval_level) / 2)
-    int <- forecast_interval(draws, probs = interval_probs)
+  forecast_metrics_row <- function(model, label, forecast_obj, y_future,
+                                   crps_probs, crps_weights = NULL) {
+    dx <- exdqlm::exdqlmForecastDiagnostics(
+      forecast_obj,
+      y = y_future,
+      crps_probs = crps_probs,
+      crps_weights = crps_weights
+    )
     data.frame(
       model = model,
       label = label,
-      horizon = length(y_future),
-      mean_check_loss = mean(check_loss_vec(p0, y_future - qhat)),
-      quantile_coverage = mean(y_future <= qhat),
-      n_exceedances = sum(y_future > qhat),
-      CRPS = safe_metric_mean(iqs_crps_vec(y_future, draws, probs = crps_probs, weights = crps_weights)),
-      interval_score = mean(interval_score_vec(y_future, int[, "lower"], int[, "upper"], level = interval_level)),
-      coverage = mean(y_future >= int[, "lower"] & y_future <= int[, "upper"]),
-      mean_interval_width = mean(int[, "upper"] - int[, "lower"]),
+      horizon = dx$horizon,
+      mean_check_loss = as.numeric(dx$m1.check_loss),
+      CRPS = as.numeric(dx$m1.CRPS),
       stringsAsFactors = FALSE
     )
   }
@@ -696,11 +625,11 @@ if (!need_ex3) {
       )
 
       forecast_metrics <- rbind(
-        forecast_metrics_row("M0_no_transfer", "M0 no transfer", fc_M0, y_holdout, p0,
+        forecast_metrics_row("M0_no_transfer", "M0 no transfer", fc_M0, y_holdout,
                              crps_probs = crps_probs),
-        forecast_metrics_row("MREG_direct_regression", "MREG direct regression", fc_MREG, y_holdout, p0,
+        forecast_metrics_row("MREG_direct_regression", "MREG direct regression", fc_MREG, y_holdout,
                              crps_probs = crps_probs),
-        forecast_metrics_row("MTF_transfer_function", "MTF transfer function", fc_MTF, y_holdout, p0,
+        forecast_metrics_row("MTF_transfer_function", "MTF transfer function", fc_MTF, y_holdout,
                              crps_probs = crps_probs)
       )
       sensitivity_metrics <- forecast_metrics
@@ -749,8 +678,15 @@ if (!need_ex3) {
     selected_labels <- ex3_models$selected_labels
     selected_indices <- ex3_models$selected_indices
     selection_table <- ex3_models$selection_table
-    forecast_metrics <- ex3_models$forecast_metrics
-    sensitivity_metrics <- ex3_models$sensitivity_metrics
+    forecast_metrics <- rbind(
+      forecast_metrics_row("M0_no_transfer", "M0 no transfer", fc_M0, y_holdout,
+                           crps_probs = crps_probs),
+      forecast_metrics_row("MREG_direct_regression", "MREG direct regression", fc_MREG, y_holdout,
+                           crps_probs = crps_probs),
+      forecast_metrics_row("MTF_transfer_function", "MTF transfer function", fc_MTF, y_holdout,
+                           crps_probs = crps_probs)
+    )
+    sensitivity_metrics <- forecast_metrics
     diagnostic_row <- function(model, label, fit) {
       dx <- ex3_diagnostics(fit)
       data.frame(
@@ -802,7 +738,7 @@ if (!need_ex3) {
       ))
       cat("\nFinal-training package diagnostics from exdqlmDiagnostics():\n")
       print(diagnostics_summary)
-      cat("\nFinal holdout forecast metrics:\n")
+      cat("\nFinal holdout forecast metrics from exdqlmForecastDiagnostics():\n")
       print(forecast_metrics)
       cat("\nSensitivity forecast metrics:\n")
       print(sensitivity_metrics)
@@ -877,7 +813,7 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_forecast_metrics",
       manuscript_target = "tab:ex3forecastmetrics",
       status = "reproduced",
-      notes = "Support-side Example 3 final 18-month holdout forecast metrics for the no-covariate, direct-regression, and transfer-function models."
+      notes = "Example 3 final 18-month holdout forecast check loss and CRPS from exdqlmForecastDiagnostics for the no-covariate, direct-regression, and transfer-function models."
     )
     save_table_csv(
       sensitivity_metrics,
@@ -885,7 +821,7 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_sensitivity_forecast_metrics",
       manuscript_target = "Example 3 sensitivity forecast metrics",
       status = "reproduced",
-      notes = "Backward-compatible copy of the Example 3 final 18-month holdout forecast metrics after promoting direct regression to the main comparison."
+      notes = "Backward-compatible copy of the Example 3 final 18-month holdout forecast check loss and CRPS from exdqlmForecastDiagnostics."
     )
     register_note("ex3", sprintf(
       "Example 3 selected lambda=%0.3f using training-data %s with static transfer psi coefficients (discount fixed at %0.3f).",

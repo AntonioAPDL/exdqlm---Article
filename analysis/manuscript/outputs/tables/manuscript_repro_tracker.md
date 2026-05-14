@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-05-14 01:36:06
+Generated: 2026-05-14 02:49:59
 Profile: standard
 Seed: 20260501
 
@@ -36,13 +36,13 @@ Seed: 20260501
 - [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (Example 3 covariate scaling). Training-window means and standard deviations used to standardize Example 3 climate indices.
 - [reproduced] `tab_ex3_lambda_selection` -> `analysis/manuscript/outputs/tables/ex3_lambda_selection.csv` (Example 3 transfer training-selection output). Example 3 transfer-function training diagnostic grid; selected lambda=0.850 and transfer psi discount=1.000 by training PPLC.
 - [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (tab:ex3). Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-covariate, direct-regression, and transfer-function models.
-- [reproduced] `tab_ex3_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` (tab:ex3forecastmetrics). Support-side Example 3 final 18-month holdout forecast metrics for the no-covariate, direct-regression, and transfer-function models.
-- [reproduced] `tab_ex3_sensitivity_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv` (Example 3 sensitivity forecast metrics). Backward-compatible copy of the Example 3 final 18-month holdout forecast metrics after promoting direct regression to the main comparison.
+- [reproduced] `tab_ex3_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` (tab:ex3forecastmetrics). Example 3 final 18-month holdout forecast check loss and CRPS from exdqlmForecastDiagnostics for the no-covariate, direct-regression, and transfer-function models.
+- [reproduced] `tab_ex3_sensitivity_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv` (Example 3 sensitivity forecast metrics). Backward-compatible copy of the Example 3 final 18-month holdout forecast check loss and CRPS from exdqlmForecastDiagnostics.
 - [reproduced] `fig_ex3quantcomps` -> `analysis/manuscript/outputs/figures/ex3quantcomps.png` (fig:ex3quant). Example 3 quantile, seasonal, and covariate-contribution comparison for M0, MREG, and MTF.
 - [reproduced] `fig_ex3zetapsi` -> `analysis/manuscript/outputs/figures/ex3zetapsi.png` (fig:ex3tftheta). Transfer-function zeta state and NOI/AMO psi states for the final Example 3 fit.
 - [reproduced] `fig_ex3forecast` -> `analysis/manuscript/outputs/figures/ex3forecast.png` (fig:ex3forecast). Example 3 18-step holdout forecast over 2021-07 to 2022-12.
 - [reproduced] `log_ex4_run_summary` -> `analysis/manuscript/outputs/logs/ex4_run_summary.txt` (Example 4 textual outputs). Sparse Nishimura-Suchard RHS static simulation settings and recovery metrics for Example 4.
-- [reproduced] `tab_ex4static_summary` -> `analysis/manuscript/outputs/tables/ex4static_summary.csv` (new: Example 4 static simulation summary). Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior.
+- [reproduced] `tab_ex4static_summary` -> `analysis/manuscript/outputs/tables/ex4static_summary.csv` (tab:ex4static). Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior.
 - [reproduced] `fig_ex4static` -> `analysis/manuscript/outputs/figures/ex4static.png` (fig:ex4static). Sparse Nishimura-Suchard RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50.
 - [reproduced] `tab_api_migration_map` -> `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv` (global code migration). Maps deprecated manuscript calls to current package API.
 - [reproduced] `tab_benchmark_backend_profiles` -> `analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv` (support: benchmark backend profiles). Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend).

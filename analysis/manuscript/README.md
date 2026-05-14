@@ -57,7 +57,7 @@ Overleaf in sync.
 - Rebuilds Example 1 predictive-synthesis figure from the tracked 0.05, 0.50, and 0.95 fits.
 - Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with optional support-only LDVB diagnostics available when requested.
 - Rebuilds a representative dynamic Example 2 runtime-and-quality benchmark table (`tab:ex2bench`) pairing runtime with KL, CRPS, and pplc under the disclosed backend profile.
-- Rebuilds Example 3 (Big Tree) primary figures + diagnostics table from the LDVB workflow.
+- Rebuilds Example 3 (Big Tree) primary figures, package diagnostic table, and held-out forecast-score table from the LDVB workflow.
 - Rebuilds Example 4 sparse static exAL simulation figure + summary table under the Nishimura-Suchard regularized horseshoe (`rhs_ns`) prior.
 - Adds LDVB-focused support artifacts for Example 2 and Example 3 (figures + diagnostics/scan tables).
 - Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.

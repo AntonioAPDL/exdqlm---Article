@@ -355,6 +355,47 @@ main <- function() {
     ok("canonical article files use the deterministic exdqlm 0.5.0 KL diagnostics wording/code")
   }
 
+  section("Canonical Forecast Scoring Wiring")
+  scoring_files <- file.path(repo_root, c(
+    "analysis/manuscript/examples/ex3_big_tree/run.R",
+    "exdqlm-jss.tex"
+  ))
+  scoring_patterns <- c(
+    "check\\.loss\\.fn",
+    "crps\\.iqs",
+    "check_loss_vec",
+    "iqs_crps_vec",
+    "interval_score_vec"
+  )
+  scoring_hits <- character()
+  for (path in scoring_files[file.exists(scoring_files)]) {
+    lines <- readLines(path, warn = FALSE)
+    hits <- which(vapply(scoring_patterns, function(pat) any(grepl(pat, lines)), logical(1)))
+    if (length(hits)) {
+      scoring_hits <- c(scoring_hits, sprintf("%s [%s]", basename(path), paste(scoring_patterns[hits], collapse = ", ")))
+    }
+    if (!any(grepl("exdqlmForecastDiagnostics", lines, fixed = TRUE))) {
+      scoring_hits <- c(scoring_hits, sprintf("%s [missing exdqlmForecastDiagnostics]", basename(path)))
+    }
+  }
+  line("stale forecast scoring markers", length(scoring_hits))
+  if (length(scoring_hits)) {
+    fail(sprintf("Canonical Example 3 files must use package-level forecast diagnostics: %s", paste(scoring_hits, collapse = "; ")))
+  } else {
+    ok("Example 3 held-out forecast scores use exdqlmForecastDiagnostics")
+  }
+
+  ex3_fc_path <- file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex3_forecast_metrics.csv")
+  ex3_fc <- read_csv_safely(ex3_fc_path)
+  if (!is.null(ex3_fc)) {
+    stale_cols <- intersect(names(ex3_fc), c("quantile_coverage", "n_exceedances", "interval_score", "coverage", "mean_interval_width"))
+    if (length(stale_cols)) {
+      fail(sprintf("ex3_forecast_metrics.csv still contains non-manuscript forecast columns: %s", paste(stale_cols, collapse = ", ")))
+    } else {
+      ok("ex3_forecast_metrics.csv is limited to package forecast diagnostics")
+    }
+  }
+
   section("Manuscript Review Markers")
   tex_path <- file.path(repo_root, "exdqlm-jss.tex")
   if (file.exists(tex_path)) {

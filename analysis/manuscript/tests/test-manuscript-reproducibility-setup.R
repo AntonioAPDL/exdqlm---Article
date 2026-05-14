@@ -1,5 +1,6 @@
 testthat::test_that("clone-grade reproducibility entrypoints exist", {
   testthat::expect_true(file.exists(file.path(repo_root, "README.md")))
+  testthat::expect_true(file.exists(file.path(repo_root, "code.R")))
   testthat::expect_true(file.exists(file.path(repo_root, "analysis", "check_reproducibility.R")))
   testthat::expect_true(file.exists(file.path(repo_root, "analysis", "lib", "exdqlm_package_resolver.R")))
 })
@@ -118,4 +119,26 @@ testthat::test_that("Example 3 canonical output tables include all three models"
       info = sprintf("%s does not include all canonical Example 3 models", basename(path))
     )
   }
+})
+
+testthat::test_that("Example 3 forecast metrics are registered and package-scored", {
+  artifacts <- readLines(file.path(repo_root, "analysis", "manuscript", "examples", "ex3_big_tree", "artifacts.yml"), warn = FALSE)
+  manifest <- readLines(file.path(repo_root, "analysis", "manuscript", "examples", "_manifest", "run.R"), warn = FALSE)
+  run_lines <- readLines(file.path(repo_root, "analysis", "manuscript", "examples", "ex3_big_tree", "run.R"), warn = FALSE)
+
+  testthat::expect_true(any(grepl("tab:ex3forecastmetrics: ex3_forecast_metrics.csv", artifacts, fixed = TRUE)))
+  testthat::expect_true(any(grepl("\"tab_ex3_forecast_metrics\"", manifest, fixed = TRUE)))
+  testthat::expect_true(any(grepl("exdqlmForecastDiagnostics", run_lines, fixed = TRUE)))
+
+  fc_path <- file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex3_forecast_metrics.csv")
+  if (!file.exists(fc_path)) {
+    testthat::skip("Example 3 forecast metric output table is not present in this targeted test run.")
+  }
+
+  fc <- utils::read.csv(fc_path, stringsAsFactors = FALSE)
+  testthat::expect_true(all(c("model", "label", "horizon", "mean_check_loss", "CRPS") %in% names(fc)))
+  testthat::expect_false(any(c(
+    "quantile_coverage", "n_exceedances", "interval_score",
+    "coverage", "mean_interval_width"
+  ) %in% names(fc)))
 })

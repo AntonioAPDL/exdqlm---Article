@@ -22,3 +22,4 @@ article_targets:
   fig:ex3tftheta: ex3zetapsi.png
   fig:ex3forecast: ex3forecast.png
   tab:ex3: ex3_diagnostics_summary.csv
+  tab:ex3forecastmetrics: ex3_forecast_metrics.csv

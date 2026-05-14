@@ -112,10 +112,10 @@ Publication-facing:
 - [ex3zetapsi.png](analysis/manuscript/outputs/figures/ex3zetapsi.png)
 - [ex3forecast.png](analysis/manuscript/outputs/figures/ex3forecast.png)
 - [ex3_diagnostics_summary.csv](analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv)
+- [ex3_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv)
 
 Support-only:
 - [ex3_lambda_selection.csv](analysis/manuscript/outputs/tables/ex3_lambda_selection.csv)
-- [ex3_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv)
 - [ex3_sensitivity_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv)
 - [ex3_model_dataset.csv](analysis/manuscript/outputs/tables/ex3_model_dataset.csv)
 - [ex3_covariate_scaling.csv](analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv)

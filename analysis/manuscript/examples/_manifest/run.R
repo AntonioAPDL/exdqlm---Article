@@ -12,6 +12,7 @@ expected_targets <- data.frame(
     "fig_ex3zetapsi",
     "fig_ex3forecast",
     "tab_ex3_diagnostics",
+    "tab_ex3_forecast_metrics",
     "fig_ex4static",
     "tab_ex4static_summary"
   ),
@@ -26,8 +27,9 @@ expected_targets <- data.frame(
     "fig:ex3tftheta",
     "fig:ex3forecast",
     "tab:ex3",
+    "tab:ex3forecastmetrics",
     "fig:ex4static",
-    "new: Example 4 static simulation summary"
+    "tab:ex4static"
   ),
   stringsAsFactors = FALSE
 )

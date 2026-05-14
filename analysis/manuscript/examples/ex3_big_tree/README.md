@@ -33,13 +33,15 @@ Rscript analysis/run_all.R --stage manuscript --tests-only
 
 The article currently uses `ex3data.png`, `ex3quantcomps.png`,
 `ex3zetapsi.png`, `ex3forecast.png`, and the package diagnostics in
-`ex3_diagnostics_summary.csv`. The transfer-function training screen is stored
-in `ex3_lambda_selection.csv` and selects the transfer-function rate by
+`ex3_diagnostics_summary.csv` and `ex3_forecast_metrics.csv`. The
+transfer-function training screen is stored in `ex3_lambda_selection.csv` and
+selects the transfer-function rate by
 final-training PPLC from the exported `exdqlmDiagnostics()` workflow, with the
 trend, seasonal, and transfer-function discount factors fixed by the manuscript
-configuration. The support tables `ex3_forecast_metrics.csv` and
-`ex3_sensitivity_forecast_metrics.csv` retain 18-month holdout forecast scores
-and the direct-regression sensitivity fit. The lambda selection table records
+configuration. The forecast-metrics table reports 18-month holdout check loss
+and CRPS from `exdqlmForecastDiagnostics()`. The support table
+`ex3_sensitivity_forecast_metrics.csv` retains the same forecast scores for
+backward-compatible reproducibility checks. The lambda selection table records
 fit/diagnostic failures and package convergence flags separately:
 `status == "ok"` means the fit completed and produced finite training
 diagnostics, while `converged` reports the LDVB joint stopping rule from the

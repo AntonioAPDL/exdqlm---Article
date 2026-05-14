@@ -33,6 +33,8 @@ The preflight checks:
 - Example 3 model data window, including the `1987-01-01` start date;
 - tracked output paths in the artifact manifest;
 - stale stochastic/FNN KL code or prose in canonical manuscript files;
+- article-local redefinitions of held-out forecast check loss, CRPS, or
+  interval-score helpers in Example 3;
 - remaining Raquel Prado review markers.
 
 ## Package Test Gate
@@ -85,6 +87,14 @@ EXDQLM_PKG_PATH=../exdqlm \
   analysis/run_all.R --stage manuscript --profile standard
 ```
 
+The top-level reader-facing wrapper is:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm \
+  /path/to/R-4.6.0/bin/Rscript \
+  code.R --profile standard --strict
+```
+
 The full run regenerates the publication-facing Example 4 simulation figure and
 table from the committed `dataset_seed` in `analysis/config/params_manuscript.yml`.
 It does not rerun the expensive support-only seed screen by default. To reselect
@@ -110,6 +120,10 @@ random standard-normal reference samples in canonical examples.
 CRPS is the primary predictive scoring rule for discount-factor selection in
 the examples. KL is reported as a calibration/normality diagnostic for the MAP
 standardized one-step-ahead forecast errors.
+
+Held-out forecast tables must use `exdqlmForecastDiagnostics()` on
+`exdqlmForecast(..., return.draws = TRUE)` objects. The article should not
+define local check-loss or CRPS functions for manuscript forecast comparisons.
 
 ## Runtime Policy
 
@@ -139,6 +153,7 @@ A final reproducibility sync should have:
 - strict preflight with zero errors and no unresolved warnings;
 - no `From RP` or `\color{magenta}` markers;
 - no stale stochastic/FNN KL wiring in canonical manuscript files;
+- no article-local CRPS/check-loss redefinitions for Example 3 forecast scores;
 - all tracked artifact paths present or explicitly marked obsolete with a clear
   manifest update;
 - all manuscript figures/tables traceable to scripts and generated outputs;

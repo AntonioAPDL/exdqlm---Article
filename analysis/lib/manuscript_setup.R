@@ -82,7 +82,7 @@ load_exdqlm()
 required_fns <- c(
   "polytrendMod", "seasMod", "as.exdqlm",
   "exdqlmMCMC", "exdqlmLDVB", "exdqlmDiagnostics",
-  "exdqlmPlot", "compPlot", "exdqlmForecast",
+  "exdqlmPlot", "compPlot", "exdqlmForecast", "exdqlmForecastDiagnostics",
   "exalStaticLDVB", "exalStaticMCMC", "exalStaticDiagnostics",
   "quantileSynthesis"
 )

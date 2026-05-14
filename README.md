@@ -48,6 +48,15 @@ Run the cheap manuscript structure/tests pass:
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --tests-only
 ```
 
+The top-level reader entrypoint wraps the same preflight and manuscript
+pipeline. Use the quick profile for a fresh-clone smoke test and the standard
+profile for the final reference run:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile quick --tests-only
+EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript code.R --profile standard --strict
+```
+
 The detailed regeneration and acceptance protocol is maintained in
 [`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`](analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md).
 
@@ -130,6 +139,8 @@ LaTeX and must be synchronized from generated CSV/log outputs after reruns.
   and should be the first command run in a fresh clone. Use `--fetch --strict`
   with `--require-r-version` before regenerating examples so stale package
   checkouts or stale R runtimes are caught before expensive relaunches.
+- `code.R` is the top-level reader-facing reproduction script and records the
+  R session used for the run.
 - `analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv` maps tracked
   artifacts to manuscript targets.
 - Runtime values are hardware-, R-version-, backend-, and profile-dependent.
