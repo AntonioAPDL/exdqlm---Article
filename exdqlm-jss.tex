@@ -991,32 +991,41 @@ a fixed 50 cubic feet per second reference value, with prior standard deviation
 1 on the log scale. This gives a broad domain-scale prior without using the
 training response to center the state prior.
 
-We compare two models. The first, \code{M0}, is the no-transfer baseline
-containing only the trend and seasonal components. The second, \code{MTF}, uses
-the same baseline state-space model and adds NOI and AMO through the
-transfer-function structure from Section \ref{sec:tf}. For both models, the
-trend and seasonal discount factors are set to 0.99. The transfer-function model
-also fixes the accumulated-effect discount factor \(\delta_\zeta\) and the
-shared instantaneous-coefficient discount factor \(\delta_\psi\) at 0.99.
+The standardized climate coefficients are assigned zero-centered normal priors
+with variance 1. On the log-flow scale this is intentionally weakly informative:
+it allows either climate index to shift the lower-tail quantile materially while
+still regularizing the example around no climate effect.
 
-The transfer rate \(\lambda\) is selected using the training period only. We fit
-the transfer model over \(\lambda\in\{0.1,0.2,\ldots,0.9\}\) and choose the value
-with the smallest posterior predictive loss criterion (PPLC) from
+We compare three models built from the same trend and seasonal baseline. The
+first, \code{M0}, contains no climate covariates. The second, \code{MREG}, adds
+NOI and AMO as direct contemporaneous regressors using \code{regMod()}. The
+third, \code{MTF}, adds the same two covariates through the transfer-function
+structure from Section \ref{sec:tf}. For all three models, the trend and
+seasonal discount factors are set to 0.99. To keep the climate-effect
+comparison simple, the direct-regression coefficients in \code{MREG} and the
+instantaneous transfer coefficients \(\psi_t\) in \code{MTF} use discount
+factor 1, so these coefficient states are static over time. The transfer
+accumulated-effect state \(\zeta_t\) retains discount factor 0.99.
+
+The transfer rate \(\lambda\) is selected using the training period only. Guided
+by an initial coarse scan, the replication script fits the transfer model over
+\(\lambda\in\{0.70,0.75,0.80,0.85,0.90,0.95,0.99\}\) and chooses the value with
+the smallest posterior predictive loss criterion (PPLC) from
 \code{exdqlmDiagnostics()}. The held-out months are not used in this selection
 step. The following code shows the selection pattern used by the replication
 script.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> lambda.grid = seq(0.1, 0.9, by = 0.1)
+R> lambda.grid = c(0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.99)
 R> pplc.grid = rep(NA_real_, length(lambda.grid))
 R> for (i in seq_along(lambda.grid)) {
 +     set.seed(20264001 + i)
 +     temp.MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
 +                 df = c(0.99, 0.99), dim.df = c(1, 6),
-+                 X = X.train, tf.df = c(0.99, 0.99),
++                 X = X.train, tf.df = c(0.99, 1),
 +                 lam = lambda.grid[i], tf.m0 = rep(0, 3),
-+                 tf.C0 = diag(c(0.1, 0.005, 0.005), 3),
++                 tf.C0 = diag(c(0.1, 1, 1), 3),
 +                 sig.init = 0.1, gam.init = -0.1,
 +                 n.samp = 1000, tol = 0.05, verbose = FALSE)
 +     temp.diag = exdqlmDiagnostics(temp.MTF, plot = FALSE)
@@ -1026,16 +1035,16 @@ R> lambda.star = lambda.grid[which.min(pplc.grid)]
 R> lambda.star
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 0.8
+[1] 0.85
 \end{CodeOutput}
 \end{CodeChunk}
 
-The final models are fit on January 1987 through June 2021. We use the LDVB implementation for both models; the corresponding MCMC implementation is available when posterior simulation is desired.
+The final models are fit on January 1987 through June 2021. We use the LDVB implementation for all three models; the corresponding MCMC implementation is available when posterior simulation is desired.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth]{ex3quantcomps.png}
-\caption{Example 3: Big Tree water flow. Top: MAP estimates and 95\% CrIs of the fitted \(0.15\) quantile from the no-transfer baseline \code{M0} (purple) and transfer-function model \code{MTF} (green), plotted with the data (grey) from 2016 to 2020. Middle: MAP estimates and 95\% CrIs of the combined seasonal components implied by the annual, semiannual, and low-frequency harmonics. Bottom: MAP estimates and 95\% CrIs of the transfer-function contribution from NOI and AMO in \code{MTF}. The horizontal orange dotted lines are at zero for reference.}
+\caption{Example 3: Big Tree water flow. Top: MAP estimates and 95\% CrIs of the fitted \(0.15\) quantile from the no-covariate baseline \code{M0} (purple), direct-regression model \code{MREG} (blue), and transfer-function model \code{MTF} (green), plotted with the data (grey) from 2016 to 2020. Middle: MAP estimates and 95\% CrIs of the combined seasonal components implied by the annual, semiannual, and low-frequency harmonics. Bottom: MAP estimates and 95\% CrIs of the direct-regression contribution in \code{MREG} and the transfer-function contribution in \code{MTF}. The horizontal orange dotted lines are at zero for reference.}
 \label{fig:ex3quant}
 \end{figure}
 
@@ -1046,30 +1055,40 @@ R> M0 = exdqlmLDVB(y = y.train, p0 = 0.15, model = model,
 +                df = c(0.99, 0.99), dim.df = c(1, 6),
 +                sig.init = 0.1, gam.init = -0.1,
 +                n.samp = 1000, tol = 0.05, verbose = FALSE)
+R> reg.comp = regMod(X.train, m0 = rep(0, 2), C0 = diag(1, 2))
+R> set.seed(20264301)
+R> MREG = exdqlmLDVB(y = y.train, p0 = 0.15,
++                  model = model + reg.comp,
++                  df = c(0.99, 0.99, 1), dim.df = c(1, 6, 2),
++                  sig.init = 0.1, gam.init = -0.1,
++                  n.samp = 1000, tol = 0.05, verbose = FALSE)
 R> set.seed(20264201)
 R> MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
 +                         df = c(0.99, 0.99), dim.df = c(1, 6),
-+                         X = X.train, tf.df = c(0.99, 0.99),
++                         X = X.train, tf.df = c(0.99, 1),
 +                         lam = lambda.star, tf.m0 = rep(0, 3),
-+                         tf.C0 = diag(c(0.1, 0.005, 0.005), 3),
++                         tf.C0 = diag(c(0.1, 1, 1), 3),
 +                         sig.init = 0.1, gam.init = -0.1,
 +                         n.samp = 1000, tol = 0.05, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
 The upper panel of Figure \ref{fig:ex3quant} compares the fitted \(0.15\)
-quantiles from the two training fits over 2016--2020. The fitted lower-tail
+quantiles from the three training fits over 2016--2020. The fitted lower-tail
 quantile paths are similar because the trend and seasonal components explain
-much of the broad annual structure. The component panels clarify the difference
-between the two fits: the middle panel shows that the seasonal contribution is
-similar across models, while the lower panel isolates the additional lagged
-climate-index contribution in \code{MTF}.
+much of the broad annual structure. The component panels clarify the model
+differences: the middle panel shows that the seasonal contribution is similar
+across models, while the lower panel separates the contemporaneous climate-index
+contribution in \code{MREG} from the accumulated transfer contribution in
+\code{MTF}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
+R> par(mfrow = c(3, 1))
 R> plot(y.train, col = "grey", ylim = c(1, 8), xlim = c(2016, 2020),
 +       ylab = "0.15 quantile 95% CrIs")
 R> exdqlmPlot(M0, add = TRUE)
+R> exdqlmPlot(MREG, add = TRUE, col = "steelblue")
 R> exdqlmPlot(MTF, add = TRUE, col = "forest green")
 \end{CodeInput}
 \end{CodeChunk}
@@ -1077,7 +1096,7 @@ R> exdqlmPlot(MTF, add = TRUE, col = "forest green")
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth]{ex3zetapsi.png}
-\caption{Example 3: Big Tree water flow. MAP estimates and 95\% CrIs of the transfer-function states in \code{MTF}. The top panel shows the accumulated transfer effect \(\zeta_t\). The bottom panels show the instantaneous transfer coefficients \(\psi_{\mathrm{NOI},t}\) and \(\psi_{\mathrm{AMO},t}\). Horizontal dotted orange lines mark zero.}
+\caption{Example 3: Big Tree water flow. MAP estimates and 95\% CrIs of the transfer-function states in \code{MTF}. The top panel shows the accumulated transfer effect \(\zeta_t\). The bottom panels show the instantaneous transfer coefficients \(\psi_{\mathrm{NOI},t}\) and \(\psi_{\mathrm{AMO},t}\), which are static here because their discount factors are set to 1. Horizontal dotted orange lines mark zero.}
 \label{fig:ex3tftheta}
 \end{figure}
 
@@ -1085,24 +1104,29 @@ The package function \code{compPlot()} displays selected model components. We
 begin with the combined seasonal contribution. Because the seasonal block
 contains three harmonics, this contribution is formed from the second through
 seventh elements of the state vector. The middle panel of Figure
-\ref{fig:ex3quant} shows the resulting seasonal estimates for the two models
+\ref{fig:ex3quant} shows the resulting seasonal estimates for the three models
 over the same 2016--2020 window.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
 +         ylab = "seasonal components")
 R> compPlot(M0, index = 2:7, add = TRUE)
+R> compPlot(MREG, index = 2:7, add = TRUE, col = "steelblue")
 R> compPlot(MTF, index = 2:7, add = TRUE, col = "forest green")
 \end{CodeInput}
 \end{CodeChunk}
-The lower panel of Figure \ref{fig:ex3quant} displays the transfer-function
-contribution induced by the standardized NOI and AMO covariates. This separates
-the lagged climate-index component from the trend and seasonal baseline, even
-when the fitted quantiles themselves are visually close.
+The lower panel of Figure \ref{fig:ex3quant} displays the climate-index
+contributions induced by the standardized NOI and AMO covariates. For
+\code{MREG}, indices 8 and 9 are the direct-regression coefficient states. For
+\code{MTF}, index 8 is the accumulated transfer effect \(\zeta_t\). This
+separates contemporaneous and lagged climate-index components from the common
+trend and seasonal baseline, even when the fitted quantiles themselves are
+visually close.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
-+          ylab = "transfer contribution")
++          ylab = "covariate contribution")
+R> compPlot(MREG, index = 8:9, add = TRUE, col = "steelblue")
 R> compPlot(MTF, index = 8, add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 \end{CodeInput}
@@ -1111,7 +1135,9 @@ R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 Figure \ref{fig:ex3tftheta} then displays the augmented transfer states
 directly. As described in Section \ref{sec:tf}, \(\zeta_t\) controls the
 accumulated transfer effect and the \(\psi_t\) states determine how the
-contemporaneous covariates enter that transfer term. Setting
+contemporaneous covariates enter that transfer term. In this example the
+\(\psi_t\) discount factors are set to 1, so the bottom panels summarize static
+NOI and AMO coefficients within the transfer-function model. Setting
 \code{just.theta = TRUE} in \code{compPlot()} plots a single element of the
 augmented state vector \(\tilde{\vect{\theta}}_t\). In this fitted model,
 indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
@@ -1142,22 +1168,24 @@ R> title(expression(psi[list(AMO, t)]))
 The fitted object also reports \code{median.kt}, the median number of time steps
 until the transfer effect on the \(0.15\) quantile is less than or equal to
 \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here
-\code{median.kt} is approximately 19.19, indicating a persistent transfer effect
+\code{median.kt} is approximately 25.15, indicating a persistent transfer effect
 under the selected \(\lambda\).
 \begin{CodeChunk}
 \begin{CodeInput}
 R> MTF$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 19.18759
+[1] 25.15187
 \end{CodeOutput}
 \end{CodeChunk}
 
 We next produce 18-month-ahead forecasts over the held-out window. For
 \code{M0}, the future state-space matrices repeat the trend and seasonal model.
-For \code{MTF}, the future matrices also include the held-out NOI and AMO values
-through the transfer-function augmentation. These matrices are passed through
-the \code{fFF} and \code{fGG} arguments of \code{exdqlmForecast()}.
+For \code{MREG}, the future observation matrix includes the held-out NOI and AMO
+values as direct regressors. For \code{MTF}, the future matrices include the
+held-out NOI and AMO values through the transfer-function augmentation. These
+matrices are passed through the \code{fFF} and \code{fGG} arguments of
+\code{exdqlmForecast()}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1166,6 +1194,13 @@ R> n.state = length(model$m0)
 R> n.x = ncol(X.holdout)
 R> F0.future = matrix(model$FF, nrow = n.state, ncol = k.fore)
 R> G0.future = array(model$GG, c(n.state, n.state, k.fore))
+R> reg.future = regMod(X.holdout, m0 = rep(0, n.x), C0 = diag(1, n.x))
+R> model.reg.future = model + reg.future
+R> n.state.reg = length(model.reg.future$m0)
+R> FREG.future = matrix(model.reg.future$FF, nrow = n.state.reg,
++                      ncol = k.fore)
+R> GREG.future = array(model.reg.future$GG,
++                     c(n.state.reg, n.state.reg, k.fore))
 R> FTF.future = matrix(0, nrow = n.state + n.x + 1, ncol = k.fore)
 R> FTF.future[seq_len(n.state), ] = F0.future
 R> FTF.future[n.state + 1, ] = 1
@@ -1181,10 +1216,16 @@ R> for (j in seq_len(n.x)) {
 +   }
 R> fc.M0 = exdqlmForecast(start.t = length(y.train), k = 18, m1 = M0,
 +                        fFF = F0.future, fGG = G0.future,
-+                        return.draws = TRUE, n.samp = 1000)
++                        return.draws = TRUE, n.samp = 1000,
++                        seed = 20265101)
+R> fc.MREG = exdqlmForecast(start.t = length(y.train), k = 18, m1 = MREG,
++                          fFF = FREG.future, fGG = GREG.future,
++                          return.draws = TRUE, n.samp = 1000,
++                          seed = 20265301)
 R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = 18, m1 = MTF,
 +                         fFF = FTF.future, fGG = GTF.future,
-+                         return.draws = TRUE, n.samp = 1000)
++                         return.draws = TRUE, n.samp = 1000,
++                         seed = 20265201)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1192,16 +1233,20 @@ Figure \ref{fig:ex3forecast} overlays the filtered estimates before the forecast
 origin and the conditional forecasts after it. The numerical comparison in Table
 \ref{tab:ex3} uses \code{exdqlmDiagnostics()} so that all reported quantities
 are exported package diagnostics, as defined in Section \ref{sec:diags}. These
-diagnostics are computed from the final-training fitted objects.
+diagnostics are computed from the final-training fitted objects. Table
+\ref{tab:ex3forecastmetrics} reports held-out forecast scores over the final 18
+months.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> diag.ex3 = exdqlmDiagnostics(M0, MTF, plot = FALSE)
+R> diag.M0 = exdqlmDiagnostics(M0, plot = FALSE)
+R> diag.MREG = exdqlmDiagnostics(MREG, plot = FALSE)
+R> diag.MTF = exdqlmDiagnostics(MTF, plot = FALSE)
 R> tab.ex3 = data.frame(
-+     model = c("M0", "MTF"),
-+     KL = c(diag.ex3$m1.KL, diag.ex3$m2.KL),
-+     CRPS = c(diag.ex3$m1.CRPS, diag.ex3$m2.CRPS),
-+     PPLC = c(diag.ex3$m1.pplc, diag.ex3$m2.pplc))
++     model = c("M0", "MREG", "MTF"),
++     KL = c(diag.M0$m1.KL, diag.MREG$m1.KL, diag.MTF$m1.KL),
++     CRPS = c(diag.M0$m1.CRPS, diag.MREG$m1.CRPS, diag.MTF$m1.CRPS),
++     PPLC = c(diag.M0$m1.pplc, diag.MREG$m1.pplc, diag.MTF$m1.pplc))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1214,37 +1259,73 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no transfer & 0.168 & 0.472 & \textbf{99.620} \\
- \code{MTF} transfer function & \textbf{0.122} & \textbf{0.362} & 123.697 \\
+ \code{M0} no covariates & 0.168 & 0.470 & \textbf{99.507} \\
+ \code{MREG} direct regression & \textbf{0.112} & \textbf{0.347} & 151.129 \\
+ \code{MTF} transfer function & 0.155 & 0.365 & 125.151 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
-\code{exdqlmDiagnostics()} for the no-transfer baseline \code{M0} and the
-transfer-function model \code{MTF}, computed on the final-training fitted
-objects. KL denotes the deterministic Kullback--Leibler normality diagnostic for
-the MAP standardized forecast errors, CRPS denotes the continuous ranked probability score, and PPLC denotes the
-posterior predictive loss criterion. Lower values are preferred; bold entries
-mark the smaller value for each diagnostic.}
+\code{exdqlmDiagnostics()} for the no-covariate baseline \code{M0}, direct-regression model \code{MREG}, and transfer-function model \code{MTF}, computed on the final-training fitted objects. KL denotes the deterministic Kullback--Leibler normality diagnostic for the MAP standardized forecast errors, CRPS denotes the continuous ranked probability score, and PPLC denotes the posterior predictive loss criterion. Lower values are preferred; bold entries mark the smallest value for each diagnostic.}
 \label{tab:ex3}
 \end{table}
 
-Table \ref{tab:ex3} gives a mixed comparison. The transfer-function model has
-smaller KL and CRPS values, while the no-transfer baseline has the smaller PPLC,
-which keeps the target-level check loss explicit. We therefore do not interpret
-the transfer-function fit as uniformly better in this example. The example
-instead shows how \pkg{exdqlm} adds lagged external-input structure to a dynamic
-quantile model, separates that structure through component plots, applies the
-exported diagnostic workflow, and forecasts conditionally on future covariate
-values.
+Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-regression model has the smallest KL and CRPS values, while the no-covariate baseline has the smallest PPLC. The transfer-function model falls between them for PPLC and has diagnostics closer to \code{MREG} than to \code{M0} for CRPS. We therefore do not interpret the transfer-function fit as uniformly better in this example. The example instead shows how \pkg{exdqlm} supports three related dynamic quantile workflows: no external inputs, direct regression through \code{regMod()}, and lagged external-input effects through transfer functions.
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> check.loss.fn = function(y, q, p0) (y - q) * (p0 - as.numeric(y < q))
+R> interval.score.fn = function(y, lower, upper, level = 0.95) {
++     alpha = 1 - level
++     (upper - lower) + (2 / alpha) * pmax(lower - y, 0) +
++       (2 / alpha) * pmax(y - upper, 0)
++   }
+R> crps.iqs = function(y, draws) {
++     probs = seq(0.01, 0.99, by = 0.01)
++     mean(vapply(seq_along(y), function(i) {
++       q = quantile(draws[i, ], probs = probs, names = FALSE)
++       2 * mean((y[i] - q) * (probs - as.numeric(y[i] < q)))
++     }, numeric(1)))
++   }
+R> forecast.row = function(name, fc) {
++     draws = as.matrix(fc$samp.fore)
++     qhat = as.numeric(fc$ff[seq_along(y.holdout)])
++     int = t(apply(draws, 1, quantile, probs = c(0.025, 0.975)))
++     data.frame(model = name,
++       check.loss = mean(check.loss.fn(y.holdout, qhat, 0.15)),
++       CRPS = crps.iqs(y.holdout, draws),
++       interval.score = mean(interval.score.fn(y.holdout, int[, 1], int[, 2])),
++       coverage = mean(y.holdout >= int[, 1] & y.holdout <= int[, 2]))
++   }
+R> tab.ex3.fc = rbind(forecast.row("M0", fc.M0),
++                    forecast.row("MREG", fc.MREG),
++                    forecast.row("MTF", fc.MTF))
+\end{CodeInput}
+\end{CodeChunk}
+
+\begin{table}[h!]
+\centering
+\TableStyle
+\begin{tabular}{@{}lrrrr@{}}
+ \toprule
+ Model & Check loss & CRPS & Interval score & 95\% coverage \\
+ \midrule
+ \code{M0} no covariates & 0.119 & 0.498 & 8.754 & 0.833 \\
+ \code{MREG} direct regression & \textbf{0.114} & \textbf{0.401} & \textbf{2.906} & 1.000 \\
+ \code{MTF} transfer function & 0.155 & 0.550 & 7.167 & 0.889 \\
+ \bottomrule
+\end{tabular}
+\caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022. Check loss is computed at \(p_0=0.15\). CRPS is computed from posterior predictive draws using the integrated-quantile-score approximation. Interval score and coverage use pointwise 95\% posterior predictive intervals. Lower values are preferred for check loss, CRPS, and interval score; bold entries mark the smallest value in those columns.}
+\label{tab:ex3forecastmetrics}
+\end{table}
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=0.6\textwidth]{ex3forecast.png}
+\includegraphics[width=0.82\textwidth]{ex3forecast.png}
 \caption{Example 3: Big Tree water flow. Held-out 18-month conditional forecast
 display from July 2021 through December 2022. The vertical dot-dashed line marks
 the forecast origin after the final training month, June 2021. Solid lines
 indicate posterior mean forecast quantiles and dotted lines indicate pointwise
-95\% CrIs. Held-out observations are shown as orange circles.}
+95\% CrIs for \code{M0}, \code{MREG}, and \code{MTF}. Held-out observations are shown as orange circles.}
 \label{fig:ex3forecast}
 \end{figure}
 

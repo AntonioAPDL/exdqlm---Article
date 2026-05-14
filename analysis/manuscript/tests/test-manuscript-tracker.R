@@ -21,6 +21,7 @@ testthat::test_that("core manuscript figure targets are reproduced", {
     "fig_ex3zetapsi",
     "fig_ex3forecast",
     "tab_ex3_diagnostics",
+    "tab_ex3_forecast_metrics",
     "fig_ex4static",
     "tab_ex4static_summary"
   )

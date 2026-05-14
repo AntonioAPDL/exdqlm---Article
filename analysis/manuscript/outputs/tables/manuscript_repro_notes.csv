@@ -19,3 +19,5 @@
 "benchmark","Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles."
 "benchmark","benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run."
 "scope","Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex."
+"ex3","Example 3 selected lambda=0.850 using training-data PPLC with static transfer psi coefficients (discount fixed at 1.000)."
+"coverage","Targeted run; requested targets: ex3."

@@ -81,3 +81,41 @@ testthat::test_that("backend options table lives in the supplement", {
   testthat::expect_true(any(grepl("\\\\label\\{tab:supp_backendopts\\}", supp_text)))
   testthat::expect_true(any(grepl("\\\\section\\{Global backend options\\}", supp_text)))
 })
+
+testthat::test_that("Example 3 uses static climate coefficients in the three-model comparison", {
+  testthat::skip_if_not_installed("yaml")
+
+  cfg <- yaml::read_yaml(file.path(repo_root, "analysis", "config", "params_manuscript.yml"))
+  for (profile in c("quick", "standard", "full")) {
+    ex3 <- cfg$profiles[[profile]]$ex3
+    testthat::expect_equal(as.numeric(ex3$covariate_df), 1)
+    testthat::expect_equal(as.numeric(ex3$transfer_psi_df), 1)
+    testthat::expect_equal(as.numeric(unlist(ex3$transfer_psi_df_grid)), 1)
+    testthat::expect_equal(as.numeric(ex3$reg_c0), as.numeric(ex3$transfer_psi_c0))
+    testthat::expect_true(all(as.numeric(unlist(ex3$lambda_grid)) >= 0.70))
+    testthat::expect_true(all(as.numeric(unlist(ex3$lambda_grid)) < 1))
+  }
+})
+
+testthat::test_that("Example 3 canonical output tables include all three models", {
+  expected_models <- c(
+    "M0_no_transfer",
+    "MREG_direct_regression",
+    "MTF_transfer_function"
+  )
+  table_paths <- file.path(repo_root, c(
+    "analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv",
+    "analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv"
+  ))
+  if (!all(file.exists(table_paths))) {
+    testthat::skip("Example 3 generated output tables are not present in this targeted test run.")
+  }
+
+  for (path in table_paths) {
+    tab <- utils::read.csv(path, stringsAsFactors = FALSE)
+    testthat::expect_true(
+      all(expected_models %in% tab$model),
+      info = sprintf("%s does not include all canonical Example 3 models", basename(path))
+    )
+  }
+})

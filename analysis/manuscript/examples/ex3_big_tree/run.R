@@ -182,12 +182,12 @@ if (!need_ex3) {
     )
   }
 
-  build_direct_forecast_mats <- function(base_model, X_future_scaled) {
+  build_direct_forecast_mats <- function(base_model, X_future_scaled, coef_c0 = 1) {
     X_future_scaled <- as.matrix(X_future_scaled)
     reg_future <- exdqlm::regMod(
       X_future_scaled,
       m0 = rep(0, ncol(X_future_scaled)),
-      C0 = diag(1, ncol(X_future_scaled))
+      C0 = diag(coef_c0, ncol(X_future_scaled))
     )
     future_model <- base_model + reg_future
     p <- length(future_model$m0)
@@ -325,7 +325,8 @@ if (!need_ex3) {
     m0_aux = "#B991CC",
     mtf = "#2E7D5B",
     mtf_aux = "#85B89A",
-    mreg = "#6C6C6C",
+    mreg = "#4C72B0",
+    mreg_aux = "#9EB8D9",
     idx1 = "#2D6F95",
     idx2 = "#B85C38",
     holdout = "#C47A2C",
@@ -359,9 +360,10 @@ if (!need_ex3) {
   trend_c0 <- as.numeric(ex3_cfg$trend_c0 %||% 0.1)
   trend_m0 <- as.numeric(ex3_cfg$trend_m0 %||% log(50))
   seasonal_c0 <- as.numeric(ex3_cfg$seasonal_c0 %||% 1)
-  reg_c0 <- as.numeric(ex3_cfg$reg_c0 %||% 1)
+  climate_coef_c0 <- as.numeric(ex3_cfg$climate_coef_c0 %||% 1)
+  reg_c0 <- as.numeric(ex3_cfg$reg_c0 %||% climate_coef_c0)
   transfer_zeta_c0 <- as.numeric(ex3_cfg$transfer_zeta_c0 %||% 0.1)
-  transfer_psi_c0 <- as.numeric(ex3_cfg$transfer_psi_c0 %||% 0.005)
+  transfer_psi_c0 <- as.numeric(ex3_cfg$transfer_psi_c0 %||% climate_coef_c0)
   gam_init <- as.numeric(ex3_cfg$gam_init %||% -0.1)
   sig_init <- as.numeric(ex3_cfg$sig_init %||% 0.1)
   n_samp <- as.integer(ex3_cfg$n_samp)
@@ -390,6 +392,7 @@ if (!need_ex3) {
   base_model_template <- make_base_model(y_train_ts)
   base_state_dim <- length(base_model_template$m0)
   seasonal_idx <- seq.int(trend_order + 1L, base_state_dim)
+  direct_reg_idx <- seq.int(base_state_dim + 1L, base_state_dim + k_cov)
   transfer_zeta_idx <- base_state_dim + 1L
   transfer_psi_idx <- seq.int(base_state_dim + 2L, base_state_dim + k_cov + 1L)
 
@@ -531,15 +534,22 @@ if (!need_ex3) {
     metric_tag <- gsub("[^0-9A-Za-z]+", "_", selection_metric)
     p0_tag <- sprintf("p%03d", round(100 * p0))
     prior_tag <- sprintf("m0%04d_c0%04d", round(1000 * trend_m0), round(1000 * trend_c0))
+    coef_tag <- sprintf(
+      "coefc0%04d_regdf%03d_zetadf%03d_psidf%s",
+      round(1000 * climate_coef_c0),
+      round(100 * covariate_df),
+      round(100 * transfer_zeta_df),
+      psi_tag
+    )
     cache_key <- sprintf(
-      "ex3_models_trainselect_v5_diagtable_%s_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
+      "ex3_models_trainselect_v6_threemodel_%s_%s_%s_%s_%s_%s_grid%s_%s_nsamp%d_tol%s_h%d",
       paste(selected_indices, collapse = "_"),
       pkg_commit %||% "unknown",
       window_tag,
       p0_tag,
       prior_tag,
+      coef_tag,
       grid_tag,
-      psi_tag,
       metric_tag,
       n_samp,
       gsub("[^0-9A-Za-z]+", "_", format(tol)),
@@ -654,14 +664,14 @@ if (!need_ex3) {
         )),
         error = function(e) e
       )
-      log_msg("Example 3 final sensitivity fit: MREG direct-regression model")
+      log_msg("Example 3 final fit: MREG direct-regression model")
       MREG <- tryCatch(
         with_ex3_max_iter(with_local_seed(seed_value + 3800L, fit_direct_model(y_train_ts, X_train))),
         error = function(e) e
       )
 
-      if (!fit_ok(M0) || !fit_ok(MTF)) {
-        stop("Example 3 final no-transfer or transfer-function LDVB fit failed.", call. = FALSE)
+      if (!fit_ok(M0) || !fit_ok(MREG) || !fit_ok(MTF)) {
+        stop("Example 3 final no-transfer, direct-regression, or transfer-function LDVB fit failed.", call. = FALSE)
       }
 
       base_final <- attr(M0, "ex3_base_model")
@@ -678,31 +688,22 @@ if (!need_ex3) {
         mats = build_transfer_forecast_mats(attr(MTF, "ex3_base_model"), X_holdout, lambda = lambda_star),
         seed = seed_value + 4700L
       )
-      fc_MREG <- if (fit_ok(MREG)) {
-        forecast_with_mats(
-          MREG,
-          k = forecast_horizon,
-          mats = build_direct_forecast_mats(attr(MREG, "ex3_base_model"), X_holdout),
-          seed = seed_value + 4800L
-        )
-      } else {
-        MREG
-      }
+      fc_MREG <- forecast_with_mats(
+        MREG,
+        k = forecast_horizon,
+        mats = build_direct_forecast_mats(attr(MREG, "ex3_base_model"), X_holdout, coef_c0 = reg_c0),
+        seed = seed_value + 4800L
+      )
 
       forecast_metrics <- rbind(
         forecast_metrics_row("M0_no_transfer", "M0 no transfer", fc_M0, y_holdout, p0,
+                             crps_probs = crps_probs),
+        forecast_metrics_row("MREG_direct_regression", "MREG direct regression", fc_MREG, y_holdout, p0,
                              crps_probs = crps_probs),
         forecast_metrics_row("MTF_transfer_function", "MTF transfer function", fc_MTF, y_holdout, p0,
                              crps_probs = crps_probs)
       )
       sensitivity_metrics <- forecast_metrics
-      if (fit_ok(fc_MREG)) {
-        sensitivity_metrics <- rbind(
-          sensitivity_metrics,
-          forecast_metrics_row("MREG_direct_regression", "MREG direct regression", fc_MREG, y_holdout, p0,
-                               crps_probs = crps_probs)
-        )
-      }
 
       list(
         M0 = M0,
@@ -735,13 +736,13 @@ if (!need_ex3) {
     fc_M0 <- ex3_models$fc_M0
     fc_MTF <- ex3_models$fc_MTF
     fc_MREG <- ex3_models$fc_MREG
-    if (!fit_ok(M0) || !fit_ok(MTF)) {
+    if (!fit_ok(M0) || !fit_ok(MREG) || !fit_ok(MTF)) {
       stop("Example 3 final LDVB fits failed; cannot regenerate manuscript artifacts.", call. = FALSE)
     }
 
     M0$y <- y_train_ts
     MTF$y <- y_train_ts
-    if (fit_ok(MREG)) MREG$y <- y_train_ts
+    MREG$y <- y_train_ts
 
     lambda_star <- ex3_models$lambda_star
     psi_df_star <- ex3_models$psi_df_star
@@ -750,21 +751,33 @@ if (!need_ex3) {
     selection_table <- ex3_models$selection_table
     forecast_metrics <- ex3_models$forecast_metrics
     sensitivity_metrics <- ex3_models$sensitivity_metrics
-    diagnostics_out <- ex3_diagnostics(M0, MTF)
-    diagnostics_summary <- data.frame(
-      model = c("M0_no_transfer", "MTF_transfer_function"),
-      label = c("M0 no transfer", "MTF transfer function"),
-      KL = c(diagnostics_out$m1.KL, diagnostics_out$m2.KL),
-      KL_flipped = c(diagnostics_out$m1.KL.flip, diagnostics_out$m2.KL.flip),
-      CRPS = c(diagnostics_out$m1.CRPS, diagnostics_out$m2.CRPS),
-      PPLC = c(diagnostics_out$m1.pplc, diagnostics_out$m2.pplc),
-      stringsAsFactors = FALSE
+    diagnostic_row <- function(model, label, fit) {
+      dx <- ex3_diagnostics(fit)
+      data.frame(
+        model = model,
+        label = label,
+        KL = as.numeric(dx$m1.KL),
+        KL_flipped = as.numeric(dx$m1.KL.flip),
+        CRPS = as.numeric(dx$m1.CRPS),
+        PPLC = as.numeric(dx$m1.pplc),
+        stringsAsFactors = FALSE
+      )
+    }
+    diagnostics_summary <- rbind(
+      diagnostic_row("M0_no_transfer", "M0 no transfer", M0),
+      diagnostic_row("MREG_direct_regression", "MREG direct regression", MREG),
+      diagnostic_row("MTF_transfer_function", "MTF transfer function", MTF)
     )
     capture_output_file("ex3_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("package_commit=%s\n", git_short_head(resolve_pkg_path()$path)))
       cat(sprintf("p0=%0.2f\n", p0))
       cat(sprintf("trend_prior_m0=%0.6f, trend_prior_C0=%0.3f\n", trend_m0, trend_c0))
+      cat(sprintf("climate_coef_prior_C0=%0.3f\n", climate_coef_c0))
+      cat(sprintf(
+        "discount_factors=trend:%0.3f, seasonal:%0.3f, direct_coef:%0.3f, transfer_zeta:%0.3f, transfer_psi:%0.3f\n",
+        trend_df, seasonal_df, covariate_df, transfer_zeta_df, psi_df_star
+      ))
       cat(sprintf("data_window=%s to %s\n", fmt_month(min(model_df$date)), fmt_month(max(model_df$date))))
       cat(sprintf("final_training_window=%s to %s\n", fmt_month(model_df$date[min(final_train_idx)]), fmt_month(model_df$date[max(final_train_idx)])))
       cat(sprintf("forecast_holdout_window=%s to %s\n", fmt_month(model_df$date[min(holdout_idx)]), fmt_month(model_df$date[max(holdout_idx)])))
@@ -856,15 +869,15 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_diagnostics",
       manuscript_target = "tab:ex3",
       status = "reproduced",
-      notes = "Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-transfer and transfer-function models."
+      notes = "Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-covariate, direct-regression, and transfer-function models."
     )
     save_table_csv(
       forecast_metrics,
       filename = "ex3_forecast_metrics.csv",
       artifact_id = "tab_ex3_forecast_metrics",
-      manuscript_target = "support: Example 3 holdout forecast metrics",
+      manuscript_target = "tab:ex3forecastmetrics",
       status = "reproduced",
-      notes = "Support-side Example 3 final 18-month holdout forecast metrics computed by article replication helpers, not exdqlmDiagnostics."
+      notes = "Support-side Example 3 final 18-month holdout forecast metrics for the no-covariate, direct-regression, and transfer-function models."
     )
     save_table_csv(
       sensitivity_metrics,
@@ -872,10 +885,10 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_sensitivity_forecast_metrics",
       manuscript_target = "Example 3 sensitivity forecast metrics",
       status = "reproduced",
-      notes = "Example 3 final 18-month holdout forecast metrics including the internal direct-regression sensitivity model."
+      notes = "Backward-compatible copy of the Example 3 final 18-month holdout forecast metrics after promoting direct regression to the main comparison."
     )
     register_note("ex3", sprintf(
-      "Example 3 selected lambda=%0.3f using training-data %s with transfer psi discount fixed at %0.3f.",
+      "Example 3 selected lambda=%0.3f using training-data %s with static transfer psi coefficients (discount fixed at %0.3f).",
       lambda_star,
       ex3_models$selection_metric,
       psi_df_star
@@ -901,9 +914,12 @@ if (!need_ex3) {
 
     if (need_ex3quantcomps) {
       q0 <- quantile_summary_from_fit(M0, cr.percent = 0.95)
+      qreg <- quantile_summary_from_fit(MREG, cr.percent = 0.95)
       qtf <- quantile_summary_from_fit(MTF, cr.percent = 0.95)
       c0_seas <- component_summary_from_fit(M0, index = seasonal_idx)
+      creg_seas <- component_summary_from_fit(MREG, index = seasonal_idx)
       ctf_seas <- component_summary_from_fit(MTF, index = seasonal_idx)
+      creg_direct <- component_summary_from_fit(MREG, index = direct_reg_idx)
       ctf_transfer <- component_summary_from_fit(MTF, index = transfer_zeta_idx)
 
       save_png_plot("ex3quantcomps.png", {
@@ -912,33 +928,40 @@ if (!need_ex3) {
 
         graphics::plot(
           tx_full, y_log, type = "l", col = "grey70",
-          ylim = padded_range(y_log, q0$lb, q0$ub, qtf$lb, qtf$ub),
+          ylim = padded_range(y_log, q0$lb, q0$ub, qreg$lb, qreg$ub, qtf$lb, qtf$ub),
           xlim = xlim_mid, xlab = "", ylab = "log flow / quantile"
         )
         graphics::grid(col = "grey90")
         plot_quantile_summary(q0, col = ex3_cols$m0, add = TRUE)
+        plot_quantile_summary(qreg, col = ex3_cols$mreg, add = TRUE)
         plot_quantile_summary(qtf, col = ex3_cols$mtf, add = TRUE)
         graphics::legend(
-          "topleft", legend = c("M0 no transfer", "MTF transfer function"),
-          col = c(ex3_cols$m0, ex3_cols$mtf), lty = 1, lwd = 1.5, bty = "n"
+          "topleft", legend = c("M0 no covariates", "MREG direct regression", "MTF transfer function"),
+          col = c(ex3_cols$m0, ex3_cols$mreg, ex3_cols$mtf), lty = 1, lwd = 1.5, bty = "n"
         )
 
         graphics::plot(
-          NA, ylim = padded_range(c0_seas$lb, c0_seas$ub, ctf_seas$lb, ctf_seas$ub),
+          NA, ylim = padded_range(c0_seas$lb, c0_seas$ub, creg_seas$lb, creg_seas$ub, ctf_seas$lb, ctf_seas$ub),
           xlim = xlim_mid, ylab = "seasonal contribution", xlab = ""
         )
         graphics::grid(col = "grey90")
         plot_component_with_band(c0_seas, col = ex3_cols$m0)
+        plot_component_with_band(creg_seas, col = ex3_cols$mreg)
         plot_component_with_band(ctf_seas, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
 
         graphics::plot(
-          NA, ylim = padded_range(ctf_transfer$lb, ctf_transfer$ub, 0),
-          xlim = xlim_mid, ylab = "transfer contribution", xlab = ""
+          NA, ylim = padded_range(creg_direct$lb, creg_direct$ub, ctf_transfer$lb, ctf_transfer$ub, 0),
+          xlim = xlim_mid, ylab = "covariate contribution", xlab = ""
         )
         graphics::grid(col = "grey90")
+        plot_component_with_band(creg_direct, col = ex3_cols$mreg)
         plot_component_with_band(ctf_transfer, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
+        graphics::legend(
+          "topleft", legend = c("MREG direct", "MTF transfer"),
+          col = c(ex3_cols$mreg, ex3_cols$mtf), lty = 1, lwd = 1.5, bty = "n"
+        )
         graphics::mtext("time", side = 1, outer = TRUE, line = 0.5)
       })
       register_artifact(
@@ -947,7 +970,7 @@ if (!need_ex3) {
         relative_path = "analysis/manuscript/outputs/figures/ex3quantcomps.png",
         manuscript_target = "fig:ex3quant",
         status = "reproduced",
-        notes = "Example 3 quantile, seasonal, and transfer-contribution comparison for M0 and MTF."
+        notes = "Example 3 quantile, seasonal, and covariate-contribution comparison for M0, MREG, and MTF."
       )
     }
 
@@ -992,21 +1015,22 @@ if (!need_ex3) {
       save_png_plot("ex3forecast.png", {
         stats::plot.ts(
           y_log_ts, col = "grey70",
-          ylim = padded_range(y_log, fc_M0$ff, fc_MTF$ff),
+          ylim = padded_range(y_log, fc_M0$ff, fc_MREG$ff, fc_MTF$ff),
           xlim = xlim_fore,
           ylab = "log flow / forecast quantile",
           xlab = "time"
         )
         graphics::grid(col = "grey90")
         plot(fc_M0, add = TRUE, cols = c(ex3_cols$m0, ex3_cols$m0_aux))
+        plot(fc_MREG, add = TRUE, cols = c(ex3_cols$mreg, ex3_cols$mreg_aux))
         plot(fc_MTF, add = TRUE, cols = c(ex3_cols$mtf, ex3_cols$mtf_aux))
         graphics::lines(tx_full[holdout_idx], y_log[holdout_idx], col = ex3_cols$holdout, lwd = 1.4)
         graphics::points(tx_full[holdout_idx], y_log[holdout_idx], col = ex3_cols$holdout, pch = 1, cex = 0.8)
         graphics::abline(v = tx_full[holdout_idx[[1L]]], col = ex3_cols$ref, lty = 5, lwd = 1.2)
         graphics::legend(
-          "topleft", legend = c("M0 no transfer", "MTF transfer", "held-out observations"),
-          col = c(ex3_cols$m0, ex3_cols$mtf, ex3_cols$holdout),
-          lty = c(1, 1, 1), pch = c(NA, NA, 1), lwd = c(1.4, 1.4, 1.2), bty = "n"
+          "topleft", legend = c("M0 no covariates", "MREG direct regression", "MTF transfer", "held-out observations"),
+          col = c(ex3_cols$m0, ex3_cols$mreg, ex3_cols$mtf, ex3_cols$holdout),
+          lty = c(1, 1, 1, 1), pch = c(NA, NA, NA, 1), lwd = c(1.4, 1.4, 1.4, 1.2), bty = "n"
         )
       }, width = 8, height = 5.5)
       register_artifact(

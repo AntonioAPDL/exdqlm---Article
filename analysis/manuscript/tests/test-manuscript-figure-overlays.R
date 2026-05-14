@@ -28,6 +28,7 @@ testthat::test_that("key figure overlays are present (color checks)", {
   )
   ex3_cols <- list(
     m1 = rgb_hex("#8A46B2"),
+    mreg = rgb_hex("#4C72B0"),
     m2 = rgb_hex("#2E7D5B")
   )
   ldvb_cols <- list(
@@ -71,12 +72,14 @@ testthat::test_that("key figure overlays are present (color checks)", {
   ex3q <- read_img("analysis/manuscript/outputs/figures/ex3quantcomps.png")
   if (!is.null(ex3q)) {
     testthat::expect_gt(count_near_color(ex3q, ex3_cols$m1), 40)
+    testthat::expect_gt(count_near_color(ex3q, ex3_cols$mreg), 40)
     testthat::expect_gt(count_near_color(ex3q, ex3_cols$m2), 40)
   }
 
   ex3f <- read_img("analysis/manuscript/outputs/figures/ex3forecast.png")
   if (!is.null(ex3f)) {
     testthat::expect_gt(count_near_color(ex3f, ex3_cols$m1), 40)
+    testthat::expect_gt(count_near_color(ex3f, ex3_cols$mreg), 40)
     testthat::expect_gt(count_near_color(ex3f, ex3_cols$m2), 40)
   }
 
