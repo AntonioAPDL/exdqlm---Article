@@ -87,7 +87,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 \addlinespace[1pt]
 \pkg{bayesQR} & Bayesian AL quantile regression & Static regression; no temporal or state-space component & MCMC under the AL likelihood; optional adaptive lasso & Vector-valued quantile levels; output organized by fitted quantile \\
 \addlinespace[1pt]
-\pkg{pqrBayes} & Bayesian penalized quantile regression & Static sparse, group, binary, or effect-modifier varying-coefficient regression; varying coefficients are functions of an observed modifier, not latent state-space trajectories & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
+\pkg{pqrBayes} & Bayesian penalized quantile regression & Static sparse, group, binary, or effect-modifier varying-coefficient regression; no latent time-evolving states & MCMC with spike-and-slab, Laplace, or horseshoe-family priors & One target quantile per fit \\
 \addlinespace[1pt]
 \pkg{brms} & General Bayesian regression with an AL family & Autocorrelation structures available; no dedicated quantile state-space workflow & Stan-based posterior inference & Target quantile set through AL parameter \\
 \addlinespace[1pt]
@@ -111,7 +111,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 
 The frequentist package \pkg{quantreg} \citep{quantreg} remains the broad general-purpose baseline, covering linear, nonlinear, nonparametric, censored, and dynamic quantile regression, together with bootstrap-based and related uncertainty summaries. Its \code{dynrq()} function supports dynamic linear quantile regression through time-series regression formulas involving lags, differences, trends, seasonal factors, and harmonic terms, while preserving time-series attributes. However, the dynamic structure enters through the design matrix rather than through latent states: once these regressors are constructed, estimation proceeds through the standard \pkg{quantreg} fitting routines for a fixed coefficient vector. In that sense, \code{dynrq()} is a regression-style time-series interface rather than a latent-state state-space model, so it does not provide filtered or smoothed state summaries.
 
-Most other \proglang{R} packages relevant here implement static quantile regression or target a different multi-quantile objective. Among the static Bayesian options, \pkg{bayesQR} \citep{bayesQR} provides Bayesian quantile regression under the AL working likelihood with an adaptive-lasso option, whereas \pkg{pqrBayes} \citep{pqrBayes} emphasizes penalized Bayesian quantile regression with spike-and-slab and horseshoe-family shrinkage priors. Its varying-coefficient option models coefficients as functions of an observed effect modifier rather than as latent states evolving through a time-indexed state-space equation; this distinction is the reason Table \ref{table:software} classifies it as static with respect to latent temporal state evolution. The broader Bayesian modeling package \pkg{brms} \citep{brmsfamily} is also relevant because it supports AL-based quantile regression within a flexible multilevel, nonlinear, and additive regression framework, and can incorporate regression-level autocorrelation terms. However, it is not organized as a dedicated quantile state-space workflow, and its documentation does not present filtered or smoothed state summaries of the type targeted by \pkg{exdqlm}. Packages such as \pkg{qgam} \citep{qgam}, \pkg{qrjoint} \citep{qrjoint}, \pkg{quantregGrowth} \citep{quantregGrowth}, and \pkg{qrcm} \citep{qrcm} address additive, joint, non-crossing, or coefficient-modeling formulations. Other packages focus on specialized static settings, including penalized frequentist fitting across quantiles in \pkg{rqPen} \citep{rqPen}, convolution-smoothed linear quantile regression with efficient gradient-based fitting in \pkg{conquer} \citep{conquer}, and robust or censored-response modeling in \pkg{lqr} \citep{lqr}.
+Most other \proglang{R} packages relevant here implement static quantile regression or target a different multi-quantile objective. Among the static Bayesian options, \pkg{bayesQR} \citep{bayesQR} provides Bayesian quantile regression under the AL working likelihood with an adaptive-lasso option, whereas \pkg{pqrBayes} \citep{pqrBayes} emphasizes penalized Bayesian quantile regression with spike-and-slab and horseshoe-family shrinkage priors. In \pkg{pqrBayes}, varying coefficients are functions of an observed effect modifier; they are not latent coefficients evolving through a state-space equation. The broader Bayesian modeling package \pkg{brms} \citep{brmsfamily} is also relevant because it supports AL-based quantile regression within a flexible multilevel, nonlinear, and additive regression framework, and can incorporate regression-level autocorrelation terms. However, it is not organized as a dedicated quantile state-space workflow, and its documentation does not present filtered or smoothed state summaries of the type targeted by \pkg{exdqlm}. Packages such as \pkg{qgam} \citep{qgam}, \pkg{qrjoint} \citep{qrjoint}, \pkg{quantregGrowth} \citep{quantregGrowth}, and \pkg{qrcm} \citep{qrcm} address additive, joint, non-crossing, or coefficient-modeling formulations. Other packages focus on specialized static settings, including penalized frequentist fitting across quantiles in \pkg{rqPen} \citep{rqPen}, convolution-smoothed linear quantile regression with efficient gradient-based fitting in \pkg{conquer} \citep{conquer}, and robust or censored-response modeling in \pkg{lqr} \citep{lqr}.
 
 Related implementations also exist outside \proglang{R}. In Python, \pkg{statsmodels} \citep{statsmodelsQuantReg} provides linear quantile regression via iterative reweighted least squares. Julia offers \pkg{QuantReg.jl} \citep{QuantRegjl}, and MATLAB includes tools such as \code{fitrqlinear} and \code{fitrqnet} \citep{matlabQuantile}. These implementations are useful reference points for the broader software ecosystem, but they are better viewed as general or static quantile-regression tools than as direct counterparts to a dedicated package for Bayesian dynamic quantile state-space modeling.
 
@@ -217,7 +217,7 @@ diagnostics for the proposal kernel used for the $(\sigma,\gamma)$ update.
 
 
 
-For model comparison or longer time series, posterior sampling with the MCMC algorithm can be computationally demanding. To address this, the package includes a variational routine for fast approximate posterior estimation. The default routine, \code{exdqlmLDVB()}, uses a mean-field approximation together with a Laplace--delta treatment of the nonconjugate $(\sigma,\gamma)$ block. The variational approximation factorizes the posterior into computationally tractable blocks \citep{ostwald2014tutorial,beal2003variational}. Under a mean-field factorization, this induces a blockwise coordinate-ascent variational inference (CAVI) scheme. For the exDQLM, the blocks associated with the dynamic coefficients and latent variables admit recognizable closed-form updates, while the joint variational distribution of $\sigma$ and $\gamma$ is nonconjugate. Following the nonconjugate variational strategy of \cite{wang2013nonconjugatevb}, we approximate this block on transformed coordinates and use a second-order delta method to evaluate the expectations of functions of $(\sigma,\gamma)$ needed by the remaining variational updates. The dynamic regression coefficients are updated within each iteration using a forward-filtering backward-smoothing algorithm. Convergence is assessed jointly through the state, scale, skewness, and evidence lower bound (ELBO) diagnostics. After the algorithm reaches convergence with tolerance $\epsilon_{tol}$, $N_{SAMP}$ samples are drawn from the variational distributions, resulting in an approximate sample of the posterior distribution; here $\epsilon_{tol}$ is the convergence tolerance and $N_{SAMP}$ is the requested number of approximate posterior draws. The output of \code{exdqlmLDVB()} includes the approximate posterior samples as well as the parameters of the variational distributions for all parameters ($\vect{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$). For the $(\gamma,\sigma)$ block, the return also contains the transformed mode, approximate covariance matrix, derived moments, and ELBO terms associated with the Laplace--delta approximation. Selected state-space computations in the dynamic routines are implemented in \proglang{C++}, with corresponding \proglang{R} code retained for parity checks and fallback use. Global package-level runtime options for backend routing and ELBO monitoring are summarized in Appendix Table \ref{tab:backendopts}. These options are distinct from the function-specific inference inputs listed in Table \ref{table:post}.
+For model comparison or longer time series, posterior sampling with the MCMC algorithm can be computationally demanding. To address this, the package includes a variational routine for fast approximate posterior estimation. The default routine, \code{exdqlmLDVB()}, uses a mean-field approximation together with a Laplace--delta treatment of the nonconjugate $(\sigma,\gamma)$ block. The variational approximation factorizes the posterior into computationally tractable blocks \citep{ostwald2014tutorial,beal2003variational}. Under a mean-field factorization, this induces a blockwise coordinate-ascent variational inference (CAVI) scheme. For the exDQLM, the blocks associated with the dynamic coefficients and latent variables admit recognizable closed-form updates, while the joint variational distribution of $\sigma$ and $\gamma$ is nonconjugate. Following the nonconjugate variational strategy of \cite{wang2013nonconjugatevb}, we approximate this block on transformed coordinates and use a second-order delta method to evaluate the expectations of functions of $(\sigma,\gamma)$ needed by the remaining variational updates. The dynamic regression coefficients are updated within each iteration using a forward-filtering backward-smoothing algorithm. Convergence is assessed jointly through the state, scale, skewness, and evidence lower bound (ELBO) diagnostics. After the algorithm reaches convergence with tolerance $\epsilon_{tol}$, $N_{SAMP}$ samples are drawn from the variational distributions, resulting in an approximate sample of the posterior distribution; here $\epsilon_{tol}$ is the convergence tolerance and $N_{SAMP}$ is the requested number of approximate posterior draws. The output of \code{exdqlmLDVB()} includes the approximate posterior samples as well as the parameters of the variational distributions for all parameters ($\vect{\theta}_{1:T},v_{1:T},s_{1:T},\gamma,\sigma$). For the $(\gamma,\sigma)$ block, the return also contains the transformed mode, approximate covariance matrix, derived moments, and ELBO terms associated with the Laplace--delta approximation. Selected state-space computations in the dynamic routines are implemented in \proglang{C++}, with corresponding \proglang{R} code retained for parity checks and fallback use. Global package-level runtime options for backend routing and ELBO monitoring are summarized in the supplement. These options are distinct from the function-specific inference inputs listed in Table \ref{table:post}.
 
 Table \ref{table:post} shows selected core inference controls for the fitting functions \code{exdqlmMCMC()} and \code{exdqlmLDVB()}, their mathematical symbols, and their default values. The MCMC routine also accepts \code{Sig.mh} as an optional proposal covariance when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default slice-sampling update.
 
@@ -543,7 +543,7 @@ The progress output also reports which computational backend is being used. In t
 current implementation, some operations, including dynamic MCMC updates and sampling
 from latent-variable full conditionals, can be routed through either \proglang{R} or
 \proglang{C++} implementations. The package-level options controlling this routing are
-listed in Appendix Table~\ref{tab:backendopts}.
+listed in the supplementary backend-options table.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -735,11 +735,11 @@ For our next example, we use the yearly Sunspot time series from the package \pk
 Upper-tail sunspot activity is a natural setting for illustrating dynamic quantile modeling of cyclic count data. We therefore model the \(0.85\) quantile in this example. Again, we begin by building the state-space structure used to estimate the quantile. Here we choose to model the quantile with a first order polynomial trend component as well as a Fourier form seasonal component that incorporates a fundamental period every 11 observations (years), as well as some of its corresponding harmonics. This results in a dynamic model with a total of 9 state parameters, 1 for the first order polynomial component and 8 for the seasonal component. The \pkg{exdqlm} functions are compatible with time-invariant \code{dlm} objects from the \pkg{dlm} package. For example, we create the first order trend component with the function \code{dlmModPoly()} from the \pkg{dlm} package, then use \code{as.exdqlm()} to turn the output into an \code{exdqlm} object.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> dlm.trend.comp = dlm::dlmModPoly(1, m0 = mean(sunspot.year), C0 = 10)
+R> dlm.trend.comp = dlm::dlmModPoly(1, m0 = 50, C0 = 2500)
 R> trend.comp = as.exdqlm(dlm.trend.comp)
 \end{CodeInput}
 \end{CodeChunk}
-Next, we construct the seasonal component with our \code{seasMod} function. Sunspot cycles are commonly modeled with an approximately 11-year period; we include the first four Fourier harmonics in the component.
+The initial level prior is centered at 50 sunspots, a rounded count-scale value chosen before fitting, with prior standard deviation 50 to keep the level weakly informative on the observed count scale. Next, we construct the seasonal component with our \code{seasMod} function. Sunspot cycles are commonly modeled with an approximately 11-year period; we include the first four Fourier harmonics in the component.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> seas.comp = seasMod(p = 11, h = 1:4, C0 = 10 * diag(8))
@@ -893,11 +893,11 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{23.89} & \textbf{0.155} & 8.712 & 3911.3 \\
- & MCMC & 282.45 & 0.179 & \textbf{7.745} & \textbf{3022.7} \\
+ \tworowcell{DQLM} & LDVB & \textbf{22.71} & \textbf{0.133} & 8.535 & 3856.0 \\
+ & MCMC & 267.88 & 0.152 & \textbf{7.582} & \textbf{2990.8} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{112.18} & \textbf{0.105} & 6.493 & 2351.8 \\
- & MCMC & 360.84 & 0.184 & \textbf{5.200} & \textbf{2234.4} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{104.02} & \textbf{0.120} & 6.268 & 2328.0 \\
+ & MCMC & 325.53 & 0.164 & \textbf{5.095} & \textbf{2186.3} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} development version 0.5.0.9000 at package commit \code{f937842}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
@@ -980,12 +980,16 @@ R> X.holdout = scale(X.raw[holdout.ind, ],
 The baseline state-space model contains a first-order polynomial trend and a Fourier-form seasonal component with period 12. The seasonal block includes \(h = 1\), \(h = 2\), and \(h \approx 0.147\), corresponding to annual, semiannual, and approximately 7-year cycles on the monthly scale.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> trend.comp = polytrendMod(1, m0 = quantile(y.train, 0.15), C0 = 0.1)
+R> trend.comp = polytrendMod(1, m0 = log(50), C0 = 1)
 R> seas.comp = seasMod(p = 12, h = c(1, 2, 0.1469118636),
 +                     C0 = diag(1, 6))
 R> model = trend.comp + seas.comp
 \end{CodeInput}
 \end{CodeChunk}
+The initial log-flow level prior is centered at \(\log(50)\), corresponding to
+a fixed 50 cubic feet per second reference value, with prior standard deviation
+1 on the log scale. This gives a broad domain-scale prior without using the
+training response to center the state prior.
 
 We compare two models. The first, \code{M0}, is the no-transfer baseline
 containing only the trend and seasonal components. The second, \code{MTF}, uses
@@ -1359,31 +1363,5 @@ The examples illustrate the main workflows supported by the package. The dynamic
 %\section{Acknowledgments}
 
 \bibliography{references}
-
-\appendix
-\section{Global backend options}
-\begin{table}[!t]
-\centering
-\TableStyle
-\setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}X>{\raggedleft\arraybackslash}p{0.12\textwidth}@{}}
-\toprule
-Option & Purpose & Default \\
-\midrule
-\code{exdqlm.use\_cpp\_kf} & Enables or disables the C++ Kalman-filter bridge in dynamic routines. & \code{TRUE} \\
-\code{exdqlm.compute\_elbo} & Enables or disables ELBO computation in variational routines. & \code{TRUE} \\
-\code{exdqlm.tol\_elbo} & Sets the ELBO stabilization tolerance when ELBO checks are enabled. & \code{1e-6} \\
-\code{exdqlm.use\_cpp\_builders} & Enables or disables C++ builders for state-space model blocks. & \code{FALSE} \\
-\code{exdqlm.use\_cpp\_samplers} & Enables or disables C++ latent-variable samplers in dynamic routines. & \code{FALSE} \\
-\code{exdqlm.use\_cpp\_postpred} & Enables or disables the C++ posterior-predictive sampling path. & \code{FALSE} \\
-\code{exdqlm.use\_cpp\_mcmc} & Enables or disables C++ backend routing in dynamic MCMC routines. & \code{TRUE} \\
-\code{exdqlm.cpp\_mcmc\_mode} & Chooses dynamic MCMC routing mode (\code{"strict"} for parity path, \code{"fast"} for accelerated path). & \code{"fast"} \\
-\code{exdqlm.cpp\_threads} & Sets the thread cap for eligible OpenMP-enabled C++ paths. & \code{1L} \\
-\bottomrule
-\end{tabularx}
-\caption{Package-level runtime options exposed through \code{options(...)} for backend routing and ELBO monitoring in \pkg{exdqlm}. Function-level inference controls are documented separately in the function interfaces (for example, Table \ref{table:post}).}
-\label{tab:backendopts}
-\end{table}
-
 
 \end{document}

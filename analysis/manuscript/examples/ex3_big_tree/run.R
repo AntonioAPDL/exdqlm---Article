@@ -357,6 +357,7 @@ if (!need_ex3) {
     stop("Example 3 crps_probs must contain values strictly between 0 and 1.", call. = FALSE)
   }
   trend_c0 <- as.numeric(ex3_cfg$trend_c0 %||% 0.1)
+  trend_m0 <- as.numeric(ex3_cfg$trend_m0 %||% log(50))
   seasonal_c0 <- as.numeric(ex3_cfg$seasonal_c0 %||% 1)
   reg_c0 <- as.numeric(ex3_cfg$reg_c0 %||% 1)
   transfer_zeta_c0 <- as.numeric(ex3_cfg$transfer_zeta_c0 %||% 0.1)
@@ -375,7 +376,7 @@ if (!need_ex3) {
   make_base_model <- function(y_train) {
     trend_comp <- exdqlm::polytrendMod(
       order = trend_order,
-      m0 = as.numeric(stats::quantile(as.numeric(y_train), probs = p0)),
+      m0 = trend_m0,
       C0 = trend_c0
     )
     seas_comp <- exdqlm::seasMod(
@@ -529,12 +530,14 @@ if (!need_ex3) {
     window_tag <- paste(fmt_month(range(model_df$date)), collapse = "_")
     metric_tag <- gsub("[^0-9A-Za-z]+", "_", selection_metric)
     p0_tag <- sprintf("p%03d", round(100 * p0))
+    prior_tag <- sprintf("m0%04d_c0%04d", round(1000 * trend_m0), round(1000 * trend_c0))
     cache_key <- sprintf(
-      "ex3_models_trainselect_v4_diagtable_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
+      "ex3_models_trainselect_v5_diagtable_%s_%s_%s_%s_%s_grid%s_psidf%s_%s_nsamp%d_tol%s_h%d",
       paste(selected_indices, collapse = "_"),
       pkg_commit %||% "unknown",
       window_tag,
       p0_tag,
+      prior_tag,
       grid_tag,
       psi_tag,
       metric_tag,
@@ -761,6 +764,7 @@ if (!need_ex3) {
       cat(sprintf("profile=%s\n", selected_profile))
       cat(sprintf("package_commit=%s\n", git_short_head(resolve_pkg_path()$path)))
       cat(sprintf("p0=%0.2f\n", p0))
+      cat(sprintf("trend_prior_m0=%0.6f, trend_prior_C0=%0.3f\n", trend_m0, trend_c0))
       cat(sprintf("data_window=%s to %s\n", fmt_month(min(model_df$date)), fmt_month(max(model_df$date))))
       cat(sprintf("final_training_window=%s to %s\n", fmt_month(model_df$date[min(final_train_idx)]), fmt_month(model_df$date[max(final_train_idx)])))
       cat(sprintf("forecast_holdout_window=%s to %s\n", fmt_month(model_df$date[min(holdout_idx)]), fmt_month(model_df$date[max(holdout_idx)])))

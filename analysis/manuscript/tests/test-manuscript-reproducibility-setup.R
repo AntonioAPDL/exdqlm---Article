@@ -48,3 +48,36 @@ testthat::test_that("preflight warns about dirty tracked checkouts for final rer
   testthat::expect_true(any(grepl("Article checkout has dirty tracked files", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("Package checkout has dirty tracked files", check_lines, fixed = TRUE)))
 })
+
+testthat::test_that("manuscript examples avoid data-centered prior means", {
+  canonical_files <- file.path(repo_root, c(
+    "exdqlm-jss.tex",
+    "analysis/manuscript/examples/ex2_sunspots/run.R",
+    "analysis/manuscript/examples/ex3_big_tree/run.R"
+  ))
+  text <- unlist(lapply(canonical_files, readLines, warn = FALSE), use.names = FALSE)
+
+  stale_patterns <- c(
+    "m0 = mean\\(",
+    "m0 = stats::mean\\(",
+    "m0 = quantile\\(",
+    "m0 = stats::quantile\\(",
+    "m0 = as.numeric\\(stats::quantile"
+  )
+  for (pattern in stale_patterns) {
+    testthat::expect_false(
+      any(grepl(pattern, text)),
+      info = sprintf("data-centered prior marker still present: %s", pattern)
+    )
+  }
+})
+
+testthat::test_that("backend options table lives in the supplement", {
+  main_text <- readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE)
+  supp_text <- readLines(file.path(repo_root, "exdqlm-supplement.tex"), warn = FALSE)
+
+  testthat::expect_false(any(grepl("\\\\label\\{tab:backendopts\\}", main_text)))
+  testthat::expect_false(any(grepl("\\\\section\\{Global backend options\\}", main_text)))
+  testthat::expect_true(any(grepl("\\\\label\\{tab:supp_backendopts\\}", supp_text)))
+  testthat::expect_true(any(grepl("\\\\section\\{Global backend options\\}", supp_text)))
+})
