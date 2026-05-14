@@ -142,3 +142,63 @@ testthat::test_that("Example 3 forecast metrics are registered and package-score
     "coverage", "mean_interval_width"
   ) %in% names(fc)))
 })
+
+testthat::test_that("main manuscript inline table values match generated outputs", {
+  tex <- paste(readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE), collapse = "\n")
+  expect_value <- function(value, digits) {
+    rendered <- sprintf(paste0("%0.", digits, "f"), as.numeric(value))
+    testthat::expect_true(
+      grepl(rendered, tex, fixed = TRUE),
+      info = sprintf("Rendered table value %s is missing from exdqlm-jss.tex.", rendered)
+    )
+  }
+
+  ex2 <- utils::read.csv(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex2_dynamic_benchmark.csv"),
+    stringsAsFactors = FALSE
+  )
+  for (i in seq_len(nrow(ex2))) {
+    expect_value(ex2$runtime_sec[[i]], 2)
+    expect_value(ex2$KL[[i]], 3)
+    expect_value(ex2$CRPS[[i]], 3)
+    expect_value(ex2$pplc[[i]], 1)
+  }
+
+  ex3 <- utils::read.csv(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex3_diagnostics_summary.csv"),
+    stringsAsFactors = FALSE
+  )
+  for (i in seq_len(nrow(ex3))) {
+    expect_value(ex3$KL[[i]], 3)
+    expect_value(ex3$CRPS[[i]], 3)
+    expect_value(ex3$PPLC[[i]], 3)
+  }
+
+  ex3_fc <- utils::read.csv(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex3_forecast_metrics.csv"),
+    stringsAsFactors = FALSE
+  )
+  for (i in seq_len(nrow(ex3_fc))) {
+    expect_value(ex3_fc$mean_check_loss[[i]], 3)
+    expect_value(ex3_fc$CRPS[[i]], 3)
+  }
+
+  ex4 <- utils::read.csv(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex4static_summary.csv"),
+    stringsAsFactors = FALSE
+  )
+  for (i in seq_len(nrow(ex4))) {
+    expect_value(ex4$runtime_sec[[i]], 2)
+    expect_value(ex4$active_signal_rmse[[i]], 3)
+    expect_value(ex4$inactive_signal_mae[[i]], 3)
+    expect_value(ex4$holdout_quantile_rmse[[i]], 3)
+  }
+
+  env <- utils::read.csv(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "benchmark_environment.csv"),
+    header = FALSE,
+    stringsAsFactors = FALSE
+  )
+  exdqlm_commit <- env$V2[env$V1 == "exdqlm_commit"][[1]]
+  testthat::expect_true(grepl(exdqlm_commit, tex, fixed = TRUE))
+})

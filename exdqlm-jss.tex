@@ -900,7 +900,7 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  & MCMC & 325.53 & 0.164 & \textbf{5.095} & \textbf{2186.3} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} development version 0.5.0.9000 at package commit \code{f937842}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} development version 0.5.0.9000 at package commit \code{66593e7}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1259,9 +1259,9 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.168 & 0.470 & \textbf{99.507} \\
- \code{MREG} direct regression & \textbf{0.112} & \textbf{0.347} & 151.129 \\
- \code{MTF} transfer function & 0.155 & 0.365 & 125.151 \\
+ \code{M0} no covariates & 0.168 & 0.469 & \textbf{99.568} \\
+ \code{MREG} direct regression & \textbf{0.112} & \textbf{0.348} & 151.433 \\
+ \code{MTF} transfer function & 0.155 & 0.366 & 125.218 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
@@ -1405,7 +1405,7 @@ Figure \ref{fig:ex4static} shows that both methods recover the active coefficien
  \tworowcell{0.05} & LDVB & \textbf{20.31} & 0.107 & \textbf{0.034} & 0.674 \\
  & MCMC & 135.05 & \textbf{0.065} & 0.036 & \textbf{0.589} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{11.50} & \textbf{0.148} & 0.069 & 0.295 \\
+ \tworowcell{0.25} & LDVB & \textbf{11.49} & \textbf{0.148} & 0.069 & 0.295 \\
  & MCMC & 140.25 & 0.160 & \textbf{0.046} & \textbf{0.254} \\
  \midrule
  \tworowcell{0.50} & LDVB & \textbf{4.64} & 0.086 & \textbf{0.015} & 0.167 \\
