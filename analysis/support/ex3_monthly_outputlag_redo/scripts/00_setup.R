@@ -61,7 +61,7 @@ resolve_pkg_path <- function(envvar, configured_path) {
   }
   candidates <- c(
     candidates,
-    file.path(repo_root, "..", "exdqlm__wt__0.5.0-crps-iqs")
+    file.path(repo_root, "..", "exdqlm__wt__1.0.0-jss")
   )
   candidates <- unique(vapply(
     candidates,

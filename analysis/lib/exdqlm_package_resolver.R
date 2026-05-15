@@ -20,11 +20,12 @@ exdqlm_source_candidate_paths <- function(repo_root) {
       "..",
       c(
         "exdqlm",
+        "exdqlm__wt__1p0p0_exdqlm_article",
+        "exdqlm__wt__1.0.0-jss",
+        "exdqlm__wt__1.0.0",
         "exdqlm__wt__0p5p0_exdqlm_article",
         "exdqlm__wt__0p5p0_article",
-        "exdqlm__wt__0p5p0",
-        "exdqlm__wt__0.5.0-crps-iqs",
-        "exdqlm__wt__0.5.0"
+        "exdqlm__wt__0p5p0"
       )
     ),
     winslash = "/",

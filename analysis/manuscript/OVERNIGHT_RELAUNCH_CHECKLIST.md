@@ -2,13 +2,13 @@
 
 This checklist is the reproducible relaunch plan for the manuscript examples
 and the alternative monthly Example 3 sandbox against the current article-facing
-`0.5.0.9000` development package checkout.
+`1.0.0` development package checkout.
 
 ## Package + repo state
 
 - Article repo: current checkout
-- Package repo: sibling checkout `../exdqlm__wt__0.5.0-crps-iqs`
-- Required package state before launch: clean `feature/0.5.0-crps-iqs` HEAD, recorded
+- Package repo: sibling checkout `../exdqlm__wt__1.0.0-jss`
+- Required package state before launch: clean `feature/1.0.0-jss` HEAD, recorded
   in the launch logs before rerunning.
 - Load package source through `--pkg-path` for manuscript runs.
 - Use `--force-refit` for manuscript reruns so cached fits from older package
@@ -35,7 +35,7 @@ Run from the article repo root:
 ```bash
 git status --short
 git rev-parse HEAD
-export PKG="$(cd .. && pwd)/exdqlm__wt__0.5.0-crps-iqs"
+export PKG="$(cd .. && pwd)/exdqlm__wt__1.0.0-jss"
 Rscript -e "cat(normalizePath(Sys.getenv('PKG')), '\n')"
 Rscript -e "pkgload::load_all(Sys.getenv('PKG'), quiet = TRUE); cat(formals(exdqlm::exdqlmLDVB)$fix.sigma, '\n')"
 ```
@@ -54,7 +54,7 @@ Run in this order so we surface the highest-risk package changes first.
 
 ```bash
 ARTICLE="$(pwd)"
-PKG="$(cd .. && pwd)/exdqlm__wt__0.5.0-crps-iqs"
+PKG="$(cd .. && pwd)/exdqlm__wt__1.0.0-jss"
 
 Rscript $ARTICLE/analysis/run_all.R \
   --stage manuscript \

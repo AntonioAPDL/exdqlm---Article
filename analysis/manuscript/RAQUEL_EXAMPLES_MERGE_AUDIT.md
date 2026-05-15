@@ -34,7 +34,7 @@ by maintaining separate example workflows.
 - Package repo for the current article-facing package branch:
   `AntonioAPDL/exdqlm`
 - Package branch:
-  `feature/0.5.0-crps-iqs`
+  `feature/1.0.0-jss`
 
 ## Merge Provenance
 

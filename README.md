@@ -8,7 +8,7 @@ The article is intended to be run against the companion package repository:
 
 - Article repo: `AntonioAPDL/exdqlm---Article`
 - Package repo: `AntonioAPDL/exdqlm`
-- Current package branch for this article work: `feature/0.5.0-crps-iqs`
+- Current package branch for this article work: `feature/1.0.0-jss`
 
 ## Quick Start
 
@@ -16,7 +16,7 @@ Clone the article and package repositories next to each other:
 
 ```sh
 git clone https://github.com/AntonioAPDL/exdqlm---Article.git
-git clone --branch feature/0.5.0-crps-iqs https://github.com/AntonioAPDL/exdqlm.git
+git clone --branch feature/1.0.0-jss https://github.com/AntonioAPDL/exdqlm.git
 cd exdqlm---Article
 ```
 

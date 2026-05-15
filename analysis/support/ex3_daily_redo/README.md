@@ -231,7 +231,7 @@ The full-history review config also records:
 - the historical and future observation marker sizes used in the review plots
 
 By default the workflow loads package source from the configured package path,
-with a fallback to sibling checkout `../exdqlm__wt__0.5.0-crps-iqs`.
+with a fallback to sibling checkout `../exdqlm__wt__1.0.0-jss`.
 
 Override that with `EX3_DAILY_PKG_PATH=/path/to/exdqlm`.
 

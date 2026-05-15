@@ -10,8 +10,9 @@ testthat::test_that("package resolver includes current and generic source checko
   candidates <- basename(exdqlm_source_candidate_paths(repo_root))
 
   testthat::expect_true("exdqlm" %in% candidates)
+  testthat::expect_true("exdqlm__wt__1p0p0_exdqlm_article" %in% candidates)
+  testthat::expect_true("exdqlm__wt__1.0.0-jss" %in% candidates)
   testthat::expect_true("exdqlm__wt__0p5p0_exdqlm_article" %in% candidates)
-  testthat::expect_true("exdqlm__wt__0.5.0-crps-iqs" %in% candidates)
 })
 
 testthat::test_that("reader-facing analysis docs avoid stale machine-specific paths", {

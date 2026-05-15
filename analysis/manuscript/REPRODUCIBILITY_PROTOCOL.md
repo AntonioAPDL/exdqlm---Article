@@ -9,7 +9,7 @@ The manuscript is intended to be reproducible from two checkouts:
 - Package repository: `AntonioAPDL/exdqlm`
 
 For the current article pass, the package checkout must track
-`origin/feature/0.5.0-crps-iqs` and report package version `0.5.0.9000`.
+`origin/feature/1.0.0-jss` and report package version `1.0.0`.
 
 ## Required Preflight
 
@@ -113,7 +113,7 @@ and displayed Example 4 artifacts are synchronized.
 ## Diagnostic Policy
 
 The canonical article diagnostics must use the current package implementation.
-In exdqlm 0.5.0, KL diagnostics are deterministic for fixed fitted objects by
+In exdqlm 1.0.0, KL diagnostics are deterministic for fixed fitted objects by
 default. The article should not use stochastic `FNN::KL.divergence()` calls or
 random standard-normal reference samples in canonical examples.
 

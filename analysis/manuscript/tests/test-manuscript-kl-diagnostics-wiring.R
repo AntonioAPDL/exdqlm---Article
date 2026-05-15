@@ -1,4 +1,4 @@
-testthat::test_that("canonical manuscript KL diagnostics use deterministic 0.5.0 wiring", {
+testthat::test_that("canonical manuscript KL diagnostics use deterministic 1.0.0 wiring", {
   canonical <- file.path(repo_root, c(
     "analysis/lib/manuscript_setup.R",
     "analysis/manuscript/examples/ex2_sunspots/run.R",

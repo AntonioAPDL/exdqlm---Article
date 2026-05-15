@@ -2,7 +2,7 @@
 
 This note documents the remaining alternative Example 3 work after the main
 manuscript relaunch. The goal is to regenerate the support-only reduced-6
-monthly sandbox with the package development branch `feature/0.5.0-crps-iqs`,
+monthly sandbox with the package development branch `feature/1.0.0-jss`,
 without changing the manuscript-facing Example 3.
 
 ## Scope
@@ -14,9 +14,9 @@ without changing the manuscript-facing Example 3.
 - Output tag:
   `monthly_reduced6_crps_dense_p015_df099_iter200`
 - Package branch:
-  `feature/0.5.0-crps-iqs`
+  `feature/1.0.0-jss`
 - Package worktree:
-  sibling checkout `../exdqlm__wt__0.5.0-crps-iqs`
+  sibling checkout `../exdqlm__wt__1.0.0-jss`
 - Package commit at relaunch:
   recorded by the launcher in `.run_state/reduced6_crps_dense_launch_info.txt`
 
@@ -87,5 +87,5 @@ settings, selected lambda, diagnostics, and generated files.
 
 The previous dense reduced-6 attempt was started from an older package snapshot
 and stopped before figures, diagnostics, and manifest were produced. The current
-relaunch is explicitly tied to `feature/0.5.0-crps-iqs` so that the alternative
+relaunch is explicitly tied to `feature/1.0.0-jss` so that the alternative
 Example 3 support run matches the package branch used for the article.

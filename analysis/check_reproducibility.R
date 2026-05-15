@@ -233,11 +233,11 @@ main <- function() {
       } else {
         ok("package remote is AntonioAPDL/exdqlm")
       }
-      if (!grepl("^0\\.5\\.0", pkg_spec$version)) {
-        warn(sprintf("Package source version is %s, not 0.5.0/0.5.0.9000.", pkg_spec$version))
+      if (!identical(pkg_spec$version, "1.0.0")) {
+        warn(sprintf("Package source version is %s, not 1.0.0.", pkg_spec$version))
       }
-      if (!identical(pkg_spec$git$upstream, "origin/feature/0.5.0-crps-iqs")) {
-        warn(sprintf("Package upstream is %s; expected origin/feature/0.5.0-crps-iqs for current paper work.", pkg_spec$git$upstream))
+      if (!identical(pkg_spec$git$upstream, "origin/feature/1.0.0-jss")) {
+        warn(sprintf("Package upstream is %s; expected origin/feature/1.0.0-jss for current paper work.", pkg_spec$git$upstream))
       }
     }
   } else {
@@ -352,7 +352,7 @@ main <- function() {
   if (length(stale_hits)) {
     fail(sprintf("Canonical article files still contain stale stochastic/FNN KL wording or code: %s", paste(stale_hits, collapse = "; ")))
   } else {
-    ok("canonical article files use the deterministic exdqlm 0.5.0 KL diagnostics wording/code")
+    ok("canonical article files use the deterministic exdqlm 1.0.0 KL diagnostics wording/code")
   }
 
   section("Canonical Forecast Scoring Wiring")
