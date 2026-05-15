@@ -8,7 +8,7 @@
 "r_binary","/data/jaguir26/local/opt/R/4.6.0/lib64/R/bin/R"
 "rscript_binary","/data/jaguir26/local/opt/R/4.6.0/lib64/R/bin/Rscript"
 "exdqlm_version","0.5.0.9000"
-"exdqlm_commit","10ac1ab"
+"exdqlm_commit","350151b"
 "exdqlm_branch","work/exdqlm-article-0.5.0"
 "exdqlm_upstream","origin/feature/0.5.0-crps-iqs"
 "exdqlm_dirty","FALSE"
