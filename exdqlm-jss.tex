@@ -9,7 +9,7 @@
 
 \newcommand{\tworowcell}[1]{\smash{\raisebox{-0.5\normalbaselineskip}{#1}}}
 \newcommand{\TableStyle}{\footnotesize\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.08}}
-\newcommand{\CompactTableStyle}{\footnotesize\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.04}}
+\newcommand{\CompactTableStyle}{\footnotesize\setlength{\tabcolsep}{2.3pt}\renewcommand{\arraystretch}{1.0}}
 \newcommand{\vect}[1]{\boldsymbol{#1}}
 \newcommand{\mat}[1]{\mathbf{#1}}
 \newcommand{\N}{\mathcal{N}}
@@ -73,7 +73,7 @@ Quantile regression has become a widely used alternative to mean-based modeling 
 \citet{yan2025family} introduce the extended asymmetric Laplace (exAL) distribution, a parametric extension of the asymmetric Laplace distribution that preserves many of its computational advantages while relaxing some of its restrictive assumptions. Building on this family, \citet{me} developed the extended dynamic quantile linear model (exDQLM) framework for modeling time-varying quantiles. The \pkg{exdqlm} package uses this dynamic model as its foundation, but its software contribution is broader: it provides a unified Bayesian workflow for latent-state quantile dynamics, posterior simulation via Markov chain Monte Carlo (MCMC) and via Laplace--delta variational Bayes (LDVB), dynamic transfer-function modeling, static AL/exAL regression with shrinkage priors, forecasting, diagnostics, and post hoc synthesis across separately fitted quantile models.
  
 
-The current \proglang{R} \citep{R} software ecosystem for quantile regression is broad, but the capabilities most relevant to this paper are distributed across software with different aims. Table \ref{table:software} gives a compact roadmap of representative packages using the distinctions most important for positioning \pkg{exdqlm}: modeling scope, temporal or latent-state structure, inference strategy, and handling of multiple quantile levels. The temporal column distinguishes methods that explicitly model serial dependence or state evolution from static regressions that can include time only as an ordinary covariate, smooth, or modifier. The purpose of the table is to identify the software gap addressed by the dedicated Bayesian dynamic quantile state-space workflow that \pkg{exdqlm} offers.
+The current \proglang{R} \citep{R} software ecosystem for quantile regression is broad, but the capabilities most relevant to this paper are distributed across software with different aims. Table \ref{table:software} gives a compact roadmap of representative packages using the distinctions most important for positioning \pkg{exdqlm}: modeling scope, temporal or latent-state structure, inference strategy, and handling of multiple quantile levels. To avoid treating all temporal features as equivalent, the temporal column separates time used as a regression input, smooth, modifier, or lagged regressor; regression-level autocorrelation; Gaussian latent-state evolution; and quantile latent-state evolution. The purpose of the table is to identify the software gap addressed by the dedicated Bayesian dynamic quantile state-space workflow that \pkg{exdqlm} offers.
 
 \begin{table}[!htb]
 \centering
@@ -83,26 +83,26 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 \toprule
 \textbf{Package} & \textbf{Main scope} & \shortstack{\textbf{Temporal or}\\\textbf{state-space handling}} & \shortstack{\textbf{Inference or}\\\textbf{computation}} & \shortstack{\textbf{Multiple-quantile}\\\textbf{handling}} \\
 \midrule
-\pkg{quantreg} & General frequentist quantile regression & Yes: \code{dynrq()} supports lags, differences, trends, and seasonal regressors; no latent states & Optimization-based fitting; frequentist and bootstrap summaries & Vector-valued quantile levels; post hoc rearrangement \\
+\pkg{quantreg} & General frequentist QR & Time-series regression formula: \code{dynrq()} handles lags, differences, trends, and seasons; no latent states & Optimization-based fitting; frequentist and bootstrap summaries & Vector-valued quantile levels; post hoc rearrangement \\
 \addlinespace[1pt]
-\pkg{bayesQR} & Bayesian AL quantile regression & No: static regression; time or lags only if supplied as ordinary covariates & MCMC under the AL likelihood; optional adaptive lasso & Vector-valued quantile levels; output organized by fitted quantile \\
+\pkg{bayesQR} & Bayesian AL QR & Time/lag covariates only: no serial or state-space model & MCMC under the AL likelihood; optional adaptive lasso & Vector-valued quantile levels; output organized by fitted quantile \\
 \addlinespace[1pt]
-\pkg{pqrBayes} & Bayesian penalized quantile regression & Static only: \code{VC} can smooth over an observed time/modifier index; no serial model or latent states & MCMC with shrinkage priors; \code{VC} curves use B-spline basis coefficients & One target quantile per fit \\
+\pkg{pqrBayes} & Bayesian penalized QR & Modifier-indexed coefficients: \code{VC} fits B-spline curves over an observed modifier, possibly time; no serial/state-space model & MCMC with shrinkage priors; \code{VC} estimates B-spline coefficients & One target quantile per fit \\
 \addlinespace[1pt]
-\pkg{brms} & General Bayesian regression with an AL family & Partial: regression-level AR, MA, ARMA, and related autocorrelation terms; no quantile state-space workflow & Stan-based posterior inference & Target quantile set through AL parameter \\
+\pkg{brms} & General Bayesian regression with an AL family & Regression autocorrelation: AR, MA, ARMA, and related terms; no quantile state-space workflow & Stan-based posterior inference & Fixed through the \code{asym\_laplace()} quantile parameter \\
 \addlinespace[1pt]
-\pkg{qgam} & Smooth additive quantile regression & Static only: time may enter as a smooth covariate; no serial model or latent states & Automatic smoothing and learning-rate calibration; PIRLS or Newton fitting & Single-quantile \code{qgam()}; multi-quantile \code{mqgam()} \\
+\pkg{qgam} & Smooth additive QR & Smooth time covariate only: no serial or state-space model & Automatic smoothing and learning-rate calibration; PIRLS or Newton fitting & Single quantile via \code{qgam()}; multiple via \code{mqgam()} \\
 \addlinespace[1pt]
-\pkg{qrjoint} & Bayesian joint linear quantile regression & No: static joint quantile planes over predictors; time only if encoded as a predictor & Adaptive MCMC for quantile-level coefficient functions & Joint noncrossing quantile planes \\
+\pkg{qrjoint} & Bayesian joint linear QR & Time-as-predictor only: no serial or state-space model & Adaptive MCMC for quantile-level coefficient functions & Joint noncrossing quantile planes \\
 \addlinespace[1pt]
-\pkg{dlm} & Gaussian dynamic linear models & Yes: latent Gaussian state-space models with filtering, smoothing, and forecasting; not quantile regression & Maximum likelihood, Kalman filtering/smoothing, and Bayesian analysis & Not a quantile-regression package \\
+\pkg{dlm} & Gaussian state-space modeling & Gaussian latent states: filtering, smoothing, and forecasting; not quantile regression & Maximum likelihood, Kalman filtering/smoothing, and Bayesian analysis & Not a quantile-regression package \\
 \addlinespace[1pt]
 \midrule
-\pkg{exdqlm} & Bayesian exAL quantile regression & Yes: latent quantile state evolution, forecasting, and transfer-function effects & MCMC and LDVB; static shrinkage-prior options & Posterior-predictive synthesis from separately fitted quantiles \\
+\pkg{exdqlm} & Bayesian exAL QR & Quantile latent states: state evolution, forecasting, and transfer-function effects & MCMC and LDVB; static shrinkage-prior options & Synthesis from separately fitted quantiles \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Entries summarize documented primary interfaces along the dimensions used to position \pkg{exdqlm}; they are selective rather than exhaustive. In the temporal column, using time as a covariate, smooth, or modifier is distinguished from modeling serial dependence or latent state evolution. AL denotes asymmetric Laplace, exAL its extended version, PIRLS penalized iteratively reweighted least squares, and LDVB Laplace--delta variational Bayes.}
+\caption{Representative \proglang{R} packages relevant to quantile and state-space modeling. Entries summarize documented primary interfaces along the dimensions used to position \pkg{exdqlm}; they are selective rather than exhaustive. In the temporal column, time-as-predictor/smooth/modifier uses, regression autocorrelation, Gaussian latent states, and quantile latent states are distinct categories. QR denotes quantile regression, AL asymmetric Laplace, exAL its extended version, PIRLS penalized iteratively reweighted least squares, and LDVB Laplace--delta variational Bayes.}
 \label{table:software}
 \end{table}
 
