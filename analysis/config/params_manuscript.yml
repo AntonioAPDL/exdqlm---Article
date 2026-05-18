@@ -1,5 +1,10 @@
 seed: 20260501
 
+rng:
+  kind: Mersenne-Twister
+  normal_kind: Inversion
+  sample_kind: Rejection
+
 manuscript_benchmark_profile: B
 
 benchmark_profiles:

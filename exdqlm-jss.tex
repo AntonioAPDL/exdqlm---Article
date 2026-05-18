@@ -900,7 +900,7 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  & MCMC & 325.53 & 0.164 & \textbf{5.095} & \textbf{2186.3} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{d8aa14f}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{d5b23ee}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -949,29 +949,28 @@ external-input effects. The covariates are standardized using the training
 window only. In the forecast display, NOI and AMO values over the held-out
 months are treated as known future inputs; the display is therefore conditional
 on those covariates rather than an operational forecast of the climate indices.
+The complete overlap used here has 432 monthly observations. The first 414
+observations, January 1987 through June 2021, form the training period; the final
+18 observations, July 2021 through December 2022, form the forecast holdout. The
+replication scripts include the corresponding date checks and write the aligned
+modeling data to \code{analysis/manuscript/outputs/tables/ex3\_model\_dataset.csv}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> data("BTflow", package = "exdqlm")
 R> data("climateIndices", package = "exdqlm")
-R> bt.dates = seq(as.Date("1987-01-01"), by = "month",
-+                length.out = length(BTflow))
-R> flow.df = data.frame(date = bt.dates, flow = as.numeric(BTflow))
-R> index.df = climateIndices[, c("date", "noi", "amo")]
-R> ex3.df = merge(flow.df, index.df, by = "date")
-R> ex3.df = subset(ex3.df, date >= as.Date("1987-01-01") &
-+                         date <= as.Date("2022-12-01"))
-R> flow.fit = ts(ex3.df$flow, start = c(1987, 1), frequency = 12)
-R> y.fit = log(flow.fit)
-R> train.end = as.Date("2021-06-01")
-R> holdout.start = as.Date("2021-07-01")
-R> train.ind = ex3.df$date <= train.end
-R> holdout.ind = ex3.df$date >= holdout.start
-R> y.train = ts(y.fit[train.ind], start = c(1987, 1), frequency = 12)
-R> y.holdout = y.fit[holdout.ind]
+R> ex3.dates = seq(as.Date("1987-01-01"), by = "month",
++                  length.out = length(BTflow))
+R> flow.df = data.frame(date = ex3.dates, flow = as.numeric(BTflow))
+R> ex3.df = merge(flow.df, climateIndices[, c("date", "noi", "amo")],
++                 by = "date")
+R> ex3.df = ex3.df[1:432, ]
+R> y.fit = ts(log(ex3.df$flow), start = c(1987, 1), frequency = 12)
+R> y.train = window(y.fit, end = c(2021, 6))
+R> y.holdout = window(y.fit, start = c(2021, 7))
 R> X.raw = as.matrix(ex3.df[, c("noi", "amo")])
-R> X.train = scale(X.raw[train.ind, ])
-R> X.holdout = scale(X.raw[holdout.ind, ],
+R> X.train = scale(X.raw[1:414, ])
+R> X.holdout = scale(X.raw[415:432, ],
 +                   center = attr(X.train, "scaled:center"),
 +                   scale = attr(X.train, "scaled:scale"))
 \end{CodeInput}
@@ -1259,9 +1258,9 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.168 & 0.472 & \textbf{99.754} \\
- \code{MREG} direct regression & \textbf{0.112} & \textbf{0.346} & 150.743 \\
- \code{MTF} transfer function & 0.155 & 0.367 & 125.436 \\
+ \code{M0} no covariates & 0.168 & 0.471 & \textbf{99.656} \\
+ \code{MREG} direct regression & \textbf{0.112} & \textbf{0.348} & 151.044 \\
+ \code{MTF} transfer function & 0.155 & 0.366 & 125.274 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from

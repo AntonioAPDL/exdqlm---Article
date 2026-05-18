@@ -37,6 +37,72 @@ The preflight checks:
   interval-score helpers in Example 3;
 - remaining Raquel Prado review markers.
 
+## Reproducibility Modes
+
+The article workflow has two reproducibility modes.
+
+Portable mode is for fresh clones, Overleaf-source downloads, collaborators,
+and JSS/readers on non-reference machines. It verifies that the pipeline runs,
+required artifacts are generated, manifests and figure/table wiring are
+coherent, package provenance is recorded, and numeric outputs are finite and
+sensible. It does not require exact agreement with the manuscript's printed
+runtime values or simulation-based diagnostics, because those can vary by
+hardware, R runtime, compiled libraries, and backend profile.
+
+Reference mode is the final acceptance gate on the documented benchmark
+platform. It performs the portable checks and additionally requires exact
+agreement between generated rounded values and the values printed in the
+manuscript. Use this mode only before committing synchronized manuscript
+figures, tables, and benchmark metadata.
+
+Portable collaborator/reviewer run:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm \
+  /path/to/R-4.6.0/bin/Rscript \
+  code.R --profile standard --mode portable
+```
+
+Final reference-machine run:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm \
+  /path/to/R-4.6.0/bin/Rscript \
+  code.R --profile standard --mode reference --strict
+```
+
+## JSS HTML Replication Log
+
+JSS encourages an output file from the standalone replication script. For R
+submissions this should be `code.html` generated with `knitr::spin("code.R")`.
+The safe command below uses quick portable tests-only mode, so the HTML log
+checks the replication wiring without replacing publication artifacts:
+
+```r
+Sys.setenv(EXDQLM_PKG_PATH = "../exdqlm")
+Sys.setenv(EXDQLM_REPRO_PROFILE = "quick")
+Sys.setenv(EXDQLM_REPRO_MODE = "portable")
+Sys.setenv(EXDQLM_REPRO_TESTS_ONLY = "true")
+Sys.setenv(EXDQLM_SKIP_PREFLIGHT = "true")
+Sys.setenv(EXDQLM_BUILDING_CODE_HTML = "true")
+knitr::spin("code.R", knit = TRUE)
+```
+
+Before final submission, run the standard portable or reference command
+directly, then refresh `code.html` so the reviewer-facing log reflects the
+current `code.R` interface and session information.
+
+## Manuscript Code Policy
+
+The main article should show the package-facing code needed to understand each
+workflow: model builders, fitting calls, diagnostics, forecasts, synthesis, and
+the table/figure-producing package calls. Generic preprocessing should be
+described in prose when doing so improves readability, with the guarded,
+fully executable implementation kept in `analysis/` and reachable through
+`code.R`. When preprocessing is abbreviated in the manuscript, the text should
+state the data window, train/holdout split, and the generated artifact that
+records the aligned data.
+
 ## Package Test Gate
 
 Before using package outputs as article reference values, run the package tests
@@ -92,7 +158,7 @@ The top-level reader-facing wrapper is:
 ```sh
 EXDQLM_PKG_PATH=../exdqlm \
   /path/to/R-4.6.0/bin/Rscript \
-  code.R --profile standard --strict
+  code.R --profile standard --mode portable
 ```
 
 The full run regenerates the publication-facing Example 4 simulation figure and
@@ -119,7 +185,10 @@ random standard-normal reference samples in canonical examples.
 
 CRPS is the primary predictive scoring rule for discount-factor selection in
 the examples. KL is reported as a calibration/normality diagnostic for the MAP
-standardized one-step-ahead forecast errors.
+standardized one-step-ahead forecast errors. The top-level value `KL` is the
+primary quantity to report; `KL.flip` is a secondary sensitivity diagnostic,
+and by-`k`/Gaussian plug-in details belong under `kl.details` rather than as
+competing table columns.
 
 Held-out forecast tables must use `exdqlmForecastDiagnostics()` on
 `exdqlmForecast(..., return.draws = TRUE)` objects. The article should not
@@ -144,6 +213,30 @@ machine-independent constants. The file
 R binary, package/article commits, backend options, seeds, and dataset sizes for
 the run.
 
+## Randomness and Backend Policy
+
+Manuscript runs set the random-number generator from
+`analysis/config/params_manuscript.yml` before the configured seed is applied:
+
+```yaml
+rng:
+  kind: Mersenne-Twister
+  normal_kind: Inversion
+  sample_kind: Rejection
+```
+
+The benchmark profile used for printed runtime values is Profile B. It records
+`exdqlm.cpp_threads = 1L`, enables the C++ MCMC backend in `"fast"` mode, and
+keeps C++ samplers disabled. This profile is intended to make the reference
+run stable and auditable while still reflecting the backend used for the
+manuscript timings.
+
+Portable runs should reproduce the workflow and coherent numerical summaries.
+Exact trace paths, elapsed runtimes, and some simulation-based summaries may
+differ across operating systems, compilers, BLAS/LAPACK builds, and hardware.
+The reference run is the only run expected to match the printed rounded
+manuscript values exactly.
+
 ## Final Acceptance Criteria
 
 A final reproducibility sync should have:
@@ -154,6 +247,8 @@ A final reproducibility sync should have:
 - no `From RP` or `\color{magenta}` markers;
 - no stale stochastic/FNN KL wiring in canonical manuscript files;
 - no article-local CRPS/check-loss redefinitions for Example 3 forecast scores;
+- explicit RNG and benchmark-backend provenance recorded in
+  `benchmark_environment.csv`;
 - all tracked artifact paths present or explicitly marked obsolete with a clear
   manifest update;
 - all manuscript figures/tables traceable to scripts and generated outputs;

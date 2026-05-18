@@ -49,12 +49,38 @@ EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --tests-
 ```
 
 The top-level reader entrypoint wraps the same preflight and manuscript
-pipeline. Use the quick profile for a fresh-clone smoke test and the standard
-profile for the final reference run:
+pipeline. Use `--mode portable` for fresh-clone, collaborator, or reviewer
+runs. Portable mode checks that the pipeline runs, figures/tables are generated,
+manifests are coherent, package provenance is recorded, and numeric outputs are
+finite and sensible. It does not require machine-dependent runtimes or
+simulation-based diagnostics to exactly match the manuscript's reference-machine
+values.
 
 ```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile quick --tests-only
-EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript code.R --profile standard --strict
+EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile quick --mode portable --tests-only
+EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode portable
+```
+
+Use `--mode reference` only for the final reference-machine sync before
+committing printed manuscript table values. Reference mode also runs the exact
+generated-value-to-manuscript checks and enables strict preflight behavior:
+
+```sh
+EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode reference --strict
+```
+
+JSS encourages an HTML output log from the standalone replication script. To
+refresh `code.html` without overwriting manuscript artifacts, run the quick
+portable tests-only spin:
+
+```r
+Sys.setenv(EXDQLM_PKG_PATH = "../exdqlm")
+Sys.setenv(EXDQLM_REPRO_PROFILE = "quick")
+Sys.setenv(EXDQLM_REPRO_MODE = "portable")
+Sys.setenv(EXDQLM_REPRO_TESTS_ONLY = "true")
+Sys.setenv(EXDQLM_SKIP_PREFLIGHT = "true")
+Sys.setenv(EXDQLM_BUILDING_CODE_HTML = "true")
+knitr::spin("code.R", knit = TRUE)
 ```
 
 The detailed regeneration and acceptance protocol is maintained in
@@ -78,7 +104,7 @@ Installed-package mode is also supported:
 
 ```sh
 EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R
-EXDQLM_LOAD_MODE=installed Rscript analysis/run_all.R --stage manuscript --tests-only
+EXDQLM_LOAD_MODE=installed Rscript analysis/run_all.R --stage manuscript --mode portable --tests-only
 ```
 
 Use `EXDQLM_INSTALLED_LIB=/path/to/R/library` if the installed package lives in
@@ -140,11 +166,21 @@ LaTeX and must be synchronized from generated CSV/log outputs after reruns.
   with `--require-r-version` before regenerating examples so stale package
   checkouts or stale R runtimes are caught before expensive relaunches.
 - `code.R` is the top-level reader-facing reproduction script and records the
-  R session used for the run.
+  R session used for the run. Its portable mode is intended for readers and
+  collaborators; its reference mode is the final exact manuscript-value sync
+  gate on the documented benchmark platform. `code.html` is generated from
+  `code.R` with `knitr::spin()` as the reviewer-facing execution log.
 - `analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv` maps tracked
   artifacts to manuscript targets.
 - Runtime values are hardware-, R-version-, backend-, and profile-dependent.
-  Benchmark provenance is recorded in
+  Portable runs should regenerate coherent positive runtimes, but only the
+  reference run is expected to exactly match the runtimes printed in the
+  manuscript. Benchmark provenance is recorded in
   `analysis/manuscript/outputs/tables/benchmark_environment.csv`.
+- Manuscript runs set the RNG explicitly to
+  `Mersenne-Twister / Inversion / Rejection` before applying the configured
+  seed. Printed runtime values use benchmark Profile B, which records one C++
+  thread, disables the C++ sampler backend, and stores the backend/profile
+  choices in `benchmark_environment.csv`.
 - Support workflows under `analysis/support/` are retained for audit/history;
   they are not the canonical source of manuscript figures and tables.

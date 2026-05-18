@@ -55,7 +55,16 @@ if (!selected_benchmark_profile %in% names(cfg_benchmark_profiles)) {
   )
 }
 
+set_manuscript_rng <- function(rng_cfg = cfg_params$rng %||% list()) {
+  kind <- as.character(rng_cfg$kind %||% "Mersenne-Twister")
+  normal_kind <- as.character(rng_cfg$normal_kind %||% "Inversion")
+  sample_kind <- as.character(rng_cfg$sample_kind %||% "Rejection")
+  RNGkind(kind = kind, normal.kind = normal_kind, sample.kind = sample_kind)
+  invisible(RNGkind())
+}
+
 seed_value <- seed_override %||% cfg_params$seed
+selected_rng_kind <- set_manuscript_rng()
 set.seed(seed_value)
 
 targets <- if (exists("targets")) as.character(targets) else character(0)
@@ -127,7 +136,7 @@ with_backend_profile <- function(profile_name, expr) {
 
 safe_system_output <- function(cmd, args = character()) {
   out <- tryCatch(
-    system2(cmd, args = args, stdout = TRUE, stderr = FALSE),
+    suppressWarnings(system2(cmd, args = args, stdout = TRUE, stderr = FALSE)),
     error = function(e) character()
   )
   trimws(out[nzchar(trimws(out))])
@@ -263,6 +272,9 @@ benchmark_environment_table <- function() {
       "r_version",
       "r_binary",
       "rscript_binary",
+      "rng_kind",
+      "rng_normal_kind",
+      "rng_sample_kind",
       "exdqlm_version",
       "exdqlm_commit",
       "exdqlm_branch",
@@ -297,6 +309,9 @@ benchmark_environment_table <- function() {
       R.version.string,
       normalizePath(file.path(R.home("bin"), "R"), mustWork = FALSE),
       normalizePath(file.path(R.home("bin"), "Rscript"), mustWork = FALSE),
+      selected_rng_kind[[1L]],
+      selected_rng_kind[[2L]],
+      selected_rng_kind[[3L]],
       pkg_version,
       pkg_git_at_setup$commit,
       pkg_git_at_setup$branch,
@@ -557,6 +572,9 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
   kl_normality <- function(x, ref = NULL, kl_k = NULL) {
     exdqlm:::.exdqlm_kl_normality_1d(x, ref = ref, kl_k = kl_k)
   }
+  kl_details <- function(x) {
+    exdqlm:::.exdqlm_kl_details(x)
+  }
   y_full <- if (!is.null(y_data)) as.numeric(y_data) else as.numeric(m1$y)
   has_y <- length(y_full) > 0L
   nrow_or_len <- function(x) if (is.null(dim(x))) length(x) else nrow(x)
@@ -608,10 +626,7 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
     m1.uts = m1.uts, m1.KL = m1.KL, m1.KL.flip = m1.KL.flip, m1.CRPS = m1.CRPS, m1.pplc = m1.pplc,
     m1.qq = m1.qq, m1.acf = m1.acf, m1.rt = m1$run.time,
     m1.msfe = m1_msfe, y = y,
-    m1.KL.by_k = m1.kl$KL.by_k,
-    m1.KL.flip.by_k = m1.kl$KL.flip.by_k,
-    m1.KL.gaussian = m1.kl$KL.gaussian,
-    m1.KL.flip.gaussian = m1.kl$KL.flip.gaussian,
+    kl.details = list(m1 = kl_details(m1.kl)),
     crps.method = "integrated_quantile_score",
     crps.probs = crps_probs,
     crps.weights = crps_weights,
@@ -645,10 +660,7 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
     retlist$m2.uts <- m2.uts
     retlist$m2.KL <- m2.kl$KL
     retlist$m2.KL.flip <- m2.kl$KL.flip
-    retlist$m2.KL.by_k <- m2.kl$KL.by_k
-    retlist$m2.KL.flip.by_k <- m2.kl$KL.flip.by_k
-    retlist$m2.KL.gaussian <- m2.kl$KL.gaussian
-    retlist$m2.KL.flip.gaussian <- m2.kl$KL.flip.gaussian
+    retlist$kl.details$m2 <- kl_details(m2.kl)
     retlist$kl.n_finite <- c(retlist$kl.n_finite, m2 = m2.kl$n_finite)
     retlist$kl.n_ref <- c(retlist$kl.n_ref, m2 = m2.kl$n_ref)
     retlist$kl.zero_distance_count <- c(retlist$kl.zero_distance_count, m2 = m2.kl$zero_distance_count)
@@ -757,7 +769,11 @@ write_session_info <- function() {
   path <- file.path(logs_dir, "sessionInfo.txt")
   sink(path)
   on.exit(sink(), add = TRUE)
+  if (!nzchar(Sys.getenv("TZ", unset = ""))) {
+    Sys.setenv(TZ = "America/New_York")
+  }
   cat(sprintf("Seed: %s\n", seed_value))
+  cat(sprintf("RNGkind: %s\n", paste(RNGkind(), collapse = " | ")))
   cat(sprintf("Profile: %s\n", selected_profile))
   cat(sprintf("Date: %s\n\n", as.character(Sys.time())))
   print(sessionInfo())

@@ -14,6 +14,14 @@ find_repo_root <- function(start = getwd()) {
   }
 }
 
+normalize_repro_mode <- function(mode) {
+  mode <- tolower(trimws(mode))
+  if (!mode %in% c("portable", "reference")) {
+    stop("Reproducibility mode must be either 'portable' or 'reference'.", call. = FALSE)
+  }
+  mode
+}
+
 parse_args <- function(args) {
   out <- list(
     stage = "exal",
@@ -21,6 +29,7 @@ parse_args <- function(args) {
     skip_tests = FALSE,
     promote = FALSE,
     profile = "standard",
+    mode = Sys.getenv("EXDQLM_REPRO_MODE", unset = "portable"),
     pkg_path = NULL,
     seed = NULL,
     targets = character(0),
@@ -42,6 +51,9 @@ parse_args <- function(args) {
     } else if (a == "--profile") {
       i <- i + 1L
       out$profile <- args[[i]]
+    } else if (a == "--mode") {
+      i <- i + 1L
+      out$mode <- args[[i]]
     } else if (a == "--pkg-path") {
       i <- i + 1L
       out$pkg_path <- args[[i]]
@@ -62,6 +74,7 @@ parse_args <- function(args) {
     }
     i <- i + 1L
   }
+  out$mode <- normalize_repro_mode(out$mode)
   out
 }
 
@@ -90,6 +103,7 @@ main <- function() {
   ctx$repo_root <- repo_root
   ctx$project_stage <- args$stage
   ctx$profile <- args$profile
+  ctx$repro_mode <- args$mode
   ctx$pkg_path <- args$pkg_path
   ctx$seed_override <- args$seed
   ctx$targets <- args$targets
@@ -99,6 +113,11 @@ main <- function() {
   if (!args$stage %in% valid_stages) {
     stop(sprintf("Unknown stage '%s'. Valid stages: %s", args$stage, paste(valid_stages, collapse = ", ")), call. = FALSE)
   }
+
+  Sys.setenv(
+    EXDQLM_REPRO_MODE = args$mode,
+    EXDQLM_REFERENCE_SYNC = if (identical(args$mode, "reference")) "true" else "false"
+  )
 
   stage_tests <- file.path(repo_root, "analysis", args$stage, "tests")
   setup_path <- switch(

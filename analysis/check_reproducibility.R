@@ -281,6 +281,40 @@ main <- function() {
         warn("Example 3 fit_start is not 1987-01-01.")
       }
     }
+
+    rng <- cfg$rng %||% list()
+    rng_kind <- as.character(rng$kind %||% "")
+    rng_normal_kind <- as.character(rng$normal_kind %||% "")
+    rng_sample_kind <- as.character(rng$sample_kind %||% "")
+    line("rng", paste(c(rng_kind, rng_normal_kind, rng_sample_kind), collapse = " / "))
+    expected_rng <- c("Mersenne-Twister", "Inversion", "Rejection")
+    actual_rng <- c(rng_kind, rng_normal_kind, rng_sample_kind)
+    if (!identical(actual_rng, expected_rng)) {
+      fail(sprintf(
+        "Manuscript RNG must be explicit and stable: expected %s, found %s.",
+        paste(expected_rng, collapse = " / "),
+        paste(actual_rng, collapse = " / ")
+      ))
+    } else {
+      ok("manuscript RNG kind is explicit and stable")
+    }
+
+    bench_name <- as.character(cfg$manuscript_benchmark_profile %||% "")
+    bench <- cfg$benchmark_profiles[[bench_name]] %||% list()
+    line("benchmark profile", bench_name)
+    if (!identical(bench_name, "B")) {
+      warn(sprintf("Manuscript benchmark profile is %s; expected B for current paper values.", bench_name))
+    }
+    if (!identical(as.integer(bench$cpp_threads %||% NA_integer_), 1L)) {
+      fail("Manuscript benchmark profile must use exdqlm.cpp_threads = 1 for reference timing/provenance.")
+    } else {
+      ok("benchmark profile uses one C++ thread")
+    }
+    if (isTRUE(bench$use_cpp_samplers)) {
+      fail("Manuscript benchmark profile must keep C++ samplers disabled unless sampler reproducibility is revalidated.")
+    } else {
+      ok("benchmark profile keeps C++ samplers disabled")
+    }
   } else {
     fail("Could not read analysis/config/params_manuscript.yml.")
   }
@@ -310,6 +344,29 @@ main <- function() {
     }
   }
 
+  env_path <- file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "benchmark_environment.csv")
+  bench_env <- read_csv_safely(env_path)
+  if (!is.null(bench_env) && ncol(bench_env) >= 2L) {
+    env_fields <- stats::setNames(as.character(bench_env[[2L]]), as.character(bench_env[[1L]]))
+    required_env_fields <- c(
+      "rng_kind",
+      "rng_normal_kind",
+      "rng_sample_kind",
+      "exdqlm.cpp_threads",
+      "exdqlm.use_cpp_samplers",
+      "runtime_definition"
+    )
+    missing_env_fields <- setdiff(required_env_fields, names(env_fields))
+    if (length(missing_env_fields)) {
+      warn(sprintf(
+        "benchmark_environment.csv is missing reproducibility field(s) added after its last generation: %s",
+        paste(missing_env_fields, collapse = ", ")
+      ))
+    } else {
+      ok("benchmark environment records RNG, backend, and runtime provenance")
+    }
+  }
+
   section("Example 3 Data Window")
   ex3_data_path <- file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex3_model_dataset.csv")
   ex3_data <- read_csv_safely(ex3_data_path)
@@ -331,6 +388,50 @@ main <- function() {
     }
   }
 
+  section("Manuscript Code Policy")
+  tex_path <- file.path(repo_root, "exdqlm-jss.tex")
+  tex <- if (file.exists(tex_path)) readLines(tex_path, warn = FALSE) else character()
+  ex3_prose_requirements <- c(
+    "first 414",
+    "final 18",
+    "ex3\\_model\\_dataset.csv",
+    "January 1987 through June 2021",
+    "July 2021 through December 2022"
+  )
+  missing_ex3_prose <- ex3_prose_requirements[!vapply(
+    ex3_prose_requirements,
+    function(marker) any(grepl(marker, tex, fixed = TRUE)),
+    logical(1)
+  )]
+  if (length(missing_ex3_prose)) {
+    fail(sprintf(
+      "Example 3 manuscript prose is missing data-window/split marker(s): %s",
+      paste(missing_ex3_prose, collapse = ", ")
+    ))
+  } else {
+    ok("Example 3 prose records the data window, train/holdout split, and aligned-data artifact")
+  }
+  low_level_ex3_patterns <- c(
+    "date >= as\\.Date",
+    "date <= as\\.Date",
+    "train\\.ind",
+    "holdout\\.ind"
+  )
+  low_level_ex3_hits <- low_level_ex3_patterns[vapply(
+    low_level_ex3_patterns,
+    function(pattern) any(grepl(pattern, tex)),
+    logical(1)
+  )]
+  line("low-level Example 3 markers", length(low_level_ex3_hits))
+  if (length(low_level_ex3_hits)) {
+    fail(sprintf(
+      "Example 3 manuscript chunk still contains low-level preprocessing markers better kept in analysis scripts: %s",
+      paste(low_level_ex3_hits, collapse = ", ")
+    ))
+  } else {
+    ok("Example 3 manuscript chunk keeps preprocessing reader-facing")
+  }
+
   section("Canonical KL Diagnostics Wiring")
   kl_files <- file.path(repo_root, c(
     "analysis/lib/manuscript_setup.R",
@@ -339,7 +440,15 @@ main <- function() {
     "exdqlm-jss.tex",
     "exdqlm-supplement.tex"
   ))
-  kl_patterns <- c("FNN::KL", "KL\\.divergence", "ref\\.samp", "reference sample used in the KL", "nearest-neighbor estimates")
+  kl_patterns <- c(
+    "FNN::KL",
+    "KL\\.divergence",
+    "ref\\.samp",
+    "reference sample used in the KL",
+    "nearest-neighbor estimates",
+    "m[12]\\.KL\\.(by_k|gaussian)\\s*=",
+    "KL\\.(by_k|gaussian)"
+  )
   stale_hits <- character()
   for (path in kl_files[file.exists(kl_files)]) {
     lines <- readLines(path, warn = FALSE)
@@ -350,9 +459,9 @@ main <- function() {
   }
   line("stale KL markers", length(stale_hits))
   if (length(stale_hits)) {
-    fail(sprintf("Canonical article files still contain stale stochastic/FNN KL wording or code: %s", paste(stale_hits, collapse = "; ")))
+    fail(sprintf("Canonical article files still contain stale or confusing KL wording/code: %s", paste(stale_hits, collapse = "; ")))
   } else {
-    ok("canonical article files use the deterministic exdqlm 1.0.0 KL diagnostics wording/code")
+    ok("canonical article files use primary deterministic exdqlm 1.0.0 KL diagnostics wording/code")
   }
 
   section("Canonical Forecast Scoring Wiring")

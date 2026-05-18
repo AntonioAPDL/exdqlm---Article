@@ -77,6 +77,17 @@ testthat::test_that("Example 4 publication seed is configured, not output-depend
   }
 })
 
+testthat::test_that("Example 3 manuscript preprocessing is reader-facing", {
+  tex <- readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE)
+
+  testthat::expect_true(any(grepl("first 414", tex, fixed = TRUE)))
+  testthat::expect_true(any(grepl("final 18", tex, fixed = TRUE)))
+  testthat::expect_true(any(grepl("ex3\\\\_model\\\\_dataset.csv", tex)))
+  testthat::expect_true(any(grepl("window\\(y\\.fit, end = c\\(2021, 6\\)\\)", tex)))
+  testthat::expect_true(any(grepl("X\\.train = scale\\(X\\.raw\\[1:414, \\]\\)", tex)))
+  testthat::expect_false(any(grepl("date >= as\\.Date|date <= as\\.Date|train\\.ind|holdout\\.ind", tex)))
+})
+
 testthat::test_that("article figures are declared by the canonical example manifests", {
   testthat::skip_if_not_installed("yaml")
 
