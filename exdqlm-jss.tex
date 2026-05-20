@@ -481,7 +481,7 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
 \section{Examples}
  \label{sec:exs}
 
-We demonstrate the general workflow and key features of the package through three real-data analyses and one simulation benchmark. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. The functions in Table \ref{table:flow} cover the high-level modeling workflow used in the examples. The package also exposes distribution-level utilities for the exAL error family: \code{dexal()}, \code{pexal()}, \code{qexal()}, and \code{rexal()} evaluate the density, distribution function, quantile function, and random generator, respectively, and \code{get\_gamma\_bounds()} returns the admissible interval for $\gamma$ at a specified $p_0$. These utilities are useful for simulation, prior calibration, and direct checks of the exAL distribution, but are not needed for the main fitting, forecasting, diagnostic, or synthesis workflows illustrated below. We use CrI as shorthand for credible interval in figure captions and plotting labels. All figures and tables are generated from scripts distributed with the article repository. These scripts build the example artifacts directly from the current \pkg{exdqlm} API. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
+We demonstrate the general workflow and key features of the package through three real-data analyses and one simulation benchmark. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. The functions in Table \ref{table:flow} cover the high-level modeling workflow used in the examples. The package also exposes distribution-level utilities for the exAL error family: \code{dexal()}, \code{pexal()}, \code{qexal()}, and \code{rexal()} evaluate the density, distribution function, quantile function, and random generator, respectively, and \code{get\_gamma\_bounds()} returns the admissible interval for $\gamma$ at a specified $p_0$. These utilities are useful for simulation, prior calibration, and direct checks of the exAL distribution, but are not needed for the main fitting, forecasting, diagnostic, or synthesis workflows illustrated below. We use CrI as shorthand for credible interval in figure captions and plotting labels. All figures and tables are generated from scripts distributed with the article repository. The top-level \code{code.R} file is the canonical reproduction entry point, and the scripts under \code{analysis/manuscript/examples/} generate the displayed figures, tables, logs, and provenance files. The code chunks shown below are compact, reader-facing excerpts of those scripts; generic output handling, caching, graphics devices, and manifest-writing code are kept in the replication scripts. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
 
 We begin by loading the \pkg{exdqlm} package used for all examples.
 
@@ -952,8 +952,10 @@ on those covariates rather than an operational forecast of the climate indices.
 The complete overlap used here has 432 monthly observations. The first 414
 observations, January 1987 through June 2021, form the training period; the final
 18 observations, July 2021 through December 2022, form the forecast holdout. The
-replication scripts include the corresponding date checks and write the aligned
-modeling data to \code{analysis/manuscript/outputs/tables/ex3\_model\_dataset.csv}.
+following chunk shows the essential data alignment. The replication script adds
+date and completeness checks, uses the same training-window scaling, and writes
+the aligned modeling data to
+\code{analysis/manuscript/outputs/tables/ex3\_model\_dataset.csv}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1184,7 +1186,9 @@ For \code{MREG}, the future observation matrix includes the held-out NOI and AMO
 values as direct regressors. For \code{MTF}, the future matrices include the
 held-out NOI and AMO values through the transfer-function augmentation. These
 matrices are passed through the \code{fFF} and \code{fGG} arguments of
-\code{exdqlmForecast()}.
+\code{exdqlmForecast()}. The code below shows the relevant matrix construction
+and forecast calls; the replication script wraps these steps in dimension
+checks and output-writing code.
 
 \begin{CodeChunk}
 \begin{CodeInput}

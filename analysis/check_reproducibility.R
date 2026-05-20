@@ -432,6 +432,37 @@ main <- function() {
     ok("Example 3 manuscript chunk keeps preprocessing reader-facing")
   }
 
+  code_policy_helper <- file.path(repo_root, "analysis", "lib", "manuscript_code_policy.R")
+  code_map_path <- file.path(repo_root, "analysis", "manuscript", "code_chunk_map.csv")
+  if (!file.exists(code_policy_helper) || !file.exists(code_map_path)) {
+    fail("Manuscript code chunk traceability helper or map is missing.")
+  } else {
+    source(code_policy_helper, local = TRUE)
+    chunks <- tryCatch(extract_codeinput_chunks(tex_path), error = function(e) e)
+    code_map <- tryCatch(read_code_chunk_map(code_map_path), error = function(e) e)
+    if (inherits(chunks, "error") || inherits(code_map, "error")) {
+      fail(sprintf(
+        "Could not read displayed manuscript code or code_chunk_map.csv: %s %s",
+        if (inherits(chunks, "error")) conditionMessage(chunks) else "",
+        if (inherits(code_map, "error")) conditionMessage(code_map) else ""
+      ))
+    } else {
+      chunk_ids <- vapply(chunks, `[[`, character(1), "chunk_id")
+      line("displayed code chunks", length(chunk_ids))
+      if (!setequal(chunk_ids, code_map$chunk_id)) {
+        fail("analysis/manuscript/code_chunk_map.csv does not cover exactly the displayed CodeInput chunks.")
+      } else {
+        ok("displayed manuscript code chunks are mapped to canonical analysis sources")
+      }
+      parsed <- tryCatch(parse_codeinput_chunks(chunks), error = function(e) e)
+      if (inherits(parsed, "error")) {
+        fail(conditionMessage(parsed))
+      } else {
+        ok("displayed manuscript code chunks parse as R excerpts")
+      }
+    }
+  }
+
   section("Canonical KL Diagnostics Wiring")
   kl_files <- file.path(repo_root, c(
     "analysis/lib/manuscript_setup.R",

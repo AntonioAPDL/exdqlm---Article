@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2026.5.1)  18 MAY 2026 03:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2026.5.1)  20 MAY 2026 19:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -757,7 +757,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [18]
-<analysis/manuscript/outputs/figures/ex2quant.png, id=424, 722.7pt x 534.798pt>
+<analysis/manuscript/outputs/figures/ex2quant.png, id=425, 722.7pt x 534.798pt>
 
 File: analysis/manuscript/outputs/figures/ex2quant.png Graphic file (type png)
 <use analysis/manuscript/outputs/figures/ex2quant.png>
@@ -776,7 +776,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [20 <./analysis/manuscript/outputs/figures/ex2quant.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex2checks.png, id=438, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex2checks.png, id=439, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex2checks.png Graphic file (type png)
 
@@ -822,36 +822,36 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [25]
-<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=477, 722.7pt x 433.6
+<analysis/manuscript/outputs/figures/ex3quantcomps.png, id=479, 722.7pt x 433.6
 2pt>
 File: analysis/manuscript/outputs/figures/ex3quantcomps.png Graphic file (type 
 png)
 <use analysis/manuscript/outputs/figures/ex3quantcomps.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3quantcomps.png 
- used on input line 1045. on input line 1045.
+ used on input line 1047. on input line 1047.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 1045.
+e 1047.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 26 []
  []
 
-[26 <./analysis/manuscript/outputs/figures/ex3quantcomps.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=484, 722.7pt x 433.62pt
+[26]
+<analysis/manuscript/outputs/figures/ex3zetapsi.png, id=486, 722.7pt x 433.62pt
 >
 File: analysis/manuscript/outputs/figures/ex3zetapsi.png Graphic file (type png
 )
 <use analysis/manuscript/outputs/figures/ex3zetapsi.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3zetapsi.png  us
-ed on input line 1097. on input line 1097.
+ed on input line 1099. on input line 1099.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 1097.
+e 1099.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 27
  []
 
-[27]
+[27 <./analysis/manuscript/outputs/figures/ex3quantcomps.png (PNG copy)>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 28 []
  []
@@ -867,15 +867,15 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [30]
-<analysis/manuscript/outputs/figures/ex3forecast.png, id=515, 578.16pt x 397.48
+<analysis/manuscript/outputs/figures/ex3forecast.png, id=517, 578.16pt x 397.48
 5pt>
 File: analysis/manuscript/outputs/figures/ex3forecast.png Graphic file (type pn
 g)
 <use analysis/manuscript/outputs/figures/ex3forecast.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex3forecast.png  u
-sed on input line 1307. on input line 1307.
+sed on input line 1311. on input line 1311.
 Package pdftex.def Info: Requested size: 362.97931pt x 249.54349pt on input lin
-e 1307.
+e 1311.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 31
@@ -889,15 +889,15 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [32 <./analysis/manuscript/outputs/figures/ex3forecast.png (PNG copy)>]
-<analysis/manuscript/outputs/figures/ex4static.png, id=532, 722.7pt x 433.62pt>
+<analysis/manuscript/outputs/figures/ex4static.png, id=534, 722.7pt x 433.62pt>
 
 File: analysis/manuscript/outputs/figures/ex4static.png Graphic file (type png)
 
 <use analysis/manuscript/outputs/figures/ex4static.png>
 Package pdftex.def Info: analysis/manuscript/outputs/figures/ex4static.png  use
-d on input line 1389. on input line 1389.
+d on input line 1393. on input line 1393.
 Package pdftex.def Info: Requested size: 442.65375pt x 265.59291pt on input lin
-e 1389.
+e 1393.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 33
@@ -954,9 +954,9 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <10.95> not available
 (Font)              Font shape `T1/lmss/m/sl' tried instead on input line 282.
 )
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1436.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1440.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1436.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1440.
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 38 []
@@ -968,14 +968,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [39]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1436.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1440.
  (./exdqlm-jss.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1436.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1436.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1440.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1440.
 
 Package rerunfilecheck Info: File `exdqlm-jss.out' has not changed.
 (rerunfilecheck)             Checksum: 4D32B7B7943D11387E1BDC5FF0701EC8;1802.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1436.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1440.
  ) 
 Here is how much of TeX's memory you used:
  8635 strings out of 494917
@@ -984,7 +984,7 @@ Here is how much of TeX's memory you used:
  11588 multiletter control sequences out of 15000+600000
  146475 words of font info for 97 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 35i,16n,34p,2532b,513s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,16n,34p,2532b,509s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texli
 ve/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texlive/texmf-dist/font
 s/enc/dvips/lm/lm-rm.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/lm/lm-m
@@ -1017,10 +1017,10 @@ ic/lm/lmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/lm/lmtt10.pfb
 live/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on exdqlm-jss.pdf (39 pages, 3140331 bytes).
+Output written on exdqlm-jss.pdf (39 pages, 3140749 bytes).
 PDF statistics:
- 765 PDF objects out of 1000 (max. 8388607)
- 674 compressed objects within 7 object streams
+ 767 PDF objects out of 1000 (max. 8388607)
+ 676 compressed objects within 7 object streams
  154 named destinations out of 1000 (max. 500000)
  171 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -49,12 +49,12 @@ EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --tests-
 ```
 
 The top-level reader entrypoint wraps the same preflight and manuscript
-pipeline. Use `--mode portable` for fresh-clone, collaborator, or reviewer
-runs. Portable mode checks that the pipeline runs, figures/tables are generated,
-manifests are coherent, package provenance is recorded, and numeric outputs are
-finite and sensible. It does not require machine-dependent runtimes or
-simulation-based diagnostics to exactly match the manuscript's reference-machine
-values.
+pipeline. It is the canonical way to reproduce the full paper. Use
+`--mode portable` for fresh-clone, collaborator, or reviewer runs. Portable mode
+checks that the pipeline runs, figures/tables are generated, manifests are
+coherent, package provenance is recorded, and numeric outputs are finite and
+sensible. It does not require machine-dependent runtimes or simulation-based
+diagnostics to exactly match the manuscript's reference-machine values.
 
 ```sh
 EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile quick --mode portable --tests-only
@@ -85,6 +85,13 @@ knitr::spin("code.R", knit = TRUE)
 
 The detailed regeneration and acceptance protocol is maintained in
 [`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`](analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md).
+
+The code printed in `exdqlm-jss.tex` is a curated, reader-facing excerpt of the
+same workflows rather than a replacement for `code.R`. The file
+`analysis/manuscript/code_chunk_map.csv` links every displayed `CodeInput`
+chunk to the canonical script, relevant package calls, and generated
+figure/table targets. Manuscript tests parse the displayed chunks and verify
+that the map stays synchronized with `analysis/`.
 
 ## Package Loading Modes
 
@@ -170,6 +177,9 @@ LaTeX and must be synchronized from generated CSV/log outputs after reruns.
   collaborators; its reference mode is the final exact manuscript-value sync
   gate on the documented benchmark platform. `code.html` is generated from
   `code.R` with `knitr::spin()` as the reviewer-facing execution log.
+- `analysis/manuscript/code_chunk_map.csv` records how the compact code chunks
+  displayed in the article map to the full executable scripts under
+  `analysis/manuscript/examples/`.
 - `analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv` maps tracked
   artifacts to manuscript targets.
 - Runtime values are hardware-, R-version-, backend-, and profile-dependent.

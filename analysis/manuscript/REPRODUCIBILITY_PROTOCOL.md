@@ -103,6 +103,26 @@ fully executable implementation kept in `analysis/` and reachable through
 state the data window, train/holdout split, and the generated artifact that
 records the aligned data.
 
+The source of truth for full reproduction is `code.R`, which calls
+`analysis/run_all.R` and the canonical example scripts under
+`analysis/manuscript/examples/`. The `CodeInput` chunks in `exdqlm-jss.tex` are
+curated article excerpts. They must be readable and faithful to the canonical
+workflow, but they do not need to include every cache, graphics-device,
+manifest, or output-writing line from the scripts.
+
+The traceability file `analysis/manuscript/code_chunk_map.csv` records, for
+each displayed article chunk:
+
+- the example and workflow role;
+- whether the chunk is an exact snippet or a compact excerpt;
+- the canonical source file(s) in `analysis/`;
+- required manuscript and source-code terms;
+- any figure/table target to which the chunk contributes.
+
+The manuscript test suite parses all displayed chunks, checks the map coverage,
+checks required source terms, and verifies that mapped figure/table labels are
+registered in the example `artifacts.yml` files.
+
 ## Package Test Gate
 
 Before using package outputs as article reference values, run the package tests

@@ -65,6 +65,11 @@
 #' The tracker files in `analysis/manuscript/outputs/tables/` map generated
 #' files back to manuscript figures and tables.
 #'
+#' The code chunks printed in `exdqlm-jss.tex` are compact, reader-facing
+#' excerpts of these same workflows. Their traceability to the executable
+#' scripts is recorded in `analysis/manuscript/code_chunk_map.csv` and checked
+#' by the manuscript test suite.
+#'
 #' ## Creating the JSS HTML replication log
 #'
 #' JSS encourages an output file created from this script. The safe portable
