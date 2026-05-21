@@ -693,22 +693,23 @@ The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}
 \begin{CodeInput}
 R> synth.obs.col = adjustcolor("#F7D6DE", alpha.f = 0.40)
 R> synth.fore.col = adjustcolor("#D98A9B", alpha.f = 0.38)
-R> t.end = tail(time(LakeHuron), 1)
+R> time.obs = as.numeric(time(LakeHuron))
+R> t.end = tail(time.obs, 1)
 R> dt = 1 / frequency(LakeHuron)
 R> t.fore = seq(from = t.end + dt, by = dt, length.out = 8)
-R> idx.obs = which(time(LakeHuron) >= 1952)
-R> idx.zoom = which(time(LakeHuron) >= 1952)
+R> idx.obs = which(time.obs >= 1952)
+R> idx.zoom = which(time.obs >= 1952)
 R> ylim.obs = range(LakeHuron[idx.obs], syn.obs$summary$q025[idx.obs],
 +                  syn.obs$summary$q975[idx.obs])
 R> ylim.fore = range(LakeHuron[idx.zoom], syn.obs$summary$q025[idx.zoom],
 +                   syn.obs$summary$q975[idx.zoom],
 +                   syn.fore$summary$q025, syn.fore$summary$q975)
-R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
+R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
 +       xlim = c(1952, t.end), ylim = ylim.obs,
 +       ylab = "predictive synthesis",
 +       show.median = FALSE, band.col = synth.obs.col,
 +       y.col = adjustcolor("grey30", alpha.f = 0.62))
-R> plot(syn.obs, y = LakeHuron, time = time(LakeHuron),
+R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
 +       xlim = c(1952, max(t.fore)), ylim = ylim.fore,
 +       ylab = "predictive synthesis",
 +       show.median = FALSE, band.col = synth.obs.col,
