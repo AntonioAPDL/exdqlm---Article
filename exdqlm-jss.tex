@@ -586,12 +586,9 @@ By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDV
 \label{fig:ex1mcmc}
 \end{figure}
 
-\textcolor{red}{These lines of code do not match with Figure 1:}
-% fig:ex1mcmc w750h750
-% R> par(mfcol=c(2,2))
-% R> par(mar = c(5.1, 4.1, 1, 1))
 \begin{CodeChunk}
 \begin{CodeInput}
+R> par(mfrow = c(2, 2), mar = c(5.1, 4.1, 1, 1))
 R> keep.idx = seq(1, length(M50$samp.sigma), by = 10)
 R> sigma.trace = coda::mcmc(M50$samp.sigma[keep.idx], thin = 10)
 R> gamma.trace = coda::mcmc(M50$samp.gamma[keep.idx], thin = 10)
@@ -605,26 +602,22 @@ R> coda::densplot(gamma.trace, main = "")
 
 The posterior summary does not provide strong evidence that $\gamma$ differs from zero for the median fit. We therefore re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.
 
-\textcolor{red}{Should we add a verbose = FALSE here since we are not showing the output:}
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
 +                  df = 0.9, dim.df = 2,
 +                  gam.init = 0, fix.gamma = TRUE,
-+                  n.burn = 2000, n.mcmc = 3000)
++                  n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
 The results are \code{exdqlmMCMC} objects that can be used for analysis and forecasting. First we examine the estimated quantiles with the plot method for \code{exdqlmMCMC} objects, seen in the top-left panel of Figure \ref{fig:ex1quants}. This generates a plot of the data with the MAP estimates and the 95\% CrIs of the dynamic quantile. Subsequent quantiles (i.e. $p_0 = 0.50, 0.05$ in this example) can be added to the plot using the function \code{exdqlmPlot()} with the argument \code{add = TRUE}.
 
-\textcolor{red}{Maybe this is picky? Should this be title("(a) Dynamic quantiles") so it matches Figure 2... same with the forecast \& synthesis plots in that figure.}
-
-% fig:ex1quant 1000 225
-% R> par(mfcol=c(1,2))
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(M95); title("Dynamic quantiles")
+R> par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2),
++        oma = c(0, 0, 0.8, 0))
+R> plot(M95); title("(a) Dynamic quantiles")
 R> exdqlmPlot(M50, add = TRUE, col = "blue")
 R> exdqlmPlot(M5, add = TRUE, col = "forest green")
 R> legend("topright", lty = 1, bty = "n",
@@ -654,7 +647,7 @@ We plot the time series data in a narrower range for closer examination and add 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(LakeHuron,  xlim = c(1952, 1980), ylim = c(575, 581),
-+        col = "dark grey", main = "Forecasted quantiles",
++        col = "dark grey", main = "(b) Forecasted quantiles",
 +           ylab = "forecast 95% CrIs")
 R> fc95 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M95,
 +               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
@@ -712,11 +705,13 @@ R> ylim.fore = range(LakeHuron[idx.zoom], syn.obs$summary$q025[idx.zoom],
 R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
 +       xlim = c(1952, t.end), ylim = ylim.obs,
 +       ylab = "predictive synthesis",
++       main = "(c) Observed-period synthesis",
 +       show.median = FALSE, band.col = synth.obs.col,
 +       y.col = adjustcolor("grey30", alpha.f = 0.62))
 R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
 +       xlim = c(1952, max(t.fore)), ylim = ylim.fore,
 +       ylab = "predictive synthesis",
++       main = "(d) Forecast synthesis",
 +       show.median = FALSE, band.col = synth.obs.col,
 +       y.col = adjustcolor("grey30", alpha.f = 0.62))
 R> polygon(c(t.end, t.fore[1], t.fore[1], t.end),
