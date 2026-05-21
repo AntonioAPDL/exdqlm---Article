@@ -586,6 +586,7 @@ By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDV
 \label{fig:ex1mcmc}
 \end{figure}
 
+\textcolor{red}{These lines of code do not match with Figure 1:}
 % fig:ex1mcmc w750h750
 % R> par(mfcol=c(2,2))
 % R> par(mar = c(5.1, 4.1, 1, 1))
@@ -604,6 +605,8 @@ R> coda::densplot(gamma.trace, main = "")
 
 The posterior summary does not provide strong evidence that $\gamma$ differs from zero for the median fit. We therefore re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.
 
+\textcolor{red}{Should we add a verbose = FALSE here since we are not showing the output:}
+
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
@@ -614,6 +617,8 @@ R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
 \end{CodeChunk}
 
 The results are \code{exdqlmMCMC} objects that can be used for analysis and forecasting. First we examine the estimated quantiles with the plot method for \code{exdqlmMCMC} objects, seen in the top-left panel of Figure \ref{fig:ex1quants}. This generates a plot of the data with the MAP estimates and the 95\% CrIs of the dynamic quantile. Subsequent quantiles (i.e. $p_0 = 0.50, 0.05$ in this example) can be added to the plot using the function \code{exdqlmPlot()} with the argument \code{add = TRUE}.
+
+\textcolor{red}{Maybe this is picky? Should this be title("(a) Dynamic quantiles") so it matches Figure 2... same with the forecast \& synthesis plots in that figure.}
 
 % fig:ex1quant 1000 225
 % R> par(mfcol=c(1,2))
@@ -1253,7 +1258,7 @@ R> tab.ex3 = data.frame(
 \end{CodeInput}
 \end{CodeChunk}
 
-\clearpage
+% \clearpage
 
 \begin{table}[h!]
 \centering
