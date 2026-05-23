@@ -322,7 +322,7 @@ if (!need_ex2) {
           border = ex2_cols$hist_border
         )
         graphics::abline(v = stats::median(as.numeric(m_exdqlm_plot$samp.gamma), na.rm = TRUE), col = ex2_cols$exdqlm, lwd = 2)
-      }, height = 7.4)
+      }, width = 9.2, height = 7.2, pointsize = 12.5)
     }
 
     if (ex2_ldvb_pair_ok && need_ex2quant) {
@@ -470,7 +470,7 @@ if (!need_ex2) {
       save_png_plot("ex2checks.png", {
         graphics::par(mfrow = c(2, 3))
         diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ex2_cols$dqlm, ex2_cols$exdqlm), y_data = y)
-      })
+      }, width = 9.2, height = 6.4, pointsize = 12.5)
       register_artifact(
         artifact_id = "fig_ex2checks",
         artifact_type = "figure",

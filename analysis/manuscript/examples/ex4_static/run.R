@@ -134,7 +134,7 @@ if (!need_ex4) {
     y_lim <- c(y_lim[1] - y_pad, y_lim[2] + y_pad)
 
     save_png_plot("ex4static.png", {
-      graphics::par(mfrow = c(1, 3), mar = c(6, 4, 3, 1), xpd = NA)
+      graphics::par(mfrow = c(1, 3), mar = c(5.2, 4, 2.6, 1), xpd = NA)
       x_pos <- seq_len(predictor_n)
       for (i in seq_along(p_levels)) {
         res <- ex4_obj$fits[[ex4_p_key(p_levels[i])]]
@@ -176,7 +176,7 @@ if (!need_ex4) {
           )
         }
       }
-    })
+    }, width = 9.2, height = 4.8, pointsize = 12.5)
 
     register_artifact(
       artifact_id = "fig_ex4static",

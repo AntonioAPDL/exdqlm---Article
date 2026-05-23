@@ -333,12 +333,12 @@ if (!need_ex1) {
 
   if (need_ex1mcmc) {
     save_png_plot("ex1mcmc.png", {
-      graphics::par(mfcol = c(2, 2))
+      graphics::par(mfcol = c(2, 2), mar = c(4.1, 4.1, 2.1, 1.0))
       coda::traceplot(sigma_trace_thin, main = "sigma trace")
       coda::densplot(sigma_trace_thin, main = "sigma density")
       coda::traceplot(gamma_trace_thin, main = "gamma trace")
       coda::densplot(gamma_trace_thin, main = "gamma density")
-    })
+    }, width = 8.2, height = 5.8, pointsize = 13)
     register_artifact(
       artifact_id = "fig_ex1mcmc",
       artifact_type = "figure",
@@ -504,7 +504,7 @@ if (!need_ex1) {
         x.intersp = 0.9,
         inset = c(0.015, 0.025)
       )
-    })
+    }, width = 9.2, height = 6.3, pointsize = 12.5)
     register_artifact(
       artifact_id = "fig_ex1quants",
       artifact_type = "figure",

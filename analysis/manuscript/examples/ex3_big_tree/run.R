@@ -899,7 +899,7 @@ if (!need_ex3) {
           col = c(ex3_cols$mreg, ex3_cols$mtf), lty = 1, lwd = 1.5, bty = "n"
         )
         graphics::mtext("time", side = 1, outer = TRUE, line = 0.5)
-      })
+      }, width = 8.2, height = 7.2, pointsize = 12.5)
       register_artifact(
         artifact_id = "fig_ex3quantcomps",
         artifact_type = "figure",
@@ -936,7 +936,7 @@ if (!need_ex3) {
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
           graphics::title(climate_psi_title(selected_labels[[j]]))
         }
-      })
+      }, width = 8.8, height = 5.8, pointsize = 12.5)
       register_artifact(
         artifact_id = "fig_ex3zetapsi",
         artifact_type = "figure",
@@ -968,7 +968,7 @@ if (!need_ex3) {
           col = c(ex3_cols$m0, ex3_cols$mreg, ex3_cols$mtf, ex3_cols$holdout),
           lty = c(1, 1, 1, 1), pch = c(NA, NA, NA, 1), lwd = c(1.4, 1.4, 1.4, 1.2), bty = "n"
         )
-      }, width = 8, height = 5.5)
+      }, width = 8.4, height = 5.5, pointsize = 12.5)
       register_artifact(
         artifact_id = "fig_ex3forecast",
         artifact_type = "figure",

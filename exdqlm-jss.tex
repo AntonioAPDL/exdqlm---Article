@@ -581,21 +581,21 @@ By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDV
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.7\textwidth]{ex1mcmc.png}
+\includegraphics[width=0.82\textwidth]{ex1mcmc.png}
 \caption{Example 1: Lake Huron. Trace and density plots from the median run with 2000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are representative MCMC traces from the recorded run profile; exact trace paths may differ across reruns while retaining comparable posterior summaries.}
 \label{fig:ex1mcmc}
 \end{figure}
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> par(mfrow = c(2, 2), mar = c(5.1, 4.1, 1, 1))
+R> par(mfcol = c(2, 2), mar = c(4.1, 4.1, 2.1, 1.0))
 R> keep.idx = seq(1, length(M50$samp.sigma), by = 10)
 R> sigma.trace = coda::mcmc(M50$samp.sigma[keep.idx], thin = 10)
 R> gamma.trace = coda::mcmc(M50$samp.gamma[keep.idx], thin = 10)
-R> coda::traceplot(sigma.trace, main = expression(sigma), ylab = "trace")
-R> coda::densplot(sigma.trace, main = "", ylab = "density")
-R> coda::traceplot(gamma.trace, main = expression(gamma))
-R> coda::densplot(gamma.trace, main = "")
+R> coda::traceplot(sigma.trace, main = "sigma trace")
+R> coda::densplot(sigma.trace, main = "sigma density")
+R> coda::traceplot(gamma.trace, main = "gamma trace")
+R> coda::densplot(gamma.trace, main = "gamma density")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -708,6 +708,9 @@ R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
 +       main = "(c) Observed-period synthesis",
 +       show.median = FALSE, band.col = synth.obs.col,
 +       y.col = adjustcolor("grey30", alpha.f = 0.62))
+R> legend("bottomleft",
++        legend = "Synthesized posterior predictive interval (95%)",
++        fill = synth.obs.col, border = NA, bty = "n", cex = 0.68)
 R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
 +       xlim = c(1952, max(t.fore)), ylim = ylim.fore,
 +       ylab = "predictive synthesis",
@@ -721,6 +724,11 @@ R> polygon(c(t.end, t.fore[1], t.fore[1], t.end),
 R> plot(syn.fore, time = t.fore, add = TRUE,
 +       show.median = FALSE, band.col = synth.fore.col)
 R> abline(v = t.end, lty = 3)
+R> legend("bottomleft",
++        legend = c("Observed-period synthesis (95%)",
++                   "Forecast synthesis (95%)"),
++        fill = c(synth.obs.col, synth.fore.col), border = NA,
++        bty = "n", cex = 0.66)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -901,7 +909,7 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  & MCMC & 325.53 & 0.164 & \textbf{5.095} & \textbf{2186.3} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{d5b23ee}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{fdb74dd}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1045,7 +1053,7 @@ The final models are fit on January 1987 through June 2021. We use the LDVB impl
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=1\textwidth]{ex3quantcomps.png}
+\includegraphics[width=0.92\textwidth]{ex3quantcomps.png}
 \caption{Example 3: Big Tree water flow. Top: MAP estimates and 95\% CrIs of the fitted \(0.15\) quantile from the no-covariate baseline \code{M0} (purple), direct-regression model \code{MREG} (blue), and transfer-function model \code{MTF} (green), plotted with the data (grey) from 2016 to 2020. Middle: MAP estimates and 95\% CrIs of the combined seasonal components implied by the annual, semiannual, and low-frequency harmonics. Bottom: MAP estimates and 95\% CrIs of the direct-regression contribution in \code{MREG} and the transfer-function contribution in \code{MTF}. The horizontal orange dotted lines are at zero for reference.}
 \label{fig:ex3quant}
 \end{figure}
@@ -1086,18 +1094,72 @@ contribution in \code{MREG} from the accumulated transfer contribution in
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> par(mfrow = c(3, 1))
-R> plot(y.train, col = "grey", ylim = c(1, 8), xlim = c(2016, 2020),
-+       ylab = "0.15 quantile 95% CrIs")
-R> exdqlmPlot(M0, add = TRUE)
-R> exdqlmPlot(MREG, add = TRUE, col = "steelblue")
-R> exdqlmPlot(MTF, add = TRUE, col = "forest green")
+R> padded.range = function(..., pad = 0.08) {
++     z = unlist(list(...), use.names = FALSE)
++     z = z[is.finite(z)]
++     r = range(z)
++     r + c(-1, 1) * diff(r) * pad
++   }
+R> q.summary = function(fit) {
++     theta = fit$samp.theta
++     TT = dim(theta)[2]
++     n.samp = dim(theta)[3]
++     FF = matrix(fit$model$FF, nrow = dim(theta)[1], ncol = TT)
++     draws = matrix(NA_real_, TT, n.samp)
++     for (i in seq_len(n.samp)) draws[, i] = colSums(FF * theta[, , i])
++     list(x = as.numeric(time(fit$y)), map = rowMeans(draws),
++          lb = apply(draws, 1, quantile, 0.025),
++          ub = apply(draws, 1, quantile, 0.975))
++   }
+R> c.summary = function(fit, index, just.theta = FALSE) {
++     theta = fit$samp.theta
++     TT = dim(theta)[2]
++     n.samp = dim(theta)[3]
++     if (just.theta) {
++       draws = matrix(theta[index, , ], nrow = TT, ncol = n.samp)
++     } else {
++       FF = array(fit$model$FF[index, ], c(length(index), TT, n.samp))
++       th = array(theta[index, , ], c(length(index), TT, n.samp))
++       draws = colSums(FF * th)
++     }
++     list(x = as.numeric(time(fit$y)), map = rowMeans(draws),
++          lb = apply(draws, 1, quantile, 0.025),
++          ub = apply(draws, 1, quantile, 0.975))
++   }
+R> add.band = function(z, col) {
++     lines(z$x, z$map, col = col, lwd = 1.6)
++     lines(z$x, z$lb, col = col, lwd = 0.8, lty = 2)
++     lines(z$x, z$ub, col = col, lwd = 0.8, lty = 2)
++   }
+R> q0 = q.summary(M0); qreg = q.summary(MREG); qtf = q.summary(MTF)
+R> c0.seas = c.summary(M0, 2:7)
+R> creg.seas = c.summary(MREG, 2:7)
+R> ctf.seas = c.summary(MTF, 2:7)
+R> creg.direct = c.summary(MREG, 8:9)
+R> ctf.transfer = c.summary(MTF, 8)
+R> x.focus = c(2016, 2020)
+R> par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
++      oma = c(1.8, 0, 0, 0))
+R> plot(as.numeric(time(y.fit)), as.numeric(y.fit), type = "l",
++       col = "grey70", xlim = x.focus, xlab = "",
++       ylim = padded.range(as.numeric(y.fit), q0$lb, q0$ub,
++                           qreg$lb, qreg$ub, qtf$lb, qtf$ub),
++       ylab = "log flow / quantile")
+R> grid(col = "grey90")
+R> add.band(q0, "purple")
+R> add.band(qreg, "steelblue")
+R> add.band(qtf, "forest green")
+R> legend("topleft",
++        legend = c("M0 no covariates", "MREG direct regression",
++                   "MTF transfer function"),
++        col = c("purple", "steelblue", "forest green"),
++        lty = 1, lwd = 1.5, bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=1\textwidth]{ex3zetapsi.png}
+\includegraphics[width=0.9\textwidth]{ex3zetapsi.png}
 \caption{Example 3: Big Tree water flow. MAP estimates and 95\% CrIs of the transfer-function states in \code{MTF}. The top panel shows the accumulated transfer effect \(\zeta_t\). The bottom panels show the instantaneous transfer coefficients \(\psi_{\mathrm{NOI},t}\) and \(\psi_{\mathrm{AMO},t}\), which are static here because their discount factors are set to 1. Horizontal dotted orange lines mark zero.}
 \label{fig:ex3tftheta}
 \end{figure}
@@ -1110,11 +1172,15 @@ seventh elements of the state vector. The middle panel of Figure
 over the same 2016--2020 window.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
-+         ylab = "seasonal components")
-R> compPlot(M0, index = 2:7, add = TRUE)
-R> compPlot(MREG, index = 2:7, add = TRUE, col = "steelblue")
-R> compPlot(MTF, index = 2:7, add = TRUE, col = "forest green")
+R> plot(NA, ylim = padded.range(c0.seas$lb, c0.seas$ub,
++                               creg.seas$lb, creg.seas$ub,
++                               ctf.seas$lb, ctf.seas$ub),
++       xlim = x.focus, ylab = "seasonal contribution", xlab = "")
+R> grid(col = "grey90")
+R> add.band(c0.seas, "purple")
+R> add.band(creg.seas, "steelblue")
+R> add.band(ctf.seas, "forest green")
+R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 \end{CodeInput}
 \end{CodeChunk}
 The lower panel of Figure \ref{fig:ex3quant} displays the climate-index
@@ -1126,11 +1192,16 @@ trend and seasonal baseline, even when the fitted quantiles themselves are
 visually close.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
-+          ylab = "covariate contribution")
-R> compPlot(MREG, index = 8:9, add = TRUE, col = "steelblue")
-R> compPlot(MTF, index = 8, add = TRUE, col = "forest green")
-R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
+R> plot(NA, ylim = padded.range(creg.direct$lb, creg.direct$ub,
++                               ctf.transfer$lb, ctf.transfer$ub, 0),
++       xlim = x.focus, ylab = "covariate contribution", xlab = "")
+R> grid(col = "grey90")
+R> add.band(creg.direct, "steelblue")
+R> add.band(ctf.transfer, "forest green")
+R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
+R> legend("topleft", legend = c("MREG direct", "MTF transfer"),
++        col = c("steelblue", "forest green"), lty = 1, lwd = 1.5,
++        bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1147,22 +1218,33 @@ indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE))
-R> compPlot(MTF, index = 8, col = "forest green",
-+             add = FALSE, just.theta = TRUE)
-R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
+R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE),
++        heights = c(1.05, 1))
+R> zeta = c.summary(MTF, 8, just.theta = TRUE)
+R> psi.noi = c.summary(MTF, 9, just.theta = TRUE)
+R> psi.amo = c.summary(MTF, 10, just.theta = TRUE)
+R> par(mar = c(3.0, 4.2, 2.1, 0.8), oma = c(0, 0, 0, 0))
+R> plot(zeta$x, zeta$map, type = "n", xlab = "",
++       ylab = "component CrIs",
++       ylim = padded.range(zeta$lb, zeta$ub, 0))
+R> grid(col = "grey90")
+R> add.band(zeta, "forest green")
+R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(zeta[t]))
-R> plot(y.train, type = "n", ylim = c(-0.3, 0.1),
-+       xlab = "time", ylab = "component CrIs")
-R> compPlot(MTF, index = 9, col = "steelblue",
-+             add = TRUE, just.theta = TRUE)
-R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
+R> par(mar = c(3.8, 4.2, 2.1, 0.8))
+R> plot(psi.noi$x, psi.noi$map, type = "n",
++       xlab = "time", ylab = "component CrIs",
++       ylim = padded.range(psi.noi$lb, psi.noi$ub, 0))
+R> grid(col = "grey90")
+R> add.band(psi.noi, "steelblue")
+R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(NOI, t)]))
-R> plot(y.train, type = "n", ylim = c(-0.1, 0.3),
-+       xlab = "time", ylab = "component CrIs")
-R> compPlot(MTF, index = 10, col = "darkorange",
-+             add = TRUE, just.theta = TRUE)
-R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
+R> plot(psi.amo$x, psi.amo$map, type = "n",
++       xlab = "time", ylab = "component CrIs",
++       ylim = padded.range(psi.amo$lb, psi.amo$ub, 0))
+R> grid(col = "grey90")
+R> add.band(psi.amo, "darkorange")
+R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
 \end{CodeChunk}
@@ -1221,15 +1303,35 @@ R> for (j in seq_len(n.x)) {
 R> fc.M0 = exdqlmForecast(start.t = length(y.train), k = 18, m1 = M0,
 +                        fFF = F0.future, fGG = G0.future,
 +                        return.draws = TRUE, n.samp = 1000,
-+                        seed = 20265101)
++                        seed = 20265101, plot = FALSE)
 R> fc.MREG = exdqlmForecast(start.t = length(y.train), k = 18, m1 = MREG,
 +                          fFF = FREG.future, fGG = GREG.future,
 +                          return.draws = TRUE, n.samp = 1000,
-+                          seed = 20265301)
++                          seed = 20265301, plot = FALSE)
 R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = 18, m1 = MTF,
 +                         fFF = FTF.future, fGG = GTF.future,
 +                         return.draws = TRUE, n.samp = 1000,
-+                         seed = 20265201)
++                         seed = 20265201, plot = FALSE)
+R> t.all = as.numeric(time(y.fit))
+R> hold.idx = 415:432
+R> plot(y.fit, col = "grey70", xlim = c(2020, max(t.all)),
++       ylim = padded.range(as.numeric(y.fit), fc.M0$ff, fc.MREG$ff,
++                           fc.MTF$ff),
++       ylab = "log flow / forecast quantile", xlab = "time")
+R> grid(col = "grey90")
+R> plot(fc.M0, add = TRUE, cols = c("purple", "plum"))
+R> plot(fc.MREG, add = TRUE, cols = c("steelblue", "lightblue"))
+R> plot(fc.MTF, add = TRUE, cols = c("forest green", "darkseagreen"))
+R> lines(t.all[hold.idx], as.numeric(y.fit)[hold.idx],
++       col = "darkorange", lwd = 1.4)
+R> points(t.all[hold.idx], as.numeric(y.fit)[hold.idx],
++        col = "darkorange", pch = 1, cex = 0.8)
+R> abline(v = t.all[hold.idx[1]], col = "orange", lty = 5, lwd = 1.2)
+R> legend("topleft",
++        legend = c("M0 no covariates", "MREG direct regression",
++                   "MTF transfer", "held-out observations"),
++        col = c("purple", "steelblue", "forest green", "darkorange"),
++        lty = 1, pch = c(NA, NA, NA, 1), bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1263,9 +1365,9 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.168 & 0.471 & \textbf{99.656} \\
- \code{MREG} direct regression & \textbf{0.112} & \textbf{0.348} & 151.044 \\
- \code{MTF} transfer function & 0.155 & 0.366 & 125.274 \\
+ \code{M0} no covariates & 0.168 & 0.470 & \textbf{99.497} \\
+ \code{MREG} direct regression & \textbf{0.112} & \textbf{0.347} & 151.073 \\
+ \code{MTF} transfer function & 0.155 & 0.366 & 125.318 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
@@ -1386,12 +1488,47 @@ For static fits, the helper function \code{exalStaticDiagnostics()} summarizes f
 R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
 +                  X = X.hold, y = y.hold, ref = ref.hold,
 +                  plot = FALSE)
+R> beta.summary = function(fit) {
++     b = as.matrix(fit$samp.beta)[, -1, drop = FALSE]
++     list(mean = colMeans(b),
++          lb = apply(b, 2, quantile, 0.025),
++          ub = apply(b, 2, quantile, 0.975))
++   }
+R> ldvb.sum = lapply(M.ldvb, beta.summary)
+R> mcmc.sum = lapply(M.mcmc, beta.summary)
+R> y.lim = range(beta.true,
++                unlist(lapply(c(ldvb.sum, mcmc.sum), function(z) c(z$lb, z$ub))))
+R> y.lim = y.lim + c(-1, 1) * 0.08 * diff(y.lim)
+R> x.pos = seq_along(beta.true)
+R> par(mfrow = c(1, 3), mar = c(5.2, 4.0, 2.6, 1.0), xpd = NA)
+R> for (i in seq_along(p.grid)) {
++     plot(x.pos, beta.true, type = "n", xaxt = "n", xlab = "",
++          ylab = if (i == 1) "coefficient value" else "",
++          main = sprintf("p0 = %.2f", p.grid[i]), ylim = y.lim)
++     abline(h = 0, col = "grey85", lty = 2)
++     axis(1, at = x.pos, labels = paste0("x", x.pos), las = 2)
++     segments(x.pos - 0.12, ldvb.sum[[i]]$lb,
++              x.pos - 0.12, ldvb.sum[[i]]$ub,
++              col = "orange", lwd = 2)
++     points(x.pos - 0.12, ldvb.sum[[i]]$mean, pch = 16, col = "orange")
++     segments(x.pos + 0.12, mcmc.sum[[i]]$lb,
++              x.pos + 0.12, mcmc.sum[[i]]$ub,
++              col = "steelblue", lwd = 2)
++     points(x.pos + 0.12, mcmc.sum[[i]]$mean, pch = 16,
++            col = "steelblue")
++     points(x.pos, beta.true, pch = 18, cex = 1.1)
++     if (i == 1) legend("topleft",
++          legend = c("truth", "LDVB 95% interval", "MCMC 95% interval"),
++          col = c("black", "orange", "steelblue"),
++          pch = c(18, 16, 16), lty = c(0, 1, 1),
++          lwd = c(0, 2, 2), bty = "n", cex = 0.9)
++   }
 \end{CodeInput}
 \end{CodeChunk}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=1\textwidth]{ex4static.png}
+\includegraphics[width=0.95\textwidth]{ex4static.png}
 \caption{Example 4: sparse static exAL regression under the correlated Gaussian benchmark with the \code{rhs\_ns} prior. Black diamonds denote the true non-intercept coefficients, orange intervals denote LDVB 95\% posterior intervals, and blue intervals denote MCMC 95\% posterior intervals. Panels correspond to \(p_0 = 0.05, 0.25,\) and \(0.50\).}
 \label{fig:ex4static}
 \end{figure}
