@@ -909,7 +909,7 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  & MCMC & 325.53 & 0.164 & \textbf{5.095} & \textbf{2186.3} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{fdb74dd}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{a9e6a81}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1090,7 +1090,9 @@ much of the broad annual structure. The component panels clarify the model
 differences: the middle panel shows that the seasonal contribution is similar
 across models, while the lower panel separates the contemporaneous climate-index
 contribution in \code{MREG} from the accumulated transfer contribution in
-\code{MTF}.
+\code{MTF}. The plotting helpers are first called with \code{plot = FALSE} to
+return the same posterior summaries used in the figure; the subsequent calls
+with \code{add = TRUE} draw the three model fits on common axes.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1100,55 +1102,27 @@ R> padded.range = function(..., pad = 0.08) {
 +     r = range(z)
 +     r + c(-1, 1) * diff(r) * pad
 +   }
-R> q.summary = function(fit) {
-+     theta = fit$samp.theta
-+     TT = dim(theta)[2]
-+     n.samp = dim(theta)[3]
-+     FF = matrix(fit$model$FF, nrow = dim(theta)[1], ncol = TT)
-+     draws = matrix(NA_real_, TT, n.samp)
-+     for (i in seq_len(n.samp)) draws[, i] = colSums(FF * theta[, , i])
-+     list(x = as.numeric(time(fit$y)), map = rowMeans(draws),
-+          lb = apply(draws, 1, quantile, 0.025),
-+          ub = apply(draws, 1, quantile, 0.975))
-+   }
-R> c.summary = function(fit, index, just.theta = FALSE) {
-+     theta = fit$samp.theta
-+     TT = dim(theta)[2]
-+     n.samp = dim(theta)[3]
-+     if (just.theta) {
-+       draws = matrix(theta[index, , ], nrow = TT, ncol = n.samp)
-+     } else {
-+       FF = array(fit$model$FF[index, ], c(length(index), TT, n.samp))
-+       th = array(theta[index, , ], c(length(index), TT, n.samp))
-+       draws = colSums(FF * th)
-+     }
-+     list(x = as.numeric(time(fit$y)), map = rowMeans(draws),
-+          lb = apply(draws, 1, quantile, 0.025),
-+          ub = apply(draws, 1, quantile, 0.975))
-+   }
-R> add.band = function(z, col) {
-+     lines(z$x, z$map, col = col, lwd = 1.6)
-+     lines(z$x, z$lb, col = col, lwd = 0.8, lty = 2)
-+     lines(z$x, z$ub, col = col, lwd = 0.8, lty = 2)
-+   }
-R> q0 = q.summary(M0); qreg = q.summary(MREG); qtf = q.summary(MTF)
-R> c0.seas = c.summary(M0, 2:7)
-R> creg.seas = c.summary(MREG, 2:7)
-R> ctf.seas = c.summary(MTF, 2:7)
-R> creg.direct = c.summary(MREG, 8:9)
-R> ctf.transfer = c.summary(MTF, 8)
+R> q0 = exdqlmPlot(M0, plot = FALSE)
+R> qreg = exdqlmPlot(MREG, plot = FALSE)
+R> qtf = exdqlmPlot(MTF, plot = FALSE)
+R> c0.seas = compPlot(M0, index = 2:7, plot = FALSE)
+R> creg.seas = compPlot(MREG, index = 2:7, plot = FALSE)
+R> ctf.seas = compPlot(MTF, index = 2:7, plot = FALSE)
+R> creg.direct = compPlot(MREG, index = 8:9, plot = FALSE)
+R> ctf.transfer = compPlot(MTF, index = 8, plot = FALSE)
 R> x.focus = c(2016, 2020)
 R> par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
 +      oma = c(1.8, 0, 0, 0))
 R> plot(as.numeric(time(y.fit)), as.numeric(y.fit), type = "l",
 +       col = "grey70", xlim = x.focus, xlab = "",
-+       ylim = padded.range(as.numeric(y.fit), q0$lb, q0$ub,
-+                           qreg$lb, qreg$ub, qtf$lb, qtf$ub),
++       ylim = padded.range(as.numeric(y.fit), q0$lb.quant, q0$ub.quant,
++                           qreg$lb.quant, qreg$ub.quant,
++                           qtf$lb.quant, qtf$ub.quant),
 +       ylab = "log flow / quantile")
 R> grid(col = "grey90")
-R> add.band(q0, "purple")
-R> add.band(qreg, "steelblue")
-R> add.band(qtf, "forest green")
+R> exdqlmPlot(M0, add = TRUE, col = "purple")
+R> exdqlmPlot(MREG, add = TRUE, col = "steelblue")
+R> exdqlmPlot(MTF, add = TRUE, col = "forest green")
 R> legend("topleft",
 +        legend = c("M0 no covariates", "MREG direct regression",
 +                   "MTF transfer function"),
@@ -1172,14 +1146,14 @@ seventh elements of the state vector. The middle panel of Figure
 over the same 2016--2020 window.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = padded.range(c0.seas$lb, c0.seas$ub,
-+                               creg.seas$lb, creg.seas$ub,
-+                               ctf.seas$lb, ctf.seas$ub),
+R> plot(NA, ylim = padded.range(c0.seas$lb.comp, c0.seas$ub.comp,
++                               creg.seas$lb.comp, creg.seas$ub.comp,
++                               ctf.seas$lb.comp, ctf.seas$ub.comp),
 +       xlim = x.focus, ylab = "seasonal contribution", xlab = "")
 R> grid(col = "grey90")
-R> add.band(c0.seas, "purple")
-R> add.band(creg.seas, "steelblue")
-R> add.band(ctf.seas, "forest green")
+R> compPlot(M0, index = 2:7, add = TRUE, col = "purple")
+R> compPlot(MREG, index = 2:7, add = TRUE, col = "steelblue")
+R> compPlot(MTF, index = 2:7, add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1192,12 +1166,12 @@ trend and seasonal baseline, even when the fitted quantiles themselves are
 visually close.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = padded.range(creg.direct$lb, creg.direct$ub,
-+                               ctf.transfer$lb, ctf.transfer$ub, 0),
+R> plot(NA, ylim = padded.range(creg.direct$lb.comp, creg.direct$ub.comp,
++                               ctf.transfer$lb.comp, ctf.transfer$ub.comp, 0),
 +       xlim = x.focus, ylab = "covariate contribution", xlab = "")
 R> grid(col = "grey90")
-R> add.band(creg.direct, "steelblue")
-R> add.band(ctf.transfer, "forest green")
+R> compPlot(MREG, index = 8:9, add = TRUE, col = "steelblue")
+R> compPlot(MTF, index = 8, add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> legend("topleft", legend = c("MREG direct", "MTF transfer"),
 +        col = c("steelblue", "forest green"), lty = 1, lwd = 1.5,
@@ -1220,30 +1194,33 @@ indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
 \begin{CodeInput}
 R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE),
 +        heights = c(1.05, 1))
-R> zeta = c.summary(MTF, 8, just.theta = TRUE)
-R> psi.noi = c.summary(MTF, 9, just.theta = TRUE)
-R> psi.amo = c.summary(MTF, 10, just.theta = TRUE)
+R> zeta = compPlot(MTF, index = 8, just.theta = TRUE, plot = FALSE)
+R> psi.noi = compPlot(MTF, index = 9, just.theta = TRUE, plot = FALSE)
+R> psi.amo = compPlot(MTF, index = 10, just.theta = TRUE, plot = FALSE)
 R> par(mar = c(3.0, 4.2, 2.1, 0.8), oma = c(0, 0, 0, 0))
-R> plot(zeta$x, zeta$map, type = "n", xlab = "",
+R> plot(zeta$x, zeta$map.comp, type = "n", xlab = "",
 +       ylab = "component CrIs",
-+       ylim = padded.range(zeta$lb, zeta$ub, 0))
++       ylim = padded.range(zeta$lb.comp, zeta$ub.comp, 0))
 R> grid(col = "grey90")
-R> add.band(zeta, "forest green")
+R> compPlot(MTF, index = 8, just.theta = TRUE, add = TRUE,
++          col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(zeta[t]))
 R> par(mar = c(3.8, 4.2, 2.1, 0.8))
-R> plot(psi.noi$x, psi.noi$map, type = "n",
+R> plot(psi.noi$x, psi.noi$map.comp, type = "n",
 +       xlab = "time", ylab = "component CrIs",
-+       ylim = padded.range(psi.noi$lb, psi.noi$ub, 0))
++       ylim = padded.range(psi.noi$lb.comp, psi.noi$ub.comp, 0))
 R> grid(col = "grey90")
-R> add.band(psi.noi, "steelblue")
+R> compPlot(MTF, index = 9, just.theta = TRUE, add = TRUE,
++          col = "steelblue")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(NOI, t)]))
-R> plot(psi.amo$x, psi.amo$map, type = "n",
+R> plot(psi.amo$x, psi.amo$map.comp, type = "n",
 +       xlab = "time", ylab = "component CrIs",
-+       ylim = padded.range(psi.amo$lb, psi.amo$ub, 0))
++       ylim = padded.range(psi.amo$lb.comp, psi.amo$ub.comp, 0))
 R> grid(col = "grey90")
-R> add.band(psi.amo, "darkorange")
+R> compPlot(MTF, index = 10, just.theta = TRUE, add = TRUE,
++          col = "darkorange")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
@@ -1365,9 +1342,9 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.168 & 0.470 & \textbf{99.497} \\
- \code{MREG} direct regression & \textbf{0.112} & \textbf{0.347} & 151.073 \\
- \code{MTF} transfer function & 0.155 & 0.366 & 125.318 \\
+ \code{M0} no covariates & 0.168 & 0.470 & \textbf{99.365} \\
+ \code{MREG} direct regression & \textbf{0.112} & \textbf{0.348} & 151.984 \\
+ \code{MTF} transfer function & 0.155 & 0.365 & 125.399 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from

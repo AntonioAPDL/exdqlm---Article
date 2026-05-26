@@ -64,12 +64,6 @@ if (!need_ex3) {
     r + c(-1, 1) * diff(r) * pad
   }
 
-  plot_component_with_band <- function(csum, col, lwd = 1.6, lty = 1) {
-    graphics::lines(csum$x, csum$map, col = col, lwd = lwd, lty = lty)
-    graphics::lines(csum$x, csum$lb, col = col, lwd = 0.8, lty = 2)
-    graphics::lines(csum$x, csum$ub, col = col, lwd = 0.8, lty = 2)
-  }
-
   climate_psi_title <- function(label) {
     as.expression(substitute(psi[list(LABEL, t)], list(LABEL = label)))
   }
@@ -849,14 +843,14 @@ if (!need_ex3) {
     xlim_fore <- c(max(min(tx_full), forecast_plot_start), max(tx_full))
 
     if (need_ex3quantcomps) {
-      q0 <- quantile_summary_from_fit(M0, cr.percent = 0.95)
-      qreg <- quantile_summary_from_fit(MREG, cr.percent = 0.95)
-      qtf <- quantile_summary_from_fit(MTF, cr.percent = 0.95)
-      c0_seas <- component_summary_from_fit(M0, index = seasonal_idx)
-      creg_seas <- component_summary_from_fit(MREG, index = seasonal_idx)
-      ctf_seas <- component_summary_from_fit(MTF, index = seasonal_idx)
-      creg_direct <- component_summary_from_fit(MREG, index = direct_reg_idx)
-      ctf_transfer <- component_summary_from_fit(MTF, index = transfer_zeta_idx)
+      q0 <- exdqlm::exdqlmPlot(M0, plot = FALSE)
+      qreg <- exdqlm::exdqlmPlot(MREG, plot = FALSE)
+      qtf <- exdqlm::exdqlmPlot(MTF, plot = FALSE)
+      c0_seas <- exdqlm::compPlot(M0, index = seasonal_idx, plot = FALSE)
+      creg_seas <- exdqlm::compPlot(MREG, index = seasonal_idx, plot = FALSE)
+      ctf_seas <- exdqlm::compPlot(MTF, index = seasonal_idx, plot = FALSE)
+      creg_direct <- exdqlm::compPlot(MREG, index = direct_reg_idx, plot = FALSE)
+      ctf_transfer <- exdqlm::compPlot(MTF, index = transfer_zeta_idx, plot = FALSE)
 
       save_png_plot("ex3quantcomps.png", {
         old_par <- graphics::par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9), oma = c(1.8, 0, 0, 0))
@@ -864,35 +858,35 @@ if (!need_ex3) {
 
         graphics::plot(
           tx_full, y_log, type = "l", col = "grey70",
-          ylim = padded_range(y_log, q0$lb, q0$ub, qreg$lb, qreg$ub, qtf$lb, qtf$ub),
+          ylim = padded_range(y_log, q0$lb.quant, q0$ub.quant, qreg$lb.quant, qreg$ub.quant, qtf$lb.quant, qtf$ub.quant),
           xlim = xlim_mid, xlab = "", ylab = "log flow / quantile"
         )
         graphics::grid(col = "grey90")
-        plot_quantile_summary(q0, col = ex3_cols$m0, add = TRUE)
-        plot_quantile_summary(qreg, col = ex3_cols$mreg, add = TRUE)
-        plot_quantile_summary(qtf, col = ex3_cols$mtf, add = TRUE)
+        exdqlm::exdqlmPlot(M0, add = TRUE, col = ex3_cols$m0)
+        exdqlm::exdqlmPlot(MREG, add = TRUE, col = ex3_cols$mreg)
+        exdqlm::exdqlmPlot(MTF, add = TRUE, col = ex3_cols$mtf)
         graphics::legend(
           "topleft", legend = c("M0 no covariates", "MREG direct regression", "MTF transfer function"),
           col = c(ex3_cols$m0, ex3_cols$mreg, ex3_cols$mtf), lty = 1, lwd = 1.5, bty = "n"
         )
 
         graphics::plot(
-          NA, ylim = padded_range(c0_seas$lb, c0_seas$ub, creg_seas$lb, creg_seas$ub, ctf_seas$lb, ctf_seas$ub),
+          NA, ylim = padded_range(c0_seas$lb.comp, c0_seas$ub.comp, creg_seas$lb.comp, creg_seas$ub.comp, ctf_seas$lb.comp, ctf_seas$ub.comp),
           xlim = xlim_mid, ylab = "seasonal contribution", xlab = ""
         )
         graphics::grid(col = "grey90")
-        plot_component_with_band(c0_seas, col = ex3_cols$m0)
-        plot_component_with_band(creg_seas, col = ex3_cols$mreg)
-        plot_component_with_band(ctf_seas, col = ex3_cols$mtf)
+        exdqlm::compPlot(M0, index = seasonal_idx, add = TRUE, col = ex3_cols$m0)
+        exdqlm::compPlot(MREG, index = seasonal_idx, add = TRUE, col = ex3_cols$mreg)
+        exdqlm::compPlot(MTF, index = seasonal_idx, add = TRUE, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
 
         graphics::plot(
-          NA, ylim = padded_range(creg_direct$lb, creg_direct$ub, ctf_transfer$lb, ctf_transfer$ub, 0),
+          NA, ylim = padded_range(creg_direct$lb.comp, creg_direct$ub.comp, ctf_transfer$lb.comp, ctf_transfer$ub.comp, 0),
           xlim = xlim_mid, ylab = "covariate contribution", xlab = ""
         )
         graphics::grid(col = "grey90")
-        plot_component_with_band(creg_direct, col = ex3_cols$mreg)
-        plot_component_with_band(ctf_transfer, col = ex3_cols$mtf)
+        exdqlm::compPlot(MREG, index = direct_reg_idx, add = TRUE, col = ex3_cols$mreg)
+        exdqlm::compPlot(MTF, index = transfer_zeta_idx, add = TRUE, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
         graphics::legend(
           "topleft", legend = c("MREG direct", "MTF transfer"),
@@ -921,18 +915,27 @@ if (!need_ex3) {
           graphics::par(mfrow = c(1, k_cov + 1L))
         }
         graphics::par(mar = c(3.0, 4.2, 2.1, 0.8), oma = c(0, 0, 0, 0))
-        zeta <- component_summary_from_fit(MTF, index = transfer_zeta_idx, just.theta = TRUE)
-        plot_component_summary(zeta, col = ex3_cols$mtf, add = FALSE, xlab = "")
+        zeta <- exdqlm::compPlot(MTF, index = transfer_zeta_idx, just.theta = TRUE, plot = FALSE)
+        graphics::plot(
+          zeta$x, zeta$map.comp, type = "n", xlab = "",
+          ylab = "component CrIs",
+          ylim = padded_range(zeta$lb.comp, zeta$ub.comp, 0)
+        )
         graphics::grid(col = "grey90")
+        exdqlm::compPlot(MTF, index = transfer_zeta_idx, just.theta = TRUE, add = TRUE, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
         graphics::title(expression(zeta[t]))
 
         graphics::par(mar = c(3.8, 4.2, 2.1, 0.8))
         for (j in seq_len(k_cov)) {
-          psi <- component_summary_from_fit(MTF, index = transfer_psi_idx[[j]], just.theta = TRUE)
-          psi_ylim <- padded_range(psi$lb, psi$ub, 0)
-          plot_component_summary(psi, col = index_cols[[j]], add = FALSE, ylim = psi_ylim)
+          psi <- exdqlm::compPlot(MTF, index = transfer_psi_idx[[j]], just.theta = TRUE, plot = FALSE)
+          psi_ylim <- padded_range(psi$lb.comp, psi$ub.comp, 0)
+          graphics::plot(
+            psi$x, psi$map.comp, type = "n", xlab = "time",
+            ylab = "component CrIs", ylim = psi_ylim
+          )
           graphics::grid(col = "grey90")
+          exdqlm::compPlot(MTF, index = transfer_psi_idx[[j]], just.theta = TRUE, add = TRUE, col = index_cols[[j]])
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
           graphics::title(climate_psi_title(selected_labels[[j]]))
         }

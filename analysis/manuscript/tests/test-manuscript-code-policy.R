@@ -19,7 +19,13 @@ testthat::test_that("manuscript code chunk map covers every displayed chunk", {
 
   chunk_ids <- vapply(chunks, `[[`, character(1), "chunk_id")
   testthat::expect_setequal(map$chunk_id, chunk_ids)
-  testthat::expect_true(all(map$display_scope %in% c("exact", "excerpt", "exact_with_analysis_helpers")))
+  allowed_scopes <- c(
+    "exact",
+    "excerpt",
+    "exact_with_analysis_helpers",
+    "exact_with_package_plot_helpers"
+  )
+  testthat::expect_true(all(map$display_scope %in% allowed_scopes))
   testthat::expect_false(any(!nzchar(map$example)))
   testthat::expect_false(any(!nzchar(map$role)))
   testthat::expect_false(any(!nzchar(map$notes)))
