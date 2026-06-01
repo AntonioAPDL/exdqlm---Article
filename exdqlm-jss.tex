@@ -500,7 +500,7 @@ R> library("exdqlm")
 
 In this example, we consider the Lake Huron time series from the package \pkg{datasets}. The data are annual measurements of the level (ft) of Lake Huron from 1875 to 1972, shown in Figure \ref{fig:ex1quants}. This example shows how to build a basic state-space structure, specify a prior on $\gamma$, run the MCMC algorithm, and plot estimated quantiles and forecast distributions.
 
-To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space structure and prior used to estimate the quantiles (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function.
+To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space structure and prior used to estimate the quantiles (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function. The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero. 
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -538,7 +538,7 @@ $GG
 \end{CodeOutput}
 \end{CodeChunk}
 
-The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero. To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix $\mat{W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. The prior centers for \(\gamma\) are quantile-specific: they are centered at zero for the median and shifted in opposite directions for the upper and lower tails to provide stable tail-specific initialization within the admissible support. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown above (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}.
+To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix $\mat{W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. The prior centers for \(\gamma\) are quantile-specific: they are centered at zero for the median and shifted in opposite directions for the upper and lower tails to provide stable tail-specific initialization within the admissible support. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown below (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}.
 The progress output also reports which computational backend is being used. In the
 current implementation, some operations, including dynamic MCMC updates and sampling
 from latent-variable full conditionals, can be routed through either \proglang{R} or
@@ -644,9 +644,11 @@ R> fGG =  model$GG
 
 We plot the time series data in a narrower range for closer examination and add the forecast estimates using \code{exdqlmForecast()} with argument \code{add = TRUE}. Notice we start the forecast at the last time index of the data, i.e. \code{start.t = length(LakeHuron)}.
 
+\textcolor{red}{Updated chunk -- this just changes the top right plot in figure 2 to have ylim = c(575, 582). The plot will need to be updated too. }
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(LakeHuron,  xlim = c(1952, 1980), ylim = c(575, 581),
+R> plot(LakeHuron,  xlim = c(1952, 1980), ylim = c(575, 582),
 +        col = "dark grey", main = "(b) Forecasted quantiles",
 +           ylab = "forecast 95% CrIs")
 R> fc95 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M95,
@@ -685,50 +687,41 @@ R> syn.fore = quantileSynthesis(
 \end{CodeInput}
 \end{CodeChunk}
 
-The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. The first synthesis panel shows the observed-period synthesized predictive interval, and the second panel uses the same observed-period synthesis near the forecast origin, overlays the forecast synthesis, and shades the one-step bridge from the final observed synthesis interval to the first forecast synthesis interval. The replication script uses the same plotting construction.
+The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. The first synthesis panel shows the observed-period synthesized predictive interval, and the second panel uses the same observed-period synthesis near the forecast origin, overlays the forecast synthesis, and shades the one-step bridge from the final observed synthesis interval to the first forecast synthesis interval. 
+
+\textcolor{red}{Updated chunk -- this one actually still wasn't working for me before. idk if you want to check it. I had to change "y = as.numeric(LakeHuron)" to just "y = LakeHuron" for the ts to show up in the plots. }
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> synth.obs.col = adjustcolor("#F7D6DE", alpha.f = 0.40)
 R> synth.fore.col = adjustcolor("#D98A9B", alpha.f = 0.38)
-R> time.obs = as.numeric(time(LakeHuron))
-R> t.end = tail(time.obs, 1)
-R> dt = 1 / frequency(LakeHuron)
-R> t.fore = seq(from = t.end + dt, by = dt, length.out = 8)
-R> idx.obs = which(time.obs >= 1952)
-R> idx.zoom = which(time.obs >= 1952)
-R> ylim.obs = range(LakeHuron[idx.obs], syn.obs$summary$q025[idx.obs],
-+                  syn.obs$summary$q975[idx.obs])
-R> ylim.fore = range(LakeHuron[idx.zoom], syn.obs$summary$q025[idx.zoom],
-+                   syn.obs$summary$q975[idx.zoom],
-+                   syn.fore$summary$q025, syn.fore$summary$q975)
-R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
-+       xlim = c(1952, t.end), ylim = ylim.obs,
-+       ylab = "predictive synthesis",
-+       main = "(c) Observed-period synthesis",
-+       show.median = FALSE, band.col = synth.obs.col,
-+       y.col = adjustcolor("grey30", alpha.f = 0.62))
+R> plot(syn.obs, y = LakeHuron, time = as.numeric(time(LakeHuron)),
++         xlim = c(1880, 1972), ylim = c(575.75,582.25),
++         ylab = "predictive synthesis",
++         main = "(c) Observed-period synthesis",
++         show.median = FALSE, band.col = synth.obs.col,
++         y.col = adjustcolor("grey30", alpha.f = 0.62))
 R> legend("bottomleft",
-+        legend = "Synthesized posterior predictive interval (95%)",
-+        fill = synth.obs.col, border = NA, bty = "n", cex = 0.68)
-R> plot(syn.obs, y = as.numeric(LakeHuron), time = time.obs,
-+       xlim = c(1952, max(t.fore)), ylim = ylim.fore,
-+       ylab = "predictive synthesis",
-+       main = "(d) Forecast synthesis",
-+       show.median = FALSE, band.col = synth.obs.col,
-+       y.col = adjustcolor("grey30", alpha.f = 0.62))
-R> polygon(c(t.end, t.fore[1], t.fore[1], t.end),
-+          c(tail(syn.obs$summary$q025, 1), syn.fore$summary$q025[1],
-+            syn.fore$summary$q975[1], tail(syn.obs$summary$q975, 1)),
-+          col = synth.fore.col, border = NA)
-R> plot(syn.fore, time = t.fore, add = TRUE,
-+       show.median = FALSE, band.col = synth.fore.col)
-R> abline(v = t.end, lty = 3)
++           legend = "Synthesized posterior predictive interval (95%)",
++           fill = synth.obs.col, border = NA, bty = "n", cex = 0.68)
+R> plot(syn.obs, y = LakeHuron, time = as.numeric(time(LakeHuron)),
++         xlim = c(1952, 1980), ylim = c(575.75,581),
++         ylab = "predictive synthesis",
++         main = "(d) Forecast synthesis",
++         show.median = FALSE, band.col = synth.obs.col,
++         y.col = adjustcolor("grey30", alpha.f = 0.62))
+R> polygon(c(1972, 1973, 1973, 1972),
++            c(tail(syn.obs$summary$q025, 1), syn.fore$summary$q025[1],
++                syn.fore$summary$q975[1], tail(syn.obs$summary$q975, 1)),
++            col = synth.fore.col, border = NA)
+R> plot(syn.fore, time = 1973:1980, add = TRUE,
++         show.median = FALSE, band.col = synth.fore.col)
+R> abline(v = 1972, lty = 3)
 R> legend("bottomleft",
-+        legend = c("Observed-period synthesis (95%)",
-+                   "Forecast synthesis (95%)"),
-+        fill = c(synth.obs.col, synth.fore.col), border = NA,
-+        bty = "n", cex = 0.66)
++           legend = c("Observed-period synthesis (95%)",
++                        "Forecast synthesis (95%)"),
++           fill = c(synth.obs.col, synth.fore.col), border = NA,
++           bty = "n", cex = 0.66)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -748,7 +741,7 @@ R> dlm.trend.comp = dlm::dlmModPoly(1, m0 = 50, C0 = 2500)
 R> trend.comp = as.exdqlm(dlm.trend.comp)
 \end{CodeInput}
 \end{CodeChunk}
-The initial level prior is centered at 50 sunspots, a rounded count-scale value chosen before fitting, with prior standard deviation 50 to keep the level weakly informative on the observed count scale. Next, we construct the seasonal component with our \code{seasMod} function. Sunspot cycles are commonly modeled with an approximately 11-year period; we include the first four Fourier harmonics in the component.
+The initial level prior is centered at 50 sunspots, a rounded count-scale value chosen before fitting, with prior standard deviation 50 to keep the level weakly informative on the observed count scale. Next, we construct the seasonal component with our \code{seasMod()} function. Sunspot cycles are commonly modeled with an approximately 11-year period; we include the first four Fourier harmonics in the component.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> seas.comp = seasMod(p = 11, h = 1:4, C0 = 10 * diag(8))
@@ -788,7 +781,7 @@ We will apply discount factors by component, i.e. a discount factor of $0.9$ for
 \label{fig:ex2quant}
 \end{figure}
 
-We call the function \code{exdqlmLDVB()} to obtain the LDVB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. In this example we set \code{n.samp = 3000}.
+We call the function \code{exdqlmLDVB()} to obtain the LDVB approximations. We use the routine with argument \code{dqlm.ind = TRUE} to estimate the DQLM, as well as with the default settings to estimate the exDQLM. In this example we set \code{n.samp = 3000} and the output is suppressed using input \code{verbose = FALSE}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -803,12 +796,15 @@ R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 \end{CodeInput}
 \end{CodeChunk}
 
-The output is suppressed using input \code{verbose = FALSE}. The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded backend profile. These runtimes are fit elapsed times stored in the returned fit objects; they are intended for within-profile comparison and should not be interpreted as machine-independent timing constants.
+The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded backend profile. These runtimes are fit elapsed times stored in the returned fit objects; they are intended for within-profile comparison and should not be interpreted as machine-independent timing constants.
 
 We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1780 to 1830.
 % fig:ex1quant w850 h275
 % par(mfcol=c(1,3))
 % plot(sunspot.year, col="dark grey")
+
+\textcolor{red}{Updated chunk:}
+
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(sunspot.year, xlim = c(1780, 1830), col = "dark grey",
@@ -817,6 +813,7 @@ R> exdqlmPlot(M1, add = TRUE, col = "red")
 R> exdqlmPlot(M2, add = TRUE, col = "blue")
 R> legend("topleft", lty = 1, bty = "n", col = c("red", "blue"),
 +        legend = c("DQLM", "exDQLM"))
+R> title("LDVB fit for p0 = 0.85")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -829,22 +826,42 @@ R> legend("topleft", lty = 1, bty = "n", col = c("red", "blue"),
 
 To examine whether the added flexibility of the exDQLM is supported by the fitted approximation, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}. The approximate posterior mass lies away from zero, supporting the additional skewness flexibility for this upper-quantile fit.
 
+\textcolor{red}{Updated chunk:}
+
 \begin{CodeChunk}
 \begin{CodeInput}
 R> hist(M2$samp.gamma, xlab = expression(gamma), main = "",
 +        col = adjustcolor("#4C72B0", alpha.f = 0.22),
 +        border = "#4C72B0")
 R> abline(v = median(M2$samp.gamma), col = "#4C72B0", lwd = 2)
+R> title("exDQLM posterior draws of gamma (p0 = 0.85)")
 \end{CodeInput}
 \end{CodeChunk}
 
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. The KL values are computed by the deterministic package default, so repeated diagnostic calls give the same KL and flipped-KL values for the same fitted object. Smaller values indicate better fit for the KL, CRPS, and PPLC criteria; for these LDVB fits, the reported diagnostics favor the exDQLM, while the DQLM is faster.
-% fig:ex2checks
+To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. 
+
 \begin{CodeChunk}
 \begin{CodeInput}
 R> par(mfrow = c(2, 3))
 R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red", "blue"))
 \end{CodeInput}
+\end{CodeChunk}
+
+We can also apply the \code{print()} generic to the resulting \code{exdqlmDiagnostic} object. Smaller values indicate better fit for the KL, CRPS, and PPLC criteria; for these LDVB fits, the reported diagnostics favor the exDQLM, while the DQLM is faster.
+
+\textcolor{red}{New chunk -- can you update the output so it matches your system \& the results in the table??}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> print(diagM1M2)
+\end{CodeInput}
+\begin{CodeOutput}
+   Diagnostic        M1        M2
+           KL    0.1329    0.1197
+ KL (flipped)    0.0625    0.0528
+         CRPS    8.5517    6.2499
+         pplc 3851.7358 2329.1243
+ run-time (s)    6.1600   11.7210
+\end{CodeOutput}
 \end{CodeChunk}
 
 The function \code{exdqlmDiagnostics()} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the LDVB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. The selected discount factors are the row with the smallest CRPS.
@@ -999,9 +1016,7 @@ R> model = trend.comp + seas.comp
 The initial log-flow level prior is centered at \(\log(50)\), corresponding to
 a fixed 50 cubic feet per second reference value, with prior standard deviation
 1 on the log scale. This gives a broad domain-scale prior without using the
-training response to center the state prior.
-
-The standardized climate coefficients are assigned zero-centered normal priors
+training response to center the state prior. The standardized climate coefficients are assigned zero-centered normal priors
 with variance 1. On the log-flow scale this is intentionally weakly informative:
 it allows either climate index to shift the lower-tail quantile materially while
 still regularizing the example around no climate effect.
@@ -1084,43 +1099,18 @@ R> MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
 \end{CodeChunk}
 
 The upper panel of Figure \ref{fig:ex3quant} compares the fitted \(0.15\)
-quantiles from the three training fits over 2016--2020. The fitted lower-tail
-quantile paths are similar because the trend and seasonal components explain
-much of the broad annual structure. The component panels clarify the model
-differences: the middle panel shows that the seasonal contribution is similar
-across models, while the lower panel separates the contemporaneous climate-index
-contribution in \code{MREG} from the accumulated transfer contribution in
-\code{MTF}. The plotting helpers are first called with \code{plot = FALSE} to
-return the same posterior summaries used in the figure; the subsequent calls
-with \code{add = TRUE} draw the three model fits on common axes.
+quantiles from the three training fits over 2016--2020. We first plot the data, then call \code{exdqlmPlot()} with \code{add = TRUE} to draw the three model fits on common axes.
+
+\textcolor{red}{Updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> padded.range = function(..., pad = 0.08) {
-+     z = unlist(list(...), use.names = FALSE)
-+     z = z[is.finite(z)]
-+     r = range(z)
-+     r + c(-1, 1) * diff(r) * pad
-+   }
-R> q0 = exdqlmPlot(M0, plot = FALSE)
-R> qreg = exdqlmPlot(MREG, plot = FALSE)
-R> qtf = exdqlmPlot(MTF, plot = FALSE)
-R> c0.seas = compPlot(M0, index = 2:7, plot = FALSE)
-R> creg.seas = compPlot(MREG, index = 2:7, plot = FALSE)
-R> ctf.seas = compPlot(MTF, index = 2:7, plot = FALSE)
-R> creg.direct = compPlot(MREG, index = 8:9, plot = FALSE)
-R> ctf.transfer = compPlot(MTF, index = 8, plot = FALSE)
-R> x.focus = c(2016, 2020)
 R> par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
-+      oma = c(1.8, 0, 0, 0))
-R> plot(as.numeric(time(y.fit)), as.numeric(y.fit), type = "l",
-+       col = "grey70", xlim = x.focus, xlab = "",
-+       ylim = padded.range(as.numeric(y.fit), q0$lb.quant, q0$ub.quant,
-+                           qreg$lb.quant, qreg$ub.quant,
-+                           qtf$lb.quant, qtf$ub.quant),
-+       ylab = "log flow / quantile")
++     oma = c(1.8, 0, 0, 0))
+R> plot(y.train, col = "grey", ylim = c(1, 8), xlim = c(2016, 2020),
++         ylab = "log flow / quantile")
 R> grid(col = "grey90")
-R> exdqlmPlot(M0, add = TRUE, col = "purple")
+R> exdqlmPlot(M0, add = TRUE)
 R> exdqlmPlot(MREG, add = TRUE, col = "steelblue")
 R> exdqlmPlot(MTF, add = TRUE, col = "forest green")
 R> legend("topleft",
@@ -1129,7 +1119,7 @@ R> legend("topleft",
 +        col = c("purple", "steelblue", "forest green"),
 +        lty = 1, lwd = 1.5, bty = "n")
 \end{CodeInput}
-\end{CodeChunk}
+\end{CodeChunk}       
 
 \begin{figure}[!t]
 \centering
@@ -1138,20 +1128,26 @@ R> legend("topleft",
 \label{fig:ex3tftheta}
 \end{figure}
 
-The package function \code{compPlot()} displays selected model components. We
+The fitted lower-tail quantile paths are similar because the trend and seasonal components explain
+much of the broad annual structure. The component panels of Figure \ref{fig:ex3quant} clarify the model
+differences: the middle panel shows that the seasonal contribution is similar
+across models, while the lower panel separates the contemporaneous climate-index
+contribution in \code{MREG} from the accumulated transfer contribution in
+\code{MTF}. The package function \code{compPlot()} is used to display these selected model components. We
 begin with the combined seasonal contribution. Because the seasonal block
 contains three harmonics, this contribution is formed from the second through
 seventh elements of the state vector. The middle panel of Figure
 \ref{fig:ex3quant} shows the resulting seasonal estimates for the three models
 over the same 2016--2020 window.
+
+\textcolor{red}{Updated chunk:}
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = padded.range(c0.seas$lb.comp, c0.seas$ub.comp,
-+                               creg.seas$lb.comp, creg.seas$ub.comp,
-+                               ctf.seas$lb.comp, ctf.seas$ub.comp),
-+       xlim = x.focus, ylab = "seasonal contribution", xlab = "")
+R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
++      ylab = "seasonal components")
 R> grid(col = "grey90")
-R> compPlot(M0, index = 2:7, add = TRUE, col = "purple")
+R> compPlot(M0, index = 2:7, add = TRUE)
 R> compPlot(MREG, index = 2:7, add = TRUE, col = "steelblue")
 R> compPlot(MTF, index = 2:7, add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
@@ -1164,11 +1160,13 @@ contributions induced by the standardized NOI and AMO covariates. For
 separates contemporaneous and lagged climate-index components from the common
 trend and seasonal baseline, even when the fitted quantiles themselves are
 visually close.
+
+\textcolor{red}{Updated chunk:}
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = padded.range(creg.direct$lb.comp, creg.direct$ub.comp,
-+                               ctf.transfer$lb.comp, ctf.transfer$ub.comp, 0),
-+       xlim = x.focus, ylab = "covariate contribution", xlab = "")
+R> plot(NA, ylim = c(-1.5, 1.5), xlim = c(2016, 2020),
++      ylab = "covariate contribution")
 R> grid(col = "grey90")
 R> compPlot(MREG, index = 8:9, add = TRUE, col = "steelblue")
 R> compPlot(MTF, index = 8, add = TRUE, col = "forest green")
@@ -1190,38 +1188,28 @@ augmented state vector \(\tilde{\vect{\theta}}_t\). In this fitted model,
 indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
 \(\psi_{\mathrm{AMO},t}\), respectively.
 
+\textcolor{red}{Updated chunk:}
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE),
-+        heights = c(1.05, 1))
-R> zeta = compPlot(MTF, index = 8, just.theta = TRUE, plot = FALSE)
-R> psi.noi = compPlot(MTF, index = 9, just.theta = TRUE, plot = FALSE)
-R> psi.amo = compPlot(MTF, index = 10, just.theta = TRUE, plot = FALSE)
-R> par(mar = c(3.0, 4.2, 2.1, 0.8), oma = c(0, 0, 0, 0))
-R> plot(zeta$x, zeta$map.comp, type = "n", xlab = "",
-+       ylab = "component CrIs",
-+       ylim = padded.range(zeta$lb.comp, zeta$ub.comp, 0))
+R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE))
+R> compPlot(MTF, index = 8, col = "forest green",
++             add = FALSE, just.theta = TRUE)
 R> grid(col = "grey90")
-R> compPlot(MTF, index = 8, just.theta = TRUE, add = TRUE,
-+          col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(zeta[t]))
 R> par(mar = c(3.8, 4.2, 2.1, 0.8))
-R> plot(psi.noi$x, psi.noi$map.comp, type = "n",
-+       xlab = "time", ylab = "component CrIs",
-+       ylim = padded.range(psi.noi$lb.comp, psi.noi$ub.comp, 0))
-R> grid(col = "grey90")
-R> compPlot(MTF, index = 9, just.theta = TRUE, add = TRUE,
-+          col = "steelblue")
+R> plot(y.train, type = "n", ylim = c(-0.11, 0.01),
++      xlab = "time", ylab = "component CrIs")
+R> compPlot(MTF, index = 9, col = "steelblue",
++             add = TRUE, just.theta = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(NOI, t)]))
-R> plot(psi.amo$x, psi.amo$map.comp, type = "n",
-+       xlab = "time", ylab = "component CrIs",
-+       ylim = padded.range(psi.amo$lb.comp, psi.amo$ub.comp, 0))
-R> grid(col = "grey90")
-R> compPlot(MTF, index = 10, just.theta = TRUE, add = TRUE,
-+          col = "darkorange")
-R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
+R> plot(y.train, type = "n", ylim = c(-0.005, 0.06),
++         xlab = "time", ylab = "component CrIs")
+R> compPlot(MTF, index = 10, col = "darkorange",
++             add = TRUE, just.theta = TRUE)
+R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
 \end{CodeChunk}
@@ -1240,85 +1228,104 @@ R> MTF$median.kt
 \end{CodeOutput}
 \end{CodeChunk}
 
-We next produce 18-month-ahead forecasts over the held-out window. For
-\code{M0}, the future state-space matrices repeat the trend and seasonal model.
-For \code{MREG}, the future observation matrix includes the held-out NOI and AMO
-values as direct regressors. For \code{MTF}, the future matrices include the
-held-out NOI and AMO values through the transfer-function augmentation. These
-matrices are passed through the \code{fFF} and \code{fGG} arguments of
-\code{exdqlmForecast()}. The code below shows the relevant matrix construction
+\textcolor{red}{I rearranged the text \& code chunks a bit from here to the end of the section. I hope that is OK! I think it reads a little more clearly.}
+
+We next produce 18-month-ahead forecasts over the held-out window. The
+future state-space matrices are passed through the \code{fFF} and \code{fGG} arguments of \code{exdqlmForecast()}. The code below shows the relevant matrix construction
 and forecast calls; the replication script wraps these steps in dimension
-checks and output-writing code.
+checks and output-writing code. For \code{M0}, the future state-space matrices repeat the trend and seasonal model.
+
+\textcolor{red}{Updated chunk -- I broke the large one into 4 parts}
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> k.fore = length(y.holdout)
-R> n.state = length(model$m0)
+R> F0.future = model$FF
+R> G0.future = model$GG
+R> fc.M0 = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = M0,
++                         fFF = F0.future, fGG = G0.future,
++                         return.draws = TRUE, n.samp = 1000,
++                         seed = 20265101, plot = FALSE)
+\end{CodeInput}
+\end{CodeChunk}
+
+For \code{MREG}, the future observation matrix includes the held-out NOI and AMO values as direct regressors. 
+
+\textcolor{red}{Updated chunk -- part 2}
+
+\begin{CodeChunk}
+\begin{CodeInput}
 R> n.x = ncol(X.holdout)
-R> F0.future = matrix(model$FF, nrow = n.state, ncol = k.fore)
-R> G0.future = array(model$GG, c(n.state, n.state, k.fore))
 R> reg.future = regMod(X.holdout, m0 = rep(0, n.x), C0 = diag(1, n.x))
 R> model.reg.future = model + reg.future
-R> n.state.reg = length(model.reg.future$m0)
-R> FREG.future = matrix(model.reg.future$FF, nrow = n.state.reg,
-+                      ncol = k.fore)
-R> GREG.future = array(model.reg.future$GG,
-+                     c(n.state.reg, n.state.reg, k.fore))
+R> FREG.future = model.reg.future$FF
+R> GREG.future = model.reg.future$GG
+R> fc.MREG = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MREG,
++                           fFF = FREG.future, fGG = GREG.future,
++                           return.draws = TRUE, n.samp = 1000,
++                           seed = 20265301, plot = FALSE)
+\end{CodeInput}
+\end{CodeChunk}
+
+For \code{MTF}, the future matrices include the held-out NOI and AMO values through the transfer-function augmentation.  
+
+\textcolor{red}{Updated chunk -- part 3}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> n.state = length(model$m0)
 R> FTF.future = matrix(0, nrow = n.state + n.x + 1, ncol = k.fore)
 R> FTF.future[seq_len(n.state), ] = F0.future
 R> FTF.future[n.state + 1, ] = 1
 R> GTF.future = array(0, c(n.state + n.x + 1,
-+                         n.state + n.x + 1, k.fore))
++                             n.state + n.x + 1, k.fore))
 R> GTF.future[seq_len(n.state), seq_len(n.state), ] = G0.future
 R> zeta.ind = n.state + 1
 R> psi.ind = n.state + 1 + seq_len(n.x)
 R> GTF.future[zeta.ind, zeta.ind, ] = lambda.star
 R> for (j in seq_len(n.x)) {
-+     GTF.future[zeta.ind, psi.ind[j], ] = X.holdout[, j]
-+     GTF.future[psi.ind[j], psi.ind[j], ] = 1
-+   }
-R> fc.M0 = exdqlmForecast(start.t = length(y.train), k = 18, m1 = M0,
-+                        fFF = F0.future, fGG = G0.future,
-+                        return.draws = TRUE, n.samp = 1000,
-+                        seed = 20265101, plot = FALSE)
-R> fc.MREG = exdqlmForecast(start.t = length(y.train), k = 18, m1 = MREG,
-+                          fFF = FREG.future, fGG = GREG.future,
-+                          return.draws = TRUE, n.samp = 1000,
-+                          seed = 20265301, plot = FALSE)
-R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = 18, m1 = MTF,
-+                         fFF = FTF.future, fGG = GTF.future,
-+                         return.draws = TRUE, n.samp = 1000,
-+                         seed = 20265201, plot = FALSE)
-R> t.all = as.numeric(time(y.fit))
-R> hold.idx = 415:432
-R> plot(y.fit, col = "grey70", xlim = c(2020, max(t.all)),
-+       ylim = padded.range(as.numeric(y.fit), fc.M0$ff, fc.MREG$ff,
-+                           fc.MTF$ff),
-+       ylab = "log flow / forecast quantile", xlab = "time")
++    GTF.future[zeta.ind, psi.ind[j], ] = X.holdout[, j]
++    GTF.future[psi.ind[j], psi.ind[j], ] = 1
++    }
+R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MTF,
++                             fFF = FTF.future, fGG = GTF.future,
++                             return.draws = TRUE, n.samp = 1000,
++                             seed = 20265201, plot = FALSE)
+\end{CodeInput}
+\end{CodeChunk}
+
+Finally, Figure \ref{fig:ex3forecast} overlays the filtered estimates before the forecast
+origin and the conditional forecasts after it. 
+
+\textcolor{red}{Updated chunk -- part 4}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> plot(y.fit, col = "grey70", xlim = c(2020, 2023), ylim = c(1,8),
+        ylab = "log flow / forecast quantile", xlab = "time")
 R> grid(col = "grey90")
 R> plot(fc.M0, add = TRUE, cols = c("purple", "plum"))
 R> plot(fc.MREG, add = TRUE, cols = c("steelblue", "lightblue"))
 R> plot(fc.MTF, add = TRUE, cols = c("forest green", "darkseagreen"))
-R> lines(t.all[hold.idx], as.numeric(y.fit)[hold.idx],
-+       col = "darkorange", lwd = 1.4)
-R> points(t.all[hold.idx], as.numeric(y.fit)[hold.idx],
-+        col = "darkorange", pch = 1, cex = 0.8)
+R> t.all = as.numeric(time(y.fit))
+R> hold.idx = 415:432
+R> lines(t.all[hold.idx], y.fit[hold.idx],
++           col = "darkorange", lwd = 1.4)
+R> points(t.all[hold.idx], y.fit[hold.idx],
++            col = "darkorange", pch = 1, cex = 0.8)
 R> abline(v = t.all[hold.idx[1]], col = "orange", lty = 5, lwd = 1.2)
 R> legend("topleft",
-+        legend = c("M0 no covariates", "MREG direct regression",
-+                   "MTF transfer", "held-out observations"),
-+        col = c("purple", "steelblue", "forest green", "darkorange"),
-+        lty = 1, pch = c(NA, NA, NA, 1), bty = "n")
++            legend = c("M0 no covariates", "MREG direct regression",
++                       "MTF transfer", "held-out observations"),
++            col = c("purple", "steelblue", "forest green", "darkorange"),
++            lty = 1, pch = c(NA, NA, NA, 1), bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
 
-Figure \ref{fig:ex3forecast} overlays the filtered estimates before the forecast
-origin and the conditional forecasts after it. The numerical comparison in Table
+The numerical comparison in Table
 \ref{tab:ex3} uses \code{exdqlmDiagnostics()} so that all reported quantities
 are exported package diagnostics, as defined in Section \ref{sec:diags}. These
-diagnostics are computed from the final-training fitted objects. Table
-\ref{tab:ex3forecastmetrics} reports held-out forecast scores over the final 18
-months.
+diagnostics are computed from the final-training fitted objects. 
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1352,7 +1359,9 @@ R> tab.ex3 = data.frame(
 \label{tab:ex3}
 \end{table}
 
-Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-regression model has the smallest KL and CRPS values, while the no-covariate baseline has the smallest PPLC. The transfer-function model falls between them for PPLC and has diagnostics closer to \code{MREG} than to \code{M0} for CRPS. We therefore do not interpret the transfer-function fit as uniformly better in this example. The example instead shows how \pkg{exdqlm} supports three related dynamic quantile workflows: no external inputs, direct regression through \code{regMod()}, and lagged external-input effects through transfer functions.
+Alternatively, Table
+\ref{tab:ex3forecastmetrics} reports held-out forecast scores over the final 18
+months. These diagnostics are computed from the forecast objects using \code{exdqlmForecastDiagnostics()}. 
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1369,6 +1378,8 @@ R> tab.ex3.fc = data.frame(
 +              fc.diag.MTF$m1.CRPS))
 \end{CodeInput}
 \end{CodeChunk}
+
+Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-regression model has the smallest KL and CRPS values, while the no-covariate baseline has the smallest PPLC. The transfer-function model falls between them for PPLC and has diagnostics closer to \code{MREG} than to \code{M0} for CRPS. The example instead shows how \pkg{exdqlm} supports three related dynamic quantile workflows: no external inputs, direct regression through \code{regMod()}, and lagged external-input effects through transfer functions.
 
 \begin{table}[h!]
 \centering
