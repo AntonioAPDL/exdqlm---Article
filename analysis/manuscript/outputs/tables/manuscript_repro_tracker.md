@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-06-02 21:14:19
+Generated: 2026-06-02 21:54:22
 Profile: standard
 Seed: 20260501
 
@@ -70,4 +70,3 @@ Seed: 20260501
 - benchmark: Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.
 - benchmark: benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.
 - scope: Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.
-- coverage: Targeted run; requested targets: ex4, manifest.
