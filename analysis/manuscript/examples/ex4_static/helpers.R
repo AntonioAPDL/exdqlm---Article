@@ -332,25 +332,13 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
         plot = FALSE
       )
 
-      z_crit <- stats::qnorm(0.975)
-      if (!is.null(fit_ldvb$samp.beta)) {
-        ldvb_draws <- as.matrix(fit_ldvb$samp.beta)
-        ldvb_beta_full <- as.numeric(colMeans(ldvb_draws))
-        ldvb_lb_full <- as.numeric(apply(ldvb_draws, 2, stats::quantile, probs = 0.025))
-        ldvb_ub_full <- as.numeric(apply(ldvb_draws, 2, stats::quantile, probs = 0.975))
-      } else {
-        ldvb_beta_full <- as.numeric(fit_ldvb$qbeta$m)
-        ldvb_sd_full <- sqrt(pmax(diag(as.matrix(fit_ldvb$qbeta$V)), 0))
-        ldvb_lb_full <- ldvb_beta_full - z_crit * ldvb_sd_full
-        ldvb_ub_full <- ldvb_beta_full + z_crit * ldvb_sd_full
-      }
-
-      mcmc_draws <- as.matrix(fit_mcmc$samp.beta)
-      mcmc_beta_full <- as.numeric(colMeans(mcmc_draws))
-      mcmc_lb_full <- as.numeric(apply(mcmc_draws, 2, stats::quantile, probs = 0.025))
-      mcmc_ub_full <- as.numeric(apply(mcmc_draws, 2, stats::quantile, probs = 0.975))
-
       slope_idx <- seq_len(predictor_n) + 1L
+      ldvb_beta_full <- as.numeric(diag_holdout$m1.beta.mean)
+      ldvb_lb_full <- as.numeric(diag_holdout$m1.beta.lb)
+      ldvb_ub_full <- as.numeric(diag_holdout$m1.beta.ub)
+      mcmc_beta_full <- as.numeric(diag_holdout$m2.beta.mean)
+      mcmc_lb_full <- as.numeric(diag_holdout$m2.beta.lb)
+      mcmc_ub_full <- as.numeric(diag_holdout$m2.beta.ub)
       ldvb_beta_slopes <- ldvb_beta_full[slope_idx]
       mcmc_beta_slopes <- mcmc_beta_full[slope_idx]
       ldvb_support <- ex4_support_recovery(ldvb_beta_slopes, beta_slopes)
@@ -361,6 +349,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
       fits[[ex4_p_key(p0)]] <- list(
         p0 = p0,
         y_train = y_train,
+        diag_holdout = diag_holdout,
         ldvb = list(
           converged = TRUE,
           iter = as.integer(fit_ldvb$iter),

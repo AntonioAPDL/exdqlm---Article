@@ -460,7 +460,7 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
     \code{compPlot()} & Invisible \code{list} & Plot component or state-level MAP and CrI summaries.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticMCMC} or \code{exalStaticLDVB} objects} \\
-    \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fitted-quantile diagnostics and comparisons.\\
+    \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fitted-quantile diagnostics and coefficient-interval summaries/plots.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input dynamic fit/forecast objects or draw matrices} \\
     \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{exdqlmSynthesis} & Synthesize posterior predictive draws across separately fitted quantile levels.\\
@@ -644,8 +644,6 @@ R> fGG =  model$GG
 
 We plot the time series data in a narrower range for closer examination and add the forecast estimates using \code{exdqlmForecast()} with argument \code{add = TRUE}. Notice we start the forecast at the last time index of the data, i.e. \code{start.t = length(LakeHuron)}.
 
-\textcolor{red}{Updated chunk -- this just changes the top right plot in figure 2 to have ylim = c(575, 582). The plot will need to be updated too. }
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(LakeHuron,  xlim = c(1952, 1980), ylim = c(575, 582),
@@ -688,8 +686,6 @@ R> syn.fore = quantileSynthesis(
 \end{CodeChunk}
 
 The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}, so the corresponding \code{plot()} method can be used to display the synthesized posterior predictive intervals. The lower panels of Figure \ref{fig:ex1quants} are produced from these objects as follows. The first synthesis panel shows the observed-period synthesized predictive interval, and the second panel uses the same observed-period synthesis near the forecast origin, overlays the forecast synthesis, and shades the one-step bridge from the final observed synthesis interval to the first forecast synthesis interval. 
-
-\textcolor{red}{Updated chunk -- this one actually still wasn't working for me before. idk if you want to check it. I had to change "y = as.numeric(LakeHuron)" to just "y = LakeHuron" for the ts to show up in the plots. }
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -803,8 +799,6 @@ We can visualize the differences between the two resulting dynamic quantiles usi
 % par(mfcol=c(1,3))
 % plot(sunspot.year, col="dark grey")
 
-\textcolor{red}{Updated chunk:}
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(sunspot.year, xlim = c(1780, 1830), col = "dark grey",
@@ -825,8 +819,6 @@ R> title("LDVB fit for p0 = 0.85")
 \end{figure}
 
 To examine whether the added flexibility of the exDQLM is supported by the fitted approximation, we can also visualize the approximate posterior distribution of the skewness parameter $\gamma$ by plotting the samples from the corresponding variational distribution, also seen in Figure \ref{fig:ex2quant}. The approximate posterior mass lies away from zero, supporting the additional skewness flexibility for this upper-quantile fit.
-
-\textcolor{red}{Updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -849,7 +841,6 @@ R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red", "blue"))
 
 We can also apply the \code{print()} generic to the resulting \code{exdqlmDiagnostic} object. Smaller values indicate better fit for the KL, CRPS, and PPLC criteria; for these LDVB fits, the reported diagnostics favor the exDQLM, while the DQLM is faster.
 
-\textcolor{red}{New chunk -- can you update the output so it matches your system \& the results in the table??}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> print(diagM1M2)
@@ -858,9 +849,9 @@ R> print(diagM1M2)
    Diagnostic        M1        M2
            KL    0.1329    0.1197
  KL (flipped)    0.0625    0.0528
-         CRPS    8.5517    6.2499
-         pplc 3851.7358 2329.1243
- run-time (s)    6.1600   11.7210
+         CRPS    8.5349    6.2685
+         pplc 3855.9702 2328.0091
+ run-time (s)   22.7090  104.0150
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -926,7 +917,7 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  & MCMC & 325.53 & 0.164 & \textbf{5.095} & \textbf{2186.3} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{a9e6a81}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{1c09803}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1101,8 +1092,6 @@ R> MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
 The upper panel of Figure \ref{fig:ex3quant} compares the fitted \(0.15\)
 quantiles from the three training fits over 2016--2020. We first plot the data, then call \code{exdqlmPlot()} with \code{add = TRUE} to draw the three model fits on common axes.
 
-\textcolor{red}{Updated chunk:}
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
@@ -1140,8 +1129,6 @@ seventh elements of the state vector. The middle panel of Figure
 \ref{fig:ex3quant} shows the resulting seasonal estimates for the three models
 over the same 2016--2020 window.
 
-\textcolor{red}{Updated chunk:}
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
@@ -1160,8 +1147,6 @@ contributions induced by the standardized NOI and AMO covariates. For
 separates contemporaneous and lagged climate-index components from the common
 trend and seasonal baseline, even when the fitted quantiles themselves are
 visually close.
-
-\textcolor{red}{Updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1187,8 +1172,6 @@ NOI and AMO coefficients within the transfer-function model. Setting
 augmented state vector \(\tilde{\vect{\theta}}_t\). In this fitted model,
 indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
 \(\psi_{\mathrm{AMO},t}\), respectively.
-
-\textcolor{red}{Updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1228,14 +1211,10 @@ R> MTF$median.kt
 \end{CodeOutput}
 \end{CodeChunk}
 
-\textcolor{red}{I rearranged the text \& code chunks a bit from here to the end of the section. I hope that is OK! I think it reads a little more clearly.}
-
 We next produce 18-month-ahead forecasts over the held-out window. The
 future state-space matrices are passed through the \code{fFF} and \code{fGG} arguments of \code{exdqlmForecast()}. The code below shows the relevant matrix construction
 and forecast calls; the replication script wraps these steps in dimension
 checks and output-writing code. For \code{M0}, the future state-space matrices repeat the trend and seasonal model.
-
-\textcolor{red}{Updated chunk -- I broke the large one into 4 parts}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1250,8 +1229,6 @@ R> fc.M0 = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = M0,
 \end{CodeChunk}
 
 For \code{MREG}, the future observation matrix includes the held-out NOI and AMO values as direct regressors. 
-
-\textcolor{red}{Updated chunk -- part 2}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1268,8 +1245,6 @@ R> fc.MREG = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MREG,
 \end{CodeChunk}
 
 For \code{MTF}, the future matrices include the held-out NOI and AMO values through the transfer-function augmentation.  
-
-\textcolor{red}{Updated chunk -- part 3}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1296,8 +1271,6 @@ R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MTF,
 
 Finally, Figure \ref{fig:ex3forecast} overlays the filtered estimates before the forecast
 origin and the conditional forecasts after it. 
-
-\textcolor{red}{Updated chunk -- part 4}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1469,47 +1442,33 @@ R> M.mcmc = lapply(p.grid, function(p0) exalStaticMCMC(
 \end{CodeInput}
 \end{CodeChunk}
 
-For static fits, the helper function \code{exalStaticDiagnostics()} summarizes fitted quantiles on a common design matrix and, when holdout responses or a reference quantile are supplied, reports predictive evaluation metrics such as check loss and reference-quantile error. In this simulated example, the true coefficient vector is also known, so we separately compute the active-signal RMSE and null-coefficient MAE used in Table \ref{tab:ex4static}. For real data applications, these coefficient-recovery summaries would be replaced by posterior intervals and holdout predictive diagnostics. For example, on the independent holdout design generated above:
+For static fits, the helper function \code{exalStaticDiagnostics()} summarizes fitted quantiles on a common design matrix and, when holdout responses or a reference quantile are supplied, reports predictive evaluation metrics such as check loss and reference-quantile error. It also stores posterior coefficient summaries that can be plotted with the \code{plot()} method. In this simulated example, the true coefficient vector is known, so Figure \ref{fig:ex4static} overlays it as a visual reference; this truth overlay is optional and is not needed for real data applications. The active-signal RMSE and null-coefficient MAE in Table \ref{tab:ex4static} are simulation-benchmark summaries computed separately from the package diagnostics.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> exalStaticDiagnostics(M.ldvb[[2]], M.mcmc[[2]],
-+                  X = X.hold, y = y.hold, ref = ref.hold,
-+                  plot = FALSE)
-R> beta.summary = function(fit) {
-+     b = as.matrix(fit$samp.beta)[, -1, drop = FALSE]
-+     list(mean = colMeans(b),
-+          lb = apply(b, 2, quantile, 0.025),
-+          ub = apply(b, 2, quantile, 0.975))
-+   }
-R> ldvb.sum = lapply(M.ldvb, beta.summary)
-R> mcmc.sum = lapply(M.mcmc, beta.summary)
+R> y.hold = lapply(p.grid, function(p0) sim.y(X.hold.raw, p0))
+R> diag.static = Map(function(ldvb, mcmc, y.h) {
++     exalStaticDiagnostics(ldvb, mcmc,
++                           X = X.hold, y = y.h, ref = ref.hold,
++                           plot = FALSE)
++   }, M.ldvb, M.mcmc, y.hold)
 R> y.lim = range(beta.true,
-+                unlist(lapply(c(ldvb.sum, mcmc.sum), function(z) c(z$lb, z$ub))))
++                unlist(lapply(diag.static, function(z) {
++                  c(z$m1.beta.lb[-1], z$m1.beta.ub[-1],
++                    z$m2.beta.lb[-1], z$m2.beta.ub[-1])
++                })))
 R> y.lim = y.lim + c(-1, 1) * 0.08 * diff(y.lim)
-R> x.pos = seq_along(beta.true)
 R> par(mfrow = c(1, 3), mar = c(5.2, 4.0, 2.6, 1.0), xpd = NA)
 R> for (i in seq_along(p.grid)) {
-+     plot(x.pos, beta.true, type = "n", xaxt = "n", xlab = "",
++     plot(diag.static[[i]], type = "coefficients",
++          beta.ref = c(0, beta.true),
++          include.intercept = FALSE,
++          coef.names = c("(Intercept)", paste0("x", seq_along(beta.true))),
++          cols = c("orange", "steelblue"),
++          legend.labels = c("LDVB 95% interval", "MCMC 95% interval"),
++          beta.ref.label = "truth", ylim = y.lim,
 +          ylab = if (i == 1) "coefficient value" else "",
-+          main = sprintf("p0 = %.2f", p.grid[i]), ylim = y.lim)
-+     abline(h = 0, col = "grey85", lty = 2)
-+     axis(1, at = x.pos, labels = paste0("x", x.pos), las = 2)
-+     segments(x.pos - 0.12, ldvb.sum[[i]]$lb,
-+              x.pos - 0.12, ldvb.sum[[i]]$ub,
-+              col = "orange", lwd = 2)
-+     points(x.pos - 0.12, ldvb.sum[[i]]$mean, pch = 16, col = "orange")
-+     segments(x.pos + 0.12, mcmc.sum[[i]]$lb,
-+              x.pos + 0.12, mcmc.sum[[i]]$ub,
-+              col = "steelblue", lwd = 2)
-+     points(x.pos + 0.12, mcmc.sum[[i]]$mean, pch = 16,
-+            col = "steelblue")
-+     points(x.pos, beta.true, pch = 18, cex = 1.1)
-+     if (i == 1) legend("topleft",
-+          legend = c("truth", "LDVB 95% interval", "MCMC 95% interval"),
-+          col = c("black", "orange", "steelblue"),
-+          pch = c(18, 16, 16), lty = c(0, 1, 1),
-+          lwd = c(0, 2, 2), bty = "n", cex = 0.9)
++          main = sprintf("p0 = %.2f", p.grid[i]), legend = i == 1)
 +   }
 \end{CodeInput}
 \end{CodeChunk}
@@ -1521,7 +1480,7 @@ R> for (i in seq_along(p.grid)) {
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. In the median panel, both methods cover all plotted coefficients, while the MCMC reference fit gives the smaller holdout quantile error.
+Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. Across the three panels, the MCMC intervals tend to give slightly cleaner active-signal recovery, while the LDVB intervals provide a fast approximation to the same coefficient-level summaries.
 
 \begin{table}[t!]
 \centering
@@ -1531,21 +1490,21 @@ Figure \ref{fig:ex4static} shows that both methods recover the active coefficien
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{20.31} & 0.107 & \textbf{0.034} & 0.674 \\
- & MCMC & 135.05 & \textbf{0.065} & 0.036 & \textbf{0.589} \\
+ \tworowcell{0.05} & LDVB & \textbf{27.96} & 0.107 & \textbf{0.034} & 0.674 \\
+ & MCMC & 196.52 & \textbf{0.072} & 0.040 & \textbf{0.592} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{11.49} & \textbf{0.148} & 0.069 & 0.295 \\
- & MCMC & 140.25 & 0.160 & \textbf{0.046} & \textbf{0.254} \\
+ \tworowcell{0.25} & LDVB & \textbf{13.89} & 0.138 & \textbf{0.042} & 0.393 \\
+ & MCMC & 192.51 & \textbf{0.082} & 0.044 & \textbf{0.328} \\
  \midrule
- \tworowcell{0.50} & LDVB & \textbf{4.64} & 0.086 & \textbf{0.015} & 0.167 \\
- & MCMC & 145.36 & \textbf{0.070} & 0.019 & \textbf{0.131} \\
+ \tworowcell{0.50} & LDVB & \textbf{3.11} & 0.241 & 0.081 & 0.410 \\
+ & MCMC & 201.30 & \textbf{0.225} & \textbf{0.048} & \textbf{0.372} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference fit has the smaller holdout quantile RMSE at all three quantile levels and the smaller active-signal RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is slightly smaller on active-signal RMSE at \(p_0 = 0.25\) and on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.50\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 12-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner holdout quantile accuracy. Accordingly, the static \code{rhs\_ns} specification still supports both roles cleanly: LDVB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} reinforces the visual comparison. The MCMC reference fit has the smaller holdout quantile RMSE and active-signal RMSE at all three quantile levels, while LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 14-fold at \(p_0 = 0.25\), and 65-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner holdout quantile accuracy. Accordingly, the static \code{rhs\_ns} specification still supports both roles cleanly: LDVB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}

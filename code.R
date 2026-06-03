@@ -60,7 +60,7 @@
 #' - Example 3, Big Tree water flow: no-covariate, direct-regression, and
 #'   transfer-function fits; component plots; held-out forecast diagnostics.
 #' - Example 4, static simulation: quantile-specific sparse exAL LDVB/MCMC
-#'   comparison figure and table.
+#'   comparison table and coefficient-interval figure from static diagnostics.
 #'
 #' The tracker files in `analysis/manuscript/outputs/tables/` map generated
 #' files back to manuscript figures and tables.

@@ -29,7 +29,7 @@ if (!need_ex4) {
   ex4_seed <- as.integer(ex4_seed_info$seed)
   rhs_ctrl <- ex4_build_rhs_ctrl(cfg_ex4)
   cache_key <- sprintf(
-    "ex4_static_rhsns_sparse_seed_%d_ns%d_b%d_k%d_v3",
+    "ex4_static_rhsns_sparse_seed_%d_ns%d_b%d_k%d_v4",
     ex4_seed,
     n_samp,
     n_burn,
@@ -120,10 +120,10 @@ if (!need_ex4) {
         ex4_obj$beta_slopes,
         unlist(lapply(ex4_obj$fits, function(res) {
           c(
-            res$ldvb$beta_lb_slopes,
-            res$ldvb$beta_ub_slopes,
-            res$mcmc$beta_lb_slopes,
-            res$mcmc$beta_ub_slopes
+            res$diag_holdout$m1.beta.lb[-1],
+            res$diag_holdout$m1.beta.ub[-1],
+            res$diag_holdout$m2.beta.lb[-1],
+            res$diag_holdout$m2.beta.ub[-1]
           )
         }))
       ),
@@ -135,46 +135,22 @@ if (!need_ex4) {
 
     save_png_plot("ex4static.png", {
       graphics::par(mfrow = c(1, 3), mar = c(5.2, 4, 2.6, 1), xpd = NA)
-      x_pos <- seq_len(predictor_n)
       for (i in seq_along(p_levels)) {
         res <- ex4_obj$fits[[ex4_p_key(p_levels[i])]]
-        graphics::plot(
-          x_pos,
-          ex4_obj$beta_slopes,
-          type = "n",
-          xaxt = "n",
-          xlab = "",
+        plot(
+          res$diag_holdout,
+          type = "coefficients",
+          beta.ref = c(0, ex4_obj$beta_slopes),
+          include.intercept = FALSE,
+          coef.names = c("(Intercept)", ex4_obj$coef_names),
+          cols = c(ldvb_cols$m1, ldvb_cols$m2),
+          legend.labels = c("LDVB 95% interval", "MCMC 95% interval"),
+          beta.ref.label = "truth",
+          ylim = y_lim,
           ylab = if (i == 1L) "coefficient value" else "",
           main = sprintf("p0 = %.2f", res$p0),
-          ylim = y_lim
+          legend = i == 1L
         )
-        graphics::abline(h = 0, col = "grey85", lty = 2)
-        graphics::axis(1, at = x_pos, labels = ex4_obj$coef_names, las = 2, cex.axis = 0.9)
-        graphics::segments(
-          x_pos - 0.12, res$ldvb$beta_lb_slopes,
-          x_pos - 0.12, res$ldvb$beta_ub_slopes,
-          col = ldvb_cols$m1, lwd = 2
-        )
-        graphics::points(x_pos - 0.12, res$ldvb$beta_slopes, pch = 16, col = ldvb_cols$m1)
-        graphics::segments(
-          x_pos + 0.12, res$mcmc$beta_lb_slopes,
-          x_pos + 0.12, res$mcmc$beta_ub_slopes,
-          col = ldvb_cols$m2, lwd = 2
-        )
-        graphics::points(x_pos + 0.12, res$mcmc$beta_slopes, pch = 16, col = ldvb_cols$m2)
-        graphics::points(x_pos, ex4_obj$beta_slopes, pch = 18, cex = 1.1, col = "black")
-        if (i == 1L) {
-          graphics::legend(
-            "topleft",
-            legend = c("truth", "LDVB 95% interval", "MCMC 95% interval"),
-            col = c("black", ldvb_cols$m1, ldvb_cols$m2),
-            pch = c(18, 16, 16),
-            lty = c(0, 1, 1),
-            lwd = c(0, 2, 2),
-            bty = "n",
-            cex = 0.9
-          )
-        }
       }
     }, width = 9.2, height = 4.8, pointsize = 12.5)
 
