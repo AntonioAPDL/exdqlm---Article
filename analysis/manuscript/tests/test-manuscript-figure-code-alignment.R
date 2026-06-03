@@ -75,7 +75,7 @@ testthat::test_that("displayed figure chunks retain canonical visual markers", {
   testthat::expect_true(grepl("plot(fc.MTF", fig8_plot, fixed = TRUE))
   testthat::expect_true(grepl("held-out observations", fig8_plot, fixed = TRUE))
 
-  fig9 <- code_text(chunks, "chunk_040")
+  fig9 <- code_text(chunks, "chunk_041")
   testthat::expect_true(grepl("exalStaticDiagnostics", fig9, fixed = TRUE))
   testthat::expect_true(grepl("type = \"coefficients\"", fig9, fixed = TRUE))
   testthat::expect_true(grepl("beta.ref = c(0, beta.true)", fig9, fixed = TRUE))

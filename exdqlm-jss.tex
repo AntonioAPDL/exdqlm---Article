@@ -1422,8 +1422,8 @@ R> X.raw = MASS::mvrnorm(160, mu = rep(0, 8), Sigma = Sigma.x)
 R> X = cbind(1, X.raw)
 R> X.hold.raw = MASS::mvrnorm(800, mu = rep(0, 8), Sigma = Sigma.x)
 R> X.hold = cbind(1, X.hold.raw)
+R> ref.hold = drop(X.hold %*% c(0, beta.true))
 R> p.grid = c(0.05, 0.25, 0.50)
-R> y.train = lapply(p.grid, function(p0) sim.y(X.raw, p0))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1431,20 +1431,26 @@ We fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). All fits u
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> M.ldvb = lapply(p.grid, function(p0) exalStaticLDVB(
-+                    y = y.train[[which(p.grid == p0)]], X = X, p0 = p0,
+R> y.train = y.hold = M.ldvb = M.mcmc = vector("list", length(p.grid))
+R> for (i in seq_along(p.grid)) {
++     p0 = p.grid[i]
++     y.train[[i]] = sim.y(X.raw, p0)
++     y.hold[[i]] = sim.y(X.hold.raw, p0)
++     M.ldvb[[i]] = exalStaticLDVB(
++                    y = y.train[[i]], X = X, p0 = p0,
 +                    beta_prior = "rhs_ns",
 +                    beta_prior_controls = rhs.ctrl,
 +                    max_iter = ifelse(p0 == 0.05, 420, 260),
-+                    n.samp = 3000,
-+                    tol = 1e-4, verbose = FALSE))
-R> M.mcmc = lapply(p.grid, function(p0) exalStaticMCMC(
-+                    y = y.train[[which(p.grid == p0)]], X = X, p0 = p0,
++                    n.samp = 3000, n_samp_xi = 160,
++                    tol = 1e-4, verbose = FALSE)
++     M.mcmc[[i]] = exalStaticMCMC(
++                    y = y.train[[i]], X = X, p0 = p0,
 +                    beta_prior = "rhs_ns",
 +                    beta_prior_controls = rhs.ctrl,
-+                    n.burn = 2000, n.mcmc = 3000,
++                    n.burn = 2000, n.mcmc = 3000, thin = 1,
 +                    init.from.vb = TRUE,
-+                    verbose = FALSE))
++                    verbose = FALSE)
++   }
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1452,8 +1458,6 @@ For static fits, the helper function \code{exalStaticDiagnostics()} summarizes f
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> ref.hold = drop(X.hold %*% c(0, beta.true))
-R> y.hold = lapply(p.grid, function(p0) sim.y(X.hold.raw, p0))
 R> diag.static = Map(function(ldvb, mcmc, y.h) {
 +     exalStaticDiagnostics(ldvb, mcmc,
 +                           X = X.hold, y = y.h, ref = ref.hold,
@@ -1487,7 +1491,7 @@ R> for (i in seq_along(p.grid)) {
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that both methods recover the active coefficients and shrink the null coefficients toward zero across the lower tail, lower-middle quantile, and median. The lower-tail fit at \(p_0 = 0.05\) remains the most demanding case, but both methods still recover the sparse signal structure. Across the three panels, the MCMC intervals tend to give slightly cleaner active-signal recovery, while the LDVB intervals provide a fast approximation to the same coefficient-level summaries.
+Figure \ref{fig:ex4static} shows that both methods recover the main sparse signal structure and shrink most null coefficients toward zero across the lower tail, lower-middle quantile, and median. Recovery is not uniform across coefficients: the smaller active coefficient is more difficult in the median fit, and a few null-coefficient intervals can miss zero. Across the three panels, the MCMC intervals tend to give slightly cleaner active-signal recovery, while the LDVB intervals provide a fast approximation to the same coefficient-level summaries.
 
 \begin{table}[t!]
 \centering
