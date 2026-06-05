@@ -1,4 +1,4 @@
-\documentclass[jss]{jss}
+\documentclass{jss}
 \usepackage{thumbpdf,lmodern}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -28,20 +28,13 @@
 \title{\pkg{exdqlm}: An \proglang{R} Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}
 
 \Plainauthor{Antonio Aguirre, Raquel Barata, Raquel Prado, Bruno Sans\'{o}}
-\Plaintitle{exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models} %% without formatting
-\Shorttitle{\pkg{exdqlm}: Flexible Dynamic Quantile Linear Models} %% a short title (if necessary)
+\Plaintitle{exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}
+\Shorttitle{\pkg{exdqlm}: Flexible Dynamic Quantile Linear Models}
 
 
 \Abstract{ We present the \proglang{R} package \pkg{exdqlm} for Bayesian quantile regression, with primary emphasis on dynamic state-space quantile models for time series. The package is built around extended dynamic quantile linear models (exDQLMs), which use the extended asymmetric Laplace (exAL) family, a parametric extension of the asymmetric Laplace (AL) distribution commonly used in quantile regression. The software provides posterior simulation via Markov chain Monte Carlo (MCMC) and fast approximate posterior inference via Laplace--delta variational Bayes (LDVB), supporting posterior uncertainty quantification while also providing a computationally efficient option for longer time series. Furthermore, it supports static exAL quantile regression with regularized priors, dynamic transfer-function models for nonlinear input effects at a given quantile, post hoc posterior-predictive synthesis across separately fitted quantiles, forecasting, and several quantitative and visual diagnostics for model evaluation. }
 
 \Keywords{dynamic quantile regression, dynamic models, asymmetric Laplace, Laplace--delta variational Bayes, coordinate ascent variational inference, quantile regression}
-
-%% \Volume{50}
-%% \Issue{9}
-%% \Month{June}
-%% \Year{2012}
-%% \Submitdate{2012-06-04}
-%% \Acceptdate{2012-06-04}
 
 \Address{
   Antonio Aguirre and Raquel Barata\\
@@ -50,10 +43,6 @@
   Santa Cruz, CA 95064\\
   E-mail: \email{jaguir26@ucsc.edu}, \email{raquel.a.barata@gmail.com}\\
 }
-
-%\VignetteIndexEntry{BASS_vignette}
-%\VignetteEngine{knitr::knitr}
-
 
 \usepackage{Sweave}
 \RecustomVerbatimEnvironment{Code}{Verbatim}{fontsize=\footnotesize}
@@ -562,7 +551,6 @@ R> M5 = exdqlmMCMC(y = LakeHuron, p0 = 0.05, model = model,
 +                 n.burn = 2000, n.mcmc = 3000, verbose = TRUE, verbose.every = 1000)
 \end{CodeInput}
 
-% \noindent\emph{Representative console excerpt, abridged to the fields most relevant for the progress format:}
 \begin{CodeOutput}
 MCMC backend: C++ (mode=fast)
 running LDVB algorithm to initialize mcmc
@@ -795,9 +783,6 @@ R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded backend profile. These runtimes are fit elapsed times stored in the returned fit objects; they are intended for within-profile comparison and should not be interpreted as machine-independent timing constants.
 
 We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1780 to 1830.
-% fig:ex1quant w850 h275
-% par(mfcol=c(1,3))
-% plot(sunspot.year, col="dark grey")
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1313,9 +1298,7 @@ R> tab.ex3 = data.frame(
 \end{CodeInput}
 \end{CodeChunk}
 
-% \clearpage
-
-\begin{table}[h!]
+\begin{table}[ht!]
 \centering
 \TableStyle
 \begin{tabular}{@{}lrrr@{}}
@@ -1354,7 +1337,7 @@ R> tab.ex3.fc = data.frame(
 
 Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-regression model has the smallest KL and CRPS values, while the no-covariate baseline has the smallest PPLC. The transfer-function model falls between them for PPLC and has diagnostics closer to \code{MREG} than to \code{M0} for CRPS. The example instead shows how \pkg{exdqlm} supports three related dynamic quantile workflows: no external inputs, direct regression through \code{regMod()}, and lagged external-input effects through transfer functions.
 
-\begin{table}[h!]
+\begin{table}[ht!]
 \centering
 \TableStyle
 \begin{tabular}{@{}lrr@{}}
@@ -1527,9 +1510,6 @@ The examples illustrate how these pieces are used in analysis. Lake Huron uses s
 The examples also delineate the current scope of the package. Dynamic models are fitted one quantile level at a time. \code{quantileSynthesis()} combines predictive draws after separate fits and applies monotonicity adjustments when needed; it is not a joint posterior model over multiple quantile levels. LDVB returns samples from fitted variational factors rather than from the exact posterior target, so MCMC remains the reference calculation when posterior tail summaries, interval widths, or approximation error are central. In transfer-function models, lag propagation is controlled by a fixed or grid-selected \(\lambda\); the current implementation does not estimate input-specific lag-decay rates internally. Runtime results are elapsed fitting times under the stated backend profile and should be read alongside predictive and calibration diagnostics.
 
 Several development directions follow from these limitations: multivariate-output dynamic quantile models that represent cross-series dependence through a modeled correlation matrix for related time series; improved approximations for the nonconjugate joint \((\gamma,\sigma)\) skewness--scale block; nonlinear dynamic quantile modeling beyond the linear state-space form used here; and joint or regularized fitting across quantile levels. The main article, supplement, and replication materials serve separate roles: the article describes the user-facing workflow, the supplement records posterior targets and algorithmic details, and the repository scripts regenerate the reported figures, tables, example artifacts, and benchmark provenance.
-
-
-%\section{Acknowledgments}
 
 \bibliography{references}
 
