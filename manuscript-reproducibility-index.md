@@ -2,7 +2,7 @@
 
 This note is the reader-facing map to the reproducible materials that accompany
 the `exdqlm` software article. It is intended to complement the manuscript by
-identifying the publication artifacts, the main support-only artifacts, and the
+identifying the publication artifacts, auxiliary generated artifacts, and the
 tracked rerun paths used to regenerate them from the current `1.0.0` package.
 
 Current snapshot references are recorded in the generated reproducibility
@@ -77,7 +77,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --pro
 Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --profile standard --force-refit --skip-tests
 ```
 
-## 4. Support Artifacts by Example
+## 4. Auxiliary Artifacts by Example
 
 ### Example 1: Lake Huron
 
@@ -85,12 +85,12 @@ Publication-facing:
 - [ex1mcmc.png](analysis/manuscript/outputs/figures/ex1mcmc.png)
 - [ex1quants.png](analysis/manuscript/outputs/figures/ex1quants.png)
 
-Support-only:
+Auxiliary:
 - [ex1synth.png](analysis/manuscript/outputs/figures/ex1synth.png)
 - [ex1_synthesis_summary.txt](analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt)
-- [ex1_kernel_summary.csv](analysis/manuscript/outputs/tables/ex1_kernel_summary.csv)
-- [ex1_kernel_chain_stability.csv](analysis/manuscript/outputs/tables/ex1_kernel_chain_stability.csv)
-- [ex1_kernel_compare_summary.txt](analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt)
+
+The optional `ex1kernel` target can regenerate a kernel-comparison check, but
+those files are not part of the standard submission artifact set.
 
 ### Example 2: Sunspots
 
@@ -99,7 +99,7 @@ Publication-facing:
 - [ex2checks.png](analysis/manuscript/outputs/figures/ex2checks.png)
 - [ex2_dynamic_benchmark.csv](analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv)
 
-Support-only:
+Auxiliary:
 - [ex2_df_scan_kl.csv](analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
 - [ex2_ldvb_diagnostics.png](analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png)
 
@@ -113,7 +113,7 @@ Publication-facing:
 - [ex3_diagnostics_summary.csv](analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv)
 - [ex3_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv)
 
-Support-only:
+Auxiliary:
 - [ex3_lambda_selection.csv](analysis/manuscript/outputs/tables/ex3_lambda_selection.csv)
 - [ex3_sensitivity_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv)
 - [ex3_model_dataset.csv](analysis/manuscript/outputs/tables/ex3_model_dataset.csv)
@@ -125,25 +125,23 @@ Publication-facing:
 - [ex4static.png](analysis/manuscript/outputs/figures/ex4static.png)
 - [ex4static_summary.csv](analysis/manuscript/outputs/tables/ex4static_summary.csv)
 
-Support-only:
-- [ex4_seed_screen_p050_summary.csv](analysis/manuscript/outputs/tables/ex4_seed_screen_p050_summary.csv)
-- [ex4_seed_screen_p050_selection.csv](analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
-- [ex4_seed_screen_p050_summary.txt](analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
+Auxiliary:
+
+The optional `ex4screen` target can regenerate the seed-screen artifacts used to
+select the committed Example 4 simulation seed. The standard submission artifact
+set includes the selected seed through the generated figure/table, not the full
+screen output.
 
 ## 5. Supplementary Robustness Note
 
 The current manuscript does not add a new main-text sensitivity section. Instead,
-the repository retains support-side robustness artifacts for the parts of the
-workflow where this is most informative.
+the canonical manuscript pipeline can generate auxiliary robustness artifacts
+for the parts of the workflow where this is most informative.
 
-The most important of these is the Example 4 \(p_0 = 0.50\) seed screen:
-
-- [ex4_seed_screen_p050_selection.csv](analysis/manuscript/outputs/tables/ex4_seed_screen_p050_selection.csv)
-- [ex4_seed_screen_p050_summary.txt](analysis/manuscript/outputs/logs/ex4_seed_screen_p050_summary.txt)
-
-In the tracked standard-profile run, a fixed seed grid is screened in
-deterministic batches until at least one candidate satisfies the illustration
-criterion:
+The most important of these is the optional Example 4 \(p_0 = 0.50\) seed
+screen. When the explicit `ex4screen` target is run, a fixed seed grid is
+screened in deterministic batches until at least one candidate satisfies the
+illustration criterion:
 - the full Example 4 fit must succeed for all tracked `p0` values,
 - at `p0 = 0.50`, the MCMC 95% intervals for all plotted slope coefficients
   must contain the truth,
@@ -155,9 +153,8 @@ choice, while also making clear that the static benchmark is a curated
 illustrative example rather than a claim of uniform performance across all
 possible simulated datasets.
 
-Two smaller support-side robustness checks are also retained:
-- Example 1 kernel comparison:
-  [ex1_kernel_summary.csv](analysis/manuscript/outputs/tables/ex1_kernel_summary.csv)
+Two smaller auxiliary robustness checks are also available:
+- Example 1 kernel comparison, regenerated with the explicit `ex1kernel` target
 - Example 2 discount-factor scan:
   [ex2_df_scan_kl.csv](analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
 
@@ -167,7 +164,7 @@ For a reader who wants only the core article artifacts:
 1. read the manuscript and inspect the publication figures/tables listed in Section 1
 2. consult the reproducibility tracker files in Section 2
 
-For a reader who wants the computational support layer:
+For a reader who wants the computational details:
 1. read [analysis/manuscript/README.md](analysis/manuscript/README.md)
 2. use the rerun commands in Section 3
-3. inspect the example-specific support artifacts in Sections 4 and 5
+3. inspect the example-specific auxiliary artifacts in Sections 4 and 5

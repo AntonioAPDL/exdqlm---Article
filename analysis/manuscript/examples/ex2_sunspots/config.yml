@@ -10,7 +10,7 @@ targets:
   diagnostic_figure: ex2checks
   benchmark_table: ex2bench
   manuscript_tables: ex2tables
-  ldvb_support: ex2quant_ldvb,ex2checks_ldvb,ex2_ldvb_diagnostics,ex2tables_ldvb
+  ldvb_auxiliary: ex2quant_ldvb,ex2checks_ldvb,ex2_ldvb_diagnostics,ex2tables_ldvb
 notes:
   - Keep the benchmark profile disclosure synchronized with generated backend tables.
   - Article table values are inline in exdqlm-jss.tex and must be updated from generated CSVs after reruns.

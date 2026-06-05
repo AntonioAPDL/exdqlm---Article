@@ -180,7 +180,7 @@ if (!need_ex4) {
     register_note(
       "ex4",
       sprintf(
-        "The tracked Example 4 dataset seed (%d) was selected by the support-only ex4screen workflow using the p0=%0.2f MCMC full-coverage criterion for the plotted slope coefficients.",
+        "The tracked Example 4 dataset seed (%d) was selected by the optional ex4screen workflow using the p0=%0.2f MCMC full-coverage criterion for the plotted slope coefficients.",
         ex4_seed,
         ex4_seed_info$target_p0
       )

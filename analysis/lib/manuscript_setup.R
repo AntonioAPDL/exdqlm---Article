@@ -430,7 +430,20 @@ load_or_fit_cache <- function(key, expr, note = NULL) {
 capture_output_file <- function(filename, expr) {
   path <- file.path(logs_dir, filename)
   txt <- utils::capture.output(eval.parent(substitute(expr)))
-  writeLines(txt, con = path)
+  write_log_lines(txt, path)
+  invisible(path)
+}
+
+normalize_log_lines <- function(x) {
+  x <- sub("[[:space:]]+$", "", x)
+  while (length(x) > 0L && identical(x[[length(x)]], "")) {
+    x <- x[-length(x)]
+  }
+  x
+}
+
+write_log_lines <- function(x, path) {
+  writeLines(normalize_log_lines(x), con = path)
   invisible(path)
 }
 
@@ -767,16 +780,17 @@ write_tracker <- function() {
 
 write_session_info <- function() {
   path <- file.path(logs_dir, "sessionInfo.txt")
-  sink(path)
-  on.exit(sink(), add = TRUE)
   if (!nzchar(Sys.getenv("TZ", unset = ""))) {
     Sys.setenv(TZ = "America/New_York")
   }
-  cat(sprintf("Seed: %s\n", seed_value))
-  cat(sprintf("RNGkind: %s\n", paste(RNGkind(), collapse = " | ")))
-  cat(sprintf("Profile: %s\n", selected_profile))
-  cat(sprintf("Date: %s\n\n", as.character(Sys.time())))
-  print(sessionInfo())
+  txt <- utils::capture.output({
+    cat(sprintf("Seed: %s\n", seed_value))
+    cat(sprintf("RNGkind: %s\n", paste(RNGkind(), collapse = " | ")))
+    cat(sprintf("Profile: %s\n", selected_profile))
+    cat(sprintf("Date: %s\n\n", as.character(Sys.time())))
+    print(sessionInfo())
+  })
+  write_log_lines(txt, path)
 }
 
 promote_publication_figures <- function() {

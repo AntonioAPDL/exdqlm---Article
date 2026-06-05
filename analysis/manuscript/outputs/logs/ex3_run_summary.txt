@@ -1,0 +1,88 @@
+profile=standard
+package_commit=1c09803
+p0=0.15
+trend_prior_m0=3.912023, trend_prior_C0=1.000
+climate_coef_prior_C0=1.000
+discount_factors=trend:0.990, seasonal:0.990, direct_coef:1.000, transfer_zeta:0.990, transfer_psi:1.000
+data_window=1987-01 to 2022-12
+final_training_window=1987-01 to 2021-06
+forecast_holdout_window=2021-07 to 2022-12
+n_observations=432, n_train=414, n_holdout=18
+selected_indices=NOI, AMO
+n.samp=1000, forecast_n.samp=1000, tol=0.05, max_iter=220
+lambda_star_by_training_pplc=0.850
+transfer_psi_df_star=1.000
+
+Training transfer grid diagnostics:
+  lambda transfer_zeta_df transfer_psi_df selection_metric selection_value
+1   0.70             0.99               1             PPLC        139.6582
+2   0.75             0.99               1             PPLC        133.5769
+3   0.80             0.99               1             PPLC        128.5971
+4   0.85             0.99               1             PPLC        125.6014
+5   0.90             0.99               1             PPLC        127.8860
+6   0.95             0.99               1             PPLC        142.8922
+7   0.99             0.99               1             PPLC        161.1224
+          KL KL_flipped      CRPS     PPLC runtime iter converged status
+1 0.08761585 0.04423922 0.3533010 139.6582 194.823  220     FALSE     ok
+2 0.11799273 0.06570937 0.3581321 133.5769 193.669  220     FALSE     ok
+3 0.13211721 0.07127456 0.3621793 128.5971 194.695  220     FALSE     ok
+4 0.15540479 0.09085043 0.3660474 125.6014 192.483  220     FALSE     ok
+5 0.14081466 0.05927812 0.3631396 127.8860 193.476  220     FALSE     ok
+6 0.12522038 0.07004369 0.3522382 142.8922 192.180  220     FALSE     ok
+7 0.14018051 0.08214896 0.3203348 161.1224 186.891  220     FALSE     ok
+  error_message     seed selected
+1               20264002    FALSE
+2               20264003    FALSE
+3               20264004    FALSE
+4               20264005     TRUE
+5               20264006    FALSE
+6               20264007    FALSE
+7               20264008    FALSE
+
+Final-training covariate scaling:
+    index label     center     scale
+noi   noi   NOI 0.11707246 2.8974165
+amo   amo   AMO 0.07316425 0.1889801
+
+MTF$median.kt:
+[1] 25.15187
+
+Run times:
+  M0.elapsed  MTF.elapsed MREG.elapsed
+     147.773      198.184      182.996
+
+Convergence:
+  model iter converged
+1    M0  220     FALSE
+2   MTF  220     FALSE
+3  MREG  220     FALSE
+
+Final-training package diagnostics from exdqlmDiagnostics():
+                   model                  label        KL KL_flipped      CRPS
+1         M0_no_transfer         M0 no transfer 0.1683914 0.11184834 0.4706691
+2 MREG_direct_regression MREG direct regression 0.1117387 0.04663119 0.3470413
+3  MTF_transfer_function  MTF transfer function 0.1554048 0.09085043 0.3655634
+       PPLC
+1  99.45878
+2 151.17088
+3 125.43006
+
+Final holdout forecast metrics from exdqlmForecastDiagnostics():
+                   model                  label horizon mean_check_loss
+1         M0_no_transfer         M0 no transfer      18       0.1190039
+2 MREG_direct_regression MREG direct regression      18       0.1137257
+3  MTF_transfer_function  MTF transfer function      18       0.1554579
+       CRPS
+1 0.4976984
+2 0.4008178
+3 0.5498088
+
+Sensitivity forecast metrics:
+                   model                  label horizon mean_check_loss
+1         M0_no_transfer         M0 no transfer      18       0.1190039
+2 MREG_direct_regression MREG direct regression      18       0.1137257
+3  MTF_transfer_function  MTF transfer function      18       0.1554579
+       CRPS
+1 0.4976984
+2 0.4008178
+3 0.5498088

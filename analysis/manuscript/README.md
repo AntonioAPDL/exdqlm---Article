@@ -4,7 +4,7 @@ This stage reproduces the main manuscript example artifacts (figures, key tables
 and compact console-output equivalents) using the current `exdqlm` package API,
 without modifying `exdqlm-jss.tex`.
 
-For a reader-facing index of the publication artifacts, support-only outputs,
+For a reader-facing index of the publication artifacts, auxiliary outputs,
 and recommended rerun entry points, see `manuscript-reproducibility-index.md`
 in the repository root. For the required preflight, package-test gate, runtime
 policy, targeted-rerun order, and final acceptance criteria, see
@@ -55,13 +55,13 @@ Overleaf in sync.
 
 - Rebuilds Example 1 (Lake Huron) figures.
 - Rebuilds Example 1 predictive-synthesis figure from the tracked 0.05, 0.50, and 0.95 fits.
-- Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with optional support-only LDVB diagnostics available when requested.
+- Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with optional LDVB diagnostics available when requested.
 - Rebuilds a representative dynamic Example 2 runtime-and-quality benchmark table (`tab:ex2bench`) pairing runtime with KL, CRPS, and pplc under the disclosed backend profile.
 - Rebuilds Example 3 (Big Tree) primary figures, package diagnostic table, and held-out forecast-score table from the LDVB workflow.
 - Rebuilds Example 4 sparse static exAL simulation figure + summary table under the Nishimura-Suchard regularized horseshoe (`rhs_ns`) prior.
-- Adds LDVB-focused support artifacts for Example 2 and Example 3 (figures + diagnostics/scan tables).
-- Adds an optional support-only Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.
-- Adds an optional support-only Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds and selects the tracked dataset seed using the \(p_0 = 0.50\) MCMC full-coverage criterion for the plotted slope coefficients.
+- Adds LDVB-focused auxiliary artifacts for Example 2 and Example 3 (figures + diagnostics/scan tables).
+- Adds an optional Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.
+- Adds an optional Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds and selects the tracked dataset seed using the \(p_0 = 0.50\) MCMC full-coverage criterion for the plotted slope coefficients.
 - Writes a reproducibility tracker with per-artifact status notes.
 - Writes support tables describing the disclosed benchmark backend profiles and tracked benchmark environment.
 
@@ -72,13 +72,6 @@ From repository root:
 ```bash
 Rscript analysis/check_reproducibility.R
 Rscript analysis/run_all.R --stage manuscript
-```
-
-For the staged overnight relaunch sequence against the current package checkout,
-you can also run:
-
-```bash
-bash analysis/manuscript/run_overnight_relaunch.sh
 ```
 
 Useful variants:
@@ -113,7 +106,7 @@ set `EXDQLM_LOAD_MODE=installed` and optionally
 `EXDQLM_INSTALLED_LIB=/path/to/R/library` to use an installed `exdqlm`
 package instead. Source mode remains the default.
 
-The support-only Example 4 seed screen is intentionally explicit-only. A full
+The optional Example 4 seed screen is intentionally explicit-only. A full
 standard manuscript run regenerates the Example 4 figure/table from the
 committed `dataset_seed` in `analysis/config/params_manuscript.yml`, but does
 not redo the seed screen unless `--targets ex4screen` is supplied. After
@@ -143,16 +136,7 @@ Main tracker files:
 - `benchmark_backend_profiles.csv`
 - `benchmark_environment.csv`
 
-For the staged overnight relaunch sequence against the current package checkout,
-see `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.
-
-For merge provenance and issue-by-issue integration notes tied to Raquel's
-example review pass, see
-`analysis/manuscript/RAQUEL_EXAMPLES_MERGE_AUDIT.md`.
-
-For the final figure/table readability pass, see
-`analysis/manuscript/PLOT_POLISH_CHECKLIST.md`.
-
-For the shared manuscript prose standard used when editing article text,
-captions, and displayed code explanations, see
-`analysis/manuscript/WRITING_STYLE_CHECKLIST.md`.
+Internal development checklists and review-audit notes are intentionally not
+part of the submission tree. The maintained reader-facing provenance is the
+reproducibility protocol, the code chunk map, the generated tracker, and the
+example manifests.

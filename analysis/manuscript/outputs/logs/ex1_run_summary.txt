@@ -1,0 +1,42 @@
+profile=standard
+quantile run settings: n.burn=2000, n.mcmc=3000
+trace run settings: seed=20260616, n.burn=2000, n.mcmc=3000, thin=10, saved_for_plot=300
+
+M50_trace sigma summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.2240  0.3377  0.3688  0.3701  0.3999  0.5834
+
+M50_trace sigma summary (thinned chain used in ex1mcmc.png):
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.2320  0.3390  0.3702  0.3710  0.4021  0.5708
+
+M50_trace gamma summary:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+-0.64128 -0.17335 -0.04819 -0.07260  0.03618  0.56452
+
+M50_trace gamma summary (thinned chain used in ex1mcmc.png):
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+-0.60344 -0.18249 -0.03518 -0.07639  0.03499  0.56452
+
+M50_trace joint posterior summary:
+  parameter        mean       q025      median      q975
+1     sigma  0.37014861  0.2765223  0.36875261 0.4727220
+2     gamma -0.07259965 -0.5265961 -0.04818659 0.2876583
+
+M50_dqlm gamma fixed:
+[1] 0
+
+Backend metadata (trace model):
+$mcmc
+[1] "C++"
+
+$mode
+[1] "fast"
+
+$gig
+[1] "cpp_devroye_required"
+
+
+Run times (seconds):
+      M95.elapsed M50_trace.elapsed        M5.elapsed  M50_dqlm.elapsed
+          126.066           132.777           123.401            64.348

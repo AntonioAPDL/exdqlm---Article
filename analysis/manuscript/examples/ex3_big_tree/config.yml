@@ -18,7 +18,7 @@ notes:
   - The manuscript covariates are standardized NOI and AMO from the package climateIndices dataset.
   - The manuscript component figure focuses on 2016--2020, while the transfer-state figure keeps the full fitted span.
   - The forecast figure displays the final held-out forecast window from 2020 forward.
-  - Older Big Tree alternatives are preserved under analysis/support/.
+  - Exploratory Big Tree alternatives are excluded from the submission tree.
   - Keep precipitation and soil moisture out of the manuscript workflow unless the paper decision changes.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard --skip-tests

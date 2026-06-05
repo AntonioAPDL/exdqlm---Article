@@ -9,9 +9,9 @@ uses the observed USGS monthly-average `BTflow` response and the standardized
 not use precipitation, soil moisture, hidden daily files, or the older
 reconstructed Big Tree flow series.
 
-The current script is intentionally separated from the older support/sandbox
-workflows under `analysis/support/`. Those workflows are preserved as screening
-or historical analysis inputs only; they are not the manuscript source of truth.
+The current script is the only maintained manuscript-facing Big Tree workflow
+in the submission tree. Exploratory Big Tree alternatives are intentionally
+kept outside this reproducibility archive.
 
 The numerical settings are read from the `ex3` section of
 `analysis/config/params_manuscript.yml`.

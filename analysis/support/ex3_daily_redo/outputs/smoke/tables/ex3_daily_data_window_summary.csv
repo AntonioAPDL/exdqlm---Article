@@ -1,2 +1,0 @@
-"fit_start","fit_end","fit_n","forecast_start","forecast_end","forecast_n","data_start","data_end","data_n","response_transform"
-"2020-01-01","2022-12-25",1090,"2022-12-26","2023-01-24",30,"1987-01-01","2026-03-31",14335,"log_log1p"

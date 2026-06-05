@@ -214,7 +214,7 @@ if (!need_ex2) {
       artifact_id = "log_ex2_benchmark_run_summary",
       artifact_type = "log",
       relative_path = "analysis/manuscript/outputs/logs/ex2_benchmark_run_summary.txt",
-      manuscript_target = "support: Example 2 dynamic benchmark summary",
+      manuscript_target = "auxiliary: Example 2 dynamic benchmark summary",
       status = "reproduced",
       notes = "Runtime and diagnostics summary for the dynamic LDVB versus MCMC benchmark under the disclosed backend profile."
     )

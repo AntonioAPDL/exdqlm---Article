@@ -8,11 +8,11 @@ targets:
   all: ex1
   mcmc_trace: ex1mcmc
   quantiles_and_forecasts: ex1quants
-  synthesis_support: ex1synth
-  kernel_support: ex1kernel
+  synthesis_auxiliary: ex1synth
+  kernel_auxiliary: ex1kernel
 notes:
   - Keep output filenames stable unless exdqlm-jss.tex is updated in the same commit.
-  - The manuscript-facing figure is ex1quants.png; ex1synth.png is support-only.
+  - The manuscript-facing figure is ex1quants.png; ex1synth.png is auxiliary.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests
   tests: Rscript analysis/run_all.R --stage manuscript --tests-only

@@ -114,40 +114,6 @@ testthat::test_that("article figures are declared by the canonical example manif
   )
 })
 
-testthat::test_that("preserved support workflows remain available outside the canonical examples", {
-  support_root <- file.path(repo_root, "analysis", "support")
-  support_workflows <- c(
-    "ex3_daily_redo",
-    "ex3_monthly_nino34_redo",
-    "ex3_monthly_outputlag_redo"
-  )
-
-  testthat::expect_true(dir.exists(support_root))
-  testthat::expect_true(file.exists(file.path(support_root, "README.md")))
-
-  for (workflow in support_workflows) {
-    workflow_dir <- file.path(support_root, workflow)
-    testthat::expect_true(dir.exists(workflow_dir), info = workflow)
-    testthat::expect_true(file.exists(file.path(workflow_dir, "README.md")), info = workflow)
-    testthat::expect_true(file.exists(file.path(workflow_dir, "run_all.R")), info = workflow)
-
-    run_all <- readLines(file.path(workflow_dir, "run_all.R"), warn = FALSE)
-    testthat::expect_true(
-      any(grepl("file.path\\(redo_root, \"\\.\\.\", \"\\.\\.\", \"\\.\\.\"\\)", run_all)),
-      info = sprintf("%s/run_all.R should resolve the article root from analysis/support/<workflow>.", workflow)
-    )
-  }
-
-  daily_shell <- list.files(
-    file.path(support_root, "ex3_daily_redo"),
-    pattern = "^run_.*\\.sh$",
-    full.names = TRUE
-  )
-  for (script in daily_shell) {
-    lines <- readLines(script, warn = FALSE)
-    testthat::expect_true(
-      any(grepl("\\$\\{script_dir\\}/\\.\\./\\.\\./\\.\\.", lines)),
-      info = sprintf("%s should resolve the article root from analysis/support/ex3_daily_redo.", basename(script))
-    )
-  }
+testthat::test_that("submission tree excludes non-canonical exploratory workflows", {
+  testthat::expect_false(dir.exists(file.path(repo_root, "analysis", "support")))
 })

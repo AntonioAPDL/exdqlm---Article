@@ -1,0 +1,109 @@
+ \newcommand{\noop}[1]{}
+\begin{thebibliography}{15}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Barata \emph{et~al.}(2022)Barata, Prado, and Sans\'{o}}]{me}
+Barata R, Prado R, Sans\'{o} B (2022).
+\newblock \enquote{{Fast inference for time-varying quantiles via flexible
+  dynamic models with application to the characterization of atmospheric
+  rivers}.}
+\newblock \emph{The Annals of Applied Statistics}, \textbf{16}(1), 247--271.
+\newblock \doi{10.1214/21-AOAS1497}.
+
+\bibitem[{Barlow \emph{et~al.}(1972)Barlow, Bartholomew, Bremner, and
+  Brunk}]{barlow1972}
+Barlow RE, Bartholomew DJ, Bremner JM, Brunk HD (1972).
+\newblock \emph{Statistical Inference Under Order Restrictions: The Theory and
+  Application of Isotonic Regression}.
+\newblock John Wiley \& Sons, New York.
+
+\bibitem[{Carter and Kohn(1994)}]{carter1994gibbs}
+Carter CK, Kohn R (1994).
+\newblock \enquote{On Gibbs sampling for state space models.}
+\newblock \emph{Biometrika}, \textbf{81}(3), 541--553.
+
+\bibitem[{Chernozhukov \emph{et~al.}(2010)Chernozhukov, Fern{\'a}ndez-Val, and
+  Galichon}]{chernozhukov2010}
+Chernozhukov V, Fern{\'a}ndez-Val I, Galichon A (2010).
+\newblock \enquote{Quantile and Probability Curves Without Crossing.}
+\newblock \emph{Econometrica}, \textbf{78}(3), 1093--1125.
+\newblock \doi{10.3982/ECTA7880}.
+
+\bibitem[{Fr{\"u}hwirth-Schnatter(1994)}]{fruhwirth1994data}
+Fr{\"u}hwirth-Schnatter S (1994).
+\newblock \enquote{Data augmentation and dynamic linear models.}
+\newblock \emph{Journal of time series analysis}, \textbf{15}(2), 183--202.
+
+\bibitem[{Gelfand and Ghosh(1998)}]{gelfand1998model}
+Gelfand AE, Ghosh SK (1998).
+\newblock \enquote{Model choice: a minimum posterior predictive loss approach.}
+\newblock \emph{Biometrika}, \textbf{85}(1), 1--11.
+
+\bibitem[{Gneiting and Raftery(2007)}]{gneiting2007}
+Gneiting T, Raftery AE (2007).
+\newblock \enquote{Strictly Proper Scoring Rules, Prediction, and Estimation.}
+\newblock \emph{Journal of the American Statistical Association},
+  \textbf{102}(477), 359--378.
+\newblock \doi{10.1198/016214506000001437}.
+
+\bibitem[{Gon{\c{c}}alves \emph{et~al.}(2017)Gon{\c{c}}alves, Migon, and
+  Bastos}]{gonccalves2017dynamic}
+Gon{\c{c}}alves K, Migon HS, Bastos LS (2017).
+\newblock \enquote{Dynamic quantile linear model: a {B}ayesian approach.}
+\newblock \emph{arXiv preprint arXiv:1711.00162}.
+
+\bibitem[{Kozumi and Kobayashi(2011)}]{kozumi2011gibbs}
+Kozumi H, Kobayashi G (2011).
+\newblock \enquote{Gibbs sampling methods for {B}ayesian quantile regression.}
+\newblock \emph{Journal of statistical computation and simulation},
+  \textbf{81}(11), 1565--1578.
+
+\bibitem[{Laio and Tamea(2007)}]{laio2007verification}
+Laio F, Tamea S (2007).
+\newblock \enquote{Verification Tools for Probabilistic Forecasts of Continuous
+  Hydrological Variables.}
+\newblock \emph{Hydrology and Earth System Sciences}, \textbf{11}(4),
+  1267--1277.
+\newblock \doi{10.5194/hess-11-1267-2007}.
+
+\bibitem[{Neal(2003)}]{neal2003slice}
+Neal RM (2003).
+\newblock \enquote{Slice sampling.}
+\newblock \emph{The Annals of Statistics}, \textbf{31}(3), 705--767.
+\newblock \doi{10.1214/aos/1056562461}.
+
+\bibitem[{Nishimura and Suchard(2023)}]{nishimura2023shrunken}
+Nishimura A, Suchard MA (2023).
+\newblock \enquote{Shrinkage with shrunken shoulders: Gibbs sampling shrinkage
+  model posteriors with guaranteed convergence rates.}
+\newblock \emph{Bayesian Analysis}, \textbf{18}(2), 367--390.
+\newblock \doi{10.1214/22-BA1308}.
+
+\bibitem[{Wang and Blei(2013)}]{wang2013nonconjugatevb}
+Wang C, Blei DM (2013).
+\newblock \enquote{Variational Inference in Non-Conjugate Models.}
+\newblock \emph{arXiv preprint arXiv:1209.4360}.
+\newblock \urlprefix\url{https://arxiv.org/abs/1209.4360}.
+
+\bibitem[{West and Harrison(1997)}]{west1997bayesian}
+West M, Harrison J (1997).
+\newblock \emph{Bayesian Forecasting and Dynamic Models}.
+\newblock 2 edition. Springer, New York.
+\newblock \doi{10.1007/b98971}.
+
+\bibitem[{Yan \emph{et~al.}(2025)Yan, Zheng, and Kottas}]{yan2025family}
+Yan Y, Zheng X, Kottas A (2025).
+\newblock \enquote{A New Family of Error Distributions for Bayesian Quantile
+  Regression.}
+\newblock \emph{Bayesian Analysis}.
+\newblock \doi{10.1214/25-BA1507}.
+
+\end{thebibliography}

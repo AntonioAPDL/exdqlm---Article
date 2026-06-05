@@ -386,7 +386,7 @@ if (!need_ex1) {
       ex1_synthesis_bridge_check,
       filename = "ex1_synthesis_bridge_check.csv",
       artifact_id = "tab_ex1_synthesis_bridge",
-      manuscript_target = "support: Example 1 synthesis forecast-origin check",
+      manuscript_target = "auxiliary: Example 1 synthesis forecast-origin check",
       notes = "Checks that the forecast synthesis begins one Lake Huron time step after the observed-period synthesis endpoint; Figure 2(d) uses these endpoints for the visual interval bridge."
     )
   }
@@ -532,7 +532,7 @@ if (!need_ex1) {
       artifact_id = "log_ex1_synthesis_summary",
       artifact_type = "log",
       relative_path = "analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt",
-      manuscript_target = "support: Example 1 synthesis summary",
+      manuscript_target = "auxiliary: Example 1 synthesis summary",
       status = "reproduced",
       notes = "Synthesis settings and compact summaries for the Lake Huron predictive synthesis figure."
     )
@@ -603,9 +603,9 @@ if (!need_ex1) {
       artifact_id = "fig_ex1synth",
       artifact_type = "figure",
       relative_path = "analysis/manuscript/outputs/figures/ex1synth.png",
-      manuscript_target = "support: Example 1 standalone synthesis figure",
+      manuscript_target = "auxiliary: Example 1 standalone synthesis figure",
       status = "reproduced",
-      notes = "Standalone support figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon, with a darker forecast synthesis band and one-step visual bridge at the forecast origin."
+      notes = "Standalone auxiliary figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon, with a darker forecast synthesis band and one-step visual bridge at the forecast origin."
     )
   }
 
@@ -801,7 +801,7 @@ if (!need_ex1) {
       artifact_id = "log_ex1_kernel_compare",
       artifact_type = "log",
       relative_path = "analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt",
-      manuscript_target = "support: Example 1 kernel comparison summary",
+      manuscript_target = "auxiliary: Example 1 kernel comparison summary",
       status = "reproduced",
       notes = "Four-chain Lake Huron median comparison of slice and laplace_rw."
     )
@@ -810,7 +810,7 @@ if (!need_ex1) {
       kernel_summary,
       filename = "ex1_kernel_summary.csv",
       artifact_id = "tab_ex1_kernel_summary",
-      manuscript_target = "support: Example 1 kernel summary",
+      manuscript_target = "auxiliary: Example 1 kernel summary",
       status = "reproduced",
       notes = "Pooled sigma/gamma posterior, runtime, Rhat, and ESS summaries for free-sigma slice and laplace_rw fits."
     )
@@ -819,7 +819,7 @@ if (!need_ex1) {
       kernel_chain_stability,
       filename = "ex1_kernel_chain_stability.csv",
       artifact_id = "tab_ex1_kernel_chain_stability",
-      manuscript_target = "support: Example 1 kernel chain stability",
+      manuscript_target = "auxiliary: Example 1 kernel chain stability",
       status = "reproduced",
       notes = "Per-chain sigma/gamma posterior summaries, runtimes, and acceptance diagnostics."
     )
@@ -910,7 +910,7 @@ if (!need_ex1) {
       artifact_id = "fig_ex1_kernel_compare",
       artifact_type = "figure",
       relative_path = "analysis/manuscript/outputs/figures/ex1_kernel_compare.png",
-      manuscript_target = "support: Example 1 slice vs laplace_rw kernel comparison",
+      manuscript_target = "auxiliary: Example 1 slice vs laplace_rw kernel comparison",
       status = "reproduced",
       notes = "Four-chain Lake Huron median comparison with sigma and gamma trace overlays under free sigma."
     )

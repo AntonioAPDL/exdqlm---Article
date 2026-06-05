@@ -4,7 +4,7 @@ This folder contains the canonical scripts for the static exAL simulation
 example in Section `sec:ex4static` of `exdqlm-jss.tex`.
 
 - `run.R` regenerates the manuscript-facing figure/table.
-- `seed_screen.R` runs the optional support-only seed screen.
+- `seed_screen.R` runs the optional seed screen.
 - `helpers.R` contains Example 4 helper functions shared by both scripts.
 
 The numerical settings are read from the `ex4` section of

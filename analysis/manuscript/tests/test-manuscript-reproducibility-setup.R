@@ -103,7 +103,6 @@ testthat::test_that("reader-facing analysis docs avoid stale machine-specific pa
     "README.md",
     "analysis/README.md",
     "analysis/manuscript/README.md",
-    "analysis/manuscript/RAQUEL_EXAMPLES_MERGE_AUDIT.md",
     "manuscript-reproducibility-index.md"
   )
 

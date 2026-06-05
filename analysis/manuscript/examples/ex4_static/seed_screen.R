@@ -240,7 +240,7 @@ if (!need_ex4screen) {
     detail_rows,
     filename = sprintf("%s_summary.csv", screen_stem),
     artifact_id = sprintf("tab_%s_summary", screen_stem),
-    manuscript_target = "support: Example 4 seed screen metrics",
+    manuscript_target = "auxiliary: Example 4 seed screen metrics",
     status = "reproduced",
     notes = sprintf(
       "Per-seed, per-quantile comparison of the Example 4 static fits. Seed selection targets p0 = %0.2f and requires full MCMC 95%% slope-interval coverage.",
@@ -252,7 +252,7 @@ if (!need_ex4screen) {
     seed_rows,
     filename = sprintf("%s_selection.csv", screen_stem),
     artifact_id = sprintf("tab_%s_selection", screen_stem),
-    manuscript_target = "support: Example 4 seed screen selection",
+    manuscript_target = "auxiliary: Example 4 seed screen selection",
     status = "reproduced",
     notes = sprintf(
       "Seed-level selection summary for the Example 4 screen. The selected seed is the first full-coverage p0 = %0.2f candidate after sorting by MCMC active RMSE, holdout RMSE, runtime, and seed.",
@@ -287,7 +287,7 @@ if (!need_ex4screen) {
     artifact_id = sprintf("log_%s_summary", screen_stem),
     artifact_type = "log",
     relative_path = sprintf("analysis/manuscript/outputs/logs/%s_summary.txt", screen_stem),
-    manuscript_target = "support: Example 4 seed screen summary",
+    manuscript_target = "auxiliary: Example 4 seed screen summary",
     status = "reproduced",
     notes = sprintf(
       "Selection criteria and chosen Example 4 dataset seed based on the p0 = %0.2f MCMC coverage screen.",

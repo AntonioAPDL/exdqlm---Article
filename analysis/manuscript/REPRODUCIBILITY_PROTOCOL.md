@@ -183,8 +183,8 @@ EXDQLM_PKG_PATH=../exdqlm \
 
 The full run regenerates the publication-facing Example 4 simulation figure and
 table from the committed `dataset_seed` in `analysis/config/params_manuscript.yml`.
-It does not rerun the expensive support-only seed screen by default. To reselect
-the Example 4 simulation seed, run the explicit support target:
+It does not rerun the expensive optional seed screen by default. To reselect
+the Example 4 simulation seed, run the explicit seed-screen target:
 
 ```sh
 EXDQLM_PKG_PATH=../exdqlm \

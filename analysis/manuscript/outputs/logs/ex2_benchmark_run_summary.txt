@@ -1,0 +1,23 @@
+profile=standard
+backend_profile=B
+ldvb_n.samp=3000, benchmark_n.burn=2000, benchmark_n.mcmc=3000
+
+LDVB benchmark diagnostics:
+   model runtime_sec        KL     CRPS     pplc
+1   DQLM      22.709 0.1328951 8.534882 3855.970
+2 exDQLM     104.015 0.1197573 6.268462 2328.009
+
+MCMC benchmark diagnostics:
+   model runtime_sec        KL     CRPS     pplc
+1   DQLM     267.877 0.1517377 7.581654 2990.764
+2 exDQLM     325.526 0.1644520 5.094997 2186.264
+
+MCMC backend metadata:
+$mcmc
+[1] "C++"
+
+$mode
+[1] "fast"
+
+$gig
+[1] "cpp_devroye_required"

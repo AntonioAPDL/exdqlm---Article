@@ -99,10 +99,10 @@ if (targeted_run) {
           "log_ex1_kernel_compare"
         ),
         manuscript_target = c(
-          "support: Example 1 slice vs laplace_rw kernel comparison",
-          "support: Example 1 kernel summary",
-          "support: Example 1 kernel chain stability",
-          "support: Example 1 kernel comparison summary"
+          "auxiliary: Example 1 slice vs laplace_rw kernel comparison",
+          "auxiliary: Example 1 kernel summary",
+          "auxiliary: Example 1 kernel chain stability",
+          "auxiliary: Example 1 kernel comparison summary"
         ),
         stringsAsFactors = FALSE
       )
@@ -119,9 +119,9 @@ if (targeted_run) {
           "log_ex4_seed_screen_p050_summary"
         ),
         manuscript_target = c(
-          "support: Example 4 seed screen metrics",
-          "support: Example 4 seed screen selection",
-          "support: Example 4 seed screen summary"
+          "auxiliary: Example 4 seed screen metrics",
+          "auxiliary: Example 4 seed screen selection",
+          "auxiliary: Example 4 seed screen summary"
         ),
         stringsAsFactors = FALSE
       )
@@ -194,7 +194,7 @@ save_table_csv(
   benchmark_profiles_table(),
   filename = "benchmark_backend_profiles.csv",
   artifact_id = "tab_benchmark_backend_profiles",
-  manuscript_target = "support: benchmark backend profiles",
+  manuscript_target = "auxiliary: benchmark backend profiles",
   status = "reproduced",
   notes = "Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend)."
 )
@@ -203,7 +203,7 @@ save_table_csv(
   benchmark_environment_table(),
   filename = "benchmark_environment.csv",
   artifact_id = "tab_benchmark_environment",
-  manuscript_target = "support: benchmark environment details",
+  manuscript_target = "auxiliary: benchmark environment details",
   status = "reproduced",
   notes = "CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run."
 )

@@ -10,6 +10,7 @@ analysis/exal/outputs/logs/*
 !analysis/exal/outputs/logs/.gitkeep
 analysis/manuscript/outputs/logs/*
 !analysis/manuscript/outputs/logs/.gitkeep
+!analysis/manuscript/outputs/logs/*.txt
 analysis/manuscript/outputs/cache/*
 !analysis/manuscript/outputs/cache/.gitkeep
 
@@ -19,6 +20,8 @@ Figures/
 # LaTeX build artifacts
 *.aux
 *.bbl
+!exdqlm-jss.bbl
+!exdqlm-supplement.bbl
 *.blg
 *.log
 *.out

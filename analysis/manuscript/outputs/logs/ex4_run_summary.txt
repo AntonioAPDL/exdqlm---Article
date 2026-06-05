@@ -1,0 +1,21 @@
+profile=standard
+seed=20260712
+seed_source=configured
+train_n=160, holdout_n=800, predictors=8
+ldvb_n.samp=3000, n.burn=2000, n.mcmc=3000
+cov_rho=0.50, sigma_eps=1.50
+beta_slopes=3.0, 1.5, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0
+rhs_ctrl: tau0=0.150, a_zeta=2.000, b_zeta=9.000, zeta2_fixed=9.000
+p_levels=0.05, 0.25, 0.50
+
+p0=0.05
+  LDVB: converged=TRUE, iter=301, runtime=27.959, active_rmse=0.1069, inactive_mae=0.0339, holdout_rmse=0.6741
+  MCMC: kernel=slice, runtime=196.520, active_rmse=0.0719, inactive_mae=0.0404, holdout_rmse=0.5917
+
+p0=0.25
+  LDVB: converged=TRUE, iter=201, runtime=13.894, active_rmse=0.1377, inactive_mae=0.0420, holdout_rmse=0.3927
+  MCMC: kernel=slice, runtime=192.514, active_rmse=0.0819, inactive_mae=0.0440, holdout_rmse=0.3276
+
+p0=0.50
+  LDVB: converged=TRUE, iter=44, runtime=3.105, active_rmse=0.2414, inactive_mae=0.0808, holdout_rmse=0.4099
+  MCMC: kernel=slice, runtime=201.301, active_rmse=0.2251, inactive_mae=0.0480, holdout_rmse=0.3716

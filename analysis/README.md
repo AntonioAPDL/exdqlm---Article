@@ -6,12 +6,10 @@ This folder contains reproducible analysis stages for the article.
 - `manuscript`: end-to-end regeneration of main manuscript example artifacts.
   Canonical per-example scripts live under `analysis/manuscript/examples/`.
   This includes the sparse `rhs_ns` static benchmark used in Example 4.
-- `support`: preserved exploratory and alternative workflows that are useful for
-  audit/history but are not the manuscript source of truth.
 
-For a reader-facing map of the manuscript artifacts, support-only outputs, and
-rerun entry points, see `manuscript-reproducibility-index.md` in the repository
-root.
+For a reader-facing map of the manuscript artifacts, auxiliary generated
+outputs, and rerun entry points, see `manuscript-reproducibility-index.md` in
+the repository root.
 
 The canonical source for the paper examples is
 `analysis/manuscript/examples/`, executed through `analysis/run_all.R --stage
@@ -61,7 +59,6 @@ package instead. Source mode remains the default.
 - `exal/`: exAL-focused scripts/tests/outputs.
 - `lib/`: shared analysis helpers used by the manuscript stage.
 - `manuscript/`: canonical manuscript example scripts/tests/outputs.
-- `support/`: non-canonical exploratory workflows retained for reference.
 
 ## Notes
 
@@ -70,5 +67,6 @@ package instead. Source mode remains the default.
 - The optional `--promote` flag copies selected figures into top-level
   `Figures/` as a local export mirror. That directory is ignored by git and is
   not used by `exdqlm-jss.tex`.
-- The staged overnight manuscript relaunch plan is documented in
-  `analysis/manuscript/OVERNIGHT_RELAUNCH_CHECKLIST.md`.
+- Non-canonical exploratory workflows are intentionally excluded from the
+  submission tree. New exploratory scripts should live outside the shared
+  source archive unless they become part of the maintained manuscript pipeline.

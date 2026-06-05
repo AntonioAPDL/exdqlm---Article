@@ -2,7 +2,7 @@
 
 This repository contains the reproducible manuscript materials for the
 `exdqlm` article: LaTeX source, figures, tables, analysis scripts, tests, and
-supporting audit material.
+submission-facing replication material.
 
 The article is intended to be run against the companion package repository:
 
@@ -143,7 +143,7 @@ artifacts, including the Example 4 simulation figure/table from the committed
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --profile standard
 ```
 
-To re-run the support-only Example 4 seed screen intentionally:
+To re-run the optional Example 4 seed screen intentionally:
 
 ```sh
 EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --force-refit --skip-tests
@@ -192,5 +192,7 @@ LaTeX and must be synchronized from generated CSV/log outputs after reruns.
   seed. Printed runtime values use benchmark Profile B, which records one C++
   thread, disables the C++ sampler backend, and stores the backend/profile
   choices in `benchmark_environment.csv`.
-- Support workflows under `analysis/support/` are retained for audit/history;
-  they are not the canonical source of manuscript figures and tables.
+- The submission tree retains the canonical manuscript workflow and generated
+  reproducibility outputs. Exploratory development workflows are intentionally
+  excluded from this repository state so the shared source archive stays focused
+  on reproducing the paper.
