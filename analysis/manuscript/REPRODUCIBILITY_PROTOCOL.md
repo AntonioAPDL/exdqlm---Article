@@ -3,13 +3,14 @@
 This protocol defines the reference workflow for regenerating the article
 figures, tables, diagnostics, and benchmark metadata.
 
-The manuscript is intended to be reproducible from two checkouts:
+The manuscript is intended to be reproducible with `exdqlm` version 1.0.0:
 
 - Article repository: `AntonioAPDL/exdqlm---Article`
 - Package repository: `AntonioAPDL/exdqlm`
+- CRAN package page: `https://CRAN.R-project.org/package=exdqlm`
 
-For the current article pass, the package checkout must track
-`origin/feature/1.0.0-jss` and report package version `1.0.0`.
+Readers can use the CRAN release through installed-package mode. Source-mode
+reference runs should use a committed checkout of the same 1.0.0 package code.
 
 ## Required Preflight
 
@@ -19,6 +20,14 @@ Run this before regenerating any manuscript artifacts:
 EXDQLM_PKG_PATH=../exdqlm \
   /path/to/R-4.6.0/bin/Rscript \
   analysis/check_reproducibility.R --stage manuscript --profile standard --fetch --require-r-version 4.6.0
+```
+
+For an installed CRAN package, use:
+
+```sh
+EXDQLM_LOAD_MODE=installed \
+  /path/to/R-4.6.0/bin/Rscript \
+  analysis/check_reproducibility.R --stage manuscript --profile standard --require-r-version 4.6.0
 ```
 
 For final reference runs, use `--strict`. Strict mode must pass before a final

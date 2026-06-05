@@ -7,8 +7,9 @@ tracked rerun paths used to regenerate them from the current `1.0.0` package.
 
 Current snapshot references are recorded in the generated reproducibility
 tracker and rerun logs. When regenerating artifacts, use the checked-out article
-commit together with the package release branch `feature/1.0.0-jss`,
-or override the package path explicitly with `--pkg-path`.
+commit together with `exdqlm` version 1.0.0. Readers can use the CRAN release
+through `EXDQLM_LOAD_MODE=installed`; source-mode reference runs can instead
+point `--pkg-path` or `EXDQLM_PKG_PATH` to a committed package checkout.
 
 ## 1. Publication Artifacts
 

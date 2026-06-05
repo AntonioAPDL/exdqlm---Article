@@ -235,16 +235,21 @@ main <- function() {
       }
       if (!identical(pkg_spec$version, "1.0.0")) {
         warn(sprintf("Package source version is %s, not 1.0.0.", pkg_spec$version))
-      }
-      if (!identical(pkg_spec$git$upstream, "origin/feature/1.0.0-jss")) {
-        warn(sprintf("Package upstream is %s; expected origin/feature/1.0.0-jss for current paper work.", pkg_spec$git$upstream))
+      } else {
+        ok("package source version is 1.0.0")
       }
     }
   } else {
     if (!is.null(load_spec$installed_lib)) line("installed lib", load_spec$installed_lib)
     if (requireNamespace("exdqlm", quietly = TRUE)) {
-      line("installed version", as.character(utils::packageVersion("exdqlm")))
+      installed_version <- as.character(utils::packageVersion("exdqlm"))
+      line("installed version", installed_version)
       ok("installed exdqlm is available")
+      if (!identical(installed_version, "1.0.0")) {
+        warn(sprintf("Installed exdqlm version is %s, not 1.0.0.", installed_version))
+      } else {
+        ok("installed exdqlm version is 1.0.0")
+      }
     } else {
       fail("EXDQLM_LOAD_MODE=installed but installed exdqlm is unavailable.")
     }

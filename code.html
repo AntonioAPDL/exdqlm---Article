@@ -120,12 +120,13 @@ section.footnotes {
 article. It wraps the manuscript pipeline in <code>analysis/</code> and is the file to
 run from a fresh clone, an Overleaf source download, or a final reference
 checkout.</p>
-<p>The script can load <code>exdqlm</code> in two ways. Source mode is the default and
-uses a companion package checkout, usually supplied by
-<code>EXDQLM_PKG_PATH=../exdqlm</code> or <code>--pkg-path ../exdqlm</code>. Installed-package mode
-is useful for reviewer and Overleaf-source checks:</p>
+<p>The script can load <code>exdqlm</code> in two ways. Installed-package mode is the
+simplest route for readers using the CRAN 1.0.0 release:</p>
 <pre><code class="language-sh">EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only --skip-preflight
 </code></pre>
+<p>Source mode is also available for reference runs from a companion package
+checkout, usually supplied by <code>EXDQLM_PKG_PATH=../exdqlm</code> or
+<code>--pkg-path ../exdqlm</code>.</p>
 <h2 id="sec:reproducibility-profiles-and-modes">Reproducibility profiles and modes</h2>
 <p>The <code>quick</code> profile is a smoke-test profile. The <code>standard</code> profile is the
 manuscript replication profile used for the reported examples. Two
@@ -145,8 +146,8 @@ applied. The manuscript benchmark profile uses one C++ thread and keeps the
 C++ sampler backend disabled. Runtime values are therefore reference-profile
 elapsed fitting times, not machine-independent constants.</p>
 <h2 id="sec:main-commands">Main commands</h2>
-<pre><code class="language-sh">EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile quick --mode portable --tests-only
-EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile standard --mode portable
+<pre><code class="language-sh">EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only
+EXDQLM_LOAD_MODE=installed Rscript code.R --profile standard --mode portable
 EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile standard --mode reference --strict
 </code></pre>
 <p>The first command is a cheap smoke test. The second command regenerates the
@@ -175,7 +176,7 @@ by the manuscript test suite.</p>
 <p>JSS encourages an output file created from this script. The safe portable
 HTML check uses the quick tests-only profile, which validates the wiring
 without overwriting manuscript artifacts:</p>
-<pre><code class="language-r">Sys.setenv(EXDQLM_PKG_PATH = &quot;../exdqlm&quot;)
+<pre><code class="language-r">Sys.setenv(EXDQLM_LOAD_MODE = &quot;installed&quot;)
 Sys.setenv(EXDQLM_REPRO_PROFILE = &quot;quick&quot;)
 Sys.setenv(EXDQLM_REPRO_MODE = &quot;portable&quot;)
 Sys.setenv(EXDQLM_REPRO_TESTS_ONLY = &quot;true&quot;)

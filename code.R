@@ -7,14 +7,16 @@
 #' run from a fresh clone, an Overleaf source download, or a final reference
 #' checkout.
 #'
-#' The script can load `exdqlm` in two ways. Source mode is the default and
-#' uses a companion package checkout, usually supplied by
-#' `EXDQLM_PKG_PATH=../exdqlm` or `--pkg-path ../exdqlm`. Installed-package mode
-#' is useful for reviewer and Overleaf-source checks:
+#' The script can load `exdqlm` in two ways. Installed-package mode is the
+#' simplest route for readers using the CRAN 1.0.0 release:
 #'
 #' ```sh
 #' EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only --skip-preflight
 #' ```
+#'
+#' Source mode is also available for reference runs from a companion package
+#' checkout, usually supplied by `EXDQLM_PKG_PATH=../exdqlm` or
+#' `--pkg-path ../exdqlm`.
 #'
 #' ## Reproducibility profiles and modes
 #'
@@ -39,8 +41,8 @@
 #' ## Main commands
 #'
 #' ```sh
-#' EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile quick --mode portable --tests-only
-#' EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile standard --mode portable
+#' EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only
+#' EXDQLM_LOAD_MODE=installed Rscript code.R --profile standard --mode portable
 #' EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile standard --mode reference --strict
 #' ```
 #'
@@ -77,7 +79,7 @@
 #' without overwriting manuscript artifacts:
 #'
 #' ```r
-#' Sys.setenv(EXDQLM_PKG_PATH = "../exdqlm")
+#' Sys.setenv(EXDQLM_LOAD_MODE = "installed")
 #' Sys.setenv(EXDQLM_REPRO_PROFILE = "quick")
 #' Sys.setenv(EXDQLM_REPRO_MODE = "portable")
 #' Sys.setenv(EXDQLM_REPRO_TESTS_ONLY = "true")

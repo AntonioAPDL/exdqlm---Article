@@ -4,48 +4,47 @@ This repository contains the reproducible manuscript materials for the
 `exdqlm` article: LaTeX source, figures, tables, analysis scripts, tests, and
 submission-facing replication material.
 
-The article is intended to be run against the companion package repository:
+The article is intended to be run with `exdqlm` version 1.0.0:
 
 - Article repo: `AntonioAPDL/exdqlm---Article`
 - Package repo: `AntonioAPDL/exdqlm`
-- Current package branch for this article work: `feature/1.0.0-jss`
+- CRAN package page: `https://CRAN.R-project.org/package=exdqlm`
 
 ## Quick Start
 
-Clone the article and package repositories next to each other:
+Clone the article repository and install the CRAN release:
 
 ```sh
 git clone https://github.com/AntonioAPDL/exdqlm---Article.git
-git clone --branch feature/1.0.0-jss https://github.com/AntonioAPDL/exdqlm.git
 cd exdqlm---Article
+Rscript -e 'install.packages("exdqlm", repos = "https://cloud.r-project.org")'
 ```
 
-Run the read-only preflight check:
+Run the read-only preflight check using the installed package:
 
 ```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/check_reproducibility.R
+EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R
 ```
 
-Before regenerating any examples, refresh remote refs and require both the local
-package checkout and R runtime to be current. As of 2026-05-13, the current
-official R release is R 4.6.0, so final reference runs should use at least that
-version:
+Before regenerating any examples, require the package version and R runtime to
+match the reference setup. As of 2026-05-13, the current official R release is
+R 4.6.0, so final reference runs should use at least that version:
 
 ```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/check_reproducibility.R --fetch --strict --require-r-version 4.6.0
+EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R --strict --require-r-version 4.6.0
 ```
 
 If the default `Rscript` on the machine is older, call the target R
 installation directly:
 
 ```sh
-EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript analysis/check_reproducibility.R --fetch --strict --require-r-version 4.6.0
+EXDQLM_LOAD_MODE=installed /path/to/R-4.6.0/bin/Rscript analysis/check_reproducibility.R --strict --require-r-version 4.6.0
 ```
 
 Run the cheap manuscript structure/tests pass:
 
 ```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --tests-only
+EXDQLM_LOAD_MODE=installed Rscript analysis/run_all.R --stage manuscript --tests-only
 ```
 
 The top-level reader entrypoint wraps the same preflight and manuscript
@@ -57,8 +56,8 @@ sensible. It does not require machine-dependent runtimes or simulation-based
 diagnostics to exactly match the manuscript's reference-machine values.
 
 ```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile quick --mode portable --tests-only
-EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode portable
+EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only
+EXDQLM_LOAD_MODE=installed /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode portable
 ```
 
 Use `--mode reference` only for the final reference-machine sync before
@@ -66,7 +65,7 @@ committing printed manuscript table values. Reference mode also runs the exact
 generated-value-to-manuscript checks and enables strict preflight behavior:
 
 ```sh
-EXDQLM_PKG_PATH=../exdqlm /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode reference --strict
+EXDQLM_LOAD_MODE=installed /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode reference --strict
 ```
 
 JSS encourages an HTML output log from the standalone replication script. To
@@ -74,7 +73,7 @@ refresh `code.html` without overwriting manuscript artifacts, run the quick
 portable tests-only spin:
 
 ```r
-Sys.setenv(EXDQLM_PKG_PATH = "../exdqlm")
+Sys.setenv(EXDQLM_LOAD_MODE = "installed")
 Sys.setenv(EXDQLM_REPRO_PROFILE = "quick")
 Sys.setenv(EXDQLM_REPRO_MODE = "portable")
 Sys.setenv(EXDQLM_REPRO_TESTS_ONLY = "true")
@@ -107,7 +106,8 @@ Example:
 Rscript analysis/run_all.R --stage manuscript --pkg-path ../exdqlm --tests-only
 ```
 
-Installed-package mode is also supported:
+Installed-package mode is the simplest route for readers using the CRAN
+release:
 
 ```sh
 EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R
@@ -125,8 +125,8 @@ is orchestrated by `analysis/run_all.R`.
 Cheap checks:
 
 ```sh
-Rscript analysis/check_reproducibility.R
-Rscript analysis/run_all.R --stage manuscript --tests-only
+EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R
+EXDQLM_LOAD_MODE=installed Rscript analysis/run_all.R --stage manuscript --tests-only
 ```
 
 Targeted regeneration:
