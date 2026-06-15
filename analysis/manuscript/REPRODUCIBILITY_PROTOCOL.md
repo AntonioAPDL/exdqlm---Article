@@ -82,7 +82,7 @@ inspection.
 
 ## Manuscript code policy
 
-The main article should show the package-facing code needed to understand each
+The main text should show the package-facing code needed to understand each
 workflow: model builders, fitting calls, diagnostics, forecasts, synthesis, and
 the table/figure-producing package calls. Generic preprocessing should be
 described in prose when that improves readability, with the guarded executable

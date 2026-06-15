@@ -61,6 +61,8 @@ is generated from `code.R` with `knitr::spin("code.R", knit = TRUE)`.
 - `code.R`: public standalone replication script.
 - `code.html`: execution log generated from `code.R`.
 - `exdqlm-jss.tex`: manuscript source.
+- `exdqlm-supplement.tex`: appendix source input included by
+  `exdqlm-jss.tex`.
 - `analysis/config/params_manuscript.yml`: seeds, profile settings, expected
   package version, and backend profile.
 - `analysis/manuscript/examples/`: canonical scripts for Examples 1--4.

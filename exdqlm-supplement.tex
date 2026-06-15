@@ -1,99 +1,16 @@
-\documentclass[nojss,noheadings]{jss}
+% Appendix source input for exdqlm-jss.tex.
+% This file is intentionally not a standalone JSS manuscript.
 
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{bm}
-\usepackage{booktabs}
-\usepackage{tabularx}
-\usepackage{enumitem}
-\IfFileExists{placeins.sty}{\usepackage{placeins}}{\newcommand{\FloatBarrier}{}}
-\raggedbottom
-
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\Rp}{\mathbb{R}_{+}}
-\newcommand{\Ind}{\mathbb{I}}
-\newcommand{\dd}{\mathrm{d}}
-\renewcommand{\E}{\mathbb{E}}
-\newcommand{\Var}{\operatorname{Var}}
-\newcommand{\Cov}{\operatorname{Cov}}
-\newcommand{\tr}{\operatorname{tr}}
-\newcommand{\diag}{\operatorname{diag}}
-\newcommand{\logit}{\operatorname{logit}}
-\newcommand{\expit}{\operatorname{expit}}
-\newcommand{\vect}[1]{\bm{#1}}
-\newcommand{\mat}[1]{\mathbf{#1}}
-\newcommand{\N}{\mathcal{N}}
-\newcommand{\TNp}{\mathcal{N}^{+}}
-\newcommand{\IG}{\operatorname{IG}}
-\newcommand{\GIG}{\operatorname{GIG}}
-\newcommand{\Exp}{\operatorname{Exp}}
-\newcommand{\AL}{\operatorname{AL}}
-\newcommand{\exAL}{\operatorname{exAL}}
-\newcommand{\KL}{\operatorname{KL}}
-\newcommand{\CRPS}{\operatorname{CRPS}}
-\newcommand{\PPLC}{\operatorname{PPLC}}
-\newcommand{\elbo}{\mathcal{L}}
-\newcommand{\pigamma}{\pi_\gamma}
-\newcommand{\TableStyle}{\footnotesize\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.08}}
-\newcounter{suppalgorithm}
-\renewcommand{\thesuppalgorithm}{S\arabic{suppalgorithm}}
-\newenvironment{suppalgorithm}[1]{%
-  \refstepcounter{suppalgorithm}%
-  \par\medskip\noindent\textbf{Algorithm~\thesuppalgorithm. #1.}\par\nobreak
-}{\par\medskip}
-\renewcommand{\theequation}{S\arabic{equation}}
-\renewcommand{\thetable}{S\arabic{table}}
-\renewcommand{\thesection}{S\arabic{section}}
-\renewcommand{\thesubsection}{S\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{S\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-\author{Antonio Aguirre \\ University of California Santa Cruz \And
-        Raquel Barata \\ University of California Santa Cruz \AND
-        Raquel Prado \\ University of California Santa Cruz \And
-        Bruno Sans\'{o} \\ University of California Santa Cruz}
-\title{Supplementary Material for ``\pkg{exdqlm}: An \proglang{R} Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models''}
-
-\Plainauthor{Antonio Aguirre, Raquel Barata, Raquel Prado, Bruno Sans\'o}
-\Plaintitle{Supplementary Material for exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}
-\Shorttitle{Supplementary material for \pkg{exdqlm}}
-
-\Abstract{This supplement derives the posterior targets, full conditional
-distributions, variational updates, Laplace--delta approximations, evidence
-lower bound (ELBO) terms, and numerical blocks used by the algorithms in
-\pkg{exdqlm}. It covers state-space DQLMs under the asymmetric Laplace (AL)
-likelihood and exDQLMs under the extended asymmetric Laplace (exAL) likelihood,
-transfer-function state augmentation, static AL and exAL regression, ridge and
-Nishimura--Suchard regularized horseshoe
-shrinkage priors, forecasting, diagnostics, and posterior-predictive synthesis.
-The notation follows the main article, and each algorithmic block is linked to
-the corresponding exported package function.}
-
-\Keywords{Bayesian quantile regression, dynamic linear models, asymmetric
-Laplace likelihood, extended asymmetric Laplace likelihood, MCMC,
-Laplace--delta variational Bayes}
-\Plainkeywords{Bayesian quantile regression, dynamic linear models, asymmetric
-Laplace likelihood, extended asymmetric Laplace likelihood, MCMC,
-Laplace-delta variational Bayes}
-
-\Address{
-  Antonio Aguirre and Raquel Barata\\
-  Department of Statistics\\
-  University of California Santa Cruz\\
-  Santa Cruz, CA 95064\\
-  E-mail: \email{jaguir26@ucsc.edu}, \email{raquel.a.barata@gmail.com}\\
-}
-
-\begin{document}
-
-\section{Scope and relation to the main article}
+\section{Scope and relation to the main text}
 \label{sec:supp_scope}
 
-The main article describes the user-facing workflow for \pkg{exdqlm}: dynamic
+The main text describes the user-facing workflow for \pkg{exdqlm}: dynamic
 exDQLM and DQLM fitting, transfer-function models, static exAL regression,
-forecasting, diagnostics, and posterior-predictive synthesis. This supplement
+forecasting, diagnostics, and posterior-predictive synthesis. This appendix
 gives the corresponding posterior targets, full conditional distributions,
 Markov chain Monte Carlo (MCMC) and variational Bayes (VB) updates,
 Laplace--delta variational Bayes (LDVB) approximations, ELBO components, and
-numerical routines used by the package. Readers can use this document to
+numerical routines used by the package. Readers can use this appendix to
 verify the posterior targets, update equations, and diagnostic quantities
 behind the exported functions. The derivations build on the AL
 mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
@@ -105,11 +22,11 @@ nonconjugate variational approximations \citep{wang2013nonconjugatevb}, and
 the \code{rhs\_ns} prior \citep{nishimura2023shrunken}.
 
 Table~\ref{tab:supp_roadmap} gives the main navigation map, linking each
-article topic to the corresponding supplement sections and exported package
+article topic to the corresponding appendix sections and exported package
 routines. The model sections derive the fitting targets and updates, and
 Section~\ref{sec:numerical_blocks} collects reusable numerical identities.
 
-The notation follows the main article. In particular, $\mat{F}_t$ denotes the
+The notation follows the main text. In particular, $\mat{F}_t$ denotes the
 observation vector, $\mat{G}_t$ the state evolution matrix, $\mat{W}_t$ the
 evolution covariance, $\vect{\theta}_t$ the dynamic state, $p_0$ the target
 quantile level, and $\gamma$ the exAL skewness parameter. Dimensions are stated
@@ -124,7 +41,7 @@ when each object is introduced.
 >{\raggedright\arraybackslash}p{0.15\textwidth}
 >{\raggedright\arraybackslash}X@{}}
 \toprule
-Article topic or workflow & Main article location & Supplement location &
+Article topic or workflow & Main text location & Appendix location &
 Exported functions or computational block \\
 \midrule
 exAL distribution and gamma bounds &
@@ -172,7 +89,7 @@ GIG moments, entropy terms, slice sampling, and Laplace--delta approximation. \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Roadmap connecting the main article, supplement derivations, and
+\caption{Roadmap connecting the main text, appendix derivations, and
 exported \pkg{exdqlm} routines or computational blocks.}
 \label{tab:supp_roadmap}
 \end{table}
@@ -211,7 +128,7 @@ in Laplace--delta calculations is denoted by $z_\gamma$.
 Symbol & Meaning \\
 \midrule
 $p_0$ & Target quantile level. \\
-$p_\gamma=p(p_0,\gamma)$ & Internal exAL quantile map defined in the main article. \\
+$p_\gamma=p(p_0,\gamma)$ & Internal exAL quantile map defined in the main text. \\
 $A_{p_0},B_{p_0}$ & AL constants $A(p_0)$ and $B(p_0)$. \\
 $A_\gamma,B_\gamma,C_\gamma$ & exAL constants evaluated at $p_\gamma$. \\
 $L,U$ & Lower and upper admissible bounds for $\gamma$. \\
@@ -226,9 +143,9 @@ $\elbo(q)$ & Evidence lower bound. \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Core notation used throughout the supplement. The shorthand
+\caption{Core notation used throughout the appendices. The shorthand
 $p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ refers to functions of
-$(p_0,\gamma)$ defined in the main article.}
+$(p_0,\gamma)$ defined in the main text.}
 \label{tab:supp_notation}
 \end{table}
 
@@ -236,7 +153,7 @@ The latent variables $v_t$, $s_t$, $v_i$, and $s_i$ are introduced for
 posterior computation and are updated internally by the fitting routines; they
 are not user-supplied inputs. Practitioners specify the response, target
 quantile, model components, priors, and inference controls described in the
-main article.
+main text.
 
 The distributional parameterizations are also fixed throughout:
 $\N(m,V)$ uses variance $V$;
@@ -247,7 +164,7 @@ p(x)=\frac{b^a}{\Gamma(a)}x^{-a-1}\exp(-b/x),\qquad x>0,
 \end{equation}
 equivalently $x^{-1}\sim\operatorname{Gamma}(a,b)$ under a shape-rate gamma
 parameterization. The exponential distribution $\Exp(\text{rate}=1/\sigma)$
-has density $\sigma^{-1}\exp(-x/\sigma)$, matching the main article's
+has density $\sigma^{-1}\exp(-x/\sigma)$, matching the main text's
 mean-$\sigma$ convention for the AL and exAL mixture variables. Finally,
 $\TNp(m,V)$ denotes $\N(m,V)$ truncated to $(0,\infty)$. The generalized
 inverse Gaussian (GIG) parameterization is given in \eqref{eq:gig_parameterization}.
@@ -570,7 +487,7 @@ Thus the conditional state posterior is the Gaussian state-space posterior
 defined in Section~\ref{sec:gaussian_state_update}, with the DQLM MCMC offset
 and variance given in Table~\ref{tab:gaussian_state_update_map}. The package
 constructs the evolution covariance through the discount-factor state-space
-rules described in the main article; once the prediction covariance is formed,
+rules described in the main text; once the prediction covariance is formed,
 the filtering and backward updates are those in
 Section~\ref{sec:gaussian_state_update}.
 
@@ -1202,7 +1119,7 @@ $\vect{\beta}\in\R^p$. The ridge/Gaussian coefficient prior is
 In the package interface, the same Gaussian update is used for
 \code{beta_prior = "ridge"}. When \code{beta_prior = "rhs\_ns"}, the diagonal
 prior precision in this update is replaced by the \code{rhs\_ns} expected precision
-described in Section~\ref{sec:static_rhs}. Thus this supplement covers the
+described in Section~\ref{sec:static_rhs}. Thus this appendix covers the
 Gaussian/ridge prior and the conjugate \code{rhs\_ns} prior, both for MCMC and LDVB.
 Under the exAL likelihood,
 \begin{align}
@@ -1551,7 +1468,7 @@ default an intercept, if present, is not shrunk. For $j\notin\mathcal{A}$ the
 package uses a fixed intercept precision. The direct \code{rhs} path is not
 developed here because its log-scale block is nonconjugate; the
 \code{rhs\_ns} path is the conjugate sparse-prior formulation documented in
-this supplement.
+this appendix.
 
 \subsection{Nishimura--Suchard prior hierarchy}
 
@@ -1785,7 +1702,7 @@ surrounding static AL or exAL variational routine.
 \subsection{Forecasting}
 
 For a posterior draw $m$ at forecast origin $\tilde t$, the state forecast
-recursion in the main article gives
+recursion in the main text gives
 \begin{equation}
 \vect{\theta}_{\tilde t+k}^{(m)}
 \sim
@@ -2068,8 +1985,3 @@ Option & Purpose & Default \\
 \caption{Package-level runtime options exposed through \code{options(...)} for backend routing and ELBO monitoring in \pkg{exdqlm}. Function-level inference controls are documented separately in the function interfaces.}
 \label{tab:supp_backendopts}
 \end{table}
-
-\clearpage
-\bibliography{references}
-
-\end{document}

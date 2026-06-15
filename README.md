@@ -11,10 +11,10 @@ They do not require a version-control checkout.
 
 ## Contents
 
-- `exdqlm-jss.tex`, `exdqlm-jss.pdf`: main manuscript source and compiled PDF.
-- `exdqlm-supplement.tex`, `exdqlm-supplement.pdf`: current supplemental source
-  and compiled PDF. In the revised JSS submission this material will be merged
-  into the main manuscript appendices.
+- `exdqlm-jss.tex`, `exdqlm-jss.pdf`: manuscript source and compiled PDF. The
+  compiled manuscript PDF includes the technical appendices.
+- `exdqlm-supplement.tex`: appendix source input used by `exdqlm-jss.tex`.
+  It is not a separate submitted manuscript PDF.
 - `code.R`: standalone replication script for the manuscript results.
 - `code.html`: HTML log generated from `code.R` with `knitr::spin()`.
 - `analysis/`: scripts, configuration, generated figures/tables/logs, tests,
