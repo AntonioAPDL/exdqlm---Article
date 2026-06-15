@@ -389,7 +389,7 @@ For an arbitrary time $\tilde{t}$, the $k$-step-ahead future marginal distributi
 \label{eq:forecast_recursion}
 \end{equation}
 
-where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$, $\mat{R}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{R}_{\tilde{t}}(k-1) \mat{G}_{\tilde{t}+k}^\top + \mat{W}_{\tilde{t}+k}$, $\mat{a}_{\tilde{t}}(0) = \mat{m}_{\tilde{t}}$, and $\mat{R}_{\tilde{t}}(0) = \mat{C}_{\tilde{t}}$, with $\mat{m}_{\tilde{t}}$ and $\mat{C}_{\tilde{t}}$ denoting the filtered mean and covariance of $\vect{\theta}_{\tilde{t}}$, respectively. This distribution is implemented in the function \code{exdqlmForecast()}, which is compatible with the outputs from both the MCMC and LDVB algorithms. The fitted object supplies the filtered posterior summaries at the forecast origin, while optional future observation and evolution matrices are supplied when the required forecast design is not already stored in the fitted model. Table \ref{table:fore} summarizes the forecast inputs and optional posterior predictive draw controls. The output of \code{exdqlmForecast()} includes the parameters of the forecasted distribution as well as $\mat{a}_{\tilde{t}}(k)$ and $\mat{R}_{\tilde{t}}(k)$ for the $k$ steps, with optional posterior predictive draw matrices available when requested.
+where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$, $\mat{R}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{R}_{\tilde{t}}(k-1) \mat{G}_{\tilde{t}+k}^\top + \mat{W}_{\tilde{t}+k}$, $\mat{a}_{\tilde{t}}(0) = \mat{m}_{\tilde{t}}$, and $\mat{R}_{\tilde{t}}(0) = \mat{C}_{\tilde{t}}$, with $\mat{m}_{\tilde{t}}$ and $\mat{C}_{\tilde{t}}$ denoting the filtered mean and covariance of $\vect{\theta}_{\tilde{t}}$, respectively. This distribution is implemented in the function \code{exdqlmForecast()}, which is compatible with the outputs from both the MCMC and LDVB algorithms; the standard \code{predict()} method for fitted dynamic objects is a wrapper around this forecast constructor. The fitted object supplies the filtered posterior summaries at the forecast origin, while optional future observation and evolution matrices are supplied when the required forecast design is not already stored in the fitted model. Table \ref{table:fore} summarizes the forecast inputs and optional posterior predictive draw controls. The output of \code{exdqlmForecast()} includes the parameters of the forecasted distribution as well as $\mat{a}_{\tilde{t}}(k)$ and $\mat{R}_{\tilde{t}}(k)$ for the $k$ steps, with optional posterior predictive draw matrices available when requested.
 
 \begin{table}[!htb]
 \centering
@@ -443,10 +443,10 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
     \code{exalStaticMCMC()} & \code{exalStaticMCMC} & Fit static exAL/AL regression via MCMC.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic fit examination} -- Input \code{exdqlmMCMC}, \code{exdqlmLDVB}, or legacy \code{exdqlmISVB} objects} \\
-    \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute forecast quantiles and optional predictive draws.\\
+    \rule{0pt}{3ex}\code{plot()} & Invisible \code{list} & Plot fitted dynamic quantiles, component contributions, or state summaries.\\
+    \code{predict()} / \code{exdqlmForecast()} & \code{exdqlmForecast} & Compute forecast quantiles and optional predictive draws.\\
     \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics; use \code{plot()} to visualize them. \\
-    \code{exdqlmPlot()} & Invisible \code{list} & Plot dynamic quantile MAP and CrI summaries.\\
-    \code{compPlot()} & Invisible \code{list} & Plot component or state-level MAP and CrI summaries.\\
+    \code{exdqlmPlot()} / \code{compPlot()} & Invisible \code{list} & Explicit helpers for fitted quantile, component, and state plots.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticMCMC} or \code{exalStaticLDVB} objects} \\
     \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fitted-quantile diagnostics and coefficient summaries; use \code{plot()} for quantile or coefficient plots.\\
@@ -455,7 +455,7 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
     \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{exdqlmSynthesis} & Synthesize posterior predictive draws across separately fitted quantile levels.\\
     \bottomrule
 \end{tabularx}
-\caption{Core workflow functions supporting the examples. Fitting, diagnostic, forecast, static, and synthesis routines return the objects shown using \proglang{R}'s S3 object system; \code{exdqlmPlot()} and \code{compPlot()} return invisible summary lists.}
+\caption{Core workflow functions supporting the examples. Fitting, diagnostic, forecast, static, and synthesis routines return the objects shown using \proglang{R}'s S3 object system. Dynamic fitted objects support standard \code{plot()} and \code{predict()} methods; \code{exdqlmPlot()}, \code{compPlot()}, and \code{exdqlmForecast()} remain available as explicit helpers.}
 \label{table:flow}
 \end{table}
 
@@ -470,7 +470,7 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
 \section{Examples}
  \label{sec:exs}
 
-We demonstrate the general workflow and key features of the package through three real-data analyses and one simulation benchmark. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. The functions in Table \ref{table:flow} cover the high-level modeling workflow used in the examples. The package also exposes distribution-level utilities for the exAL error family: \code{dexal()}, \code{pexal()}, \code{qexal()}, and \code{rexal()} evaluate the density, distribution function, quantile function, and random generator, respectively, and \code{get\_gamma\_bounds()} returns the admissible interval for $\gamma$ at a specified $p_0$. These utilities are useful for simulation, prior calibration, and direct checks of the exAL distribution, but are not needed for the main fitting, forecasting, diagnostic, or synthesis workflows illustrated below. We use CrI as shorthand for credible interval in figure captions and plotting labels. All figures and tables are generated from scripts distributed with the article repository. The top-level \code{code.R} file is the canonical reproduction entry point, and the scripts under \code{analysis/manuscript/examples/} generate the displayed figures, tables, logs, and provenance files. The code chunks shown below are compact, reader-facing excerpts of those scripts; generic output handling, caching, graphics devices, and manifest-writing code are kept in the replication scripts. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
+We demonstrate the general workflow and key features of the package through three real-data analyses and one simulation benchmark. The first three examples illustrate dynamic workflows, while the fourth illustrates the static exAL special case. Table \ref{table:flow} provides an overview of the \pkg{exdqlm} functions and the resulting objects. The functions in Table \ref{table:flow} cover the high-level modeling workflow used in the examples. Fitted and post-processing objects use standard \proglang{R} methods where this is natural: for example, \code{plot()} displays fitted dynamic quantiles, components, state summaries, diagnostics, forecasts, synthesis summaries, or static diagnostics depending on the object, and \code{predict()} returns dynamic forecast objects from fitted dynamic models. The named helpers \code{exdqlmPlot()}, \code{compPlot()}, and \code{exdqlmForecast()} remain available when an explicit low-level call is clearer. The package also exposes distribution-level utilities for the exAL error family: \code{dexal()}, \code{pexal()}, \code{qexal()}, and \code{rexal()} evaluate the density, distribution function, quantile function, and random generator, respectively, and \code{get\_gamma\_bounds()} returns the admissible interval for $\gamma$ at a specified $p_0$. These utilities are useful for simulation, prior calibration, and direct checks of the exAL distribution, but are not needed for the main fitting, forecasting, diagnostic, or synthesis workflows illustrated below. We use CrI as shorthand for credible interval in figure captions and plotting labels. All figures and tables are generated from scripts distributed with the article repository. The top-level \code{code.R} file is the canonical reproduction entry point, and the scripts under \code{analysis/manuscript/examples/} generate the displayed figures, tables, logs, and provenance files. The code chunks shown below are compact, reader-facing excerpts of those scripts; generic output handling, caching, graphics devices, and manifest-writing code are kept in the replication scripts. The accompanying reproducibility materials record the computing environment and outputs used in the paper.
 
 We begin by loading the \pkg{exdqlm} package used for all examples.
 
@@ -599,15 +599,15 @@ R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
 \end{CodeInput}
 \end{CodeChunk}
 
-The results are \code{exdqlmMCMC} objects that can be used for analysis and forecasting. First we examine the estimated quantiles with the plot method for \code{exdqlmMCMC} objects, seen in the top-left panel of Figure \ref{fig:ex1quants}. This generates a plot of the data with the MAP estimates and the 95\% CrIs of the dynamic quantile. Subsequent quantiles (i.e. $p_0 = 0.50, 0.05$ in this example) can be added to the plot using the function \code{exdqlmPlot()} with the argument \code{add = TRUE}.
+The results are \code{exdqlmMCMC} objects that can be used for analysis and forecasting. First we examine the estimated quantiles with the plot method for \code{exdqlmMCMC} objects, seen in the top-left panel of Figure \ref{fig:ex1quants}. This generates a plot of the data with the MAP estimates and the 95\% CrIs of the dynamic quantile. Subsequent quantiles (i.e. $p_0 = 0.50, 0.05$ in this example) can be added to the same axes by calling \code{plot()} on the fitted objects with \code{add = TRUE}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2),
 +        oma = c(0, 0, 0.8, 0))
 R> plot(M95); title("(a) Dynamic quantiles")
-R> exdqlmPlot(M50, add = TRUE, col = "blue")
-R> exdqlmPlot(M5, add = TRUE, col = "forest green")
+R> plot(M50, add = TRUE, col = "blue")
+R> plot(M5, add = TRUE, col = "forest green")
 R> legend("topright", lty = 1, bty = "n",
 +        col = c("purple", "blue", "forest green"),
 +        legend = c(expression('p'[0]*'=0.95'), expression('p'[0]*'=0.50'),
@@ -630,22 +630,22 @@ R> fGG =  model$GG
 \end{CodeInput}
 \end{CodeChunk}
 
-We plot the time series data in a narrower range for closer examination and add the forecast estimates using \code{exdqlmForecast()} with argument \code{add = TRUE}. Notice we start the forecast at the last time index of the data, i.e. \code{start.t = length(LakeHuron)}.
+We plot the time series data in a narrower range for closer examination. Forecast objects can be created with \code{predict()} on a fitted dynamic model, or with the explicit forecast helper. Here we create the forecast objects first and then call \code{plot()} with \code{add = TRUE}. Notice we start the forecast at the last time index of the data, i.e. \code{start.t = length(LakeHuron)}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(LakeHuron,  xlim = c(1952, 1980), ylim = c(575, 582),
 +        col = "dark grey", main = "(b) Forecasted quantiles",
 +           ylab = "forecast 95% CrIs")
-R> fc95 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M95,
-+               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
-+               return.draws = TRUE)
-R> fc50 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M50,
-+               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
-+               cols = c("blue", "light blue"), return.draws = TRUE)
-R> fc05 = exdqlmForecast(start.t = length(LakeHuron), k = 8, m1 = M5,
-+               fFF = fFF, fGG = fGG, plot = TRUE, add = TRUE,
-+               cols = c("forest green", "green"), return.draws = TRUE)
+R> fc95 = predict(M95, start.t = length(LakeHuron), k = 8,
++                fFF = fFF, fGG = fGG, return.draws = TRUE)
+R> fc50 = predict(M50, start.t = length(LakeHuron), k = 8,
++                fFF = fFF, fGG = fGG, return.draws = TRUE)
+R> fc05 = predict(M5, start.t = length(LakeHuron), k = 8,
++                fFF = fFF, fGG = fGG, return.draws = TRUE)
+R> plot(fc95, add = TRUE)
+R> plot(fc50, add = TRUE, cols = c("blue", "light blue"))
+R> plot(fc05, add = TRUE, cols = c("forest green", "green"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -782,14 +782,14 @@ R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
 
 The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded backend profile. These runtimes are fit elapsed times stored in the returned fit objects; they are intended for within-profile comparison and should not be interpreted as machine-independent timing constants.
 
-We can visualize the differences between the two resulting dynamic quantiles using the function \code{exdqlmPlot()}, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1780 to 1830.
+We can visualize the differences between the two resulting dynamic quantiles with the fitted-object \code{plot()} method, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1780 to 1830.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(sunspot.year, xlim = c(1780, 1830), col = "dark grey",
 +       ylab = "quantile 95% CrIs")
-R> exdqlmPlot(M1, add = TRUE, col = "red")
-R> exdqlmPlot(M2, add = TRUE, col = "blue")
+R> plot(M1, add = TRUE, col = "red")
+R> plot(M2, add = TRUE, col = "blue")
 R> legend("topleft", lty = 1, bty = "n", col = c("red", "blue"),
 +        legend = c("DQLM", "exDQLM"))
 R> title("LDVB fit for p0 = 0.85")
@@ -1082,7 +1082,7 @@ R> MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
 \end{CodeChunk}
 
 The upper panel of Figure \ref{fig:ex3quant} compares the fitted \(0.15\)
-quantiles from the three training fits over 2016--2020. We first plot the data, then call \code{exdqlmPlot()} with \code{add = TRUE} to draw the three model fits on common axes.
+quantiles from the three training fits over 2016--2020. We first plot the data, then call \code{plot()} with \code{add = TRUE} on the three fitted objects to draw the model fits on common axes.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1091,9 +1091,9 @@ R> par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
 R> plot(y.train, col = "grey", ylim = c(1, 8), xlim = c(2016, 2020),
 +         ylab = "log flow / quantile")
 R> grid(col = "grey90")
-R> exdqlmPlot(M0, add = TRUE)
-R> exdqlmPlot(MREG, add = TRUE, col = "steelblue")
-R> exdqlmPlot(MTF, add = TRUE, col = "forest green")
+R> plot(M0, add = TRUE)
+R> plot(MREG, add = TRUE, col = "steelblue")
+R> plot(MTF, add = TRUE, col = "forest green")
 R> legend("topleft",
 +        legend = c("M0 no covariates", "MREG direct regression",
 +                   "MTF transfer function"),
@@ -1114,7 +1114,8 @@ much of the broad annual structure. The component panels of Figure \ref{fig:ex3q
 differences: the middle panel shows that the seasonal contribution is similar
 across models, while the lower panel separates the contemporaneous climate-index
 contribution in \code{MREG} from the accumulated transfer contribution in
-\code{MTF}. The package function \code{compPlot()} is used to display these selected model components. We
+\code{MTF}. Component and state views are available from the fitted-object
+\code{plot()} method, which delegates to the \code{compPlot()} summaries. We
 begin with the combined seasonal contribution. Because the seasonal block
 contains three harmonics, this contribution is formed from the second through
 seventh elements of the state vector. The middle panel of Figure
@@ -1126,9 +1127,11 @@ over the same 2016--2020 window.
 R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
 +      ylab = "seasonal components")
 R> grid(col = "grey90")
-R> compPlot(M0, index = 2:7, add = TRUE)
-R> compPlot(MREG, index = 2:7, add = TRUE, col = "steelblue")
-R> compPlot(MTF, index = 2:7, add = TRUE, col = "forest green")
+R> plot(M0, type = "component", index = 2:7, add = TRUE)
+R> plot(MREG, type = "component", index = 2:7,
++       add = TRUE, col = "steelblue")
+R> plot(MTF, type = "component", index = 2:7,
++       add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1145,8 +1148,10 @@ visually close.
 R> plot(NA, ylim = c(-1.5, 1.5), xlim = c(2016, 2020),
 +      ylab = "covariate contribution")
 R> grid(col = "grey90")
-R> compPlot(MREG, index = 8:9, add = TRUE, col = "steelblue")
-R> compPlot(MTF, index = 8, add = TRUE, col = "forest green")
+R> plot(MREG, type = "component", index = 8:9,
++       add = TRUE, col = "steelblue")
+R> plot(MTF, type = "component", index = 8,
++       add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> legend("topleft", legend = c("MREG direct", "MTF transfer"),
 +        col = c("steelblue", "forest green"), lty = 1, lwd = 1.5,
@@ -1160,7 +1165,7 @@ accumulated transfer effect and the \(\psi_t\) states determine how the
 contemporaneous covariates enter that transfer term. In this example the
 \(\psi_t\) discount factors are set to 1, so the bottom panels summarize static
 NOI and AMO coefficients within the transfer-function model. Setting
-\code{just.theta = TRUE} in \code{compPlot()} plots a single element of the
+\code{type = "state"} in \code{plot()} plots a single element of the
 augmented state vector \(\tilde{\vect{\theta}}_t\). In this fitted model,
 indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
 \(\psi_{\mathrm{AMO},t}\), respectively.
@@ -1168,22 +1173,22 @@ indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
 \begin{CodeChunk}
 \begin{CodeInput}
 R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE))
-R> compPlot(MTF, index = 8, col = "forest green",
-+             add = FALSE, just.theta = TRUE)
+R> plot(MTF, type = "state", index = 8, col = "forest green",
++       add = FALSE)
 R> grid(col = "grey90")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(zeta[t]))
 R> par(mar = c(3.8, 4.2, 2.1, 0.8))
 R> plot(y.train, type = "n", ylim = c(-0.11, 0.01),
 +      xlab = "time", ylab = "component CrIs")
-R> compPlot(MTF, index = 9, col = "steelblue",
-+             add = TRUE, just.theta = TRUE)
+R> plot(MTF, type = "state", index = 9, col = "steelblue",
++       add = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(NOI, t)]))
 R> plot(y.train, type = "n", ylim = c(-0.005, 0.06),
 +         xlab = "time", ylab = "component CrIs")
-R> compPlot(MTF, index = 10, col = "darkorange",
-+             add = TRUE, just.theta = TRUE)
+R> plot(MTF, type = "state", index = 10, col = "darkorange",
++       add = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
@@ -1216,7 +1221,7 @@ R> G0.future = model$GG
 R> fc.M0 = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = M0,
 +                         fFF = F0.future, fGG = G0.future,
 +                         return.draws = TRUE, n.samp = 1000,
-+                         seed = 20265101, plot = FALSE)
++                         seed = 20265101)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1232,7 +1237,7 @@ R> GREG.future = model.reg.future$GG
 R> fc.MREG = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MREG,
 +                           fFF = FREG.future, fGG = GREG.future,
 +                           return.draws = TRUE, n.samp = 1000,
-+                           seed = 20265301, plot = FALSE)
++                           seed = 20265301)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1257,7 +1262,7 @@ R> for (j in seq_len(n.x)) {
 R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MTF,
 +                             fFF = FTF.future, fGG = GTF.future,
 +                             return.draws = TRUE, n.samp = 1000,
-+                             seed = 20265201, plot = FALSE)
++                             seed = 20265201)
 \end{CodeInput}
 \end{CodeChunk}
 
