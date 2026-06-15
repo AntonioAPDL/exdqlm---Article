@@ -393,6 +393,28 @@ main <- function() {
     } else {
       ok("benchmark environment records RNG, backend, and runtime provenance")
     }
+    check_exdqlm_version(env_fields[["exdqlm_version"]], expected_exdqlm_version, "Generated benchmark environment")
+    if (nzchar(expected_exdqlm_version) &&
+        !identical(as.character(env_fields[["exdqlm_version"]] %||% ""), expected_exdqlm_version)) {
+      fail(sprintf(
+        "Generated benchmark environment records exdqlm version %s, but params_manuscript.yml expects %s. Regenerate manuscript outputs with the configured package.",
+        env_fields[["exdqlm_version"]] %||% "<missing>",
+        expected_exdqlm_version
+      ))
+    }
+    if (identical(load_spec$mode, "source") && isTRUE(pkg_spec$is_package) &&
+        nzchar(pkg_spec$git$commit %||% "") && nzchar(env_fields[["exdqlm_commit"]] %||% "")) {
+      expected_commit <- substr(pkg_spec$git$commit, 1L, nchar(env_fields[["exdqlm_commit"]]))
+      if (!identical(env_fields[["exdqlm_commit"]], expected_commit)) {
+        fail(sprintf(
+          "Generated benchmark environment package commit is %s, not current source package commit %s.",
+          env_fields[["exdqlm_commit"]],
+          expected_commit
+        ))
+      } else {
+        ok("generated benchmark environment package commit matches current source package checkout")
+      }
+    }
   }
 
   section("Example 3 Data Window")

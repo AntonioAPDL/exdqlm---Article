@@ -19,9 +19,9 @@ From the extracted archive:
 Rscript code.R
 ```
 
-This is the full manuscript replication command. It regenerates the manuscript
-figures, generated tables, logs, and artifact manifests, then runs the
-manuscript checks and prints `sessionInfo()`.
+This is the full manuscript replication command. It refits the manuscript
+examples, regenerates the figures, generated tables, logs, and artifact
+manifests, then runs the manuscript checks and prints `sessionInfo()`.
 
 For a faster installation and wiring check:
 
@@ -29,7 +29,7 @@ For a faster installation and wiring check:
 Rscript code.R --quick
 ```
 
-For a targeted example rerun:
+For a targeted example rerun and refit:
 
 ```sh
 Rscript code.R --example 3
@@ -64,7 +64,11 @@ is generated from `code.R` with `knitr::spin("code.R", knit = TRUE)`.
 - `analysis/config/params_manuscript.yml`: seeds, profile settings, expected
   package version, and backend profile.
 - `analysis/manuscript/examples/`: canonical scripts for Examples 1--4.
-- `analysis/manuscript/outputs/`: generated figures, tables, caches, and logs.
+- `analysis/manuscript/outputs/`: generated figures, tables, local caches, and logs.
+
+Large `.rds` fit caches are local conveniences. They are recreated by the full
+replication command when absent and should not be treated as required
+submission artifacts.
 
 The code printed in the manuscript is a reader-facing excerpt of the same
 workflows. The file `analysis/manuscript/code_chunk_map.csv` records how each

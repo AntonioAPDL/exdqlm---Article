@@ -855,9 +855,9 @@ Models: exdqlmLDVB vs exdqlmLDVB
    Diagnostic        M1        M2
            KL    0.1329    0.1197
  KL (flipped)    0.0625    0.0528
-         CRPS    8.5349    6.2685
-         pplc 3855.9702 2328.0091
- run-time (s)   22.7090  104.0150
+         CRPS    8.5460    6.2551
+         pplc 3853.4604 2331.6722
+ run-time (s)   24.9910  128.7250
 Use with: summary(), plot()
 \end{CodeOutput}
 \end{CodeChunk}
@@ -917,14 +917,14 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{22.71} & \textbf{0.133} & 8.535 & 3856.0 \\
- & MCMC & 267.88 & 0.152 & \textbf{7.582} & \textbf{2990.8} \\
+ \tworowcell{DQLM} & LDVB & \textbf{24.99} & \textbf{0.133} & 8.546 & 3853.5 \\
+ & MCMC & 387.80 & 0.141 & \textbf{7.554} & \textbf{2968.3} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{104.02} & \textbf{0.120} & 6.268 & 2328.0 \\
- & MCMC & 325.53 & 0.164 & \textbf{5.095} & \textbf{2186.3} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{128.72} & \textbf{0.120} & 6.255 & 2331.7 \\
+ & MCMC & 481.20 & 0.155 & \textbf{5.068} & \textbf{2176.2} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.0.0 at package commit \code{1c09803}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.0 at package commit \code{9b20e87}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1332,9 +1332,9 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.168 & 0.471 & \textbf{99.459} \\
- \code{MREG} direct regression & \textbf{0.112} & \textbf{0.347} & 151.171 \\
- \code{MTF} transfer function & 0.155 & 0.366 & 125.430 \\
+ \code{M0} no covariates & 0.168 & 0.471 & \textbf{99.456} \\
+ \code{MREG} direct regression & \textbf{0.112} & \textbf{0.348} & 151.582 \\
+ \code{MTF} transfer function & 0.155 & 0.366 & 125.554 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
@@ -1510,21 +1510,21 @@ Figure \ref{fig:ex4static} shows that both methods recover the main sparse signa
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{27.96} & 0.107 & \textbf{0.034} & 0.674 \\
- & MCMC & 196.52 & \textbf{0.072} & 0.040 & \textbf{0.592} \\
+ \tworowcell{0.05} & LDVB & \textbf{21.67} & 0.107 & \textbf{0.034} & 0.674 \\
+ & MCMC & 193.88 & \textbf{0.068} & 0.039 & \textbf{0.574} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{13.89} & 0.138 & \textbf{0.042} & 0.393 \\
- & MCMC & 192.51 & \textbf{0.082} & 0.044 & \textbf{0.328} \\
+ \tworowcell{0.25} & LDVB & \textbf{15.85} & \textbf{0.039} & \textbf{0.061} & \textbf{0.257} \\
+ & MCMC & 200.36 & 0.090 & 0.065 & 0.333 \\
  \midrule
- \tworowcell{0.50} & LDVB & \textbf{3.11} & 0.241 & 0.081 & 0.410 \\
- & MCMC & 201.30 & \textbf{0.225} & \textbf{0.048} & \textbf{0.372} \\
+ \tworowcell{0.50} & LDVB & \textbf{6.03} & 0.073 & 0.127 & 0.314 \\
+ & MCMC & 184.13 & \textbf{0.054} & \textbf{0.102} & \textbf{0.264} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient MAE; both are simulation-benchmark summaries computed separately from the package diagnostics. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE and active-signal RMSE at all three quantile levels, while LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 7-fold at \(p_0 = 0.05\), 14-fold at \(p_0 = 0.25\), and 65-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, but the MCMC fit provides the cleaner holdout quantile accuracy. Accordingly, the static \code{rhs\_ns} specification still supports both roles cleanly: LDVB for fast screening and model exploration, and static MCMC as the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient MAE; both are simulation-benchmark summaries computed separately from the package diagnostics. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is smaller at \(p_0 = 0.25\). Active-signal recovery shows the same pattern, and LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 9-fold at \(p_0 = 0.05\), 13-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, while static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
 
 \section{Conclusion}
 \label{sec:summary}

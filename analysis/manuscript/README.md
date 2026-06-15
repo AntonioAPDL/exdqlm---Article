@@ -10,6 +10,10 @@ Rscript code.R --quick
 Rscript code.R --example 3
 ```
 
+The default `code.R` command refits the manuscript examples. The `--quick`
+command checks existing outputs without refitting, and `--example` refits the
+selected example.
+
 The commands below are internal maintenance commands for targeted reruns and
 final reference checks.
 
@@ -49,6 +53,10 @@ When updating an example:
 
 Optional developer targets can regenerate support artifacts such as the
 Example 1 kernel comparison or the Example 4 seed screen.
+
+Large `.rds` fit caches are local accelerators. They are recreated by
+full/example runs and should be excluded from the submitted archive if needed
+to satisfy upload-size limits.
 
 ## Internal run commands
 

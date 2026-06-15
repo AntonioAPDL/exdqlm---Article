@@ -50,6 +50,7 @@ testthat::test_that("code.R is a JSS-facing spin-ready replication script", {
   testthat::expect_true(any(grepl("Rscript code.R --quick", code_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("Rscript code.R --example 3", code_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("Mersenne-Twister / Inversion / Rejection", code_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("force_refit <- !isTRUE(args$quick)", code_lines, fixed = TRUE)))
   testthat::expect_false(grepl("main <- function", code_text, fixed = TRUE))
   testthat::expect_false(grepl("analysis/run_all.R", code_text, fixed = TRUE))
   testthat::expect_false(grepl("--mode", code_text, fixed = TRUE))
@@ -195,6 +196,7 @@ testthat::test_that("replication docs use the simplified public interface", {
   testthat::expect_true(grepl("Rscript code.R", text, fixed = TRUE))
   testthat::expect_true(grepl("Rscript code.R --quick", text, fixed = TRUE))
   testthat::expect_true(grepl("Rscript code.R --example 3", text, fixed = TRUE))
+  testthat::expect_true(grepl("refit", tolower(text), fixed = TRUE))
   testthat::expect_true(grepl("internal maintenance", text, fixed = TRUE))
 
   stale_markers <- c(
@@ -250,6 +252,7 @@ testthat::test_that("RNG and benchmark backend reproducibility policy is explici
   check_lines <- readLines(file.path(repo_root, "analysis", "check_reproducibility.R"), warn = FALSE)
   testthat::expect_true(any(grepl("expected_exdqlm_version", check_lines, fixed = TRUE)))
   testthat::expect_false(any(grepl("not 1.0.0", check_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("Generated benchmark environment records exdqlm version", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("manuscript RNG kind is explicit and stable", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("benchmark profile keeps C++ samplers disabled", check_lines, fixed = TRUE)))
 })
@@ -412,8 +415,11 @@ testthat::test_that("portable generated manuscript tables are coherent", {
     header = FALSE
   )
   fields <- stats::setNames(env$V2, env$V1)
+  testthat::skip_if_not_installed("yaml")
+  cfg <- yaml::read_yaml(file.path(repo_root, "analysis", "config", "params_manuscript.yml"))
+  expected_exdqlm_version <- as.character(cfg$expected_exdqlm_version)
   testthat::expect_match(fields[["exdqlm_version"]], "^[0-9]+\\.[0-9]+\\.[0-9]+$")
-  testthat::expect_gte(package_version(fields[["exdqlm_version"]]), package_version("1.0.0"))
+  testthat::expect_identical(fields[["exdqlm_version"]], expected_exdqlm_version)
   testthat::expect_true(nzchar(fields[["exdqlm_commit"]]))
   testthat::expect_true(nzchar(fields[["r_version"]]))
   testthat::expect_true(nzchar(fields[["runtime_definition"]]))

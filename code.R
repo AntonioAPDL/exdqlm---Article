@@ -12,10 +12,10 @@
 #' Rscript code.R
 #' ```
 #'
-#' The default command regenerates the manuscript figures, tables, logs, and
-#' reproducibility manifests using the standard manuscript profile. Two shorter
-#' commands are provided for checking the materials without running the full
-#' replication:
+#' The default command refits the manuscript examples and regenerates the
+#' figures, tables, logs, and reproducibility manifests using the standard
+#' manuscript profile. Two shorter commands are provided for checking the
+#' materials without running the full replication:
 #'
 #' ```sh
 #' Rscript code.R --quick
@@ -41,7 +41,7 @@
 #' - `figures/`: manuscript figures.
 #' - `tables/`: generated tables, manifests, and provenance files.
 #' - `logs/`: text logs and `sessionInfo()`.
-#' - `cache/`: cached model fits used to avoid unnecessary refits.
+#' - `cache/`: cached model fits recreated by full/example runs when needed.
 #'
 #' The code printed in the manuscript is a compact excerpt of the same
 #' workflows. The full executable example scripts live in
@@ -197,17 +197,17 @@ replication_env$profile <- args$profile
 replication_env$pkg_path <- Sys.getenv("EXDQLM_PKG_PATH", unset = "")
 replication_env$seed_override <- NULL
 replication_env$targets <- args$targets
-replication_env$force_refit <- FALSE
+replication_env$force_refit <- !isTRUE(args$quick)
 
 cat("== exdqlm article replication ==\n")
 cat(sprintf("Working directory: %s\n", repo_root))
 cat(sprintf("Profile: %s\n", args$profile))
 if (length(args$targets)) {
-  cat(sprintf("Target: %s\n", paste(args$targets, collapse = ", ")))
+  cat(sprintf("Target: %s (refitting selected example)\n", paste(args$targets, collapse = ", ")))
 } else if (isTRUE(args$quick)) {
   cat("Target: quick wiring/test pass; existing outputs are not regenerated.\n")
 } else {
-  cat("Target: full manuscript replication.\n")
+  cat("Target: full manuscript replication from source fits.\n")
 }
 
 source(file.path(repo_root, "analysis", "lib", "manuscript_setup.R"), local = replication_env)

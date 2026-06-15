@@ -54,10 +54,10 @@ From this directory, run:
 Rscript code.R
 ```
 
-This is the full manuscript replication command. It regenerates the manuscript
-figures, generated tables, logs, and reproducibility manifests under
-`analysis/manuscript/outputs/`, then runs the manuscript checks and prints
-`sessionInfo()`.
+This is the full manuscript replication command. It refits the manuscript
+examples, regenerates the figures, generated tables, logs, and reproducibility
+manifests under `analysis/manuscript/outputs/`, then runs the manuscript checks
+and prints `sessionInfo()`.
 
 The full run can take substantial time because several examples fit Bayesian
 models. For a faster setup check, run:
@@ -69,7 +69,7 @@ Rscript code.R --quick
 The quick command checks package loading, manuscript wiring, existing generated
 outputs, and the test suite without refitting all examples.
 
-To rerun a single example, use:
+To rerun and refit a single example, use:
 
 ```sh
 Rscript code.R --example 3
@@ -84,11 +84,15 @@ The main generated files are written to:
 - `analysis/manuscript/outputs/figures/`
 - `analysis/manuscript/outputs/tables/`
 - `analysis/manuscript/outputs/logs/`
-- `analysis/manuscript/outputs/cache/`
+- `analysis/manuscript/outputs/cache/` (local fit caches recreated by full runs)
 
 The manuscript reads figures from `analysis/manuscript/outputs/figures/`.
 Generated CSV files and logs provide the numerical source for the tables and
 reported values in the manuscript.
+
+Large `.rds` fit caches are local conveniences and are not required in the
+submitted archive. If they are absent, `Rscript code.R` recreates the needed
+fits from the scripts and data.
 
 Runtime values are machine dependent. They are recorded as elapsed fitting
 times for the stated backend profile and should be interpreted together with

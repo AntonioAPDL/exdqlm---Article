@@ -1,26 +1,7 @@
-Prior mean of the state vector:
-$m0
-     [,1]
-[1,]  579
-[2,]    0
-
-
-Prior covariance of the state vector:
-$C0
-     [,1] [,2]
-[1,]   10    0
-[2,]    0   10
-
-
-Observational vector:
-$FF
-     [,1]
-[1,]    1
-[2,]    0
-
-
-Evolution matrix:
-$GG
-     [,1] [,2]
-[1,]    1    1
-[2,]    0    1
+Dynamic quantile state-space model specification (exdqlm)
+State dimension: 2
+Observation vector FF: 2 x 1
+Evolution matrix GG: 2 x 2
+Time-varying FF: no
+Time-varying GG: no
+Use with: exdqlmMCMC(), exdqlmLDVB(), exdqlmTransferMCMC(), or exdqlmTransferLDVB()

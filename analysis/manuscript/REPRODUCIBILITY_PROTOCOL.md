@@ -17,9 +17,10 @@ From the extracted archive:
 Rscript code.R
 ```
 
-This full run regenerates publication figures, generated tables, logs, caches,
-and manifests under `analysis/manuscript/outputs/`, runs the manuscript tests,
-and prints `sessionInfo()`.
+This full run refits the manuscript examples, regenerates publication figures,
+generated tables, logs, local caches, and manifests under
+`analysis/manuscript/outputs/`, runs the manuscript tests, and prints
+`sessionInfo()`.
 
 For a shorter reviewer or collaborator check:
 
@@ -30,13 +31,17 @@ Rscript code.R --quick
 The quick run checks package loading, manuscript wiring, existing generated
 outputs, and the test suite without refitting all examples.
 
-For a targeted example rerun:
+For a targeted example rerun and refit:
 
 ```sh
 Rscript code.R --example 3
 ```
 
 The same pattern works for examples `1`, `2`, `3`, and `4`.
+
+Large `.rds` fit caches are author-side accelerators. They are recreated by the
+full replication command when absent and should be excluded from the submitted
+archive if needed to stay within upload limits.
 
 ## HTML replication log
 

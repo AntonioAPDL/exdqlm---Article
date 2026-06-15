@@ -4,24 +4,24 @@ trace run settings: seed=20260616, n.burn=2000, n.mcmc=3000, thin=10, saved_for_
 
 M50_trace sigma summary:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.2240  0.3377  0.3688  0.3701  0.3999  0.5834
+ 0.1352  0.3333  0.3662  0.3598  0.3976  0.5764
 
 M50_trace sigma summary (thinned chain used in ex1mcmc.png):
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.2320  0.3390  0.3702  0.3710  0.4021  0.5708
+ 0.1415  0.3365  0.3678  0.3597  0.3968  0.5170
 
 M50_trace gamma summary:
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
--0.64128 -0.17335 -0.04819 -0.07260  0.03618  0.56452
+-0.86489 -0.18380 -0.04389 -0.09184  0.05480  0.48005
 
 M50_trace gamma summary (thinned chain used in ex1mcmc.png):
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
--0.60344 -0.18249 -0.03518 -0.07639  0.03499  0.56452
+-0.85025 -0.18550 -0.04402 -0.09145  0.04580  0.38769
 
 M50_trace joint posterior summary:
-  parameter        mean       q025      median      q975
-1     sigma  0.37014861  0.2765223  0.36875261 0.4727220
-2     gamma -0.07259965 -0.5265961 -0.04818659 0.2876583
+  parameter        mean       q025     median      q975
+1     sigma  0.35983292  0.1800656  0.3661559 0.4699944
+2     gamma -0.09184409 -0.7614736 -0.0438944 0.3370522
 
 M50_dqlm gamma fixed:
 [1] 0
@@ -39,4 +39,4 @@ $gig
 
 Run times (seconds):
       M95.elapsed M50_trace.elapsed        M5.elapsed  M50_dqlm.elapsed
-          126.066           132.777           123.401            64.348
+          208.229           202.975           209.197            91.773

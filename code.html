@@ -122,10 +122,10 @@ Quantile Linear Models”.</p>
 <p>Run this file from the extracted replication-materials directory:</p>
 <pre><code class="language-sh">Rscript code.R
 </code></pre>
-<p>The default command regenerates the manuscript figures, tables, logs, and
-reproducibility manifests using the standard manuscript profile. Two shorter
-commands are provided for checking the materials without running the full
-replication:</p>
+<p>The default command refits the manuscript examples and regenerates the
+figures, tables, logs, and reproducibility manifests using the standard
+manuscript profile. Two shorter commands are provided for checking the
+materials without running the full replication:</p>
 <pre><code class="language-sh">Rscript code.R --quick
 Rscript code.R --example 3
 </code></pre>
@@ -145,7 +145,7 @@ small differences across platforms are expected.</p>
 <li><code>figures/</code>: manuscript figures.</li>
 <li><code>tables/</code>: generated tables, manifests, and provenance files.</li>
 <li><code>logs/</code>: text logs and <code>sessionInfo()</code>.</li>
-<li><code>cache/</code>: cached model fits used to avoid unnecessary refits.</li>
+<li><code>cache/</code>: cached model fits recreated by full/example runs when needed.</li>
 </ul>
 <p>The code printed in the manuscript is a compact excerpt of the same
 workflows. The full executable example scripts live in
@@ -296,7 +296,7 @@ replication_env$profile &lt;- args$profile
 replication_env$pkg_path &lt;- Sys.getenv(&quot;EXDQLM_PKG_PATH&quot;, unset = &quot;&quot;)
 replication_env$seed_override &lt;- NULL
 replication_env$targets &lt;- args$targets
-replication_env$force_refit &lt;- FALSE
+replication_env$force_refit &lt;- !isTRUE(args$quick)
 
 cat(&quot;== exdqlm article replication ==\n&quot;)
 </code></pre>
@@ -311,19 +311,19 @@ cat(&quot;== exdqlm article replication ==\n&quot;)
 <pre><code>## Profile: quick
 </code></pre>
 <pre><code class="language-r">if (length(args$targets)) {
-  cat(sprintf(&quot;Target: %s\n&quot;, paste(args$targets, collapse = &quot;, &quot;)))
+  cat(sprintf(&quot;Target: %s (refitting selected example)\n&quot;, paste(args$targets, collapse = &quot;, &quot;)))
 } else if (isTRUE(args$quick)) {
   cat(&quot;Target: quick wiring/test pass; existing outputs are not regenerated.\n&quot;)
 } else {
-  cat(&quot;Target: full manuscript replication.\n&quot;)
+  cat(&quot;Target: full manuscript replication from source fits.\n&quot;)
 }
 </code></pre>
 <pre><code>## Target: quick wiring/test pass; existing outputs are not regenerated.
 </code></pre>
 <pre><code class="language-r">source(file.path(repo_root, &quot;analysis&quot;, &quot;lib&quot;, &quot;manuscript_setup.R&quot;), local = replication_env)
 </code></pre>
-<pre><code>## [2026-06-15 04:18:07] Loaded local exdqlm from source (--pkg-path via pkgload::load_all): /data/jaguir26/local/src/exdqlm__wt__0p5p0_exdqlm_article [version 1.1.0]
-## [2026-06-15 04:18:08] 00_setup complete (profile=quick)
+<pre><code>## [2026-06-15 06:36:28] Loaded local exdqlm from source (--pkg-path via pkgload::load_all): /data/jaguir26/local/src/exdqlm__wt__0p5p0_exdqlm_article [version 1.1.0]
+## [2026-06-15 06:36:28] 00_setup complete (profile=quick)
 </code></pre>
 <pre><code class="language-r">manuscript_stage_root &lt;- file.path(repo_root, &quot;analysis&quot;, &quot;manuscript&quot;)
 example_scripts &lt;- file.path(
@@ -362,11 +362,11 @@ if (isTRUE(args$quick)) {
   }
 }
 </code></pre>
-<pre><code>## [2026-06-15 04:18:08] Quick pass: checking current manuscript outputs without clearing or refitting.
+<pre><code>## [2026-06-15 06:36:28] Quick pass: checking current manuscript outputs without clearing or refitting.
 </code></pre>
 <pre><code class="language-r">replication_env$log_msg(&quot;Running manuscript checks&quot;)
 </code></pre>
-<pre><code>## [2026-06-15 04:18:08] Running manuscript checks
+<pre><code>## [2026-06-15 06:36:28] Running manuscript checks
 </code></pre>
 <pre><code class="language-r">run_manuscript_tests(repo_root)
 </code></pre>
@@ -377,17 +377,15 @@ if (isTRUE(args$quick)) {
 ## manuscript-figure-overlays: .................
 ## manuscript-figure-wiring: .............
 ## manuscript-kl-diagnostics-wiring: ..........
-## manuscript-reproducibility-setup: ...................S...........S...........................................................................................................................S
+## manuscript-reproducibility-setup: ....................S........................................................................................................................................................S
 ## manuscript-tracker: .............................S
 ##
 ## ══ Skipped ═════════════════════════════════════════════════════════════════════
-## 1. code.html records the JSS replication log when generated ('test-manuscript-reproducibility-setup.R:66:3') - Reason: code.html is written after the knitr::spin() run completes.
+## 1. code.html records the JSS replication log when generated ('test-manuscript-reproducibility-setup.R:67:3') - Reason: code.html is written after the knitr::spin() run completes.
 ##
-## 2. code.R help works from a no-git archive copy ('test-manuscript-reproducibility-setup.R:108:3') - Reason: Archive smoke test skipped by EXDQLM_SKIP_ARCHIVE_SMOKE.
+## 2. main manuscript inline table values match generated outputs ('test-manuscript-reproducibility-setup.R:436:3') - Reason: Exact manuscript-value matching is a reference-mode check.
 ##
-## 3. main manuscript inline table values match generated outputs ('test-manuscript-reproducibility-setup.R:396:3') - Reason: Exact manuscript-value matching is a reference-mode check.
-##
-## 4. optional Example 1 kernel comparison artifacts are coherent when present ('test-manuscript-tracker.R:52:5') - Reason: Example 1 kernel-comparison artifacts not present in this tracker run.
+## 3. optional Example 1 kernel comparison artifacts are coherent when present ('test-manuscript-tracker.R:52:5') - Reason: Example 1 kernel-comparison artifacts not present in this tracker run.
 ##
 ## ══ DONE ════════════════════════════════════════════════════════════════════════
 </code></pre>

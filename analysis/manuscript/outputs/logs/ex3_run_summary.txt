@@ -1,5 +1,5 @@
 profile=standard
-package_commit=1c09803
+package_commit=9b20e87
 p0=0.15
 trend_prior_m0=3.912023, trend_prior_C0=1.000
 climate_coef_prior_C0=1.000
@@ -15,21 +15,21 @@ transfer_psi_df_star=1.000
 
 Training transfer grid diagnostics:
   lambda transfer_zeta_df transfer_psi_df selection_metric selection_value
-1   0.70             0.99               1             PPLC        139.6582
-2   0.75             0.99               1             PPLC        133.5769
-3   0.80             0.99               1             PPLC        128.5971
-4   0.85             0.99               1             PPLC        125.6014
-5   0.90             0.99               1             PPLC        127.8860
-6   0.95             0.99               1             PPLC        142.8922
-7   0.99             0.99               1             PPLC        161.1224
+1   0.70             0.99               1             PPLC        139.4366
+2   0.75             0.99               1             PPLC        133.3232
+3   0.80             0.99               1             PPLC        128.6954
+4   0.85             0.99               1             PPLC        125.1670
+5   0.90             0.99               1             PPLC        128.2416
+6   0.95             0.99               1             PPLC        142.5868
+7   0.99             0.99               1             PPLC        161.6636
           KL KL_flipped      CRPS     PPLC runtime iter converged status
-1 0.08761585 0.04423922 0.3533010 139.6582 194.823  220     FALSE     ok
-2 0.11799273 0.06570937 0.3581321 133.5769 193.669  220     FALSE     ok
-3 0.13211721 0.07127456 0.3621793 128.5971 194.695  220     FALSE     ok
-4 0.15540479 0.09085043 0.3660474 125.6014 192.483  220     FALSE     ok
-5 0.14081466 0.05927812 0.3631396 127.8860 193.476  220     FALSE     ok
-6 0.12522038 0.07004369 0.3522382 142.8922 192.180  220     FALSE     ok
-7 0.14018051 0.08214896 0.3203348 161.1224 186.891  220     FALSE     ok
+1 0.08761585 0.04423922 0.3523836 139.4366 197.809  220     FALSE     ok
+2 0.11799273 0.06570937 0.3578712 133.3232 192.018  220     FALSE     ok
+3 0.13211721 0.07127456 0.3620359 128.6954 196.972  220     FALSE     ok
+4 0.15540479 0.09085043 0.3653773 125.1670 195.564  220     FALSE     ok
+5 0.14081466 0.05927812 0.3625195 128.2416 206.195  220     FALSE     ok
+6 0.12522038 0.07004369 0.3519863 142.5868 198.844  220     FALSE     ok
+7 0.14018051 0.08214896 0.3220443 161.6636 186.275  220     FALSE     ok
   error_message     seed selected
 1               20264002    FALSE
 2               20264003    FALSE
@@ -49,7 +49,7 @@ MTF$median.kt:
 
 Run times:
   M0.elapsed  MTF.elapsed MREG.elapsed
-     147.773      198.184      182.996
+     140.800      185.643      161.254
 
 Convergence:
   model iter converged
@@ -59,13 +59,13 @@ Convergence:
 
 Final-training package diagnostics from exdqlmDiagnostics():
                    model                  label        KL KL_flipped      CRPS
-1         M0_no_transfer         M0 no transfer 0.1683914 0.11184834 0.4706691
-2 MREG_direct_regression MREG direct regression 0.1117387 0.04663119 0.3470413
-3  MTF_transfer_function  MTF transfer function 0.1554048 0.09085043 0.3655634
+1         M0_no_transfer         M0 no transfer 0.1683914 0.11184834 0.4707751
+2 MREG_direct_regression MREG direct regression 0.1117387 0.04663119 0.3475696
+3  MTF_transfer_function  MTF transfer function 0.1554048 0.09085043 0.3661094
        PPLC
-1  99.45878
-2 151.17088
-3 125.43006
+1  99.45646
+2 151.58218
+3 125.55448
 
 Final holdout forecast metrics from exdqlmForecastDiagnostics():
                    model                  label horizon mean_check_loss

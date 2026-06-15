@@ -9,6 +9,10 @@ Rscript code.R --quick
 Rscript code.R --example 3
 ```
 
+The default `code.R` command refits the manuscript examples. The `--quick`
+command checks existing outputs without refitting, and `--example` refits the
+selected example.
+
 The scripts in this directory are internal maintenance tools used by `code.R`
 and by the authors for targeted reruns, preflight checks, and final reference
 syncs.
@@ -55,6 +59,9 @@ package source tarball installed into R.
 
 - Deterministic seeds are recorded in `config/params_manuscript.yml`.
 - Output filenames are stable for manuscript linkage.
+- Large `.rds` fit caches are local accelerators and should be excluded from
+  the final submission archive; full/example `code.R` runs recreate them when
+  absent.
 - `Figures/` is an ignored local export mirror created only by explicit
   promotion; the manuscript reads generated figures from
   `analysis/manuscript/outputs/figures/`.
