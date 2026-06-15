@@ -80,73 +80,6 @@ if (!need_ex1) {
     eval.parent(substitute(expr))
   }
 
-  summarize_smoothed_quantile <- function(mfit, cr.percent = 0.95) {
-    y_ref <- mfit$y
-    half.alpha <- (1 - cr.percent) / 2
-    p_state <- dim(mfit$samp.theta)[1]
-    n_samp <- dim(mfit$samp.theta)[3]
-    TT_local <- length(y_ref)
-    big_FF <- array(mfit$model$FF, c(p_state, TT_local, n_samp))
-    quant_samps <- colSums(big_FF * mfit$samp.theta)
-    list(
-      x = grDevices::xy.coords(y_ref)$x,
-      qmap = rowMeans(quant_samps),
-      qlb = matrixStats::rowQuantiles(quant_samps, probs = half.alpha),
-      qub = matrixStats::rowQuantiles(quant_samps, probs = cr.percent + half.alpha)
-    )
-  }
-
-  add_forecast_overlay <- function(fc, cols = c("purple", "magenta"), lwd_main = 1.8, lwd_ci = 1,
-                                   halo_col = "white", halo_main = 3.8, halo_ci = 2.2,
-                                   observed_mode = c("filtered", "smoothed")) {
-    observed_mode <- match.arg(observed_mode)
-    y_ref <- fc$m1$y
-    ts_xy <- grDevices::xy.coords(y_ref)
-    half.alpha <- (1 - fc$cr.percent) / 2
-
-    if (identical(observed_mode, "smoothed")) {
-      smooth_quant <- summarize_smoothed_quantile(fc$m1, cr.percent = fc$cr.percent)
-      qmap <- smooth_quant$qmap[seq_len(fc$start.t)]
-      qlb <- smooth_quant$qlb[seq_len(fc$start.t)]
-      qub <- smooth_quant$qub[seq_len(fc$start.t)]
-    } else {
-      p <- dim(fc$m1$model$GG)[1]
-      FF.start.t <- matrix(fc$m1$model$FF[, 1:fc$start.t], p, fc$start.t)
-      fm.start.t <- matrix(fc$m1$theta.out$fm[, 1:fc$start.t], p, fc$start.t)
-      qmap <- colSums(matrix(FF.start.t * fm.start.t, p, fc$start.t))
-      fC.start.t <- array(fc$m1$theta.out$fC[, , 1:fc$start.t], c(p, p, fc$start.t))
-      temp.var <- matrix(NA_real_, p, fc$start.t)
-      for (t in seq_len(fc$start.t)) {
-        temp.var[, t] <- fC.start.t[, , t] %*% FF.start.t[, t]
-      }
-      qvar <- colSums(FF.start.t * temp.var)
-      qsd <- sqrt(pmax(qvar, 0))
-      zlb <- stats::qnorm(half.alpha)
-      zub <- stats::qnorm(fc$cr.percent + half.alpha)
-      qlb <- qmap + zlb * qsd
-      qub <- qmap + zub * qsd
-    }
-    zlb <- stats::qnorm(half.alpha)
-    zub <- stats::qnorm(fc$cr.percent + half.alpha)
-    fqlb <- fc$ff + zlb * sqrt(pmax(fc$fQ, 0))
-    fqub <- fc$ff + zub * sqrt(pmax(fc$fQ, 0))
-    x_future <- seq(from = ts_xy$x[fc$start.t], by = diff(ts_xy$x)[1], length.out = fc$k + 1L)
-
-    graphics::lines(ts_xy$x[1:fc$start.t], qlb, col = halo_col, lty = 3, lwd = halo_ci)
-    graphics::lines(ts_xy$x[1:fc$start.t], qub, col = halo_col, lty = 3, lwd = halo_ci)
-    graphics::lines(ts_xy$x[1:fc$start.t], qmap, col = halo_col, lwd = halo_main)
-    graphics::lines(x_future, c(qmap[fc$start.t], fc$ff), col = halo_col, lwd = halo_main)
-    graphics::lines(x_future, c(qub[fc$start.t], fqub), col = halo_col, lty = 3, lwd = halo_ci)
-    graphics::lines(x_future, c(qlb[fc$start.t], fqlb), col = halo_col, lty = 3, lwd = halo_ci)
-
-    graphics::lines(ts_xy$x[1:fc$start.t], qlb, col = cols[1], lty = 3, lwd = lwd_ci)
-    graphics::lines(ts_xy$x[1:fc$start.t], qub, col = cols[1], lty = 3, lwd = lwd_ci)
-    graphics::lines(ts_xy$x[1:fc$start.t], qmap, col = cols[1], lwd = lwd_main)
-    graphics::lines(x_future, c(qmap[fc$start.t], fc$ff), col = cols[2], lwd = lwd_main)
-    graphics::lines(x_future, c(qub[fc$start.t], fqub), col = cols[2], lty = 3, lwd = lwd_ci)
-    graphics::lines(x_future, c(qlb[fc$start.t], fqlb), col = cols[2], lty = 3, lwd = lwd_ci)
-  }
-
   synthesis_forecast_origin_check <- function(syn_obs, syn_future, y_ts) {
     ts_xy <- grDevices::xy.coords(y_ts)
     dt_local <- 1 / stats::frequency(y_ts)
@@ -420,9 +353,9 @@ if (!need_ex1) {
 
       graphics::par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2), oma = c(0, 0, 0.8, 0))
 
-      exdqlm::exdqlmPlot(M95_plot, col = ex1_quant_cols$q95)
-      exdqlm::exdqlmPlot(M50_dqlm_plot, add = TRUE, col = ex1_quant_cols$q50)
-      exdqlm::exdqlmPlot(M5_plot, add = TRUE, col = ex1_quant_cols$q05)
+      plot(M95_plot, col = ex1_quant_cols$q95)
+      plot(M50_dqlm_plot, add = TRUE, col = ex1_quant_cols$q50)
+      plot(M5_plot, add = TRUE, col = ex1_quant_cols$q05)
       graphics::legend(
         "topright",
         lty = 1, col = c(ex1_quant_cols$q95, ex1_quant_cols$q50, ex1_quant_cols$q05),
@@ -431,9 +364,9 @@ if (!need_ex1) {
       graphics::title(main = "(a) Dynamic quantiles", cex.main = 0.95)
 
       stats::plot.ts(y_ts, xlim = xlim_fore, ylim = c(575, 581), col = "dark grey", ylab = "quantile forecast")
-      add_forecast_overlay(fc95, cols = c(ex1_quant_cols$q95, ex1_quant_cols$q95_future))
-      add_forecast_overlay(fc50, cols = c(ex1_quant_cols$q50, ex1_quant_cols$q50_future))
-      add_forecast_overlay(fc05, cols = c(ex1_quant_cols$q05, ex1_quant_cols$q05_future))
+      plot(fc95, add = TRUE, cols = c(ex1_quant_cols$q95, ex1_quant_cols$q95_future))
+      plot(fc50, add = TRUE, cols = c(ex1_quant_cols$q50, ex1_quant_cols$q50_future))
+      plot(fc05, add = TRUE, cols = c(ex1_quant_cols$q05, ex1_quant_cols$q05_future))
       graphics::title(main = "(b) Forecasted quantiles", cex.main = 0.95)
 
       plot(

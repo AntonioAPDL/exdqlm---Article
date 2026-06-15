@@ -862,9 +862,9 @@ if (!need_ex3) {
           xlim = xlim_mid, xlab = "", ylab = "log flow / quantile"
         )
         graphics::grid(col = "grey90")
-        exdqlm::exdqlmPlot(M0, add = TRUE, col = ex3_cols$m0)
-        exdqlm::exdqlmPlot(MREG, add = TRUE, col = ex3_cols$mreg)
-        exdqlm::exdqlmPlot(MTF, add = TRUE, col = ex3_cols$mtf)
+        plot(M0, add = TRUE, col = ex3_cols$m0)
+        plot(MREG, add = TRUE, col = ex3_cols$mreg)
+        plot(MTF, add = TRUE, col = ex3_cols$mtf)
         graphics::legend(
           "topleft", legend = c("M0 no covariates", "MREG direct regression", "MTF transfer function"),
           col = c(ex3_cols$m0, ex3_cols$mreg, ex3_cols$mtf), lty = 1, lwd = 1.5, bty = "n"
@@ -875,9 +875,9 @@ if (!need_ex3) {
           xlim = xlim_mid, ylab = "seasonal contribution", xlab = ""
         )
         graphics::grid(col = "grey90")
-        exdqlm::compPlot(M0, index = seasonal_idx, add = TRUE, col = ex3_cols$m0)
-        exdqlm::compPlot(MREG, index = seasonal_idx, add = TRUE, col = ex3_cols$mreg)
-        exdqlm::compPlot(MTF, index = seasonal_idx, add = TRUE, col = ex3_cols$mtf)
+        plot(M0, type = "component", index = seasonal_idx, add = TRUE, col = ex3_cols$m0)
+        plot(MREG, type = "component", index = seasonal_idx, add = TRUE, col = ex3_cols$mreg)
+        plot(MTF, type = "component", index = seasonal_idx, add = TRUE, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
 
         graphics::plot(
@@ -885,8 +885,8 @@ if (!need_ex3) {
           xlim = xlim_mid, ylab = "covariate contribution", xlab = ""
         )
         graphics::grid(col = "grey90")
-        exdqlm::compPlot(MREG, index = direct_reg_idx, add = TRUE, col = ex3_cols$mreg)
-        exdqlm::compPlot(MTF, index = transfer_zeta_idx, add = TRUE, col = ex3_cols$mtf)
+        plot(MREG, type = "component", index = direct_reg_idx, add = TRUE, col = ex3_cols$mreg)
+        plot(MTF, type = "component", index = transfer_zeta_idx, add = TRUE, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
         graphics::legend(
           "topleft", legend = c("MREG direct", "MTF transfer"),
@@ -922,7 +922,7 @@ if (!need_ex3) {
           ylim = padded_range(zeta$lb.comp, zeta$ub.comp, 0)
         )
         graphics::grid(col = "grey90")
-        exdqlm::compPlot(MTF, index = transfer_zeta_idx, just.theta = TRUE, add = TRUE, col = ex3_cols$mtf)
+        plot(MTF, type = "state", index = transfer_zeta_idx, add = TRUE, col = ex3_cols$mtf)
         graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
         graphics::title(expression(zeta[t]))
 
@@ -935,7 +935,7 @@ if (!need_ex3) {
             ylab = "component CrIs", ylim = psi_ylim
           )
           graphics::grid(col = "grey90")
-          exdqlm::compPlot(MTF, index = transfer_psi_idx[[j]], just.theta = TRUE, add = TRUE, col = index_cols[[j]])
+          plot(MTF, type = "state", index = transfer_psi_idx[[j]], add = TRUE, col = index_cols[[j]])
           graphics::abline(h = 0, col = ex3_cols$ref, lty = 3, lwd = 1.4)
           graphics::title(climate_psi_title(selected_labels[[j]]))
         }

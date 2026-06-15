@@ -299,10 +299,8 @@ if (!need_ex2) {
 
         graphics::par(mar = c(4.4, 4.1, 2.6, 1.2) + 0.1)
         stats::plot.ts(y_ts, xlim = xlim_time, col = ex2_cols$obs, ylab = "quantile and 95% CrI", xlab = "year")
-        q_d <- quantile_summary_from_fit(m_dqlm_plot, cr.percent = 0.95)
-        q_e <- quantile_summary_from_fit(m_exdqlm_plot, cr.percent = 0.95)
-        plot_quantile_summary(q_d, col = ex2_cols$dqlm, add = TRUE)
-        plot_quantile_summary(q_e, col = ex2_cols$exdqlm, add = TRUE)
+        plot(m_dqlm_plot, col = ex2_cols$dqlm, add = TRUE)
+        plot(m_exdqlm_plot, col = ex2_cols$exdqlm, add = TRUE)
         graphics::legend(
           "topleft",
           legend = c("DQLM", "exDQLM"),
@@ -539,10 +537,8 @@ if (!need_ex2) {
         graphics::par(mfrow = c(2, 2))
 
         stats::plot.ts(y, xlim = xlim_idx, col = "grey70", ylab = "quantile 95% CrIs")
-        q_dqlm_ld <- quantile_summary_from_fit(M1_ldvb, cr.percent = 0.95)
-        q_exdqlm_ld <- quantile_summary_from_fit(ldvb_diag, cr.percent = 0.95)
-        plot_quantile_summary(q_dqlm_ld, col = ex2_cols$dqlm, add = TRUE)
-        plot_quantile_summary(q_exdqlm_ld, col = ex2_cols$exdqlm, add = TRUE)
+        plot(M1_ldvb, col = ex2_cols$dqlm, add = TRUE)
+        plot(ldvb_diag, col = ex2_cols$exdqlm, add = TRUE)
         graphics::legend(
           "topleft",
           legend = c("DQLM LDVB", "exDQLM LDVB"),
