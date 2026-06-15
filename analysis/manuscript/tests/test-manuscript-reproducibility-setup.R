@@ -40,19 +40,25 @@ testthat::test_that("clone-grade reproducibility entrypoints exist", {
 
 testthat::test_that("code.R is a JSS-facing spin-ready replication script", {
   code_lines <- readLines(file.path(repo_root, "code.R"), warn = FALSE)
+  code_text <- paste(code_lines, collapse = "\n")
 
-  testthat::expect_true(any(grepl("# exdqlm Article Replication Script", code_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("# exdqlm article replication script", code_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("knitr::spin(\"code.R\", knit = TRUE)", code_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("sessionInfo()", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("EXDQLM_REPRO_TESTS_ONLY", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Manuscript output map", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Sys.setenv(TZ = \"America/New_York\")", code_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("analysis/manuscript/examples", code_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("replication_env <- new.env", code_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("Rscript code.R --quick", code_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("Rscript code.R --example 3", code_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("Mersenne-Twister / Inversion / Rejection", code_lines, fixed = TRUE)))
+  testthat::expect_false(grepl("main <- function", code_text, fixed = TRUE))
+  testthat::expect_false(grepl("analysis/run_all.R", code_text, fixed = TRUE))
+  testthat::expect_false(grepl("--mode", code_text, fixed = TRUE))
+  testthat::expect_false(grepl("--skip-preflight", code_text, fixed = TRUE))
 
   testthat::skip_if_not_installed("knitr")
   spun <- knitr::spin(text = code_lines, knit = FALSE)
-  testthat::expect_true(any(grepl("exdqlm Article Replication Script", spun, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Creating the JSS HTML replication log", spun, fixed = TRUE)))
+  testthat::expect_true(any(grepl("exdqlm article replication script", spun, fixed = TRUE)))
+  testthat::expect_true(any(grepl("JSS encourages an execution log", spun, fixed = TRUE)))
   testthat::expect_true(any(grepl("sessionInfo", spun, fixed = TRUE)))
 })
 
@@ -67,25 +73,72 @@ testthat::test_that("code.html records the JSS replication log when generated", 
   testthat::expect_true(file.exists(html_path), info = "Run knitr::spin(\"code.R\", knit = TRUE) to refresh code.html.")
 
   html <- readLines(html_path, warn = FALSE)
-  testthat::expect_true(any(grepl("exdqlm Article Replication Script", html, fixed = TRUE)))
-  testthat::expect_true(any(grepl("EXDQLM_REPRO_TESTS_ONLY", html, fixed = TRUE)))
+  testthat::expect_true(any(grepl("exdqlm article replication script", html, fixed = TRUE)))
+  testthat::expect_true(any(grepl("Rscript code.R --quick", html, fixed = TRUE)))
   testthat::expect_true(any(grepl("Session Info", html, fixed = TRUE)))
   testthat::expect_true(any(grepl("R version", html, fixed = TRUE)))
 })
 
-testthat::test_that("portable and reference reproducibility modes are wired", {
+testthat::test_that("public README and code.R avoid development-only entrypoints", {
   code_lines <- readLines(file.path(repo_root, "code.R"), warn = FALSE)
-  run_lines <- readLines(file.path(repo_root, "analysis", "run_all.R"), warn = FALSE)
+  readme_lines <- readLines(file.path(repo_root, "README.md"), warn = FALSE)
+  public_text <- paste(c(code_lines, readme_lines), collapse = "\n")
 
-  testthat::expect_true(any(grepl("--mode", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("portable", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("reference", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("EXDQLM_REPRO_MODE", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("EXDQLM_REFERENCE_SYNC", code_lines, fixed = TRUE)))
+  testthat::expect_true(grepl("Rscript code.R", public_text, fixed = TRUE))
+  testthat::expect_true(grepl("Rscript code.R --quick", public_text, fixed = TRUE))
+  testthat::expect_true(grepl("Rscript code.R --example 3", public_text, fixed = TRUE))
+  for (marker in c(
+    "git clone",
+    "origin/",
+    "upstream",
+    "--mode reference",
+    "--mode portable",
+    "--skip-preflight",
+    "analysis/run_all.R",
+    "analysis/check_reproducibility.R"
+  )) {
+    testthat::expect_false(
+      grepl(marker, public_text, fixed = TRUE),
+      info = sprintf("Public replication path contains development-only marker: %s", marker)
+    )
+  }
+})
 
-  testthat::expect_true(any(grepl("--mode", run_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("EXDQLM_REPRO_MODE", run_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("EXDQLM_REFERENCE_SYNC", run_lines, fixed = TRUE)))
+testthat::test_that("code.R help works from a no-git archive copy", {
+  testthat::skip_if(
+    tolower(Sys.getenv("EXDQLM_SKIP_ARCHIVE_SMOKE", unset = "false")) %in% c("true", "1", "yes"),
+    "Archive smoke test skipped by EXDQLM_SKIP_ARCHIVE_SMOKE."
+  )
+
+  tmp <- tempfile("exdqlm-jss-archive-")
+  dir.create(tmp)
+  archive_root <- file.path(tmp, "replication")
+  dir.create(archive_root)
+  files <- c(
+    "code.R",
+    "README.md",
+    "analysis/lib/manuscript_setup.R",
+    "analysis/lib/exdqlm_package_resolver.R",
+    "exdqlm-jss.tex"
+  )
+  for (rel in files) {
+    src <- file.path(repo_root, rel)
+    dst <- file.path(archive_root, rel)
+    dir.create(dirname(dst), recursive = TRUE, showWarnings = FALSE)
+    file.copy(src, dst, overwrite = TRUE)
+  }
+  on.exit(unlink(tmp, recursive = TRUE, force = TRUE), add = TRUE)
+
+  old_wd <- setwd(archive_root)
+  on.exit(setwd(old_wd), add = TRUE)
+  out <- system2(
+    file.path(R.home("bin"), "Rscript"),
+    c("code.R", "--help"),
+    stdout = TRUE,
+    stderr = TRUE
+  )
+  testthat::expect_true(any(grepl("Rscript code.R --quick", out, fixed = TRUE)))
+  testthat::expect_false(dir.exists(file.path(archive_root, ".git")))
 })
 
 testthat::test_that("package resolver includes current and generic source checkout names", {
@@ -96,6 +149,21 @@ testthat::test_that("package resolver includes current and generic source checko
   testthat::expect_true("exdqlm__wt__1p0p0_exdqlm_article" %in% candidates)
   testthat::expect_true("exdqlm__wt__1.0.0-jss" %in% candidates)
   testthat::expect_true("exdqlm__wt__0p5p0_exdqlm_article" %in% candidates)
+})
+
+testthat::test_that("package source provenance resolver tolerates archive-only layouts", {
+  source(file.path(repo_root, "analysis", "lib", "exdqlm_package_resolver.R"), local = TRUE)
+  archive_root <- tempfile("exdqlm-jss-archive-root-")
+  dir.create(archive_root)
+  on.exit(unlink(archive_root, recursive = TRUE, force = TRUE), add = TRUE)
+
+  spec <- testthat::expect_no_error(
+    exdqlm_resolve_source_spec(archive_root, env_pkg_path = NULL, fail_if_missing = FALSE)
+  )
+  testthat::expect_false(isTRUE(spec$is_package))
+  testthat::expect_null(spec$path)
+  testthat::expect_identical(spec$source, "unresolved")
+  testthat::expect_true(is.na(spec$git$commit))
 })
 
 testthat::test_that("reader-facing analysis docs avoid stale machine-specific paths", {

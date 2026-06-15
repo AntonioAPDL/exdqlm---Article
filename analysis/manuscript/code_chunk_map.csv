@@ -1,5 +1,5 @@
 "chunk_id","example","role","display_scope","source_files","manuscript_terms","source_terms","artifact_targets","notes"
-"chunk_001","global","package setup","exact","code.R","library(""exdqlm"")","exdqlm Article Replication Script","none","Loads the package used throughout the article; code.R is the full replication entrypoint."
+"chunk_001","global","package setup","exact","code.R","library(""exdqlm"")","exdqlm article replication script","none","Loads the package used throughout the article; code.R is the full replication entrypoint."
 "chunk_002","ex1_lake_huron","model construction","excerpt","analysis/manuscript/examples/ex1_lake_huron/run.R","polytrendMod;C0 = 10 * diag(2)","polytrendMod","none","Shows the polynomial trend model used in Example 1."
 "chunk_003","ex1_lake_huron","model fitting","excerpt","analysis/manuscript/examples/ex1_lake_huron/run.R","exdqlmMCMC;PriorGamma;n.burn = 2000;n.mcmc = 3000","exdqlmMCMC;PriorGamma","fig:ex1mcmc;fig:ex1quants","Shows the three fitted quantile levels used for the Lake Huron displays."
 "chunk_004","ex1_lake_huron","posterior diagnostics plot","excerpt","analysis/manuscript/examples/ex1_lake_huron/run.R","mfcol = c(2, 2);sigma trace;gamma density;coda::traceplot;coda::densplot","traceplot;densplot","fig:ex1mcmc","Shows the trace and density diagnostics displayed in Figure 1."

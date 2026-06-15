@@ -1,5 +1,9 @@
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0L) y else x
 
+exdqlm_first_or <- function(x, y = NA_character_) {
+  if (is.null(x) || length(x) == 0L || is.na(x[[1L]]) || !nzchar(x[[1L]])) y else x[[1L]]
+}
+
 exdqlm_trim_env <- function(name) {
   value <- trimws(Sys.getenv(name, unset = ""))
   if (nzchar(value)) value else NULL
@@ -76,11 +80,11 @@ exdqlm_git_info <- function(path) {
   counts <- exdqlm_git_ahead_behind(path)
 
   list(
-    branch = branch[[1]] %||% NA_character_,
-    upstream = upstream[[1]] %||% NA_character_,
-    commit = commit[[1]] %||% NA_character_,
+    branch = exdqlm_first_or(branch),
+    upstream = exdqlm_first_or(upstream),
+    commit = exdqlm_first_or(commit),
     dirty = length(status) > 0L,
-    remote = remote[[1]] %||% NA_character_,
+    remote = exdqlm_first_or(remote),
     ahead = counts[["ahead"]],
     behind = counts[["behind"]]
   )
@@ -115,7 +119,7 @@ exdqlm_resolve_source_spec <- function(repo_root,
     }
   } else {
     hits <- candidates[vapply(candidates, exdqlm_is_source_checkout, logical(1))]
-    path <- hits[[1]] %||% NULL
+    path <- if (length(hits)) hits[[1L]] else NULL
     source <- if (!is.null(path)) "auto sibling search" else "unresolved"
     is_pkg <- !is.null(path)
     if (fail_if_missing && !is_pkg) {

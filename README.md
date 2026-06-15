@@ -1,198 +1,119 @@
-# exdqlm Article Reproducibility
+# exdqlm article replication materials
 
-This repository contains the reproducible manuscript materials for the
-`exdqlm` article: LaTeX source, figures, tables, analysis scripts, tests, and
-submission-facing replication material.
+This directory contains the manuscript source and replication materials for
+the JSS article:
 
-The article is intended to be run with `exdqlm` version 1.0.0:
+> exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile
+> Linear Models
 
-- Article repo: `AntonioAPDL/exdqlm---Article`
-- Package repo: `AntonioAPDL/exdqlm`
-- CRAN package page: `https://CRAN.R-project.org/package=exdqlm`
+The replication materials are intended to be run from this extracted directory.
+They do not require a version-control checkout.
 
-## Quick Start
+## Contents
 
-Clone the article repository and install the CRAN release:
+- `exdqlm-jss.tex`, `exdqlm-jss.pdf`: main manuscript source and compiled PDF.
+- `exdqlm-supplement.tex`, `exdqlm-supplement.pdf`: current supplemental source
+  and compiled PDF. In the revised JSS submission this material will be merged
+  into the main manuscript appendices.
+- `code.R`: standalone replication script for the manuscript results.
+- `code.html`: HTML log generated from `code.R` with `knitr::spin()`.
+- `analysis/`: scripts, configuration, generated figures/tables/logs, tests,
+  and small helper files used by `code.R`.
+- `analysis/manuscript/outputs/`: generated manuscript artifacts.
+
+The source code for the `exdqlm` R package is submitted separately as the
+package source tarball. The package is also available from CRAN when the CRAN
+version matches the submitted manuscript version.
+
+## Install the package
+
+Install `exdqlm` before running the replication script. If the submitted source
+tarball is available in the current directory, install it with:
 
 ```sh
-git clone https://github.com/AntonioAPDL/exdqlm---Article.git
-cd exdqlm---Article
+R CMD INSTALL exdqlm_*.tar.gz
+```
+
+If the matching version is already on CRAN, this is also sufficient:
+
+```sh
 Rscript -e 'install.packages("exdqlm", repos = "https://cloud.r-project.org")'
 ```
 
-Run the read-only preflight check using the installed package:
+You can confirm the installed version with:
 
 ```sh
-EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R
+Rscript -e 'packageVersion("exdqlm")'
 ```
 
-Before regenerating any examples, require the package version and R runtime to
-match the reference setup. As of 2026-05-13, the current official R release is
-R 4.6.0, so final reference runs should use at least that version:
+## Reproduce the article
+
+From this directory, run:
 
 ```sh
-EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R --strict --require-r-version 4.6.0
+Rscript code.R
 ```
 
-If the default `Rscript` on the machine is older, call the target R
-installation directly:
+This is the full manuscript replication command. It regenerates the manuscript
+figures, generated tables, logs, and reproducibility manifests under
+`analysis/manuscript/outputs/`, then runs the manuscript checks and prints
+`sessionInfo()`.
+
+The full run can take substantial time because several examples fit Bayesian
+models. For a faster setup check, run:
 
 ```sh
-EXDQLM_LOAD_MODE=installed /path/to/R-4.6.0/bin/Rscript analysis/check_reproducibility.R --strict --require-r-version 4.6.0
+Rscript code.R --quick
 ```
 
-Run the cheap manuscript structure/tests pass:
+The quick command checks package loading, manuscript wiring, existing generated
+outputs, and the test suite without refitting all examples.
+
+To rerun a single example, use:
 
 ```sh
-EXDQLM_LOAD_MODE=installed Rscript analysis/run_all.R --stage manuscript --tests-only
+Rscript code.R --example 3
 ```
 
-The top-level reader entrypoint wraps the same preflight and manuscript
-pipeline. It is the canonical way to reproduce the full paper. Use
-`--mode portable` for fresh-clone, collaborator, or reviewer runs. Portable mode
-checks that the pipeline runs, figures/tables are generated, manifests are
-coherent, package provenance is recorded, and numeric outputs are finite and
-sensible. It does not require machine-dependent runtimes or simulation-based
-diagnostics to exactly match the manuscript's reference-machine values.
+Valid example numbers are `1`, `2`, `3`, and `4`.
 
-```sh
-EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only
-EXDQLM_LOAD_MODE=installed /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode portable
-```
+## Output locations
 
-Use `--mode reference` only for the final reference-machine sync before
-committing printed manuscript table values. Reference mode also runs the exact
-generated-value-to-manuscript checks and enables strict preflight behavior:
-
-```sh
-EXDQLM_LOAD_MODE=installed /path/to/R-4.6.0/bin/Rscript code.R --profile standard --mode reference --strict
-```
-
-JSS encourages an HTML output log from the standalone replication script. To
-refresh `code.html` without overwriting manuscript artifacts, run the quick
-portable tests-only spin:
-
-```r
-Sys.setenv(EXDQLM_LOAD_MODE = "installed")
-Sys.setenv(EXDQLM_REPRO_PROFILE = "quick")
-Sys.setenv(EXDQLM_REPRO_MODE = "portable")
-Sys.setenv(EXDQLM_REPRO_TESTS_ONLY = "true")
-Sys.setenv(EXDQLM_SKIP_PREFLIGHT = "true")
-Sys.setenv(EXDQLM_BUILDING_CODE_HTML = "true")
-knitr::spin("code.R", knit = TRUE)
-```
-
-The detailed regeneration and acceptance protocol is maintained in
-[`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`](analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md).
-
-The code printed in `exdqlm-jss.tex` is a curated, reader-facing excerpt of the
-same workflows rather than a replacement for `code.R`. The file
-`analysis/manuscript/code_chunk_map.csv` links every displayed `CodeInput`
-chunk to the canonical script, relevant package calls, and generated
-figure/table targets. Manuscript tests parse the displayed chunks and verify
-that the map stays synchronized with `analysis/`.
-
-## Package Loading Modes
-
-Source mode is the default. The article workflow tries, in order:
-
-1. `--pkg-path /path/to/exdqlm`
-2. `EXDQLM_PKG_PATH=/path/to/exdqlm`
-3. common sibling checkout names such as `../exdqlm`
-
-Example:
-
-```sh
-Rscript analysis/run_all.R --stage manuscript --pkg-path ../exdqlm --tests-only
-```
-
-Installed-package mode is the simplest route for readers using the CRAN
-release:
-
-```sh
-EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R
-EXDQLM_LOAD_MODE=installed Rscript analysis/run_all.R --stage manuscript --mode portable --tests-only
-```
-
-Use `EXDQLM_INSTALLED_LIB=/path/to/R/library` if the installed package lives in
-a non-default R library.
-
-## Main Workflows
-
-The manuscript-facing analysis lives under `analysis/manuscript/examples/` and
-is orchestrated by `analysis/run_all.R`.
-
-Cheap checks:
-
-```sh
-EXDQLM_LOAD_MODE=installed Rscript analysis/check_reproducibility.R
-EXDQLM_LOAD_MODE=installed Rscript analysis/run_all.R --stage manuscript --tests-only
-```
-
-Targeted regeneration:
-
-```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --targets ex2checks --profile standard --skip-tests
-```
-
-Full manuscript regeneration can be expensive. It regenerates the publication
-artifacts, including the Example 4 simulation figure/table from the committed
-`dataset_seed`, but it does not redo the optional Example 4 seed screen:
-
-```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --profile standard
-```
-
-To re-run the optional Example 4 seed screen intentionally:
-
-```sh
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --force-refit --skip-tests
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --profile standard --force-refit --skip-tests
-```
-
-If `ex4screen` selects a different seed, update `analysis/config/params_manuscript.yml`
-before rerunning the Example 4 figure/table target.
-
-## Outputs
-
-Generated manuscript artifacts are written under:
+The main generated files are written to:
 
 - `analysis/manuscript/outputs/figures/`
 - `analysis/manuscript/outputs/tables/`
 - `analysis/manuscript/outputs/logs/`
 - `analysis/manuscript/outputs/cache/`
 
-The article LaTeX file reads figures from
-`analysis/manuscript/outputs/figures/`. Tables in `exdqlm-jss.tex` are inline
-LaTeX and must be synchronized from generated CSV/log outputs after reruns.
+The manuscript reads figures from `analysis/manuscript/outputs/figures/`.
+Generated CSV files and logs provide the numerical source for the tables and
+reported values in the manuscript.
 
-## Reproducibility Notes
+Runtime values are machine dependent. They are recorded as elapsed fitting
+times for the stated backend profile and should be interpreted together with
+the generated environment/provenance files.
 
-- `analysis/check_reproducibility.R` is read-only unless `--fetch` is supplied
-  and should be the first command run in a fresh clone. Use `--fetch --strict`
-  with `--require-r-version` before regenerating examples so stale package
-  checkouts or stale R runtimes are caught before expensive relaunches.
-- `code.R` is the top-level reader-facing reproduction script and records the
-  R session used for the run. Its portable mode is intended for readers and
-  collaborators; its reference mode is the final exact manuscript-value sync
-  gate on the documented benchmark platform. `code.html` is generated from
-  `code.R` with `knitr::spin()` as the reviewer-facing execution log.
-- `analysis/manuscript/code_chunk_map.csv` records how the compact code chunks
-  displayed in the article map to the full executable scripts under
-  `analysis/manuscript/examples/`.
-- `analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv` maps tracked
-  artifacts to manuscript targets.
-- Runtime values are hardware-, R-version-, backend-, and profile-dependent.
-  Portable runs should regenerate coherent positive runtimes, but only the
-  reference run is expected to exactly match the runtimes printed in the
-  manuscript. Benchmark provenance is recorded in
-  `analysis/manuscript/outputs/tables/benchmark_environment.csv`.
-- Manuscript runs set the RNG explicitly to
-  `Mersenne-Twister / Inversion / Rejection` before applying the configured
-  seed. Printed runtime values use benchmark Profile B, which records one C++
-  thread, disables the C++ sampler backend, and stores the backend/profile
-  choices in `benchmark_environment.csv`.
-- The submission tree retains the canonical manuscript workflow and generated
-  reproducibility outputs. Exploratory development workflows are intentionally
-  excluded from this repository state so the shared source archive stays focused
-  on reproducing the paper.
+## HTML replication log
+
+The included `code.html` file is produced from `code.R`. To refresh a quick
+HTML log, run:
+
+```r
+Sys.setenv(EXDQLM_REPLICATION_QUICK = "true")
+knitr::spin("code.R", knit = TRUE)
+```
+
+For a final full refresh, run `Rscript code.R` first and then regenerate
+`code.html` from the same `code.R`.
+
+## Notes for development runs
+
+The public replication path uses the installed `exdqlm` package. During
+development only, a local package source tree can be used by setting:
+
+```sh
+EXDQLM_LOAD_MODE=source EXDQLM_PKG_PATH=/path/to/exdqlm Rscript code.R --quick
+```
+
+This is not required for reproducing the submitted materials.

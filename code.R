@@ -1,248 +1,260 @@
 #!/usr/bin/env Rscript
 
-#' # exdqlm Article Replication Script
+#' # exdqlm article replication script
 #'
-#' This file is the standalone replication entrypoint for the `exdqlm`
-#' article. It wraps the manuscript pipeline in `analysis/` and is the file to
-#' run from a fresh clone, an Overleaf source download, or a final reference
-#' checkout.
+#' This is the standalone replication script for the JSS article
+#' "exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic
+#' Quantile Linear Models".
 #'
-#' The script can load `exdqlm` in two ways. Installed-package mode is the
-#' simplest route for readers using the CRAN 1.0.0 release:
+#' Run this file from the extracted replication-materials directory:
 #'
 #' ```sh
-#' EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only --skip-preflight
+#' Rscript code.R
 #' ```
 #'
-#' Source mode is also available for reference runs from a companion package
-#' checkout, usually supplied by `EXDQLM_PKG_PATH=../exdqlm` or
-#' `--pkg-path ../exdqlm`.
-#'
-#' ## Reproducibility profiles and modes
-#'
-#' The `quick` profile is a smoke-test profile. The `standard` profile is the
-#' manuscript replication profile used for the reported examples. Two
-#' reproducibility modes are available:
-#'
-#' - `portable` verifies that the pipeline runs and produces coherent figures,
-#'   tables, manifests, diagnostics, package provenance, and finite numerical
-#'   summaries on the current machine. It does not require exact equality with
-#'   reference-machine runtimes or simulation-based diagnostics.
-#' - `reference` additionally requires exact agreement between generated values
-#'   and values printed in the manuscript. Use it only on the documented
-#'   reference machine before synchronizing manuscript tables and runtimes.
-#'
-#' All manuscript runs set the random-number generator explicitly to
-#' `Mersenne-Twister / Inversion / Rejection` before the configured seed is
-#' applied. The manuscript benchmark profile uses one C++ thread and keeps the
-#' C++ sampler backend disabled. Runtime values are therefore reference-profile
-#' elapsed fitting times, not machine-independent constants.
-#'
-#' ## Main commands
+#' The default command regenerates the manuscript figures, tables, logs, and
+#' reproducibility manifests using the standard manuscript profile. Two shorter
+#' commands are provided for checking the materials without running the full
+#' replication:
 #'
 #' ```sh
-#' EXDQLM_LOAD_MODE=installed Rscript code.R --profile quick --mode portable --tests-only
-#' EXDQLM_LOAD_MODE=installed Rscript code.R --profile standard --mode portable
-#' EXDQLM_PKG_PATH=../exdqlm Rscript code.R --profile standard --mode reference --strict
+#' Rscript code.R --quick
+#' Rscript code.R --example 3
 #' ```
 #'
-#' The first command is a cheap smoke test. The second command regenerates the
-#' manuscript artifacts in portable mode. The third command is the final
-#' reference-machine acceptance gate.
+#' `--quick` checks package loading, the manuscript wiring, the existing
+#' generated outputs, and the test suite without refitting every example.
+#' `--example 3` reruns only the Big Tree water-flow example and its manifest
+#' checks. The same pattern works for examples 1, 2, and 4.
 #'
-#' ## Manuscript output map
+#' The script uses an installed `exdqlm` package by default. To reproduce with a
+#' local package source tree during development, set `EXDQLM_LOAD_MODE=source`
+#' and `EXDQLM_PKG_PATH=/path/to/exdqlm` before running this script.
 #'
-#' The manuscript pipeline regenerates artifacts under
-#' `analysis/manuscript/outputs/`:
+#' All manuscript runs initialize the random-number generator to
+#' `Mersenne-Twister / Inversion / Rejection` through the manuscript setup file.
+#' Runtime values are elapsed fitting times on the machine used for the run, so
+#' small differences across platforms are expected.
 #'
-#' - Example 1, Lake Huron: dynamic quantile fits, forecasts, trace diagnostics,
-#'   and posterior-predictive synthesis artifacts.
-#' - Example 2, Sunspots: AL/exAL dynamic diagnostics, discount-factor scans,
-#'   runtime/diagnostic benchmark tables, and LDVB diagnostic plots.
-#' - Example 3, Big Tree water flow: no-covariate, direct-regression, and
-#'   transfer-function fits; component plots; held-out forecast diagnostics.
-#' - Example 4, static simulation: quantile-specific sparse exAL LDVB/MCMC
-#'   comparison table and coefficient-interval figure from static diagnostics.
+#' The replication writes outputs under `analysis/manuscript/outputs/`:
 #'
-#' The tracker files in `analysis/manuscript/outputs/tables/` map generated
-#' files back to manuscript figures and tables.
+#' - `figures/`: manuscript figures.
+#' - `tables/`: generated tables, manifests, and provenance files.
+#' - `logs/`: text logs and `sessionInfo()`.
+#' - `cache/`: cached model fits used to avoid unnecessary refits.
 #'
-#' The code chunks printed in `exdqlm-jss.tex` are compact, reader-facing
-#' excerpts of these same workflows. Their traceability to the executable
-#' scripts is recorded in `analysis/manuscript/code_chunk_map.csv` and checked
-#' by the manuscript test suite.
+#' The code printed in the manuscript is a compact excerpt of the same
+#' workflows. The full executable example scripts live in
+#' `analysis/manuscript/examples/` and are sourced below in manuscript order.
 #'
-#' ## Creating the JSS HTML replication log
-#'
-#' JSS encourages an output file created from this script. The safe portable
-#' HTML check uses the quick tests-only profile, which validates the wiring
-#' without overwriting manuscript artifacts:
+#' JSS encourages an execution log generated from the replication script. For R
+#' submissions this can be refreshed with:
 #'
 #' ```r
-#' Sys.setenv(EXDQLM_LOAD_MODE = "installed")
-#' Sys.setenv(EXDQLM_REPRO_PROFILE = "quick")
-#' Sys.setenv(EXDQLM_REPRO_MODE = "portable")
-#' Sys.setenv(EXDQLM_REPRO_TESTS_ONLY = "true")
-#' Sys.setenv(EXDQLM_SKIP_PREFLIGHT = "true")
-#' Sys.setenv(EXDQLM_BUILDING_CODE_HTML = "true")
+#' Sys.setenv(EXDQLM_REPLICATION_QUICK = "true")
 #' knitr::spin("code.R", knit = TRUE)
 #' ```
 #'
-#' For the final article bundle, run the standard portable or reference command
-#' directly before creating or refreshing `code.html`.
+#' The quick flag keeps the HTML refresh inexpensive. For final reference
+#' regeneration, run `Rscript code.R` before refreshing the archive.
 
 env_flag <- function(name, default = FALSE) {
-  value <- tolower(trimws(Sys.getenv(name, unset = if (isTRUE(default)) "true" else "false")))
-  value %in% c("true", "1", "yes", "y")
+  value <- Sys.getenv(name, unset = if (isTRUE(default)) "true" else "false")
+  tolower(trimws(value)) %in% c("true", "1", "yes", "y")
 }
 
-find_repo_root <- function(start = getwd()) {
-  cur <- normalizePath(start, mustWork = TRUE)
+find_article_root <- function(start = getwd()) {
+  cur <- normalizePath(start, winslash = "/", mustWork = TRUE)
   repeat {
-    if (file.exists(file.path(cur, "exdqlm-jss.tex"))) return(cur)
+    if (file.exists(file.path(cur, "exdqlm-jss.tex")) &&
+        dir.exists(file.path(cur, "analysis", "manuscript", "examples"))) {
+      return(cur)
+    }
     parent <- dirname(cur)
     if (identical(parent, cur)) {
-      stop("Could not locate repository root (exdqlm-jss.tex not found).", call. = FALSE)
+      stop("Could not locate the replication-materials root containing exdqlm-jss.tex.", call. = FALSE)
     }
     cur <- parent
   }
 }
 
-parse_args <- function(args) {
+example_targets <- function(example) {
+  example <- tolower(trimws(as.character(example)))
+  switch(
+    example,
+    "1" = "ex1",
+    "ex1" = "ex1",
+    "lake_huron" = "ex1",
+    "lake-huron" = "ex1",
+    "2" = "ex2",
+    "ex2" = "ex2",
+    "sunspots" = "ex2",
+    "3" = "ex3",
+    "ex3" = "ex3",
+    "big_tree" = "ex3",
+    "big-tree" = "ex3",
+    "4" = "ex4",
+    "ex4" = "ex4",
+    "static" = "ex4",
+    stop("`--example` must be one of 1, 2, 3, or 4.", call. = FALSE)
+  )
+}
+
+parse_replication_args <- function(args) {
   out <- list(
-    profile = Sys.getenv("EXDQLM_REPRO_PROFILE", unset = "quick"),
-    mode = Sys.getenv("EXDQLM_REPRO_MODE", unset = "portable"),
-    pkg_path = Sys.getenv("EXDQLM_PKG_PATH", unset = "../exdqlm"),
-    require_r_version = Sys.getenv("EXDQLM_REQUIRED_R_VERSION", unset = "4.6.0"),
-    targets = "",
-    tests_only = env_flag("EXDQLM_REPRO_TESTS_ONLY"),
-    skip_preflight = env_flag("EXDQLM_SKIP_PREFLIGHT"),
-    strict = env_flag("EXDQLM_REPRO_STRICT"),
-    fetch = env_flag("EXDQLM_REPRO_FETCH"),
-    force_refit = env_flag("EXDQLM_FORCE_REFIT")
+    profile = "standard",
+    quick = env_flag("EXDQLM_REPLICATION_QUICK") || env_flag("EXDQLM_BUILDING_CODE_HTML"),
+    example = Sys.getenv("EXDQLM_REPLICATION_EXAMPLE", unset = ""),
+    show_help = FALSE
   )
 
   i <- 1L
   while (i <= length(args)) {
-    a <- args[[i]]
-    if (a == "--profile") {
+    arg <- args[[i]]
+    if (arg == "--quick") {
+      out$quick <- TRUE
+    } else if (arg == "--example") {
       i <- i + 1L
-      out$profile <- args[[i]]
-    } else if (a == "--mode") {
-      i <- i + 1L
-      out$mode <- args[[i]]
-    } else if (a == "--pkg-path") {
-      i <- i + 1L
-      out$pkg_path <- args[[i]]
-    } else if (a == "--require-r-version") {
-      i <- i + 1L
-      out$require_r_version <- args[[i]]
-    } else if (a == "--targets") {
-      i <- i + 1L
-      out$targets <- args[[i]]
-    } else if (a == "--tests-only") {
-      out$tests_only <- TRUE
-    } else if (a == "--skip-preflight") {
-      out$skip_preflight <- TRUE
-    } else if (a == "--strict") {
-      out$strict <- TRUE
-    } else if (a == "--fetch") {
-      out$fetch <- TRUE
-    } else if (a == "--force-refit") {
-      out$force_refit <- TRUE
-    } else if (a %in% c("--help", "-h")) {
-      cat(
-        "Usage: Rscript code.R [options]\n\n",
-        "Options:\n",
-        "  --profile NAME             Manuscript profile: quick, standard, or full\n",
-        "  --mode MODE                Reproducibility mode: portable or reference\n",
-        "  --pkg-path PATH            exdqlm source checkout. Default: EXDQLM_PKG_PATH or ../exdqlm\n",
-        "  --require-r-version X.Y.Z  Minimum R version for preflight. Default: 4.6.0\n",
-        "  --targets LIST             Optional comma-separated manuscript targets\n",
-        "  --tests-only               Run manuscript tests without regenerating artifacts\n",
-        "  --force-refit              Force recomputation for selected targets\n",
-        "  --fetch                    Fetch remotes during preflight\n",
-        "  --strict                   Treat preflight warnings as failures\n",
-        "  --skip-preflight           Run the manuscript pipeline without preflight\n",
-        "  --help                     Show this message\n",
-        "\nEnvironment defaults:\n",
-        "  EXDQLM_REPRO_PROFILE       Default profile when --profile is omitted\n",
-        "  EXDQLM_REPRO_MODE          Default mode when --mode is omitted\n",
-        "  EXDQLM_REPRO_TESTS_ONLY    If true, run tests without regenerating artifacts\n",
-        "  EXDQLM_SKIP_PREFLIGHT      If true, skip preflight\n",
-        "  EXDQLM_LOAD_MODE           source or installed package loading\n",
-        sep = ""
-      )
-      quit(status = 0)
+      if (i > length(args)) stop("`--example` requires a value.", call. = FALSE)
+      out$example <- args[[i]]
+    } else if (arg %in% c("--help", "-h")) {
+      out$show_help <- TRUE
     } else {
-      stop(sprintf("Unknown argument: %s", a), call. = FALSE)
+      stop(sprintf("Unknown argument: %s. Run `Rscript code.R --help` for usage.", arg), call. = FALSE)
     }
     i <- i + 1L
   }
-  out$mode <- tolower(trimws(out$mode))
-  if (!out$mode %in% c("portable", "reference")) {
-    stop("--mode must be either 'portable' or 'reference'.", call. = FALSE)
+
+  if (isTRUE(out$quick)) {
+    out$profile <- "quick"
   }
+  out$targets <- if (nzchar(out$example)) example_targets(out$example) else character(0)
   out
 }
 
-run_step <- function(label, script, args) {
-  cat(sprintf("\n== %s ==\n", label))
-  cmd <- normalizePath(file.path(R.home("bin"), "Rscript"), mustWork = TRUE)
-  status <- system2(cmd, c(script, args))
-  if (!identical(status, 0L)) {
-    stop(sprintf("%s failed with exit status %s.", label, status), call. = FALSE)
+print_help <- function() {
+  cat(
+    "Usage:\n",
+    "  Rscript code.R\n",
+    "  Rscript code.R --quick\n",
+    "  Rscript code.R --example 3\n\n",
+    "Options:\n",
+    "  --quick       Run a fast wiring/test pass using the quick profile.\n",
+    "  --example N   Rerun one manuscript example, where N is 1, 2, 3, or 4.\n",
+    "  --help        Show this help message.\n\n",
+    "Package loading:\n",
+    "  By default the script loads the installed exdqlm package. For development\n",
+    "  source runs, set EXDQLM_LOAD_MODE=source and EXDQLM_PKG_PATH=/path/to/exdqlm.\n",
+    sep = ""
+  )
+}
+
+clear_manuscript_outputs <- function(stage_root) {
+  for (subdir in c("figures", "tables", "logs")) {
+    path <- file.path(stage_root, "outputs", subdir)
+    if (!dir.exists(path)) next
+    files <- list.files(path, full.names = TRUE, recursive = TRUE)
+    if (length(files)) unlink(files, recursive = TRUE, force = TRUE)
   }
+}
+
+source_manuscript_step <- function(env, path, label) {
+  env$log_msg(sprintf("Running %s", label))
+  source(path, local = env)
   invisible(TRUE)
 }
 
-main <- function() {
-  args <- parse_args(commandArgs(trailingOnly = TRUE))
-  repo_root <- find_repo_root()
-  setwd(repo_root)
-
-  if (identical(args$mode, "reference")) {
-    args$strict <- TRUE
+run_manuscript_tests <- function(repo_root) {
+  if (!requireNamespace("testthat", quietly = TRUE)) {
+    stop("The testthat package is required to run the manuscript checks.", call. = FALSE)
   }
-
-  Sys.setenv(
-    EXDQLM_PKG_PATH = args$pkg_path,
-    EXDQLM_REPRO_MODE = args$mode,
-    EXDQLM_REFERENCE_SYNC = if (identical(args$mode, "reference")) "true" else "false"
-  )
-
-  cat(sprintf("== Reproducibility Mode ==\n%s\n", args$mode))
-
-  if (!isTRUE(args$skip_preflight)) {
-    preflight_args <- c(
-      "analysis/check_reproducibility.R",
-      "--stage", "manuscript",
-      "--profile", args$profile,
-      "--pkg-path", args$pkg_path,
-      "--require-r-version", args$require_r_version
-    )
-    if (isTRUE(args$strict)) preflight_args <- c(preflight_args, "--strict")
-    if (isTRUE(args$fetch)) preflight_args <- c(preflight_args, "--fetch")
-    run_step("Preflight", preflight_args[[1]], preflight_args[-1])
-  }
-
-  run_args <- c(
-    "analysis/run_all.R",
-    "--stage", "manuscript",
-    "--profile", args$profile,
-    "--mode", args$mode,
-    "--pkg-path", args$pkg_path
-  )
-  if (nzchar(args$targets)) run_args <- c(run_args, "--targets", args$targets)
-  if (isTRUE(args$tests_only)) run_args <- c(run_args, "--tests-only")
-  if (isTRUE(args$force_refit)) run_args <- c(run_args, "--force-refit")
-  run_step("Manuscript pipeline", run_args[[1]], run_args[-1])
-
-  cat("\n== Session Info ==\n")
-  if (!nzchar(Sys.getenv("TZ", unset = ""))) {
-    Sys.setenv(TZ = "America/New_York")
-  }
-  print(utils::sessionInfo())
+  Sys.setenv(EXDQLM_ARTICLE_REPO = repo_root)
+  testthat::test_dir(file.path(repo_root, "analysis", "manuscript", "tests"), reporter = "summary")
+  invisible(TRUE)
 }
 
-main()
+args <- parse_replication_args(commandArgs(trailingOnly = TRUE))
+if (isTRUE(args$show_help)) {
+  print_help()
+  quit(status = 0)
+}
+
+repo_root <- find_article_root()
+setwd(repo_root)
+
+if (!nzchar(Sys.getenv("EXDQLM_LOAD_MODE", unset = ""))) {
+  Sys.setenv(EXDQLM_LOAD_MODE = "installed")
+}
+Sys.setenv(EXDQLM_REFERENCE_SYNC = "false")
+if (!nzchar(Sys.getenv("TZ", unset = ""))) {
+  Sys.setenv(TZ = "America/New_York")
+}
+
+replication_env <- new.env(parent = globalenv())
+replication_env$repo_root <- repo_root
+replication_env$project_stage <- "manuscript"
+replication_env$profile <- args$profile
+replication_env$pkg_path <- Sys.getenv("EXDQLM_PKG_PATH", unset = "")
+replication_env$seed_override <- NULL
+replication_env$targets <- args$targets
+replication_env$force_refit <- FALSE
+
+cat("== exdqlm article replication ==\n")
+cat(sprintf("Working directory: %s\n", repo_root))
+cat(sprintf("Profile: %s\n", args$profile))
+if (length(args$targets)) {
+  cat(sprintf("Target: %s\n", paste(args$targets, collapse = ", ")))
+} else if (isTRUE(args$quick)) {
+  cat("Target: quick wiring/test pass; existing outputs are not regenerated.\n")
+} else {
+  cat("Target: full manuscript replication.\n")
+}
+
+source(file.path(repo_root, "analysis", "lib", "manuscript_setup.R"), local = replication_env)
+
+manuscript_stage_root <- file.path(repo_root, "analysis", "manuscript")
+example_scripts <- file.path(
+  manuscript_stage_root,
+  "examples",
+  c(
+    "ex1_lake_huron/run.R",
+    "ex2_sunspots/run.R",
+    "ex3_big_tree/run.R",
+    "ex4_static/seed_screen.R",
+    "ex4_static/run.R",
+    "_manifest/run.R"
+  )
+)
+
+if (isTRUE(args$quick)) {
+  replication_env$log_msg("Quick pass: checking current manuscript outputs without clearing or refitting.")
+} else {
+  if (length(args$targets)) {
+    replication_env$log_msg("Targeted run: keeping existing outputs and regenerating selected artifacts.")
+  } else {
+    replication_env$log_msg("Clearing previous manuscript figures, tables, and logs.")
+    clear_manuscript_outputs(manuscript_stage_root)
+  }
+
+  labels <- c(
+    "Example 1 (Lake Huron)",
+    "Example 2 (Sunspots)",
+    "Example 3 (Big Tree water flow)",
+    "Example 4 seed-screen helper",
+    "Example 4 (static simulation)",
+    "manuscript manifest"
+  )
+  for (i in seq_along(example_scripts)) {
+    source_manuscript_step(replication_env, example_scripts[[i]], labels[[i]])
+  }
+}
+
+replication_env$log_msg("Running manuscript checks")
+run_manuscript_tests(repo_root)
+
+replication_env$write_session_info()
+
+cat("\n== Session Info ==\n")
+print(utils::sessionInfo())
+
+cat("\nReplication complete.\n")

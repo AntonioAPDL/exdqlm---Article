@@ -1,7 +1,7 @@
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0L) y else x
 
 if (!exists("repo_root")) {
-  stop("repo_root is not defined. Run via analysis/run_all.R.", call. = FALSE)
+  stop("repo_root is not defined. Run via code.R or the internal analysis runner.", call. = FALSE)
 }
 
 required_pkgs <- c("yaml", "matrixStats", "coda", "dlm")
