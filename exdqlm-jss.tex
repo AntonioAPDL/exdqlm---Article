@@ -378,7 +378,7 @@ For a final diagnostic, we include the \cite{gelfand1998model} posterior predict
 \end{align}
 where the expectation is with respect to posterior predictive replicate draws generated from the observation equation \eqref{EQ:exDLM} under posterior draws of the model parameters. Thus, CRPS summarizes the full predictive distribution through the integrated quantile-score approximation in \eqref{eq:crps_iqs_main}, whereas PPLC keeps the target quantile explicit through $\rho_{p_0}$. Smaller PPLC values indicate better performance under this target-quantile loss criterion. Samples from the posterior replicate distributions are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-The function \code{exdqlmDiagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} or \code{exdqlmLDVB()} is passed to \code{exdqlmDiagnostics()}, the resulting object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence and flipped KL divergence, the mean CRPS, \code{pplc}, the ordered pairs of the QQ-plot, and autocorrelations by lag. By default, the function also produces the QQ-plot, ACF plot, and MAP standardized forecast-error plot.  Examples of the utility of \code{exdqlmDiagnostics()} can be found in Section \ref{sec:exs}.
+The function \code{exdqlmDiagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} or \code{exdqlmLDVB()} is passed to \code{exdqlmDiagnostics()}, the resulting \code{exdqlmDiagnostic} object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence and flipped KL divergence, the mean CRPS, \code{pplc}, the ordered pairs of the QQ-plot, and autocorrelations by lag. The object can be inspected with \code{print()} or \code{summary()}, and visualized with its \code{plot()} method, which produces the QQ plot, ACF plot, and MAP standardized forecast-error plot. Examples of the utility of \code{exdqlmDiagnostics()} can be found in Section \ref{sec:exs}.
 
 \subsection{k-step-ahead forecast}
 
@@ -444,12 +444,12 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic fit examination} -- Input \code{exdqlmMCMC}, \code{exdqlmLDVB}, or legacy \code{exdqlmISVB} objects} \\
     \rule{0pt}{3ex}\code{exdqlmForecast()} & \code{exdqlmForecast} & Compute forecast quantiles and optional predictive draws.\\
-    \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics; optionally plot them. \\
+    \code{exdqlmDiagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics; use \code{plot()} to visualize them. \\
     \code{exdqlmPlot()} & Invisible \code{list} & Plot dynamic quantile MAP and CrI summaries.\\
     \code{compPlot()} & Invisible \code{list} & Plot component or state-level MAP and CrI summaries.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticMCMC} or \code{exalStaticLDVB} objects} \\
-    \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fitted-quantile diagnostics and coefficient-interval summaries/plots.\\
+    \code{exalStaticDiagnostics()} & \code{exalStaticDiagnostic} & Compute static fitted-quantile diagnostics and coefficient summaries; use \code{plot()} for quantile or coefficient plots.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input dynamic fit/forecast objects or draw matrices} \\
     \rule{0pt}{3ex}\code{quantileSynthesis()} & \code{exdqlmSynthesis} & Synthesize posterior predictive draws across separately fitted quantile levels.\\
@@ -815,12 +815,13 @@ R> title("exDQLM posterior draws of gamma (p0 = 0.85)")
 \end{CodeInput}
 \end{CodeChunk}
 
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to plot the model diagnostics discussed in Section \ref{sec:diags}. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals. 
+To further examine the two models, we use the function \code{exdqlmDiagnostics()} to create an \code{exdqlmDiagnostic} object and then call its \code{plot()} method. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> par(mfrow = c(2, 3))
-R> diagM1M2 = exdqlmDiagnostics(M1, M2, cols = c("red", "blue"))
+R> diagM1M2 = exdqlmDiagnostics(M1, M2)
+R> plot(diagM1M2, cols = c("red", "blue"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -831,12 +832,18 @@ We can also apply the \code{print()} generic to the resulting \code{exdqlmDiagno
 R> print(diagM1M2)
 \end{CodeInput}
 \begin{CodeOutput}
+Dynamic quantile model diagnostics
+Class: exdqlmDiagnostic
+Quantile level (p0): 0.85
+Observations: 289
+Models: exdqlmLDVB vs exdqlmLDVB
    Diagnostic        M1        M2
            KL    0.1329    0.1197
  KL (flipped)    0.0625    0.0528
          CRPS    8.5349    6.2685
          pplc 3855.9702 2328.0091
  run-time (s)   22.7090  104.0150
+Use with: summary(), plot()
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -862,7 +869,7 @@ R> for (i in 1:nrow(possible.dfs)) {
 +                  df = possible.dfs[i, ], dim.df = c(1, 8),
 +                  sig.init = 2, fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
-+   temp.check = exdqlmDiagnostics(temp.M2, plot = FALSE)
++   temp.check = exdqlmDiagnostics(temp.M2)
 +   metrics[i, ] = c(temp.check$m1.CRPS, temp.check$m1.KL)
 + }
 R> possible.dfs[which.min(metrics[, "CRPS"]), ]
@@ -1029,7 +1036,7 @@ R> for (i in seq_along(lambda.grid)) {
 +                 tf.C0 = diag(c(0.1, 1, 1), 3),
 +                 sig.init = 0.1, gam.init = -0.1,
 +                 n.samp = 1000, tol = 0.05, verbose = FALSE)
-+     temp.diag = exdqlmDiagnostics(temp.MTF, plot = FALSE)
++     temp.diag = exdqlmDiagnostics(temp.MTF)
 +     pplc.grid[i] = temp.diag$m1.pplc
 +   }
 R> lambda.star = lambda.grid[which.min(pplc.grid)]
@@ -1287,9 +1294,9 @@ diagnostics are computed from the final-training fitted objects.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> diag.M0 = exdqlmDiagnostics(M0, plot = FALSE)
-R> diag.MREG = exdqlmDiagnostics(MREG, plot = FALSE)
-R> diag.MTF = exdqlmDiagnostics(MTF, plot = FALSE)
+R> diag.M0 = exdqlmDiagnostics(M0)
+R> diag.MREG = exdqlmDiagnostics(MREG)
+R> diag.MTF = exdqlmDiagnostics(MTF)
 R> tab.ex3 = data.frame(
 +     model = c("M0", "MREG", "MTF"),
 +     KL = c(diag.M0$m1.KL, diag.MREG$m1.KL, diag.MTF$m1.KL),
@@ -1443,8 +1450,7 @@ For static fits, the helper function \code{exalStaticDiagnostics()} summarizes f
 \begin{CodeInput}
 R> diag.static = Map(function(ldvb, mcmc, y.h) {
 +     exalStaticDiagnostics(ldvb, mcmc,
-+                           X = X.hold, y = y.h, ref = ref.hold,
-+                           plot = FALSE)
++                           X = X.hold, y = y.h, ref = ref.hold)
 +   }, M.ldvb, M.mcmc, y.hold)
 R> y.lim = range(beta.true,
 +                unlist(lapply(diag.static, function(z) {
