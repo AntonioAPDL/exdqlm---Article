@@ -98,6 +98,27 @@ check_packages <- function(pkgs, label) {
   invisible(missing)
 }
 
+check_exdqlm_version <- function(found, expected, label) {
+  found <- as.character(found %||% "")
+  expected <- as.character(expected %||% "")
+  found <- if (length(found) && !is.na(found[[1L]])) found[[1L]] else ""
+  expected <- if (length(expected) && !is.na(expected[[1L]])) expected[[1L]] else ""
+  if (!nzchar(found)) {
+    warn(sprintf("%s version could not be determined.", label))
+    return(invisible(FALSE))
+  }
+  if (!nzchar(expected)) {
+    warn(sprintf("No expected exdqlm version is configured; found %s for %s.", found, label))
+    return(invisible(FALSE))
+  }
+  if (!identical(found, expected)) {
+    warn(sprintf("%s version is %s, not configured manuscript version %s.", label, found, expected))
+    return(invisible(FALSE))
+  }
+  ok(sprintf("%s version matches configured manuscript version %s", label, expected))
+  invisible(TRUE)
+}
+
 fetch_git_remote <- function(path, label) {
   if (is.null(path) || !dir.exists(path) || !file.exists(file.path(path, ".git"))) {
     warn(sprintf("Cannot fetch %s remote because path is not a git checkout: %s", label, path %||% "<null>"))
@@ -168,6 +189,12 @@ main <- function() {
   args <- parse_args(commandArgs(trailingOnly = TRUE))
   repo_root <- find_repo_root(getwd())
   analysis_root <- file.path(repo_root, "analysis")
+  cfg_path <- file.path(analysis_root, "config", "params_manuscript.yml")
+  cfg <- NULL
+  if (file.exists(cfg_path) && requireNamespace("yaml", quietly = TRUE)) {
+    cfg <- yaml::read_yaml(cfg_path)
+  }
+  expected_exdqlm_version <- as.character((cfg %||% list())$expected_exdqlm_version %||% "")
   source(file.path(analysis_root, "lib", "exdqlm_package_resolver.R"), local = TRUE)
 
   load_spec <- exdqlm_resolve_load_spec()
@@ -233,11 +260,7 @@ main <- function() {
       } else {
         ok("package remote is AntonioAPDL/exdqlm")
       }
-      if (!identical(pkg_spec$version, "1.0.0")) {
-        warn(sprintf("Package source version is %s, not 1.0.0.", pkg_spec$version))
-      } else {
-        ok("package source version is 1.0.0")
-      }
+      check_exdqlm_version(pkg_spec$version, expected_exdqlm_version, "Package source")
     }
   } else {
     if (!is.null(load_spec$installed_lib)) line("installed lib", load_spec$installed_lib)
@@ -245,11 +268,7 @@ main <- function() {
       installed_version <- as.character(utils::packageVersion("exdqlm"))
       line("installed version", installed_version)
       ok("installed exdqlm is available")
-      if (!identical(installed_version, "1.0.0")) {
-        warn(sprintf("Installed exdqlm version is %s, not 1.0.0.", installed_version))
-      } else {
-        ok("installed exdqlm version is 1.0.0")
-      }
+      check_exdqlm_version(installed_version, expected_exdqlm_version, "Installed exdqlm")
     } else {
       fail("EXDQLM_LOAD_MODE=installed but installed exdqlm is unavailable.")
     }
@@ -267,9 +286,13 @@ main <- function() {
   }
 
   section("Analysis Configuration")
-  cfg_path <- file.path(analysis_root, "config", "params_manuscript.yml")
-  if (file.exists(cfg_path) && requireNamespace("yaml", quietly = TRUE)) {
-    cfg <- yaml::read_yaml(cfg_path)
+  if (!is.null(cfg)) {
+    line("expected exdqlm", expected_exdqlm_version)
+    if (!nzchar(expected_exdqlm_version)) {
+      fail("params_manuscript.yml must define expected_exdqlm_version for final resubmission checks.")
+    } else {
+      ok("expected exdqlm version is configured")
+    }
     profiles <- names(cfg$profiles)
     line("profiles", paste(profiles, collapse = ", "))
     if (!args$profile %in% profiles) {
@@ -497,7 +520,7 @@ main <- function() {
   if (length(stale_hits)) {
     fail(sprintf("Canonical article files still contain stale or confusing KL wording/code: %s", paste(stale_hits, collapse = "; ")))
   } else {
-    ok("canonical article files use primary deterministic exdqlm 1.0.0 KL diagnostics wording/code")
+    ok("canonical article files use primary deterministic exdqlm KL diagnostics wording/code")
   }
 
   section("Canonical Forecast Scoring Wiring")

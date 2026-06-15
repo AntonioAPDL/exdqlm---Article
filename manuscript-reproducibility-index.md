@@ -1,171 +1,115 @@
-# Supplementary Materials Index
+# Replication Materials Index
 
-This note is the reader-facing map to the reproducible materials that accompany
-the `exdqlm` software article. It is intended to complement the manuscript by
-identifying the publication artifacts, auxiliary generated artifacts, and the
-tracked rerun paths used to regenerate them from the current `1.0.0` package.
+This note maps the files in the article archive to the manuscript figures,
+tables, and supporting outputs. The public replication entrypoint is the
+top-level script `code.R`; the `analysis/` tree contains the executable example
+scripts, manifests, tests, and generated artifacts used by that script.
 
-Current snapshot references are recorded in the generated reproducibility
-tracker and rerun logs. When regenerating artifacts, use the checked-out article
-commit together with `exdqlm` version 1.0.0. Readers can use the CRAN release
-through `EXDQLM_LOAD_MODE=installed`; source-mode reference runs can instead
-point `--pkg-path` or `EXDQLM_PKG_PATH` to a committed package checkout.
+The revised submission targets the `exdqlm` package version recorded in
+`analysis/config/params_manuscript.yml`. Install the submitted package source
+tarball before running a full replication. The generated environment table
+records the exact package version, commit, R version, random-number generator,
+backend profile, and platform used for the reference run.
 
-## 1. Publication Artifacts
+## Public replication entrypoints
 
-These are the figures and tables cited directly in the manuscript.
+From the extracted archive:
 
-| Manuscript target | Tracked output | Optional local export |
+```sh
+Rscript code.R
+```
+
+This is the full manuscript replication command. It regenerates the manuscript
+figures, generated tables, logs, and artifact manifests, then runs the
+manuscript checks and prints `sessionInfo()`.
+
+For a faster installation and wiring check:
+
+```sh
+Rscript code.R --quick
+```
+
+For a targeted example rerun:
+
+```sh
+Rscript code.R --example 3
+```
+
+Valid example numbers are `1`, `2`, `3`, and `4`. The included `code.html` file
+is generated from `code.R` with `knitr::spin("code.R", knit = TRUE)`.
+
+## Publication artifacts
+
+| Manuscript target | Tracked output | Notes |
 | --- | --- | --- |
-| `fig:ex1mcmc` | `analysis/manuscript/outputs/figures/ex1mcmc.png` | `Figures/ex1mcmc.png` |
-| `fig:ex1quants` | `analysis/manuscript/outputs/figures/ex1quants.png` | `Figures/ex1quants.png` |
-| `fig:ex2quant` | `analysis/manuscript/outputs/figures/ex2quant.png` | `Figures/ex2quant.png` |
-| `fig:ex2checks` | `analysis/manuscript/outputs/figures/ex2checks.png` | `Figures/ex2checks.png` |
-| `tab:ex2bench` | `analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv` | tracked table only |
-| `fig:ex3data` | `analysis/manuscript/outputs/figures/ex3data.png` | `Figures/ex3data.png` |
-| `fig:ex3quant` | `analysis/manuscript/outputs/figures/ex3quantcomps.png` | `Figures/ex3quantcomps.png` |
-| `fig:ex3tftheta` | `analysis/manuscript/outputs/figures/ex3zetapsi.png` | `Figures/ex3zetapsi.png` |
-| `fig:ex3forecast` | `analysis/manuscript/outputs/figures/ex3forecast.png` | `Figures/ex3forecast.png` |
-| `tab:ex3` | `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` | tracked table only |
-| `fig:ex4static` | `analysis/manuscript/outputs/figures/ex4static.png` | `Figures/ex4static.png` |
-| `tab:ex4static` | `analysis/manuscript/outputs/tables/ex4static_summary.csv` | tracked table only |
+| `fig:ex1mcmc` | `analysis/manuscript/outputs/figures/ex1mcmc.png` | Lake Huron MCMC diagnostics. |
+| `fig:ex1quants` | `analysis/manuscript/outputs/figures/ex1quants.png` | Lake Huron quantile fits, forecasts, and synthesis. |
+| `fig:ex2quant` | `analysis/manuscript/outputs/figures/ex2quant.png` | Sunspots fitted upper quantile. |
+| `fig:ex2checks` | `analysis/manuscript/outputs/figures/ex2checks.png` | Sunspots fitted diagnostic plots. |
+| `tab:ex2bench` | `analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv` | Sunspots benchmark source table. |
+| `fig:ex3data` | `analysis/manuscript/outputs/figures/ex3data.png` | Big Tree data and covariates. |
+| `fig:ex3quant` | `analysis/manuscript/outputs/figures/ex3quantcomps.png` | Big Tree fitted quantiles and components. |
+| `fig:ex3tftheta` | `analysis/manuscript/outputs/figures/ex3zetapsi.png` | Big Tree transfer-function states. |
+| `fig:ex3forecast` | `analysis/manuscript/outputs/figures/ex3forecast.png` | Big Tree held-out forecasts. |
+| `tab:ex3` | `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` | Big Tree fitted diagnostics. |
+| `fig:ex4static` | `analysis/manuscript/outputs/figures/ex4static.png` | Static sparse exAL coefficient summaries. |
+| `tab:ex4static` | `analysis/manuscript/outputs/tables/ex4static_summary.csv` | Static sparse exAL simulation summaries. |
 
-## 2. Core Reproduction Files
+## Core replication files
 
-The manuscript-facing workflow is organized under the article repository:
+- `README.md`: short archive-level instructions.
+- `code.R`: public standalone replication script.
+- `code.html`: execution log generated from `code.R`.
+- `exdqlm-jss.tex`: manuscript source.
+- `analysis/config/params_manuscript.yml`: seeds, profile settings, expected
+  package version, and backend profile.
+- `analysis/manuscript/examples/`: canonical scripts for Examples 1--4.
+- `analysis/manuscript/outputs/`: generated figures, tables, caches, and logs.
 
-- [analysis/README.md](analysis/README.md)
-- [analysis/manuscript/README.md](analysis/manuscript/README.md)
-- [analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md](analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md)
-- [analysis/run_all.R](analysis/run_all.R)
-- [exdqlm-jss.tex](exdqlm-jss.tex)
+The code printed in the manuscript is a reader-facing excerpt of the same
+workflows. The file `analysis/manuscript/code_chunk_map.csv` records how each
+displayed code chunk maps to the canonical executable scripts.
 
-The canonical executable scripts for the paper examples are under
-`analysis/manuscript/examples/`. Manuscript figures are generated into
-`analysis/manuscript/outputs/figures/`, which is the first path searched by
-`exdqlm-jss.tex`. Top-level `Figures/` files are optional local export copies
-created by `--promote`; they are ignored by git and are not used by the
-manuscript build. Inline LaTeX tables in `exdqlm-jss.tex` should be synchronized
-with the corresponding generated CSV/log outputs whenever a model is rerun.
+## Generated provenance
 
-The main reproducibility outputs written by the manuscript stage are:
+The main generated provenance files are:
 
-- [manuscript_repro_tracker.csv](analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv)
-- [manuscript_repro_tracker.md](analysis/manuscript/outputs/tables/manuscript_repro_tracker.md)
-- [manuscript_repro_notes.csv](analysis/manuscript/outputs/tables/manuscript_repro_notes.csv)
-- [manuscript_api_migration_map.csv](analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv)
-- [benchmark_backend_profiles.csv](analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv)
-- [benchmark_environment.csv](analysis/manuscript/outputs/tables/benchmark_environment.csv)
+- `analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv`
+- `analysis/manuscript/outputs/tables/manuscript_repro_tracker.md`
+- `analysis/manuscript/outputs/tables/manuscript_repro_notes.csv`
+- `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv`
+- `analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv`
+- `analysis/manuscript/outputs/tables/benchmark_environment.csv`
 
-## 3. Main Rerun Entry Points
+Runtime values are elapsed fitting times for the recorded reference platform
+and backend profile. They are not intended to be machine-independent constants.
 
-From the repository root:
+## Internal maintenance tools
 
-```bash
-EXDQLM_PKG_PATH=../exdqlm Rscript analysis/check_reproducibility.R
-Rscript analysis/run_all.R --stage manuscript
-Rscript analysis/run_all.R --stage manuscript --profile standard --promote
+The files `analysis/run_all.R` and `analysis/check_reproducibility.R` remain in
+the archive because they are useful for targeted developer reruns and final
+reference checks. They are not the primary public entrypoint; use `code.R`
+first.
+
+Examples of internal targeted reruns:
+
+```sh
+Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
 ```
 
-Useful targeted reruns:
+The preflight utility is intended for final reference-machine maintenance:
 
-```bash
-Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc,ex1quants,ex1synth --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2quant,ex2checks,ex2bench --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --profile standard --force-refit --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --profile standard --force-refit --skip-tests
+```sh
+Rscript analysis/check_reproducibility.R --stage manuscript --profile standard --require-r-version 4.6.0
 ```
 
-## 4. Auxiliary Artifacts by Example
+## Auxiliary artifacts
 
-### Example 1: Lake Huron
-
-Publication-facing:
-- [ex1mcmc.png](analysis/manuscript/outputs/figures/ex1mcmc.png)
-- [ex1quants.png](analysis/manuscript/outputs/figures/ex1quants.png)
-
-Auxiliary:
-- [ex1synth.png](analysis/manuscript/outputs/figures/ex1synth.png)
-- [ex1_synthesis_summary.txt](analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt)
-
-The optional `ex1kernel` target can regenerate a kernel-comparison check, but
-those files are not part of the standard submission artifact set.
-
-### Example 2: Sunspots
-
-Publication-facing:
-- [ex2quant.png](analysis/manuscript/outputs/figures/ex2quant.png)
-- [ex2checks.png](analysis/manuscript/outputs/figures/ex2checks.png)
-- [ex2_dynamic_benchmark.csv](analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv)
-
-Auxiliary:
-- [ex2_df_scan_kl.csv](analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
-- [ex2_ldvb_diagnostics.png](analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png)
-
-### Example 3: Big Tree
-
-Publication-facing:
-- [ex3data.png](analysis/manuscript/outputs/figures/ex3data.png)
-- [ex3quantcomps.png](analysis/manuscript/outputs/figures/ex3quantcomps.png)
-- [ex3zetapsi.png](analysis/manuscript/outputs/figures/ex3zetapsi.png)
-- [ex3forecast.png](analysis/manuscript/outputs/figures/ex3forecast.png)
-- [ex3_diagnostics_summary.csv](analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv)
-- [ex3_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv)
-
-Auxiliary:
-- [ex3_lambda_selection.csv](analysis/manuscript/outputs/tables/ex3_lambda_selection.csv)
-- [ex3_sensitivity_forecast_metrics.csv](analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv)
-- [ex3_model_dataset.csv](analysis/manuscript/outputs/tables/ex3_model_dataset.csv)
-- [ex3_covariate_scaling.csv](analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv)
-
-### Example 4: Static exAL benchmark
-
-Publication-facing:
-- [ex4static.png](analysis/manuscript/outputs/figures/ex4static.png)
-- [ex4static_summary.csv](analysis/manuscript/outputs/tables/ex4static_summary.csv)
-
-Auxiliary:
-
-The optional `ex4screen` target can regenerate the seed-screen artifacts used to
-select the committed Example 4 simulation seed. The standard submission artifact
-set includes the selected seed through the generated figure/table, not the full
-screen output.
-
-## 5. Supplementary Robustness Note
-
-The current manuscript does not add a new main-text sensitivity section. Instead,
-the canonical manuscript pipeline can generate auxiliary robustness artifacts
-for the parts of the workflow where this is most informative.
-
-The most important of these is the optional Example 4 \(p_0 = 0.50\) seed
-screen. When the explicit `ex4screen` target is run, a fixed seed grid is
-screened in deterministic batches until at least one candidate satisfies the
-illustration criterion:
-- the full Example 4 fit must succeed for all tracked `p0` values,
-- at `p0 = 0.50`, the MCMC 95% intervals for all plotted slope coefficients
-  must contain the truth,
-- among the full-coverage seeds, the promoted seed is chosen by smaller MCMC
-  active-signal RMSE, then smaller holdout RMSE, then smaller runtime.
-
-This confirms that the promoted Example 4 benchmark is not a casual seed
-choice, while also making clear that the static benchmark is a curated
-illustrative example rather than a claim of uniform performance across all
-possible simulated datasets.
-
-Two smaller auxiliary robustness checks are also available:
-- Example 1 kernel comparison, regenerated with the explicit `ex1kernel` target
-- Example 2 discount-factor scan:
-  [ex2_df_scan_kl.csv](analysis/manuscript/outputs/tables/ex2_df_scan_kl.csv)
-
-## 6. Practical Reading Order
-
-For a reader who wants only the core article artifacts:
-1. read the manuscript and inspect the publication figures/tables listed in Section 1
-2. consult the reproducibility tracker files in Section 2
-
-For a reader who wants the computational details:
-1. read [analysis/manuscript/README.md](analysis/manuscript/README.md)
-2. use the rerun commands in Section 3
-3. inspect the example-specific auxiliary artifacts in Sections 4 and 5
+The standard manuscript run includes the publication artifacts above. Optional
+developer targets can also regenerate support artifacts such as the Example 1
+kernel comparison and the Example 4 seed screen. These are documented in the
+example folders under `analysis/manuscript/examples/` and are not required for
+ordinary reader replication.

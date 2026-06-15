@@ -1,72 +1,62 @@
 # Analysis Workflow
 
-This folder contains reproducible analysis stages for the article.
+This folder contains the executable analysis support for the article. For JSS
+or reader-facing replication, start from the repository root:
 
-- `exal`: exAL distribution utilities/reproducibility assets.
-- `manuscript`: end-to-end regeneration of main manuscript example artifacts.
-  Canonical per-example scripts live under `analysis/manuscript/examples/`.
-  This includes the sparse `rhs_ns` static benchmark used in Example 4.
-
-For a reader-facing map of the manuscript artifacts, auxiliary generated
-outputs, and rerun entry points, see `manuscript-reproducibility-index.md` in
-the repository root.
-
-The canonical source for the paper examples is
-`analysis/manuscript/examples/`, executed through `analysis/run_all.R --stage
-manuscript`. Standalone example scripts should be merged into that stage rather
-than maintained separately, so manuscript text, displayed code, figures, tables,
-and reproducibility logs stay synchronized.
-
-## Run
-
-From repository root:
-
-```bash
-Rscript analysis/check_reproducibility.R
-Rscript analysis/run_all.R --stage exal
-Rscript analysis/run_all.R --stage manuscript
+```sh
+Rscript code.R
+Rscript code.R --quick
+Rscript code.R --example 3
 ```
 
-Optional flags:
-
-```bash
-Rscript analysis/run_all.R --stage manuscript --profile quick
-Rscript analysis/run_all.R --stage manuscript --tests-only
-Rscript analysis/run_all.R --stage manuscript --skip-tests
-Rscript analysis/run_all.R --stage manuscript --promote
-Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
-Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
-```
-
-By default, the analysis workflow loads local `exdqlm` source. It first uses
-`--pkg-path /path/to/exdqlm`, then `EXDQLM_PKG_PATH=/path/to/exdqlm`, then a
-small set of common sibling checkout names such as `../exdqlm`.
-If both explicit source paths are set, `--pkg-path` takes precedence over
-`EXDQLM_PKG_PATH`.
-For constrained environments where rebuilding local source is not feasible,
-set `EXDQLM_LOAD_MODE=installed` and optionally
-`EXDQLM_INSTALLED_LIB=/path/to/R/library` to use an installed `exdqlm`
-package instead. Source mode remains the default.
+The scripts in this directory are internal maintenance tools used by `code.R`
+and by the authors for targeted reruns, preflight checks, and final reference
+syncs.
 
 ## Structure
 
-- `config/`: stage parameter and plotting configuration.
-- `exal/`: exAL-focused scripts/tests/outputs.
-- `lib/`: shared analysis helpers used by the manuscript stage.
-- `manuscript/`: canonical manuscript example scripts/tests/outputs.
+- `config/`: manuscript parameters, seeds, backend profile, and expected package
+  version.
+- `exal/`: exAL distribution utilities and support artifacts.
+- `lib/`: shared analysis helpers.
+- `manuscript/`: canonical manuscript example scripts, manifests, tests, and
+  outputs.
+
+## Internal commands
+
+The internal runner can regenerate a full stage:
+
+```sh
+Rscript analysis/run_all.R --stage manuscript --profile standard
+```
+
+Useful targeted maintenance commands:
+
+```sh
+Rscript analysis/run_all.R --stage manuscript --profile quick
+Rscript analysis/run_all.R --stage manuscript --tests-only
+Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
+```
+
+The preflight utility is for final reference-machine checks:
+
+```sh
+Rscript analysis/check_reproducibility.R --stage manuscript --profile standard --require-r-version 4.6.0
+```
+
+By default, the internal analysis workflow loads local `exdqlm` source when
+source mode is requested. Public replication should normally use the submitted
+package source tarball installed into R.
 
 ## Notes
 
-- Deterministic seeds are stage-specific (`config/params_*.yml`).
-- Output filenames are stable for repeatable manuscript linkage.
-- The optional `--promote` flag copies selected figures into top-level
-  `Figures/` as a local export mirror. That directory is ignored by git and is
-  not used by `exdqlm-jss.tex`.
-- Non-canonical exploratory workflows are intentionally excluded from the
-  submission tree. New exploratory scripts should live outside the shared
-  source archive unless they become part of the maintained manuscript pipeline.
+- Deterministic seeds are recorded in `config/params_manuscript.yml`.
+- Output filenames are stable for manuscript linkage.
+- `Figures/` is an ignored local export mirror created only by explicit
+  promotion; the manuscript reads generated figures from
+  `analysis/manuscript/outputs/figures/`.
+- Exploratory scripts should stay outside the submitted archive unless they
+  become part of the maintained manuscript pipeline.

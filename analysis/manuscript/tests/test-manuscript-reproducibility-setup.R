@@ -183,6 +183,36 @@ testthat::test_that("reader-facing analysis docs avoid stale machine-specific pa
   }
 })
 
+testthat::test_that("replication docs use the simplified public interface", {
+  docs <- c(
+    "manuscript-reproducibility-index.md",
+    "analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md",
+    "analysis/README.md",
+    "analysis/manuscript/README.md"
+  )
+  text <- paste(unlist(lapply(file.path(repo_root, docs), readLines, warn = FALSE), use.names = FALSE), collapse = "\n")
+
+  testthat::expect_true(grepl("Rscript code.R", text, fixed = TRUE))
+  testthat::expect_true(grepl("Rscript code.R --quick", text, fixed = TRUE))
+  testthat::expect_true(grepl("Rscript code.R --example 3", text, fixed = TRUE))
+  testthat::expect_true(grepl("internal maintenance", text, fixed = TRUE))
+
+  stale_markers <- c(
+    "code.R --profile",
+    "--mode portable",
+    "--mode reference",
+    "EXDQLM_REPRO_",
+    "current `1.0.0` package",
+    "version 1.0.0"
+  )
+  for (marker in stale_markers) {
+    testthat::expect_false(
+      grepl(marker, text, fixed = TRUE),
+      info = sprintf("Replication docs contain stale public-interface marker: %s", marker)
+    )
+  }
+})
+
 testthat::test_that("manuscript setup records run-start provenance and headless PNG output", {
   setup_lines <- readLines(file.path(repo_root, "analysis", "lib", "manuscript_setup.R"), warn = FALSE)
 
@@ -209,6 +239,7 @@ testthat::test_that("RNG and benchmark backend reproducibility policy is explici
   testthat::skip_if_not_installed("yaml")
   cfg <- yaml::read_yaml(file.path(repo_root, "analysis", "config", "params_manuscript.yml"))
 
+  testthat::expect_identical(as.character(cfg$expected_exdqlm_version), "1.1.0")
   testthat::expect_identical(as.character(cfg$rng$kind), "Mersenne-Twister")
   testthat::expect_identical(as.character(cfg$rng$normal_kind), "Inversion")
   testthat::expect_identical(as.character(cfg$rng$sample_kind), "Rejection")
@@ -217,6 +248,8 @@ testthat::test_that("RNG and benchmark backend reproducibility policy is explici
   testthat::expect_false(isTRUE(cfg$benchmark_profiles$B$use_cpp_samplers))
 
   check_lines <- readLines(file.path(repo_root, "analysis", "check_reproducibility.R"), warn = FALSE)
+  testthat::expect_true(any(grepl("expected_exdqlm_version", check_lines, fixed = TRUE)))
+  testthat::expect_false(any(grepl("not 1.0.0", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("manuscript RNG kind is explicit and stable", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("benchmark profile keeps C++ samplers disabled", check_lines, fixed = TRUE)))
 })

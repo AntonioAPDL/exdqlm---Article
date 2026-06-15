@@ -1,142 +1,101 @@
 # Manuscript Reproduction Stage
 
-This stage reproduces the main manuscript example artifacts (figures, key tables,
-and compact console-output equivalents) using the current `exdqlm` package API,
-without modifying `exdqlm-jss.tex`.
+This stage contains the canonical scripts used to regenerate the article's
+manuscript-facing figures, generated tables, logs, caches, and artifact
+manifests. For public JSS replication, use the root script first:
 
-For a reader-facing index of the publication artifacts, auxiliary outputs,
-and recommended rerun entry points, see `manuscript-reproducibility-index.md`
-in the repository root. For the required preflight, package-test gate, runtime
-policy, targeted-rerun order, and final acceptance criteria, see
-`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`.
+```sh
+Rscript code.R
+Rscript code.R --quick
+Rscript code.R --example 3
+```
 
-## Canonical Example Workflow
+The commands below are internal maintenance commands for targeted reruns and
+final reference checks.
 
-The scripts under `analysis/manuscript/examples/` are the canonical source for
-the paper examples. They are the only maintained executable workflow for
-regenerating the manuscript-facing figures, support tables, logs, and
-reproducibility tracker.
+## Canonical example workflow
 
-Each example has an isolated folder:
+The maintained example scripts live under:
 
 - `examples/ex1_lake_huron/`
 - `examples/ex2_sunspots/`
 - `examples/ex3_big_tree/`
 - `examples/ex4_static/`
 
-Each folder contains a `run.R`, a short `README.md`, a collaborator-facing
-`config.yml`, and an `artifacts.yml` manifest. Shared setup and helper
-infrastructure lives in `analysis/lib/manuscript_setup.R`.
+Each folder contains a `run.R`, short documentation, configuration notes, and
+an `artifacts.yml` manifest. Shared setup and helper infrastructure lives in
+`analysis/lib/manuscript_setup.R`.
 
-Standalone collaborator scripts, including temporary `examples.R` files, should
-be treated as review input rather than as a second maintained source. When a
-standalone script contains a useful correction or improvement, merge that logic
-into the appropriate canonical example folder here, rerun the affected target,
-and commit the script/output/article changes together. This keeps the manuscript text,
-displayed code, generated figures, generated tables, and reproducibility logs
-from drifting apart.
-
-The intended update cycle is:
+When updating an example:
 
 1. Edit the relevant script in `analysis/manuscript/examples/`.
-2. Run the narrowest useful target with `analysis/run_all.R --stage manuscript`.
-3. Update any inline manuscript table/text in `exdqlm-jss.tex` from the generated
-   CSV/log output.
-4. Run the manuscript tests or a focused validation pass.
-5. Commit the script, regenerated artifacts, manuscript text, and tracker updates
-   together.
-
-Collaborators who prefer to work through Overleaf can edit these canonical
-example folders there. Those edits should then be pulled locally, validated
-through this workflow, and pushed back to keep the article repository and
-Overleaf in sync.
+2. Run the narrowest useful target with `analysis/run_all.R`.
+3. Inspect generated figures/tables/logs.
+4. Update any inline manuscript table/text from generated outputs.
+5. Run manuscript tests or a focused validation pass.
+6. Commit the script, regenerated artifacts, manuscript text, and tracker
+   updates together.
 
 ## Scope
 
-- Rebuilds Example 1 (Lake Huron) figures.
-- Rebuilds Example 1 predictive-synthesis figure from the tracked 0.05, 0.50, and 0.95 fits.
-- Rebuilds Example 2 (Sunspots) primary figures from the LDVB workflow, with optional LDVB diagnostics available when requested.
-- Rebuilds a representative dynamic Example 2 runtime-and-quality benchmark table (`tab:ex2bench`) pairing runtime with KL, CRPS, and pplc under the disclosed backend profile.
-- Rebuilds Example 3 (Big Tree) primary figures, package diagnostic table, and held-out forecast-score table from the LDVB workflow.
-- Rebuilds Example 4 sparse static exAL simulation figure + summary table under the Nishimura-Suchard regularized horseshoe (`rhs_ns`) prior.
-- Adds LDVB-focused auxiliary artifacts for Example 2 and Example 3 (figures + diagnostics/scan tables).
-- Adds an optional Example 1 kernel comparison (`ex1kernel`) that benchmarks `slice` versus `laplace_rw` for the free-`sigma` median Lake Huron fit.
-- Adds an optional Example 4 seed screen (`ex4screen`) that benchmarks a fixed candidate set of simulation seeds and selects the tracked dataset seed using the \(p_0 = 0.50\) MCMC full-coverage criterion for the plotted slope coefficients.
-- Writes a reproducibility tracker with per-artifact status notes.
-- Writes support tables describing the disclosed benchmark backend profiles and tracked benchmark environment.
+- Rebuilds Example 1 Lake Huron figures and synthesis outputs.
+- Rebuilds Example 2 Sunspots figures, diagnostics, benchmark table, and
+  discount-factor scan outputs.
+- Rebuilds Example 3 Big Tree figures, package diagnostic table, and held-out
+  forecast-score table.
+- Rebuilds Example 4 sparse static exAL simulation figure and summary table.
+- Writes the reproducibility tracker, run notes, backend-profile table, and
+  benchmark-environment table.
 
-## Run
+Optional developer targets can regenerate support artifacts such as the
+Example 1 kernel comparison or the Example 4 seed screen.
 
-From repository root:
+## Internal run commands
 
-```bash
-Rscript analysis/check_reproducibility.R
-Rscript analysis/run_all.R --stage manuscript
-```
+From the repository root:
 
-Useful variants:
-
-```bash
-Rscript analysis/run_all.R --stage manuscript --profile quick
+```sh
 Rscript analysis/run_all.R --stage manuscript --profile standard
-Rscript analysis/run_all.R --stage manuscript --skip-tests
-Rscript analysis/run_all.R --stage manuscript --promote
-Rscript analysis/run_all.R --stage manuscript --pkg-path /path/to/exdqlm
-Rscript analysis/run_all.R --stage manuscript --targets ex2quant --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2quant,ex2checks --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2bench --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2quant_ldvb,ex2checks_ldvb --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2_ldvb_diagnostics --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3data,ex3quantcomps,ex3zetapsi,ex3forecast,ex3tables --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3quantcomps,ex3forecast --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4screen --force-refit --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4figure,ex4table --force-refit --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex1mcmc --force-refit --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex1synth --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex1kernel --force-refit --skip-tests
 ```
 
-By default, this stage loads local `exdqlm` source. It first uses
-`--pkg-path /path/to/exdqlm`, then `EXDQLM_PKG_PATH=/path/to/exdqlm`, then a
-small set of common sibling checkout names such as `../exdqlm`.
-If both explicit source paths are set, `--pkg-path` takes precedence over
-`EXDQLM_PKG_PATH`.
-For constrained environments where rebuilding local source is not feasible,
-set `EXDQLM_LOAD_MODE=installed` and optionally
-`EXDQLM_INSTALLED_LIB=/path/to/R/library` to use an installed `exdqlm`
-package instead. Source mode remains the default.
+Useful targeted variants:
+
+```sh
+Rscript analysis/run_all.R --stage manuscript --profile quick
+Rscript analysis/run_all.R --stage manuscript --tests-only
+Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
+Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --force-refit --skip-tests
+```
+
+For local source-package maintenance:
+
+```sh
+EXDQLM_LOAD_MODE=source EXDQLM_PKG_PATH=/path/to/exdqlm \
+  Rscript analysis/run_all.R --stage manuscript --tests-only
+```
 
 The optional Example 4 seed screen is intentionally explicit-only. A full
 standard manuscript run regenerates the Example 4 figure/table from the
-committed `dataset_seed` in `analysis/config/params_manuscript.yml`, but does
-not redo the seed screen unless `--targets ex4screen` is supplied. After
-re-running `ex4screen`, update the configured seed if needed and rerun
-`--targets ex4figure,ex4table` so the selected seed and displayed simulation
-artifacts stay synchronized.
+configured `dataset_seed`, but does not redo the seed screen unless the
+`ex4screen` target is supplied.
 
 ## Outputs
 
-- `analysis/manuscript/outputs/figures/`: generated figure files.
-- `analysis/manuscript/outputs/tables/`: diagnostics summaries + reproducibility tracker, including the Example 4 \(p_0 = 0.50\) seed-screen selection table.
-- `analysis/manuscript/outputs/logs/`: compact textual outputs and session metadata.
-- `analysis/manuscript/outputs/cache/`: cached fitted objects to support fast targeted reruns.
+- `outputs/figures/`: generated manuscript figure files.
+- `outputs/tables/`: diagnostics summaries, generated tables, tracker files,
+  backend profile, and benchmark environment.
+- `outputs/logs/`: compact textual outputs and session metadata.
+- `outputs/cache/`: cached fitted objects supporting fast targeted reruns.
 
 Figures cited by `exdqlm-jss.tex` are resolved from
 `analysis/manuscript/outputs/figures/` through the manuscript `\graphicspath`.
-Top-level `Figures/` files are optional local export copies created by
-`--promote`; they are ignored by git and are not searched by the manuscript
-build. Tables in `exdqlm-jss.tex` are inline LaTeX, so their displayed values
-must be updated from the generated CSV/log files whenever a model is rerun.
-
-Main tracker files:
-
-- `manuscript_repro_tracker.csv`
-- `manuscript_repro_tracker.md`
-- `manuscript_api_migration_map.csv`
-- `benchmark_backend_profiles.csv`
-- `benchmark_environment.csv`
+Tables in `exdqlm-jss.tex` are inline LaTeX, so displayed values must be
+updated from generated CSV/log files whenever a model is rerun.
 
 Internal development checklists and review-audit notes are intentionally not
-part of the submission tree. The maintained reader-facing provenance is the
-reproducibility protocol, the code chunk map, the generated tracker, and the
-example manifests.
+part of the submission archive. The maintained reader-facing provenance is the
+root `README.md`, `code.R`, `code.html`, this protocol family, the code chunk
+map, generated tracker files, and example manifests.
