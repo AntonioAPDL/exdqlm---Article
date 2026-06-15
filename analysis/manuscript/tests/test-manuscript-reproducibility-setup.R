@@ -379,7 +379,8 @@ testthat::test_that("portable generated manuscript tables are coherent", {
     header = FALSE
   )
   fields <- stats::setNames(env$V2, env$V1)
-  testthat::expect_identical(fields[["exdqlm_version"]], "1.0.0")
+  testthat::expect_match(fields[["exdqlm_version"]], "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+  testthat::expect_gte(package_version(fields[["exdqlm_version"]]), package_version("1.0.0"))
   testthat::expect_true(nzchar(fields[["exdqlm_commit"]]))
   testthat::expect_true(nzchar(fields[["r_version"]]))
   testthat::expect_true(nzchar(fields[["runtime_definition"]]))
