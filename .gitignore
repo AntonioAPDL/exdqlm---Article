@@ -21,7 +21,6 @@ Figures/
 *.aux
 *.bbl
 !exdqlm-jss.bbl
-!exdqlm-supplement.bbl
 *.blg
 *.log
 *.out
