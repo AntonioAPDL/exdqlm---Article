@@ -94,7 +94,10 @@ replication-material changes are reflected in `README.md`, `code.R`,
 > modeling, MCMC and LDVB fitting engines, deterministic diagnostics,
 > forecasting, transfer-function state augmentation, posterior
 > predictive synthesis, standard object methods, examples, and
-> replication materials.
+> replication materials. The revised introduction also includes a
+> compact list of the main software contributions so that the scope of
+> the JSS submission is visible before the methodological and example
+> sections.
 >
 > We also added a dedicated package design and implementation section
 > before the examples. This section makes the software contribution

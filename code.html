@@ -155,7 +155,7 @@ submissions this can be refreshed with:</p>
 <pre><code class="language-r">Sys.setenv(EXDQLM_REPLICATION_QUICK = &quot;true&quot;)
 knitr::spin(&quot;code.R&quot;, knit = TRUE)
 </code></pre>
-<p>The quick flag keeps the HTML refresh inexpensive. For final reference
+<p>The quick flag keeps the HTML refresh inexpensive. For a final full
 regeneration, run <code>Rscript code.R</code> before refreshing the archive.</p>
 <pre><code class="language-r">env_flag &lt;- function(name, default = FALSE) {
   value &lt;- Sys.getenv(name, unset = if (isTRUE(default)) &quot;true&quot; else &quot;false&quot;)
@@ -322,9 +322,9 @@ cat(&quot;== exdqlm article replication ==\n&quot;)
 </code></pre>
 <pre><code class="language-r">source(file.path(repo_root, &quot;analysis&quot;, &quot;lib&quot;, &quot;manuscript_setup.R&quot;), local = replication_env)
 </code></pre>
-<pre><code>## [2026-06-16 02:11:11] EXDQLM_LOAD_MODE=installed: ignoring source-path overrides and loading installed exdqlm.
-## [2026-06-16 02:11:12] Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed) [version 1.1.0]
-## [2026-06-16 02:11:13] 00_setup complete (profile=quick)
+<pre><code>## [2026-06-16 03:56:59] EXDQLM_LOAD_MODE=installed: ignoring source-path overrides and loading installed exdqlm.
+## [2026-06-16 03:57:02] Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed) [version 1.1.0]
+## [2026-06-16 03:57:02] 00_setup complete (profile=quick)
 </code></pre>
 <pre><code class="language-r">manuscript_stage_root &lt;- file.path(repo_root, &quot;analysis&quot;, &quot;manuscript&quot;)
 example_scripts &lt;- file.path(
@@ -363,11 +363,11 @@ if (isTRUE(args$quick)) {
   }
 }
 </code></pre>
-<pre><code>## [2026-06-16 02:11:13] Quick pass: checking current manuscript outputs without clearing or refitting.
+<pre><code>## [2026-06-16 03:57:02] Quick pass: checking current manuscript outputs without clearing or refitting.
 </code></pre>
 <pre><code class="language-r">replication_env$log_msg(&quot;Running manuscript checks&quot;)
 </code></pre>
-<pre><code>## [2026-06-16 02:11:13] Running manuscript checks
+<pre><code>## [2026-06-16 03:57:02] Running manuscript checks
 </code></pre>
 <pre><code class="language-r">run_manuscript_tests(repo_root)
 </code></pre>

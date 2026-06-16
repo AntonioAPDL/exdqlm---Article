@@ -55,7 +55,7 @@
 #' knitr::spin("code.R", knit = TRUE)
 #' ```
 #'
-#' The quick flag keeps the HTML refresh inexpensive. For final reference
+#' The quick flag keeps the HTML refresh inexpensive. For a final full
 #' regeneration, run `Rscript code.R` before refreshing the archive.
 
 env_flag <- function(name, default = FALSE) {
