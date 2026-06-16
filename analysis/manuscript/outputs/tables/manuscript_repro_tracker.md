@@ -46,7 +46,7 @@ Seed: 20260501
 - [reproduced] `fig_ex4static` -> `analysis/manuscript/outputs/figures/ex4static.png` (fig:ex4static). Sparse Nishimura-Suchard RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50.
 - [reproduced] `tab_api_migration_map` -> `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv` (global code migration). Maps deprecated manuscript calls to current package API.
 - [reproduced] `tab_benchmark_backend_profiles` -> `analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv` (auxiliary: benchmark backend profiles). Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend).
-- [reproduced] `tab_benchmark_environment` -> `analysis/manuscript/outputs/tables/benchmark_environment.csv` (auxiliary: benchmark environment details). CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.
+- [reproduced] `tab_benchmark_environment` -> `analysis/manuscript/outputs/tables/benchmark_environment.csv` (auxiliary: benchmark environment details). CPU, R version, package version and source commit, backend options, seeds, and dataset sizes for the tracked benchmark run.
 
 ## Notes
 
@@ -68,5 +68,5 @@ Seed: 20260501
 - timing: Exact runtime printouts in manuscript are historical and expected to differ.
 - timing: Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.
 - benchmark: Benchmark tables reported in the manuscript use backend Profile B; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.
-- benchmark: benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.
+- benchmark: benchmark_environment.csv records CPU, R version, package version and source commit, backend options, seeds, and dataset sizes for the tracked benchmark run.
 - scope: Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.

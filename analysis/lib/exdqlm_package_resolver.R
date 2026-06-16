@@ -193,8 +193,7 @@ exdqlm_load_package <- function(repo_root, pkg_path = NULL, log_msg = message) {
     pkg_loc <- tryCatch(find.package("exdqlm"), error = function(e) NA_character_)
     version <- as.character(utils::packageVersion("exdqlm"))
     log_msg(sprintf(
-      "Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed): %s [version %s]",
-      pkg_loc,
+      "Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed) [version %s]",
       version
     ))
     return(invisible(list(mode = "installed", path = pkg_loc, version = version)))

@@ -200,7 +200,7 @@ replication_env$targets <- args$targets
 replication_env$force_refit <- !isTRUE(args$quick)
 
 cat("== exdqlm article replication ==\n")
-cat(sprintf("Working directory: %s\n", repo_root))
+cat("Working directory: <replication root>\n")
 cat(sprintf("Profile: %s\n", args$profile))
 if (length(args$targets)) {
   cat(sprintf("Target: %s (refitting selected example)\n", paste(args$targets, collapse = ", ")))
@@ -255,6 +255,15 @@ run_manuscript_tests(repo_root)
 replication_env$write_session_info()
 
 cat("\n== Session Info ==\n")
-print(utils::sessionInfo())
+cat(
+  paste(
+    replication_env$sanitize_reference_paths(
+      utils::capture.output(print(utils::sessionInfo()))
+    ),
+    collapse = "\n"
+  ),
+  "\n",
+  sep = ""
+)
 
 cat("\nReplication complete.\n")

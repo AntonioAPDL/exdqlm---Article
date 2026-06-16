@@ -2,9 +2,9 @@
 
 Date: 2026-06-16
 
-Article repository: `/data/jaguir26/local/src/exdqlm---Article__wt__exdqlm_0p5p0_article`
+Article repository: this Overleaf/Git repository.
 
-Package repository: `/data/jaguir26/local/src/exdqlm__wt__0p5p0_exdqlm_article`
+Package repository: the companion `exdqlm` R package repository.
 
 Article commit before adding these coauthor-review files:
 `556e79fb7b3d8b10a5ced07c41ec098df96e8b9a`
@@ -28,7 +28,7 @@ package, and replication-material levels. The main changes are:
 - the previous supplement has been merged into the main manuscript as
   appendices;
 - the response-to-editor document gives a point-by-point reply; and
-- the final staging folder contains the manuscript PDF, package source tarball,
+- the final submission bundle contains the manuscript PDF, package source tarball,
   replication archive, and response PDF.
 
 For coauthor review, a separate marked manuscript was created:
@@ -182,10 +182,6 @@ The archive excludes:
 - old supplement files
 
 ## Submission Artifacts
-
-Current final staging folder:
-
-`/data/jaguir26/local/src/exdqlm-jss-submission-20260615_065335`
 
 Recommended upload files:
 

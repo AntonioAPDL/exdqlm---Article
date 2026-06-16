@@ -302,9 +302,9 @@ cat(&quot;== exdqlm article replication ==\n&quot;)
 </code></pre>
 <pre><code>## == exdqlm article replication ==
 </code></pre>
-<pre><code class="language-r">cat(sprintf(&quot;Working directory: %s\n&quot;, repo_root))
+<pre><code class="language-r">cat(&quot;Working directory: &lt;replication root&gt;\n&quot;)
 </code></pre>
-<pre><code>## Working directory: /data/jaguir26/local/src/exdqlm-jss-submission-20260615_065335/exdqlm-jss-replication
+<pre><code>## Working directory: &lt;replication root&gt;
 </code></pre>
 <pre><code class="language-r">cat(sprintf(&quot;Profile: %s\n&quot;, args$profile))
 </code></pre>
@@ -322,9 +322,9 @@ cat(&quot;== exdqlm article replication ==\n&quot;)
 </code></pre>
 <pre><code class="language-r">source(file.path(repo_root, &quot;analysis&quot;, &quot;lib&quot;, &quot;manuscript_setup.R&quot;), local = replication_env)
 </code></pre>
-<pre><code>## [2026-06-15 18:22:02] EXDQLM_LOAD_MODE=installed: ignoring source-path overrides and loading installed exdqlm.
-## [2026-06-15 18:22:03] Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed): /data/jaguir26/local/src/exdqlm-jss-submission-20260615_065335/R-lib-final/exdqlm [version 1.1.0]
-## [2026-06-15 18:22:03] 00_setup complete (profile=quick)
+<pre><code>## [2026-06-16 02:11:11] EXDQLM_LOAD_MODE=installed: ignoring source-path overrides and loading installed exdqlm.
+## [2026-06-16 02:11:12] Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed) [version 1.1.0]
+## [2026-06-16 02:11:13] 00_setup complete (profile=quick)
 </code></pre>
 <pre><code class="language-r">manuscript_stage_root &lt;- file.path(repo_root, &quot;analysis&quot;, &quot;manuscript&quot;)
 example_scripts &lt;- file.path(
@@ -363,28 +363,28 @@ if (isTRUE(args$quick)) {
   }
 }
 </code></pre>
-<pre><code>## [2026-06-15 18:22:03] Quick pass: checking current manuscript outputs without clearing or refitting.
+<pre><code>## [2026-06-16 02:11:13] Quick pass: checking current manuscript outputs without clearing or refitting.
 </code></pre>
 <pre><code class="language-r">replication_env$log_msg(&quot;Running manuscript checks&quot;)
 </code></pre>
-<pre><code>## [2026-06-15 18:22:03] Running manuscript checks
+<pre><code>## [2026-06-16 02:11:13] Running manuscript checks
 </code></pre>
 <pre><code class="language-r">run_manuscript_tests(repo_root)
 </code></pre>
 <pre><code>## manuscript-code-policy: ....................................................................................................................................................................................................................................................................
 ## manuscript-ex1-synthesis: .....
 ## manuscript-example-structure: ........................................................................
-## manuscript-figure-code-alignment: ...............................................
+## manuscript-figure-code-alignment: .................................................
 ## manuscript-figure-overlays: .................
 ## manuscript-figure-wiring: .............
 ## manuscript-kl-diagnostics-wiring: ..........
-## manuscript-reproducibility-setup: ....................S..........................................................................................................................................................S
+## manuscript-reproducibility-setup: ....................S............................................................................................................................................................S
 ## manuscript-tracker: .............................S
 ## 
 ## ══ Skipped ═════════════════════════════════════════════════════════════════════
 ## 1. code.html records the JSS replication log when generated ('test-manuscript-reproducibility-setup.R:67:3') - Reason: code.html is written after the knitr::spin() run completes.
 ## 
-## 2. main manuscript inline table values match generated outputs ('test-manuscript-reproducibility-setup.R:438:3') - Reason: Exact manuscript-value matching is a reference-mode check.
+## 2. main manuscript inline table values match generated outputs ('test-manuscript-reproducibility-setup.R:441:3') - Reason: Exact manuscript-value matching is a reference-mode check.
 ## 
 ## 3. optional Example 1 kernel comparison artifacts are coherent when present ('test-manuscript-tracker.R:52:5') - Reason: Example 1 kernel-comparison artifacts not present in this tracker run.
 ## 
@@ -397,43 +397,52 @@ cat(&quot;\n== Session Info ==\n&quot;)
 <pre><code>## 
 ## == Session Info ==
 </code></pre>
-<pre><code class="language-r">print(utils::sessionInfo())
+<pre><code class="language-r">cat(
+  paste(
+    replication_env$sanitize_reference_paths(
+      utils::capture.output(print(utils::sessionInfo()))
+    ),
+    collapse = &quot;\n&quot;
+  ),
+  &quot;\n&quot;,
+  sep = &quot;&quot;
+)
 </code></pre>
 <pre><code>## R version 4.6.0 (2026-04-24)
 ## Platform: x86_64-pc-linux-gnu
 ## Running under: AlmaLinux 8.10 (Cerulean Leopard)
 ## 
 ## Matrix products: default
-## BLAS:   /data/jaguir26/local/opt/R/4.6.0/lib64/R/lib/libRblas.so 
-## LAPACK: /data/jaguir26/local/opt/R/4.6.0/lib64/R/lib/libRlapack.so;  LAPACK version 3.12.1
+## BLAS:   &lt;R_HOME&gt;/lib/libRblas.so
+## LAPACK: &lt;R_HOME&gt;/lib/libRlapack.so;  LAPACK version 3.12.1
 ## 
 ## locale:
-##  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
-##  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
-##  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
-## [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+##  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8
+##  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8
+##  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C
+## [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C
 ## 
 ## time zone: America/New_York
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base
 ## 
 ## other attached packages:
 ## [1] testthat_3.3.2
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] vctrs_0.7.3         cli_3.6.6           knitr_1.51         
-##  [4] rlang_1.2.0         xfun_0.57           dlm_1.1-6.1        
-##  [7] png_0.1-9           pkgload_1.5.2       glue_1.8.1         
-## [10] rprojroot_2.1.1     pracma_2.4.6        nimble_1.4.2       
-## [13] brio_1.1.5          grid_4.6.0          evaluate_1.0.5     
+##  [1] vctrs_0.7.3         cli_3.6.6           knitr_1.51
+##  [4] rlang_1.2.0         xfun_0.57           dlm_1.1-6.1
+##  [7] png_0.1-9           pkgload_1.5.2       glue_1.8.1
+## [10] rprojroot_2.1.1     pracma_2.4.6        nimble_1.4.2
+## [13] brio_1.1.5          grid_4.6.0          evaluate_1.0.5
 ## [16] yaml_2.3.12         lifecycle_1.0.5     numDeriv_2016.8-1.1
-## [19] exdqlm_1.1.0        compiler_4.6.0      igraph_2.3.1       
-## [22] coda_0.19-4.1       waldo_0.6.2         Rcpp_1.1.1-1.1     
-## [25] pkgconfig_2.0.3     rstudioapi_0.18.0   lattice_0.22-9     
-## [28] R6_2.6.1            pillar_1.11.1       parallel_4.6.0     
-## [31] magrittr_2.0.5      withr_3.0.2         tools_4.6.0        
+## [19] exdqlm_1.1.0        compiler_4.6.0      igraph_2.3.1
+## [22] coda_0.19-4.1       waldo_0.6.2         Rcpp_1.1.1-1.1
+## [25] pkgconfig_2.0.3     rstudioapi_0.18.0   lattice_0.22-9
+## [28] R6_2.6.1            pillar_1.11.1       parallel_4.6.0
+## [31] magrittr_2.0.5      withr_3.0.2         tools_4.6.0
 ## [34] matrixStats_1.5.0   desc_1.4.3
 </code></pre>
 <pre><code class="language-r">cat(&quot;\nReplication complete.\n&quot;)

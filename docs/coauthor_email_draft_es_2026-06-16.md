@@ -40,10 +40,6 @@ Lo que les pediría revisar es principalmente:
 
 En cuanto a verificaciones, corrí los checks con R 4.6.0 y `exdqlm` 1.1.0. El manuscrito limpio compila, la versión marcada compila, `Rscript code.R --quick` pasa, el strict reproducibility preflight pasa con 0 errors y 0 warnings, y el replication archive también pasa desde una extracción nueva sin Git.
 
-Los archivos finales preparados para el reenvío están en:
-
-`/data/jaguir26/local/src/exdqlm-jss-submission-20260615_065335`
-
 Los archivos que planeo subir son:
 
 - `exdqlm-jss.pdf`

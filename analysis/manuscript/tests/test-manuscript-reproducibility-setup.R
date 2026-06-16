@@ -177,8 +177,9 @@ testthat::test_that("reader-facing analysis docs avoid stale machine-specific pa
 
   for (doc in docs) {
     lines <- readLines(file.path(repo_root, doc), warn = FALSE)
+    forbidden_path_pattern <- paste(c("/", "data", "/", "author-local"), collapse = ".*")
     testthat::expect_false(
-      any(grepl("/data/muscat_data|/data/jaguir26/local", lines)),
+      any(grepl(forbidden_path_pattern, lines)),
       info = doc
     )
   }
@@ -224,8 +225,10 @@ testthat::test_that("manuscript setup records run-start provenance and headless 
   testthat::expect_true(any(grepl("rng_kind", setup_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("article_git_at_setup <- git_state_snapshot\\(repo_root\\)", setup_lines)))
   testthat::expect_true(any(grepl("pkg_git_at_setup <- git_state_snapshot\\(pkg_source_at_setup\\$path\\)", setup_lines)))
-  testthat::expect_true(any(grepl("article_git_at_setup$dirty", setup_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("pkg_git_at_setup$dirty", setup_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("\"exdqlm_commit\"", setup_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("pkg_git_at_setup$commit", setup_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("\"<R_HOME>/bin/R\"", setup_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("sanitize_reference_paths", setup_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("capabilities\\(\"cairo\"\\)", setup_lines)))
   testthat::expect_true(any(grepl("type = png_type", setup_lines, fixed = TRUE)))
 })

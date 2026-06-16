@@ -277,13 +277,6 @@ benchmark_environment_table <- function() {
       "rng_sample_kind",
       "exdqlm_version",
       "exdqlm_commit",
-      "exdqlm_branch",
-      "exdqlm_upstream",
-      "exdqlm_dirty",
-      "article_commit",
-      "article_branch",
-      "article_upstream",
-      "article_dirty",
       "runtime_definition",
       "diagnostics_runtime_included",
       "exdqlm.use_cpp_kf",
@@ -307,20 +300,13 @@ benchmark_environment_table <- function() {
       cpu_model,
       paste(Sys.info()[c("sysname", "release", "machine")], collapse = " | "),
       R.version.string,
-      normalizePath(file.path(R.home("bin"), "R"), mustWork = FALSE),
-      normalizePath(file.path(R.home("bin"), "Rscript"), mustWork = FALSE),
+      "<R_HOME>/bin/R",
+      "<R_HOME>/bin/Rscript",
       selected_rng_kind[[1L]],
       selected_rng_kind[[2L]],
       selected_rng_kind[[3L]],
       pkg_version,
       pkg_git_at_setup$commit,
-      pkg_git_at_setup$branch,
-      pkg_git_at_setup$upstream,
-      pkg_git_at_setup$dirty,
-      article_git_at_setup$commit,
-      article_git_at_setup$branch,
-      article_git_at_setup$upstream,
-      article_git_at_setup$dirty,
       "fit elapsed time stored in returned fit objects (`run.time`)",
       "FALSE",
       as.character(isTRUE(getOption("exdqlm.use_cpp_kf"))),
@@ -339,6 +325,15 @@ benchmark_environment_table <- function() {
     ),
     stringsAsFactors = FALSE
   )
+}
+
+sanitize_reference_paths <- function(lines) {
+  r_home <- normalizePath(R.home(), winslash = "/", mustWork = FALSE)
+  if (nzchar(r_home)) {
+    lines <- gsub(r_home, "<R_HOME>", lines, fixed = TRUE)
+  }
+  lines <- sub("[[:space:]]+$", "", lines)
+  lines
 }
 
 apply_backend_profile(selected_benchmark_profile)
@@ -790,6 +785,7 @@ write_session_info <- function() {
     cat(sprintf("Date: %s\n\n", as.character(Sys.time())))
     print(sessionInfo())
   })
+  txt <- sanitize_reference_paths(txt)
   write_log_lines(txt, path)
 }
 
