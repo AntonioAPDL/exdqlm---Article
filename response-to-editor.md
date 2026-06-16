@@ -24,11 +24,10 @@ The current submission files are:
 
 - Point-by-point response: `response-to-editor.pdf`
 
-The submitted package source is version 1.1.0. The package source commit
-used for the submission is `9b20e87933ec121a0cc88d7a0d1bdb964e87d55b`.
-The article source commit used for the replication archive is
-`be95a2874da4341464fcd61c0abfd4f2c7cba5b5`. The package is distributed
-under the MIT License, which is GPL-compatible.
+The software source submitted with this revision is version 1.1.0 of
+<span class="sans-serif">exdqlm</span>. This version is prepared for
+CRAN submission after the final coauthor checks. The package is
+distributed under the MIT License, which is GPL-compatible.
 
 # Summary of Major Revisions
 
@@ -46,17 +45,17 @@ under the MIT License, which is GPL-compatible.
 
 - Rewrote the replication materials as a standalone JSS archive. The
   public workflow is now centered on `Rscript code.R`, with documented
-  quick and single-example options. The public path no longer requires
-  Git metadata, GitHub remotes, or internal reference-machine modes.
+  quick and single-example options. The public path no longer requires a
+  Git checkout or internal author-maintenance modes.
 
 - Merged the former supplement into the main manuscript as appendices
   and prepared a single manuscript PDF.
 
-- Rebuilt the final replication archive without Git metadata, local
-  audit files, model-cache `.rds` files, scratch LaTeX files, or nested
-  archives. We tested both a quick no-git smoke run and a full no-git
-  replication run from a fresh archive extraction using the submitted
-  package tarball.
+- Rebuilt the final replication archive without Git metadata, author
+  audit notes, model-cache `.rds` files, scratch LaTeX files, or nested
+  archives. We tested both a quick archive smoke run and a full
+  replication run from a fresh extraction using the submitted package
+  tarball.
 
 # General Editorial Comments
 
@@ -119,8 +118,8 @@ under the MIT License, which is GPL-compatible.
 > ```
 > for rerunning one manuscript example. The previous public distinction
 > between `portable` and `reference` modes was removed from the
-> reader-facing workflow. Developer/reference checks are kept out of the
-> public command path.
+> reader-facing workflow. Internal exact-value checks used by the
+> authors are kept separate from the public command path.
 >
 > The revised `README.md` describes the contents of the submitted
 > archive, the package installation options, the expected outputs, and
@@ -177,9 +176,10 @@ under the MIT License, which is GPL-compatible.
 > It no longer asks the reader to clone or pull a GitHub repository. It
 > begins by describing the contents of the submitted replication
 > directory and then gives the commands needed to install the submitted
-> package tarball or use the installed CRAN package and run the
-> replication script. The final replication archive has also been
-> rebuilt without `.git`, `.gitignore`, or other local repository
+> package tarball or use the installed package and run the replication
+> script. A CRAN installation is sufficient when the CRAN version
+> matches the submitted version. The final replication archive has also
+> been rebuilt without `.git`, `.gitignore`, or other local repository
 > metadata.
 
 ------------------------------------------------------------------------
@@ -199,7 +199,7 @@ under the MIT License, which is GPL-compatible.
 > The revised `code.R` is now the public master script. It sources the
 > manuscript setup and the example scripts directly in manuscript order
 > rather than delegating the workflow to a second master script.
-> Internal developer orchestration remains separate from the public
+> Author-maintenance orchestration remains separate from the public
 > reproduction path. The reader-facing script now has visible sections
 > for setup, examples, checks, and session information.
 
@@ -220,7 +220,7 @@ under the MIT License, which is GPL-compatible.
 > We simplified the public interface. The submitted archive now
 > documents only the full run, the quick run, and the single-example
 > run. The previous `portable`/`reference` terminology is no longer part
-> of the public replication instructions. Exact reference-machine checks
+> of the public replication instructions. Exact-value author checks
 > remain part of our internal acceptance workflow, but they are not
 > required for readers or editors to run the submitted replication
 > materials.
@@ -255,26 +255,26 @@ under the MIT License, which is GPL-compatible.
 ------------------------------------------------------------------------
 
 > *Running the documented command failed because the submitted directory
-> was not a Git repository and the preflight checked Git remotes and
-> branch metadata.*
+> was not a Git repository and the validation step checked Git remotes
+> and branch metadata.*
 
 **Response**
 
 ------------------------------------------------------------------------
 
-> We split the public replication path from developer/reference checks.
-> The default submitted `code.R` workflow no longer requires Git
-> metadata, Git remotes, branch freshness, or a GitHub checkout. We
-> verified this by extracting the final replication archive into a fresh
-> directory with no `.git` metadata and running:
+> We split the public replication path from author-side checks. The
+> default submitted `code.R` workflow no longer requires Git metadata,
+> Git remotes, branch freshness, or a GitHub checkout. We verified this
+> by extracting the final replication archive into a fresh directory
+> with no `.git` metadata and running the documented quick command:
 > ``` math
-> \texttt{EXDQLM\_LOAD\_MODE=installed Rscript code.R --quick}.
+> \texttt{Rscript code.R --quick}.
 > ```
-> This quick no-git smoke test passed. We also ran the full no-git
-> replication from a fresh extraction using the submitted
-> `exdqlm_1.1.0.tar.gz` package tarball installed into a staging
-> library. The full run completed, regenerated the manuscript outputs,
-> rebuilt the manifest, and completed the manuscript tests.
+> This quick archive smoke test passed. We also ran the full replication
+> from a fresh extraction using the submitted `exdqlm_1.1.0.tar.gz`
+> package tarball installed into a temporary R library. The full run
+> completed, regenerated the manuscript outputs, rebuilt the manifest,
+> and completed the manuscript tests.
 
 ------------------------------------------------------------------------
 
@@ -421,19 +421,19 @@ All final checks below were run with R 4.6.0.
 - `R CMD check --no-manual --run-donttest exdqlm_1.1.0.tar.gz` completed
   with 0 errors, 0 warnings, and 0 notes.
 
-- The article reproducibility preflight completed with 0 errors and 0
+- The article reproducibility checks completed with 0 errors and 0
   warnings.
 
-- The final replication archive audit found no Git metadata, ignored
-  audit documents, `.rds` caches, obsolete supplement PDF, obsolete
+- The final replication archive audit found no Git metadata, author
+  audit notes, `.rds` caches, obsolete supplement PDF, obsolete
   supplement bibliography artifact, LaTeX scratch files, or nested
   archives.
 
-- A no-git quick smoke test from the extracted replication archive
-  passed using the installed package from the submitted package tarball.
+- A quick smoke test from the extracted replication archive passed using
+  the installed package from the submitted package tarball.
 
-- A full no-git replication run from a fresh extraction completed
-  successfully and regenerated manuscript outputs from absent caches.
+- A full replication run from a fresh extraction completed successfully
+  and regenerated manuscript outputs from absent caches.
 
 We believe these revisions address the editorial return and make the
 submission substantially easier to inspect, reproduce, and review as a

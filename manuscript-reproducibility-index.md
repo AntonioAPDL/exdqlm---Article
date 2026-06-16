@@ -9,7 +9,7 @@ The revised submission targets the `exdqlm` package version recorded in
 `analysis/config/params_manuscript.yml`. Install the submitted package source
 tarball before running a full replication. The generated environment table
 records the exact package version, commit, R version, random-number generator,
-backend profile, and platform used for the reference run.
+backend profile, and platform used for the author benchmark run.
 
 ## Public replication entrypoints
 
@@ -87,17 +87,17 @@ The main generated provenance files are:
 - `analysis/manuscript/outputs/tables/benchmark_backend_profiles.csv`
 - `analysis/manuscript/outputs/tables/benchmark_environment.csv`
 
-Runtime values are elapsed fitting times for the recorded reference platform
+Runtime values are elapsed fitting times for the recorded benchmark platform
 and backend profile. They are not intended to be machine-independent constants.
 
 ## Internal maintenance tools
 
 The files `analysis/run_all.R` and `analysis/check_reproducibility.R` remain in
-the archive because they are useful for targeted developer reruns and final
-reference checks. They are not the primary public entrypoint; use `code.R`
-first.
+the archive because they are useful for targeted author-side reruns and
+exact-value maintenance checks. They are not the primary public entrypoint; use
+`code.R` first.
 
-Examples of internal targeted reruns:
+Examples of author-side targeted reruns:
 
 ```sh
 Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests
@@ -106,7 +106,7 @@ Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard -
 Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
 ```
 
-The preflight utility is intended for final reference-machine maintenance:
+The reproducibility check is intended for final author-side maintenance:
 
 ```sh
 Rscript analysis/check_reproducibility.R --stage manuscript --profile standard --require-r-version 4.6.0
@@ -115,7 +115,7 @@ Rscript analysis/check_reproducibility.R --stage manuscript --profile standard -
 ## Auxiliary artifacts
 
 The standard manuscript run includes the publication artifacts above. Optional
-developer targets can also regenerate support artifacts such as the Example 1
+author-side targets can also regenerate support artifacts such as the Example 1
 kernel comparison and the Example 4 seed screen. These are documented in the
 example folders under `analysis/manuscript/examples/` and are not required for
 ordinary reader replication.

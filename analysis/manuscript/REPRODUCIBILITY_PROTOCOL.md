@@ -3,7 +3,7 @@
 This protocol describes how to regenerate and validate the article figures,
 tables, diagnostics, and benchmark provenance. The public replication interface
 is the top-level `code.R` script. Internal scripts in `analysis/` remain
-available for targeted reruns and final reference-machine checks.
+available for targeted reruns and author-side exact-value checks.
 
 The manuscript targets the `exdqlm` version configured in
 `analysis/config/params_manuscript.yml`. For the revised submission, install the
@@ -54,7 +54,7 @@ Sys.setenv(EXDQLM_REPLICATION_QUICK = "true")
 knitr::spin("code.R", knit = TRUE)
 ```
 
-For final submission, run the full `Rscript code.R` reference replication first,
+For final submission, run the full `Rscript code.R` replication first,
 then refresh `code.html` from the same script.
 
 ## Randomness and backend policy
@@ -70,9 +70,9 @@ rng:
 ```
 
 The benchmark profile used for printed runtime values is also configured in
-`params_manuscript.yml`. The current reference profile records one C++ thread,
+`params_manuscript.yml`. The current author benchmark profile records one C++ thread,
 enables the C++ MCMC backend in `"fast"` mode, and keeps C++ samplers disabled.
-This keeps the reference run auditable while still using the backend reported
+This keeps the benchmark run auditable while still using the backend reported
 in the manuscript.
 
 Runtime values are elapsed fitting times stored in returned fit objects as
@@ -106,12 +106,12 @@ The manuscript test suite parses all displayed chunks, checks map coverage,
 checks required source terms, and verifies that mapped figure/table labels are
 registered in the example `artifacts.yml` files.
 
-## Internal reference-maintenance tools
+## Author maintenance tools
 
 Use this section when maintaining the article repository, not as the main JSS
 reader path.
 
-Before a final reference regeneration, run the preflight check with the current
+Before a final exact-value regeneration, run the author maintenance check with the current
 R release used for the manuscript:
 
 ```sh
@@ -125,7 +125,7 @@ EXDQLM_LOAD_MODE=source EXDQLM_PKG_PATH=/path/to/exdqlm \
   Rscript analysis/check_reproducibility.R --stage manuscript --profile standard --require-r-version 4.6.0
 ```
 
-The preflight checks R version, package version, git/provenance state when
+This check verifies R version, package version, git/provenance state when
 available, required packages, RNG/backend policy, artifact manifests, code-chunk
 traceability, diagnostic wiring, and known stale-code markers.
 
@@ -135,7 +135,7 @@ For targeted internal reruns, use:
 Rscript analysis/run_all.R --stage manuscript --targets TARGETS --profile standard --force-refit --skip-tests
 ```
 
-The final internal full run is:
+The final author-side full run is:
 
 ```sh
 Rscript analysis/run_all.R --stage manuscript --profile standard
@@ -173,7 +173,7 @@ implementation issue is known. Use this order:
 3. Inspect generated figures/tables/logs.
 4. Sync inline manuscript tables and prose from generated outputs.
 5. Run manuscript tests.
-6. Run the preflight/reference checks.
+6. Run the author maintenance checks.
 7. Run full manuscript regeneration only after targeted checks are clean.
 
 The optional Example 4 seed screen is explicit-only. A full standard manuscript
@@ -204,7 +204,7 @@ A final reproducibility sync should have:
 - package tests passing under R 4.6.0 or newer;
 - package check passing with 0 errors, 0 warnings, and 0 notes;
 - article manuscript tests passing under the same R;
-- preflight checks with no unresolved warnings relevant to submission;
+- author maintenance checks with no unresolved warnings relevant to submission;
 - no `From RP`, `TODO`, or `\color{magenta}` markers;
 - no stale stochastic/FNN KL wiring in canonical manuscript files;
 - no article-local CRPS/check-loss redefinitions for Example 3 forecast scores;
