@@ -38,25 +38,31 @@
 \newcommand{\GIG}{\operatorname{GIG}}
 \newcommand{\elbo}{\mathcal{L}}
 \newcommand{\pigamma}{\pi_\gamma}
-\newcounter{suppalgorithm}
-\renewcommand{\thesuppalgorithm}{S\arabic{suppalgorithm}}
-\newenvironment{suppalgorithm}[1]{%
-  \refstepcounter{suppalgorithm}%
-  \par\medskip\noindent\textbf{Algorithm~\thesuppalgorithm. #1.}\par\nobreak
+\newcounter{appalgorithm}
+\renewcommand{\theappalgorithm}{\thesection.\arabic{appalgorithm}}
+\newenvironment{appalgorithm}[1]{%
+  \refstepcounter{appalgorithm}%
+  \par\medskip\noindent\textbf{Algorithm~\theappalgorithm. #1.}\par\nobreak
 }{\par\medskip}
+\makeatletter
 \newcommand{\exdqlmAppendixSetup}{%
   \setcounter{section}{0}%
   \setcounter{subsection}{0}%
   \setcounter{subsubsection}{0}%
   \setcounter{equation}{0}%
   \setcounter{table}{0}%
-  \setcounter{suppalgorithm}{0}%
-  \renewcommand{\thesection}{S\arabic{section}}%
-  \renewcommand{\thesubsection}{S\arabic{section}.\arabic{subsection}}%
-  \renewcommand{\thesubsubsection}{S\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}%
-  \renewcommand{\theequation}{S\arabic{equation}}%
-  \renewcommand{\thetable}{S\arabic{table}}%
+  \setcounter{appalgorithm}{0}%
+  \@addtoreset{equation}{section}%
+  \@addtoreset{table}{section}%
+  \@addtoreset{appalgorithm}{section}%
+  \renewcommand{\thesection}{\Alph{section}}%
+  \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}%
+  \renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}%
+  \renewcommand{\theequation}{\thesection.\arabic{equation}}%
+  \renewcommand{\thetable}{\thesection.\arabic{table}}%
+  \renewcommand{\theappalgorithm}{\thesection.\arabic{appalgorithm}}%
 }
+\makeatother
 
 \author{Antonio Aguirre \\ University of California Santa Cruz \And
         Raquel Barata \\ University of California Santa Cruz \AND
@@ -146,7 +152,7 @@ Viewed against the comparison in Table \ref{table:software}, \pkg{exdqlm} is not
 
 The methodological ingredients underlying the package come from prior work: the exAL family and static exAL regression framework are due to \citet{yan2025family}, and the exDQLM state-space model builds on \citet{me}. The contribution of this article is software-centered. It documents the \proglang{R} implementation and user workflow that make these models available through a coherent package interface: modular state-space construction, MCMC and LDVB fitting engines, transfer-function augmentation, static AL/exAL regression with shrinkage priors, diagnostic and forecasting objects, posterior-predictive synthesis across separately fitted quantiles, standard methods for fitted and post-processing objects, and replication materials for the examples.
 
-The remainder of the paper is organized as follows. In Section \ref{sec:exdqlm}, we describe the modeling framework, including the algorithms used for posterior inference and transfer-function state augmentation for nonlinear input effects. We also discuss static quantile regression as a special case of the framework. In Section \ref{sec:diags} we detail the model diagnostics and forecasting method implemented in the package. Section \ref{sec:design} describes the package design and implementation, including the object families and standard methods used by the examples. In Section \ref{sec:exs}, we illustrate the package through four examples. Finally, in Section \ref{sec:summary}, we present a summary of the package capabilities.
+The remainder of the paper is organized as follows. In Section \ref{sec:exdqlm}, we describe the modeling framework, including the algorithms used for posterior inference and transfer-function state augmentation for nonlinear input effects. We also discuss static quantile regression as a special case of the framework. In Section \ref{sec:diags} we detail the model diagnostics and forecasting method implemented in the package. Section \ref{sec:design} describes the package design and implementation, including the object families and standard methods used by the examples. In Section \ref{sec:exs}, we illustrate the package through four examples. Section \ref{sec:summary} summarizes the package capabilities, and Appendices A--J collect the posterior targets, algorithmic details, and numerical identities used by the implementation.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1578,7 +1584,7 @@ Several development directions follow from these limitations: multivariate-outpu
 \clearpage
 \appendix
 \exdqlmAppendixSetup
-\input{exdqlm-supplement}
+\input{exdqlm-appendix}
 
 \bibliography{references}
 

@@ -2,7 +2,7 @@
 % This file is intentionally not a standalone JSS manuscript.
 
 \section{Scope and relation to the main text}
-\label{sec:supp_scope}
+\label{sec:app_scope}
 
 The main text describes the user-facing workflow for \pkg{exdqlm}: dynamic
 exDQLM and DQLM fitting, transfer-function models, static exAL regression,
@@ -21,7 +21,7 @@ Section~\ref{sec:gaussian_state_update},
 nonconjugate variational approximations \citep{wang2013nonconjugatevb}, and
 the \code{rhs\_ns} prior \citep{nishimura2023shrunken}.
 
-Table~\ref{tab:supp_roadmap} gives the main navigation map, linking each
+Table~\ref{tab:app_roadmap} gives the main navigation map, linking each
 article topic to the corresponding appendix sections and exported package
 routines. The model sections derive the fitting targets and updates, and
 Section~\ref{sec:numerical_blocks} collects reusable numerical identities.
@@ -46,62 +46,62 @@ Exported functions or computational block \\
 \midrule
 exAL distribution and gamma bounds &
 Section 2.1 &
-S2 &
+B &
 \code{dexal()}, \code{pexal()}, \code{qexal()}, \code{rexal()},
 \code{get\_gamma\_bounds()}. \\
 Dynamic DQLM and exDQLM fitting &
 Sections 2.1--2.2, Examples 1--2 &
-S3--S4 &
+C--D &
 \code{exdqlmMCMC()}, \code{exdqlmLDVB()}; dynamic fitting algorithms. \\
 Gaussian state updates &
 Section 2.2 &
-S2.2 &
+B.2 &
 Kalman filtering, FFBS backward sampling, and RTS smoothing. \\
 Discount-factor evolution &
 Section 2.3 &
-S2.2, S3.1, S4.1 &
+B.2, C.1, D.1 &
 State-evolution covariance construction used by the dynamic routines. \\
 Transfer-function exDQLM &
 Section 2.4, Example 3 &
-S5 &
+E &
 \code{exdqlmTransferMCMC()}, \code{exdqlmTransferLDVB()}. \\
 Static AL and exAL regression &
 Section 2.5, Example 4 &
-S6--S7 &
+F--G &
 \code{exalStaticMCMC()}, \code{exalStaticLDVB()}. \\
 Forecasting &
 Section 3.2 &
-S8.1 &
+H.1 &
 \code{exdqlmForecast()}; forecast recursion and predictive draws. \\
 Diagnostics &
 Section 3.1, Examples 2--3 &
-S8.2 &
+H.2 &
 \code{exdqlmDiagnostics()}, \code{exalStaticDiagnostics()}; calibration and
 predictive-score summaries. \\
 Posterior-predictive synthesis &
 Example 1 &
-S8.3 &
+H.3 &
 \code{quantileSynthesis()}; Algorithm~\ref{alg:predictive-synthesis}. \\
 Reusable numerical blocks &
 Section 2.2 &
-S9 &
+I &
 GIG moments, entropy terms, slice sampling, and Laplace--delta approximation. \\
 \bottomrule
 \end{tabularx}
 \endgroup
 \caption{Roadmap connecting the main text, appendix derivations, and
 exported \pkg{exdqlm} routines or computational blocks.}
-\label{tab:supp_roadmap}
+\label{tab:app_roadmap}
 \end{table}
 
 Some routines temporarily hold or schedule selected blocks during early
 iterations for numerical stability. These controls affect update timing only;
 they do not change the posterior target, full conditional distributions, or
 coordinate optima documented in the sections listed in
-Table~\ref{tab:supp_roadmap}.
+Table~\ref{tab:app_roadmap}.
 
 \section{Notation and distributional conventions}
-\label{sec:supp_distributional_conventions}
+\label{sec:app_distributional_conventions}
 
 Let $p_0\in(0,1)$ be the target quantile. The response is scalar. In dynamic
 models, observations are indexed by $t=1,\ldots,T$; in static regression,
@@ -146,7 +146,7 @@ $\elbo(q)$ & Evidence lower bound. \\
 \caption{Core notation used throughout the appendices. The shorthand
 $p_\gamma$, $A_\gamma$, $B_\gamma$, and $C_\gamma$ refers to functions of
 $(p_0,\gamma)$ defined in the main text.}
-\label{tab:supp_notation}
+\label{tab:app_notation}
 \end{table}
 
 The latent variables $v_t$, $s_t$, $v_i$, and $s_i$ are introduced for
@@ -525,7 +525,7 @@ v_t\mid\vect{\theta}_t,\sigma,y_t
 \label{eq:dyn_dqlm_v_cond}
 \end{equation}
 
-\begin{suppalgorithm}{Dynamic DQLM MCMC}
+\begin{appalgorithm}{Dynamic DQLM MCMC}
 \label{alg:dyn-dqlm-mcmc}
 The MCMC kernel leaves the augmented posterior in
 \eqref{eq:dyn_dqlm_joint} invariant; posterior summaries are Monte Carlo
@@ -549,7 +549,7 @@ $(\vect{\theta}_{0:T},\vect{v},\sigma)$ and filtered/smoothed state summaries.
   \end{enumerate}
 \item Return the retained draws and state summaries.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 
 \subsection{Mean-field VB and ELBO}
 
@@ -604,7 +604,7 @@ b_q&=b_\sigma+\sum_{t=1}^T\bar v_t+
 \label{eq:dyn_dqlm_vb_sigma}
 \end{align}
 
-\begin{suppalgorithm}{Dynamic DQLM VB}
+\begin{appalgorithm}{Dynamic DQLM VB}
 \label{alg:dyn-dqlm-vb}
 \par\noindent\emph{Input:} observations $\vect{y}$, model matrices
 $(\mat{F}_t,\mat{G}_t,\mat{W}_t)$, initial state prior, AL prior
@@ -629,7 +629,7 @@ $q(\sigma)$, and $q(v_t)$.
 when requested by \code{n.samp}.
 \item Return the fitted factors, diagnostics, and optional draws.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 In the package, this AL/DQLM path is selected in the dynamic fitting routines
 with \code{dqlm.ind = TRUE}.
 
@@ -798,7 +798,7 @@ The conditional kernel for $\gamma$ is
 for $\gamma\in(L,U)$. The default sampler applies the bounded slice update in
 Section~\ref{sec:slice} directly to this kernel.
 
-\begin{suppalgorithm}{Dynamic exDQLM MCMC}
+\begin{appalgorithm}{Dynamic exDQLM MCMC}
 \label{alg:dyn-exdqlm-mcmc}
 The default $(\sigma,\gamma)$ update consists of an exact GIG update for
 $\sigma$ conditional on $\gamma$, followed by a bounded univariate slice update
@@ -827,7 +827,7 @@ $\gamma$.
   \end{enumerate}
 \item Return the retained draws and state summaries.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 Setting $\gamma=0$ drops the $s_t$ block and reduces the sampler to the
 AL/DQLM kernel in Algorithm~\ref{alg:dyn-dqlm-mcmc}.
 
@@ -932,7 +932,7 @@ h_z(\ell_\sigma,z_\gamma)
 The fitted object returns the transformed mode, the approximate covariance
 matrix, delta-method moments, and ELBO components.
 
-\begin{suppalgorithm}{Dynamic exDQLM LDVB}
+\begin{appalgorithm}{Dynamic exDQLM LDVB}
 \label{alg:dyn-exdqlm-ldvb}
 \par\noindent\emph{Input:} observations $\vect{y}$, model matrices
 $(\mat{F}_t,\mat{G}_t,\mat{W}_t)$, initial state prior, exAL prior
@@ -960,7 +960,7 @@ $q(v_t)$, $q(s_t)$, and $q(\sigma,\gamma)$.
 when requested by \code{n.samp}.
 \item Return the fitted factors, diagnostics, and optional draws.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 In the AL special case, the nonconjugate $(\sigma,\gamma)$ block is replaced
 by the inverse-gamma $q(\sigma)$ update in Algorithm~\ref{alg:dyn-dqlm-vb}.
 This exAL path is the default in \code{exdqlmMCMC()} and \code{exdqlmLDVB()}
@@ -1083,7 +1083,7 @@ The package inputs \code{X}, \code{lam}, \code{tf.df}, \code{tf.m0}, and
 $m_0^{\mathrm{tf}}$, and $C_0^{\mathrm{tf}}$; \code{median.kt} is returned as a
 summary of the fitted transfer response.
 
-\begin{suppalgorithm}{Transfer-function state augmentation and fitting}
+\begin{appalgorithm}{Transfer-function state augmentation and fitting}
 \label{alg:transfer-fitting}
 \par\noindent\emph{Input:} base dynamic model, transfer covariates $x_t$,
 fixed transfer rate $\lambda$, transfer discount factors, and transfer-state
@@ -1100,7 +1100,7 @@ MCMC uses Algorithm~\ref{alg:dyn-exdqlm-mcmc} and LDVB uses
 Algorithm~\ref{alg:dyn-exdqlm-ldvb}.
 \item Return summaries for both the base state and the transfer states.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 The transfer-function extension changes only the state-space matrices; the
 observation likelihood and latent-variable updates are unchanged.
 
@@ -1239,7 +1239,7 @@ v_i\mid\cdot
 \label{eq:static_al_v_cond}
 \end{align}
 
-\begin{suppalgorithm}{Static AL/exAL MCMC}
+\begin{appalgorithm}{Static AL/exAL MCMC}
 \label{alg:static-mcmc}
 \par\noindent\emph{Input:} response vector $\vect{y}$, design matrix
 $\mat{X}$, target quantile $p_0$, coefficient prior specification, AL/exAL
@@ -1268,7 +1268,7 @@ $\gamma$; omit $\vect{s}$ and fix $\gamma=0$ for the AL path.
   \end{enumerate}
 \item Return the retained posterior draws.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 
 \subsection{Laplace--delta VB updates and ELBO}
 
@@ -1351,7 +1351,7 @@ $q(\vect{\beta})q(\sigma)\prod_iq(v_i)$ with the same closed-form updates as
 Section~\ref{sec:dyn_dqlm}, replacing state smoothing moments by
 $\E\{(y_i-\vect{x}_i^\top\vect{\beta})^2\}$.
 
-\begin{suppalgorithm}{Static AL/exAL LDVB}
+\begin{appalgorithm}{Static AL/exAL LDVB}
 \label{alg:static-ldvb}
 \par\noindent\emph{Input:} response vector $\vect{y}$, design matrix
 $\mat{X}$, target quantile $p_0$, coefficient prior specification, AL/exAL
@@ -1376,7 +1376,7 @@ factors, and the $(\sigma,\gamma)$ block.
 \item Draw approximate posterior samples when requested by \code{n.samp}.
 \item Return the fitted factors, diagnostics, and optional draws.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 These static updates are implemented in \code{exalStaticMCMC()} and
 \code{exalStaticLDVB()}, with \code{beta_prior} selecting the Gaussian/ridge
 or \code{rhs\_ns} coefficient prior.
@@ -1769,10 +1769,10 @@ w_k
 \end{equation}
 The reported CRPS is the average of \eqref{eq:crps_estimator} over the
 diagnostic time points \citep{gneiting2007,laio2007verification}. By default,
-\code{exdqlmDiagnostics()} uses
-\(\tau_k=0.01,0.02,\ldots,0.99\) with equal weights \(w_k=1/K\). User-supplied
-weights are normalized to sum to one. For target quantile $p_0$, the
-posterior predictive loss criterion (PPLC) returned as \code{pplc} is
+\code{exdqlmDiagnostics()} uses an equally spaced grid from 0.01 to 0.99 with
+equal weights \(w_k=1/K\). User-supplied weights are normalized to sum to one.
+For target quantile $p_0$, the posterior predictive loss criterion (PPLC)
+returned as \code{pplc} is
 \begin{equation}
 \widehat{\PPLC}
 =
@@ -1796,7 +1796,7 @@ interpolates across $p$ to obtain draws from one posterior predictive
 distribution. The monotonicity correction uses isotonic adjustment and, when
 requested, global monotone rearrangement \citep{barlow1972,chernozhukov2010}.
 
-\begin{suppalgorithm}{Posterior-predictive synthesis}
+\begin{appalgorithm}{Posterior-predictive synthesis}
 \label{alg:predictive-synthesis}
 \par\noindent\emph{Input:} posterior predictive draws or fitted forecast
 objects from models at ordered quantile levels $p_1<\cdots<p_K$, together with
@@ -1812,7 +1812,7 @@ predictive curve over $p_1,\ldots,p_K$.
 \item Interpolate across quantile levels.
 \item Return synthesized posterior predictive draws and summary intervals.
 \end{enumerate}
-\end{suppalgorithm}
+\end{appalgorithm}
 
 \section{Numerical and ELBO implementation blocks}
 \label{sec:numerical_blocks}
@@ -1837,7 +1837,7 @@ H\{\N(\vect{m},\mat{V})\}
 \label{eq:entropy_gaussian}
 \end{equation}
 If $x\sim\IG(a,b)$ under the parameterization in
-Section~\ref{sec:supp_distributional_conventions}, then
+Section~\ref{sec:app_distributional_conventions}, then
 \begin{equation}
 \E(x^{-1})=\frac{a}{b},\qquad
 \E(\log x)=\log b-\psi(a),
@@ -1956,9 +1956,9 @@ This is used for smooth functions of $(\sigma,\gamma)$ in dynamic and static
 exAL models.
 
 \section{Global backend options}
-\label{sec:supp_backend_options}
+\label{sec:app_backend_options}
 
-Table~\ref{tab:supp_backendopts} lists the package-level options used for
+Table~\ref{tab:app_backendopts} lists the package-level options used for
 backend routing and ELBO monitoring. These are global \code{options(...)}
 settings; they are separate from the model-specific inference controls passed
 directly to the fitting functions.
@@ -1983,5 +1983,5 @@ Option & Purpose & Default \\
 \bottomrule
 \end{tabularx}
 \caption{Package-level runtime options exposed through \code{options(...)} for backend routing and ELBO monitoring in \pkg{exdqlm}. Function-level inference controls are documented separately in the function interfaces.}
-\label{tab:supp_backendopts}
+\label{tab:app_backendopts}
 \end{table}

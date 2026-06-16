@@ -409,8 +409,8 @@ distributed under the MIT License, which is GPL-compatible.
 > and are submitting one manuscript PDF, `exdqlm-jss.pdf`. The obsolete
 > standalone supplement PDF and separate supplement bibliography
 > artifact were removed from the submission bundle. The appendix source
-> remains as a LaTeX input file for maintainability, but it is compiled
-> into the single manuscript PDF.
+> is maintained as `exdqlm-appendix.tex`, a LaTeX input file compiled
+> directly into the single manuscript PDF.
 
 ------------------------------------------------------------------------
 

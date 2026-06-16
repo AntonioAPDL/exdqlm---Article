@@ -292,12 +292,12 @@ testthat::test_that("manuscript examples avoid data-centered prior means", {
 
 testthat::test_that("backend options table lives in the appendix source", {
   main_text <- readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE)
-  appendix_text <- readLines(file.path(repo_root, "exdqlm-supplement.tex"), warn = FALSE)
+  appendix_text <- readLines(file.path(repo_root, "exdqlm-appendix.tex"), warn = FALSE)
 
   testthat::expect_false(any(grepl("\\\\label\\{tab:backendopts\\}", main_text)))
   testthat::expect_false(any(grepl("\\\\section\\{Global backend options\\}", main_text)))
-  testthat::expect_true(any(grepl("\\\\input\\{exdqlm-supplement\\}", main_text)))
-  testthat::expect_true(any(grepl("\\\\label\\{tab:supp_backendopts\\}", appendix_text)))
+  testthat::expect_true(any(grepl("\\\\input\\{exdqlm-appendix\\}", main_text)))
+  testthat::expect_true(any(grepl("\\\\label\\{tab:app_backendopts\\}", appendix_text)))
   testthat::expect_true(any(grepl("\\\\section\\{Global backend options\\}", appendix_text)))
   testthat::expect_false(any(grepl("\\\\documentclass|\\\\begin\\{document\\}|\\\\end\\{document\\}|\\\\bibliography", appendix_text)))
 })

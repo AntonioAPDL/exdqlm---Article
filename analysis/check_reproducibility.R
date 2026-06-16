@@ -519,7 +519,7 @@ main <- function() {
     "analysis/manuscript/examples/ex2_sunspots/run.R",
     "analysis/manuscript/examples/ex3_big_tree/run.R",
     "exdqlm-jss.tex",
-    "exdqlm-supplement.tex"
+    "exdqlm-appendix.tex"
   ))
   kl_patterns <- c(
     "FNN::KL",

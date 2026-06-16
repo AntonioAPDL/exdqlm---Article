@@ -13,7 +13,7 @@ They do not require a version-control checkout.
 
 - `exdqlm-jss.tex`, `exdqlm-jss.pdf`: manuscript source and compiled PDF. The
   compiled manuscript PDF includes the technical appendices.
-- `exdqlm-supplement.tex`: appendix source input used by `exdqlm-jss.tex`.
+- `exdqlm-appendix.tex`: appendix source input used by `exdqlm-jss.tex`.
   It is not a separate submitted manuscript PDF.
 - `code.R`: standalone replication script for the manuscript results.
 - `code.html`: HTML log generated from `code.R` with `knitr::spin()`.
