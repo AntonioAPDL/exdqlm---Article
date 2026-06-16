@@ -8,11 +8,15 @@ Ya terminé de implementar la revisión completa después del rechazo editorial 
 
 Para facilitarles la revisión, preparé una versión marcada del manuscrito:
 
-`exdqlm-jss-coauthor-review.pdf`
+`00_COMPILE_THIS_COAUTHOR_REVIEW.pdf`
 
-Esa versión tiene cajas azules indicando las partes principales que cambiaron. Ojo: Overleaf probablemente abre/compila por defecto la versión limpia `exdqlm-jss.tex`, y por eso ahí no aparecen las cajas azules. Para ver los comentarios de revisión hay que abrir directamente `exdqlm-jss-coauthor-review.pdf` o compilar `exdqlm-jss-coauthor-review.tex`. También dejé una guía rápida en:
+Esa versión tiene cajas azules indicando las partes principales que cambiaron. Ojo: Overleaf probablemente abre/compila por defecto la versión limpia `exdqlm-jss.tex`, y por eso ahí no aparecen las cajas azules. Para ver los comentarios de revisión hay que abrir directamente `00_COMPILE_THIS_COAUTHOR_REVIEW.pdf` o compilar `00_COMPILE_THIS_COAUTHOR_REVIEW.tex`. También dejé una guía rápida en:
 
 `00_COAUTHOR_REVIEW_README.md`
+
+También dejé un resumen corto de los cambios en:
+
+`00_CHANGES_AFTER_JSS_REJECTION.md`
 
 La versión limpia para enviar sigue siendo:
 

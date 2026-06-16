@@ -6,13 +6,19 @@ This repository contains two manuscript versions:
 - `exdqlm-jss-coauthor-review.pdf` / `exdqlm-jss-coauthor-review.tex`:
   internal coauthor-review version with blue boxes marking the main revised
   regions after the JSS editorial return.
+- `00_COMPILE_THIS_COAUTHOR_REVIEW.pdf` /
+  `00_COMPILE_THIS_COAUTHOR_REVIEW.tex`: the same coauthor-review version,
+  duplicated under an obvious top-level name so it is easy to find in
+  Overleaf.
 
 Overleaf may open or compile `exdqlm-jss.tex` by default. That is expected:
 the clean version does not show colored review notes. To see the marked
-version, open `exdqlm-jss-coauthor-review.pdf`, or compile
-`exdqlm-jss-coauthor-review.tex`.
+version, open `00_COMPILE_THIS_COAUTHOR_REVIEW.pdf`, or compile
+`00_COMPILE_THIS_COAUTHOR_REVIEW.tex`. The original marked file is also
+available as `exdqlm-jss-coauthor-review.pdf`.
 
-The blue boxes are meant to guide review; they are not intended for the final
+The blue boxes are meant to guide review of the substantive revisions. They
+are not a word-by-word `latexdiff`, and they are not intended for the final
 JSS upload.
 
 ## Main Places To Check
@@ -55,6 +61,7 @@ JSS upload.
 
 - `docs/coauthor_resubmission_summary_2026-06-16.md`: detailed summary of
   what changed.
+- `00_CHANGES_AFTER_JSS_REJECTION.md`: compact review checklist organized by
+  changed area.
 - `docs/coauthor_email_draft_es_2026-06-16.md`: draft Spanish email with the
   same high-level summary.
-

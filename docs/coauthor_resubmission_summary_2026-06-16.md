@@ -33,8 +33,8 @@ package, and replication-material levels. The main changes are:
 
 For coauthor review, a separate marked manuscript was created:
 
-- `exdqlm-jss-coauthor-review.tex`
-- `exdqlm-jss-coauthor-review.pdf`
+- `00_COMPILE_THIS_COAUTHOR_REVIEW.tex`
+- `00_COMPILE_THIS_COAUTHOR_REVIEW.pdf`
 
 The blue boxes in that PDF identify the main regions revised after the JSS
 return. The clean submission manuscript remains:
@@ -43,10 +43,12 @@ return. The clean submission manuscript remains:
 - `exdqlm-jss.pdf`
 
 Overleaf may open or compile `exdqlm-jss.tex` by default, so the blue boxes
-will not appear unless the coauthor-review PDF/source is opened explicitly. The
-top-level file `00_COAUTHOR_REVIEW_README.md` records this review workflow. The
-coauthor-review file is only for internal review and should not be uploaded to
-JSS.
+will not appear unless the coauthor-review PDF/source is opened explicitly.
+The older names `exdqlm-jss-coauthor-review.tex` and
+`exdqlm-jss-coauthor-review.pdf` remain as backups, but the `00_...` files are
+the easiest ones to find in Overleaf. The top-level file
+`00_COAUTHOR_REVIEW_README.md` records this review workflow. The coauthor-review
+files are only for internal review and should not be uploaded to JSS.
 
 ## Baseline Used for This Summary
 
@@ -202,11 +204,13 @@ unless requested.
 Primary:
 
 - `00_COAUTHOR_REVIEW_README.md`
-- `exdqlm-jss-coauthor-review.pdf`
+- `00_CHANGES_AFTER_JSS_REJECTION.md`
+- `00_COMPILE_THIS_COAUTHOR_REVIEW.pdf`
 - `response-to-editor.pdf`
 
 Optional/source-level:
 
+- `00_COMPILE_THIS_COAUTHOR_REVIEW.tex`
 - `exdqlm-jss-coauthor-review.tex`
 - `exdqlm-jss.tex`
 - `exdqlm-appendix.tex`
