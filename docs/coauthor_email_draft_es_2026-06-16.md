@@ -10,7 +10,11 @@ Para facilitarles la revisión, preparé una versión marcada del manuscrito:
 
 `exdqlm-jss-coauthor-review.pdf`
 
-Esa versión tiene cajas azules indicando las partes principales que cambiaron. La versión limpia para enviar sigue siendo:
+Esa versión tiene cajas azules indicando las partes principales que cambiaron. Ojo: Overleaf probablemente abre/compila por defecto la versión limpia `exdqlm-jss.tex`, y por eso ahí no aparecen las cajas azules. Para ver los comentarios de revisión hay que abrir directamente `exdqlm-jss-coauthor-review.pdf` o compilar `exdqlm-jss-coauthor-review.tex`. También dejé una guía rápida en:
+
+`00_COAUTHOR_REVIEW_README.md`
+
+La versión limpia para enviar sigue siendo:
 
 `exdqlm-jss.pdf`
 

@@ -42,8 +42,11 @@ return. The clean submission manuscript remains:
 - `exdqlm-jss.tex`
 - `exdqlm-jss.pdf`
 
-The coauthor-review file is only for internal review and should not be uploaded
-to JSS.
+Overleaf may open or compile `exdqlm-jss.tex` by default, so the blue boxes
+will not appear unless the coauthor-review PDF/source is opened explicitly. The
+top-level file `00_COAUTHOR_REVIEW_README.md` records this review workflow. The
+coauthor-review file is only for internal review and should not be uploaded to
+JSS.
 
 ## Baseline Used for This Summary
 
@@ -198,6 +201,7 @@ unless requested.
 
 Primary:
 
+- `00_COAUTHOR_REVIEW_README.md`
 - `exdqlm-jss-coauthor-review.pdf`
 - `response-to-editor.pdf`
 
