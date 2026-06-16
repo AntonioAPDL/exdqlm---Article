@@ -63,14 +63,11 @@
   \renewcommand{\theappalgorithm}{\thesection.\arabic{appalgorithm}}%
 }
 \makeatother
-\definecolor{coauthorblue}{rgb}{0,0.275,0.588}
+\definecolor{antonio}{rgb}{0,0.275,0.588}
+\newcommand{\aA}[1]{\textcolor{antonio}{#1}}
 \newcommand{\ReviewNote}[1]{%
   \par\medskip
-  \noindent\begingroup
-  \setlength{\fboxsep}{6pt}%
-  \color{coauthorblue}%
-  \fbox{\parbox{0.94\textwidth}{\textbf{Coauthor review note.} #1}}%
-  \endgroup
+  \noindent\aA{\textbf{Antonio:} #1}%
   \par\medskip
 }
 
