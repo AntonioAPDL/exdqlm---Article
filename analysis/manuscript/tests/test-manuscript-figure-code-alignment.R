@@ -70,6 +70,8 @@ testthat::test_that("displayed figure chunks retain canonical visual markers", {
     sep = "\n"
   )
   fig8_plot <- code_text(chunks, "chunk_036")
+  testthat::expect_gte(count_fixed("predict(", fig8_forecasts), 3L)
+  testthat::expect_false(grepl("exdqlmForecast(", fig8_forecasts, fixed = TRUE))
   testthat::expect_gte(count_fixed("return.draws = TRUE", fig8_forecasts), 3L)
   testthat::expect_false(grepl("plot = FALSE", fig8_forecasts, fixed = TRUE))
   testthat::expect_true(grepl("plot(fc.M0", fig8_plot, fixed = TRUE))

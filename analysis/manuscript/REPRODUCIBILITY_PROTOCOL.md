@@ -194,8 +194,9 @@ and by-`k`/Gaussian plug-in details belong under `kl.details` rather than as
 competing table columns.
 
 Held-out forecast tables must use `exdqlmForecastDiagnostics()` on
-`exdqlmForecast(..., return.draws = TRUE)` objects. The article should not
-define local check-loss or CRPS functions for manuscript forecast comparisons.
+`exdqlmForecast` objects, typically returned by `predict(..., return.draws = TRUE)`
+from a fitted dynamic model. The article should not define local check-loss or
+CRPS functions for manuscript forecast comparisons.
 
 ## Final acceptance criteria
 

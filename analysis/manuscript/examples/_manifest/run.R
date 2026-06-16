@@ -174,9 +174,9 @@ api_map <- data.frame(
   ),
   reproduced_call = c(
     "exdqlmDiagnostics(M1, M2, ...)",
-    "exdqlmPlot(M1, ...)",
-    "compPlot(M1, ...)",
-    "exdqlmForecast(start.t = ..., k = ..., m1 = M1, ...)"
+    "plot(M1, ...)",
+    "plot(M1, type = \"component\", ...)",
+    "predict(M1, start.t = ..., k = ..., ...)"
   ),
   status = c("replaced", "replaced", "replaced", "replaced"),
   stringsAsFactors = FALSE

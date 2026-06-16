@@ -377,10 +377,10 @@ if (!need_ex3) {
   }
 
   forecast_with_mats <- function(fit, k, mats, seed) {
-    exdqlm::exdqlmForecast(
+    stats::predict(
+      fit,
       start.t = length(fit$y),
       k = k,
-      m1 = fit,
       fFF = mats$fFF,
       fGG = mats$fGG,
       plot = FALSE,

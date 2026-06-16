@@ -1268,19 +1268,24 @@ R> MTF$median.kt
 \end{CodeChunk}
 
 We next produce 18-month-ahead forecasts over the held-out window. The
-future state-space matrices are passed through the \code{fFF} and \code{fGG} arguments of \code{exdqlmForecast()}. The code below shows the relevant matrix construction
-and forecast calls; the replication script wraps these steps in dimension
-checks and output-writing code. For \code{M0}, the future state-space matrices repeat the trend and seasonal model.
+future state-space matrices are passed through the \code{fFF} and \code{fGG}
+arguments of the \code{predict()} method for fitted dynamic objects. This
+method returns \code{exdqlmForecast} objects and wraps the lower-level
+\code{exdqlmForecast()} constructor described in the forecast subsection above. The
+code below shows the relevant matrix construction and forecast calls; the
+replication script wraps these steps in dimension checks and output-writing
+code. For \code{M0}, the future state-space matrices repeat the trend and
+seasonal model.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> k.fore = length(y.holdout)
 R> F0.future = model$FF
 R> G0.future = model$GG
-R> fc.M0 = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = M0,
-+                         fFF = F0.future, fGG = G0.future,
-+                         return.draws = TRUE, n.samp = 1000,
-+                         seed = 20265101)
+R> fc.M0 = predict(M0, start.t = length(y.train), k = k.fore,
++                  fFF = F0.future, fGG = G0.future,
++                  return.draws = TRUE, n.samp = 1000,
++                  seed = 20265101)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1293,10 +1298,10 @@ R> reg.future = regMod(X.holdout, m0 = rep(0, n.x), C0 = diag(1, n.x))
 R> model.reg.future = model + reg.future
 R> FREG.future = model.reg.future$FF
 R> GREG.future = model.reg.future$GG
-R> fc.MREG = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MREG,
-+                           fFF = FREG.future, fGG = GREG.future,
-+                           return.draws = TRUE, n.samp = 1000,
-+                           seed = 20265301)
+R> fc.MREG = predict(MREG, start.t = length(y.train), k = k.fore,
++                    fFF = FREG.future, fGG = GREG.future,
++                    return.draws = TRUE, n.samp = 1000,
++                    seed = 20265301)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1318,10 +1323,10 @@ R> for (j in seq_len(n.x)) {
 +    GTF.future[zeta.ind, psi.ind[j], ] = X.holdout[, j]
 +    GTF.future[psi.ind[j], psi.ind[j], ] = 1
 +    }
-R> fc.MTF = exdqlmForecast(start.t = length(y.train), k = k.fore, m1 = MTF,
-+                             fFF = FTF.future, fGG = GTF.future,
-+                             return.draws = TRUE, n.samp = 1000,
-+                             seed = 20265201)
+R> fc.MTF = predict(MTF, start.t = length(y.train), k = k.fore,
++                   fFF = FTF.future, fGG = GTF.future,
++                   return.draws = TRUE, n.samp = 1000,
++                   seed = 20265201)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1420,7 +1425,7 @@ Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-re
  \code{MTF} transfer function & 0.155 & 0.550 \\
  \bottomrule
 \end{tabular}
-\caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022, computed with \code{exdqlmForecastDiagnostics()} from \code{exdqlmForecast(..., return.draws = TRUE)} objects. Check loss is computed at \(p_0=0.15\), and CRPS is computed from posterior predictive forecast draws using the integrated-quantile-score approximation. Lower values are preferred; bold entries mark the smallest value in each column.}
+\caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022, computed with \code{exdqlmForecastDiagnostics()} from \code{exdqlmForecast} objects returned by \code{predict(..., return.draws = TRUE)}. Check loss is computed at \(p_0=0.15\), and CRPS is computed from posterior predictive forecast draws using the integrated-quantile-score approximation. Lower values are preferred; bold entries mark the smallest value in each column.}
 \label{tab:ex3forecastmetrics}
 \end{table}
 
