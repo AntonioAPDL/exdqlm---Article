@@ -57,6 +57,19 @@ distributed under the MIT License, which is GPL-compatible.
   replication run from a fresh extraction using the submitted package
   tarball.
 
+For cross-reference, the main manuscript changes appear in the revised
+Introduction and software-comparison discussion (G1), the diagnostics
+and forecasting section (D9--D10), the new package design and
+implementation section and workflow table (G3, D6--D10), the revised
+reader-facing example code and replication discussion (G2, D1--D5),
+Examples 3 and 4 (D6, D9--D10), the rewritten conclusion (G1), and the
+integrated appendices (D11). The corresponding package changes are
+reflected in the 1.1.0 source tarball, `DESCRIPTION`, `NEWS.md`,
+`NAMESPACE`, the help pages, and the test suite. The
+replication-material changes are reflected in `README.md`, `code.R`,
+`code.html`, `manuscript-reproducibility-index.md`, and
+`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`.
+
 # General Editorial Comments
 
 **Comment (G1)**

@@ -112,7 +112,7 @@ Quantile regression has become a widely used alternative to mean-based modeling 
 \begin{AChange}
 \citet{yan2025family} introduce the extended asymmetric Laplace (exAL) distribution, a parametric extension of the asymmetric Laplace distribution that preserves many of its computational advantages while relaxing some of its restrictive assumptions. Building on this family, \citet{me} developed the extended dynamic quantile linear model (exDQLM) framework for modeling time-varying quantiles. The \pkg{exdqlm} package uses this dynamic model as its foundation, but its software contribution is broader: it provides a unified Bayesian workflow for latent-state quantile dynamics, posterior simulation via Markov chain Monte Carlo (MCMC) and via Laplace--delta variational Bayes (LDVB), dynamic transfer-function modeling, static AL/exAL regression with shrinkage priors, forecasting, diagnostics, and post hoc synthesis across separately fitted quantile models.
 
-\ReviewNote{The introduction was revised to answer the editor's main
+\ReviewNote{Response items G1 and D6: The introduction was revised to answer the editor's main
 scope/contribution concern. It now separates the prior methodological work
 (exAL family and exDQLM model) from the JSS software contribution: the R
 implementation, workflow, object system, diagnostics, forecasting, examples,
@@ -395,7 +395,7 @@ Examples of these dynamic and static special cases appear in Section \ref{sec:ex
 \label{sec:diags}
 
 \begin{AChange}
-\ReviewNote{This section was updated to reflect the package-level diagnostics
+\ReviewNote{Response items G3, D9, and D10: This section was updated to reflect the package-level diagnostics
 used throughout the examples. The KL diagnostic is deterministic, CRPS is
 computed through the package scoring implementation, PPLC is reported where
 appropriate, and the examples no longer define local check-loss or CRPS helper
@@ -492,7 +492,7 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
 \section{Package design and implementation}
 \label{sec:design}
 
-\ReviewNote{This is a new JSS-facing design section added in response to the
+\ReviewNote{Response items G3 and D6--D10: This is a new JSS-facing design section added in response to the
 editor. It explains model-construction objects, shared S3 fit families,
 \code{print()}, \code{summary()}, \code{plot()}, and \code{predict()} methods,
 visible diagnostic/forecast/synthesis objects, and backend controls. Table
@@ -561,7 +561,7 @@ Selected state-space computations are implemented in \proglang{C++} through \pkg
  \label{sec:exs}
 
 \begin{AChange}
-\ReviewNote{The example code chunks were revised to be reader-facing excerpts
+\ReviewNote{Response items G2 and D1--D5: The example code chunks were revised to be reader-facing excerpts
 of the same workflows run by \code{code.R}. The displayed code now emphasizes
 the public API and standard methods while the full executable scripts remain in
 the replication materials.}
@@ -1028,7 +1028,7 @@ Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. With
 \label{sec:ex3}
 
 \begin{AChange}
-\ReviewNote{Example 3 was substantially reorganized. It now compares a common
+\ReviewNote{Response items D6, D9, and D10: Example 3 was substantially reorganized. It now compares a common
 trend-seasonal baseline with no covariates, direct regression through
 \code{regMod()}, and transfer-function covariate effects. Forecast objects are
 created with the standard \code{predict()} method, and the held-out forecast
@@ -1503,7 +1503,7 @@ indicate posterior mean forecast quantiles and dotted lines indicate pointwise
 \label{sec:ex4static}
 
 \begin{AChange}
-\ReviewNote{Example 4 was updated to use the package-level static diagnostics
+\ReviewNote{Response items G3, D9, and D10: Example 4 was updated to use the package-level static diagnostics
 workflow. The coefficient interval plot is now produced through
 \code{exalStaticDiagnostics()} and \code{plot(..., type = "coefficients")};
 the truth overlay is optional and used only because this is a simulation
@@ -1642,7 +1642,7 @@ Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient M
 \label{sec:summary}
 
 \begin{AChange}
-\ReviewNote{The conclusion was rewritten to match the revised scope: it
+\ReviewNote{Response item G1: The conclusion was rewritten to match the revised scope: it
 summarizes the software workflow, keeps claims evidence-bounded, states current
 limitations, and lists future directions without overstating the examples.}
 
@@ -1659,7 +1659,7 @@ Several development directions follow from these limitations: multivariate-outpu
 \appendix
 \exdqlmAppendixSetup
 \begin{AChange}
-\ReviewNote{The former supplement is now included directly as appendices in
+\ReviewNote{Response item D11: The former supplement is now included directly as appendices in
 the single manuscript PDF, as requested by the editor. Appendix numbering uses
 A--J, and appendix equations/tables/algorithms are numbered within appendix
 sections.}
