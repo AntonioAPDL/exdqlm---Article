@@ -32,10 +32,13 @@ distributed under the MIT License, which is GPL-compatible.
 # Summary of Major Revisions
 
 - Reorganized the manuscript to make the JSS contribution explicit:
-  prior methodology is separated from the software contribution, and a
-  new package design and implementation section describes the object
-  system, fitting engines, diagnostics, forecasting, plotting, and
-  extension points.
+  prior methodology is separated from the software contribution, with
+  the exAL family/static exAL regression, the dynamic exDQLM model, the
+  original MCMC/ISVB strategy, and transfer-function methodology
+  identified as methodological foundations. The revised text then states
+  the software contribution of the present article and a new package
+  design and implementation section describes the object system, fitting
+  engines, diagnostics, forecasting, plotting, and extension points.
 
 - Revised the package design for standard R use: fitted dynamic and
   static objects now have shared superclass families,
@@ -84,20 +87,22 @@ replication-material changes are reflected in `README.md`, `code.R`,
 
 ------------------------------------------------------------------------
 
-> We agree. The revised manuscript now states more explicitly that the
-> previously published methodological components include the exAL
-> likelihood family and the exDQLM modeling framework, while the
-> contribution of this article is the R software implementation and
-> workflow. In particular, the manuscript now frames
-> <span class="sans-serif">exdqlm</span> as a software contribution: a
-> user-facing R package for dynamic and static Bayesian quantile
-> modeling, MCMC and LDVB fitting engines, deterministic diagnostics,
-> forecasting, transfer-function state augmentation, posterior
-> predictive synthesis, standard object methods, examples, and
-> replication materials. The revised introduction also includes a
-> compact list of the main software contributions so that the scope of
-> the JSS submission is visible before the methodological and example
-> sections.
+> We agree. The revised manuscript now separates the methodological
+> foundations from the JSS software contribution more explicitly. It
+> identifies Yan, Zheng, and Kottas as the source for the exAL family and
+> static exAL regression framework, and Barata, Prado, and Sansó as the
+> source for the dynamic exDQLM model, the original dynamic MCMC/ISVB
+> strategy, and the transfer-function extension. The manuscript then
+> states that the contribution of the present article is
+> software-centered: <span class="sans-serif">exdqlm</span> provides a
+> public R workflow for dynamic and static Bayesian quantile modeling,
+> including shared fitted-object families, MCMC and LDVB fitting
+> interfaces, deterministic diagnostic objects, forecasting and held-out
+> forecast scoring, transfer-function wrappers, posterior predictive
+> synthesis, standard R methods, examples, appendices, and replication
+> materials. The revised introduction also includes a compact list of
+> the main software contributions so that the scope of the JSS
+> submission is visible before the methodological and example sections.
 >
 > We also added a dedicated package design and implementation section
 > before the examples. This section makes the software contribution
