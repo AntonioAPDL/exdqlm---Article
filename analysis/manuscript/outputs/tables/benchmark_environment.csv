@@ -11,7 +11,7 @@
 "rng_normal_kind","Inversion"
 "rng_sample_kind","Rejection"
 "exdqlm_version","1.1.0"
-"exdqlm_commit","56c94e4"
+"exdqlm_commit","b28e47c"
 "runtime_definition","fit elapsed time stored in returned fit objects (`run.time`)"
 "diagnostics_runtime_included","FALSE"
 "exdqlm.use_cpp_kf","TRUE"

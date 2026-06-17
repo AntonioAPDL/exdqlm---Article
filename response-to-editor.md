@@ -32,12 +32,14 @@ distributed under the MIT License, which is GPL-compatible.
 
 - Reorganized the manuscript to make the JSS contribution explicit:
   prior methodology is separated from the software contribution, with
-  the exAL family/static exAL regression, the dynamic exDQLM model, the
-  original MCMC/ISVB strategy, and transfer-function methodology
-  identified as methodological foundations. The revised text then states
-  the software contribution of the present article and a new package
-  design and implementation section describes the object system, fitting
-  engines, exAL distribution utilities, C++ backend paths, diagnostics,
+  the extended asymmetric Laplace (exAL) family/static exAL regression,
+  the extended dynamic quantile linear model (exDQLM), the original
+  Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes
+  (ISVB) strategy, and transfer-function methodology identified as
+  methodological foundations. The revised text then states the software
+  contribution of the present article and a new package design and
+  implementation section describes the object system, fitting engines,
+  exAL distribution utilities, C++ backend paths, diagnostics,
   forecasting, plotting, and extension points.
 
 - Revised the package design for standard R use: fitted dynamic and
@@ -47,13 +49,15 @@ distributed under the MIT License, which is GPL-compatible.
   `predict()` are used where natural.
 
 - Clarified the computational contributions beyond the earlier
-  methodological papers: LDVB is now the main variational route for the
-  nonconjugate scale--skewness block, legacy ISVB is retained for
-  historical comparisons, exAL density/distribution/quantile/sampling
-  functions are documented package utilities, CRPS-based model-selection
-  and held-out forecast diagnostics are exposed as package workflows,
-  and the static `rhs_ns` implementation includes closed-form shrinkage-block MCMC/VB
-  updates and ELBO contributions documented in the appendices.
+  methodological papers: Laplace--delta variational Bayes (LDVB) is now
+  the main variational route for the nonconjugate scale--skewness block,
+  legacy ISVB is retained for historical comparisons, exAL
+  density/cumulative distribution/quantile/sampling functions are
+  documented package utilities, continuous ranked probability score
+  (CRPS) model-selection and held-out forecast diagnostics are exposed
+  as package workflows, and the static `rhs_ns` implementation includes
+  closed-form shrinkage-block MCMC and variational Bayes updates and
+  evidence lower bound (ELBO) contributions documented in the appendices.
 
 - Rewrote the replication materials as a standalone JSS archive. The
   public workflow is now centered on `Rscript code.R`, with documented
@@ -98,18 +102,21 @@ replication-material changes are reflected in `README.md`, `code.R`,
 
 > We agree. The revised manuscript now separates the methodological
 > foundations from the JSS software contribution more explicitly. It
-> identifies Yan, Zheng, and Kottas as the source for the exAL family and
-> static exAL regression framework, and Barata, Prado, and Sansó as the
-> source for the dynamic exDQLM model, the original dynamic MCMC/ISVB
-> strategy, and the transfer-function extension. The manuscript then
-> states that the contribution of the present article is
-> software-centered: <span class="sans-serif">exdqlm</span> provides a
-> public R workflow for dynamic and static Bayesian quantile modeling,
-> including shared fitted-object families, MCMC and LDVB fitting
-> interfaces, documented exAL distribution utilities, compiled backend
-> paths for selected numerical computations, deterministic diagnostic
-> objects, CRPS-based model-selection and held-out forecast scoring,
-> transfer-function wrappers, static AL/exAL regression with `rhs_ns`
+> identifies Yan, Zheng, and Kottas as the source for the extended
+> asymmetric Laplace (exAL) family and static exAL regression framework,
+> and Barata, Prado, and Sansó as the source for the extended dynamic
+> quantile linear model (exDQLM), the original dynamic Markov chain Monte
+> Carlo (MCMC) and importance-sampling variational Bayes (ISVB) strategy, and
+> the transfer-function extension. The manuscript then states that the
+> contribution of the present article is software-centered: <span
+> class="sans-serif">exdqlm</span> provides a public R workflow for
+> dynamic and static Bayesian quantile modeling, including shared
+> fitted-object families, MCMC and Laplace--delta variational Bayes
+> (LDVB) fitting interfaces, documented exAL distribution utilities,
+> compiled backend paths for selected numerical computations,
+> deterministic diagnostic objects, continuous ranked probability score
+> (CRPS) model-selection and held-out forecast scoring, transfer-function
+> wrappers, static asymmetric Laplace (AL)/exAL regression with `rhs_ns`
 > shrinkage-prior support, posterior predictive synthesis, standard R
 > methods, examples, appendices, and replication materials. The revised
 > introduction also includes a compact list of the main software and

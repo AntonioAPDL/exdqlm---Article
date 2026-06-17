@@ -4,22 +4,25 @@
 \section{Scope and relation to the main text}
 \label{sec:app_scope}
 
-The main text describes the user-facing workflow for \pkg{exdqlm}: dynamic
-exDQLM and DQLM fitting, transfer-function models, static exAL regression,
-forecasting, diagnostics, and posterior-predictive synthesis. This appendix
-gives the corresponding posterior targets, full conditional distributions,
-Markov chain Monte Carlo (MCMC) and variational Bayes (VB) updates,
-Laplace--delta variational Bayes (LDVB) approximations, ELBO components, and
-numerical routines used by the package. Readers can use this appendix to
-verify the posterior targets, update equations, and diagnostic quantities
-behind the exported functions. The derivations build on the AL
+The main text describes the user-facing workflow for \pkg{exdqlm}: extended
+dynamic quantile linear model (exDQLM) and dynamic quantile linear model
+(DQLM) fitting, transfer-function models, static extended asymmetric
+Laplace (exAL) and asymmetric Laplace (AL) regression, forecasting,
+diagnostics, and posterior-predictive synthesis. This appendix gives the
+corresponding posterior targets, full conditional distributions, Markov chain
+Monte Carlo (MCMC) and variational Bayes (VB) updates, Laplace--delta
+variational Bayes (LDVB) approximations, evidence lower bound (ELBO)
+components, and numerical routines used by the package. Readers can use this
+appendix to verify the posterior targets, update equations, and diagnostic
+quantities behind the exported functions. The derivations build on the AL
 mixture representation of \citet{kozumi2011gibbs}, dynamic quantile linear
 models \citep{gonccalves2017dynamic}, the exAL/exDQLM formulation
-\citep{yan2025family,me}, Gaussian state-space filtering, smoothing, and
-forward-filtering backward-sampling (FFBS) recursions described in
-Section~\ref{sec:gaussian_state_update},
-nonconjugate variational approximations \citep{wang2013nonconjugatevb}, and
-the \code{rhs\_ns} prior \citep{nishimura2023shrunken}.
+\citep{yan2025family,me}, Gaussian state-space filtering,
+Rauch--Tung--Striebel (RTS) smoothing, and forward-filtering
+backward-sampling (FFBS) recursions described in
+Section~\ref{sec:gaussian_state_update}, nonconjugate variational
+approximations \citep{wang2013nonconjugatevb}, and the \code{rhs\_ns} prior
+\citep{nishimura2023shrunken}.
 
 Table~\ref{tab:app_roadmap} gives the main navigation map, linking each
 article topic to the corresponding appendix sections and exported package
