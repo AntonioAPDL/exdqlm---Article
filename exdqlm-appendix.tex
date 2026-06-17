@@ -1458,10 +1458,9 @@ uses \eqref{eq:entropy_ig}.
 regularized horseshoe prior}
 \label{sec:static_rhs}
 
-This section focuses on the \code{rhs\_ns} coefficient prior, the
-conditionally conjugate regularized horseshoe variant used for sparse static
-regression. Users only need this section when fitting static models with
-\code{beta_prior = "rhs\_ns"}. The prior enters the static Gaussian update for
+\code{rhs\_ns} is the conditionally conjugate regularized horseshoe variant
+used for sparse static regression. These details are needed when fitting static
+models with \code{beta_prior = "rhs\_ns"}. The prior enters the static Gaussian update for
 $\vect{\beta}$ through a prior precision matrix. Let
 $\mathcal{A}\subseteq\{1,\ldots,p\}$ denote the active shrinkage set; by
 default an intercept, if present, is not shrunk. For $j\notin\mathcal{A}$ the

@@ -8,11 +8,10 @@ We thank the editorial team for the careful return and for the specific
 guidance on how to make the submission more suitable for review by the
 *Journal of Statistical Software*. We are submitting the revised
 material as a new submission, together with this point-by-point
-response. We revised the manuscript, package, and replication materials
-substantially in response. The revised submission is organized around
-the software contribution, uses a clearer R object and method design,
-and provides a standalone replication archive centered on a single
-reader-facing `code.R` script.
+response. The revised manuscript, package, and replication materials now
+put the software contribution first, use a clearer R object and method
+design, and provide a standalone replication archive centered on a
+single reader-facing `code.R` script.
 
 The current submission files are:
 
@@ -118,10 +117,9 @@ replication-material changes are reflected in `README.md`, `code.R`,
 > visible before the methodological and example sections.
 >
 > We also added a dedicated package design and implementation section
-> before the examples. This section makes the software contribution
-> inspectable before the reader reaches the examples, and it separates
-> package architecture from the mathematical background and algorithmic
-> appendices.
+> before the examples. The new section describes the package architecture
+> before the reader reaches the examples and separates the software
+> interface from the mathematical background and algorithmic appendices.
 
 ------------------------------------------------------------------------
 
@@ -325,7 +323,7 @@ replication-material changes are reflected in `README.md`, `code.R`,
 ------------------------------------------------------------------------
 
 > We added a package design and implementation section before the
-> examples. This section describes the principal object families, class
+> examples. The section describes the principal object families, class
 > inheritance, fitting engines, diagnostic and forecast objects,
 > synthesis objects, plotting and post-processing methods, backend
 > controls, and extension points. It also clarifies why some operations
@@ -470,5 +468,5 @@ All final checks below were run with R 4.6.0.
   and regenerated manuscript outputs from absent caches.
 
 We believe these revisions address the editorial return and make the
-submission substantially easier to inspect, reproduce, and review as a
-JSS software article.
+submission easier to inspect, reproduce, and review as a JSS software
+article.
