@@ -38,13 +38,23 @@ distributed under the MIT License, which is GPL-compatible.
   identified as methodological foundations. The revised text then states
   the software contribution of the present article and a new package
   design and implementation section describes the object system, fitting
-  engines, diagnostics, forecasting, plotting, and extension points.
+  engines, exAL distribution utilities, C++ backend paths, diagnostics,
+  forecasting, plotting, and extension points.
 
 - Revised the package design for standard R use: fitted dynamic and
   static objects now have shared superclass families,
   diagnostic/forecast/ synthesis objects are visible reusable objects,
   and standard methods such as `print()`, `summary()`, `plot()`, and
   `predict()` are used where natural.
+
+- Clarified the computational contributions beyond the earlier
+  methodological papers: LDVB is now the main variational route for the
+  nonconjugate scale--skewness block, legacy ISVB is retained for
+  historical comparisons, exAL density/distribution/quantile/sampling
+  functions are documented package utilities, CRPS-based model-selection
+  and held-out forecast diagnostics are exposed as package workflows,
+  and the static `rhs_ns` implementation includes closed-form shrinkage-block MCMC/VB
+  updates and ELBO contributions documented in the appendices.
 
 - Rewrote the replication materials as a standalone JSS archive. The
   public workflow is now centered on `Rscript code.R`, with documented
@@ -97,12 +107,15 @@ replication-material changes are reflected in `README.md`, `code.R`,
 > software-centered: <span class="sans-serif">exdqlm</span> provides a
 > public R workflow for dynamic and static Bayesian quantile modeling,
 > including shared fitted-object families, MCMC and LDVB fitting
-> interfaces, deterministic diagnostic objects, forecasting and held-out
-> forecast scoring, transfer-function wrappers, posterior predictive
-> synthesis, standard R methods, examples, appendices, and replication
-> materials. The revised introduction also includes a compact list of
-> the main software contributions so that the scope of the JSS
-> submission is visible before the methodological and example sections.
+> interfaces, documented exAL distribution utilities, compiled backend
+> paths for selected numerical computations, deterministic diagnostic
+> objects, CRPS-based model-selection and held-out forecast scoring,
+> transfer-function wrappers, static AL/exAL regression with `rhs_ns`
+> shrinkage-prior support, posterior predictive synthesis, standard R
+> methods, examples, appendices, and replication materials. The revised
+> introduction also includes a compact list of the main software and
+> computational contributions so that the scope of the JSS submission is
+> visible before the methodological and example sections.
 >
 > We also added a dedicated package design and implementation section
 > before the examples. This section makes the software contribution
