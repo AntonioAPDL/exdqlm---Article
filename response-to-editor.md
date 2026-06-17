@@ -36,10 +36,10 @@ distributed under the MIT License, which is GPL-compatible.
   the extended dynamic quantile linear model (exDQLM), the original
   Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes
   (ISVB) strategy, transfer-function methodology, and the general
-  nonconjugate variational-inference strategy of Wang and Blei identified as
+  nonconjugate variational inference strategy of Wang and Blei identified as
   methodological foundations. The revised text then states the software
   contribution of the present article and a new package design and
-  implementation section describes the object system, fitting engines,
+  implementation section describes the S3 object workflow, fitting engines,
   exAL distribution utilities, C++ backend paths, diagnostics,
   forecasting, plotting, and extension points.
 
@@ -56,9 +56,10 @@ distributed under the MIT License, which is GPL-compatible.
   the Laplace--delta strategy for nonconjugate models, with legacy ISVB
   retained for historical comparisons. The revised manuscript also
   identifies documented exAL density/cumulative distribution/quantile/
-  sampling utilities, continuous ranked probability score (CRPS)
-  model-selection and held-out forecast diagnostics, and the static
-  `rhs_ns` implementation with closed-form shrinkage-block MCMC and
+  sampling utilities, continuous ranked probability score (CRPS) and
+  posterior predictive loss criterion (PPLC) computations for predictive
+  comparison, held-out forecast diagnostics, and the static `rhs_ns`
+  implementation with closed-form shrinkage-block MCMC and
   variational Bayes updates and evidence lower bound (ELBO) contributions
   documented in the appendices.
 
@@ -119,14 +120,15 @@ protocol.
 > fitted-object families, MCMC and LDVB fitting interfaces, a
 > model-specific LDVB adaptation for the exAL scale--skewness block,
 > documented exAL distribution utilities, compiled backend paths for selected numerical computations,
-> deterministic diagnostic objects, continuous ranked probability score
-> (CRPS) model-selection and held-out forecast scoring, transfer-function
-> wrappers, static asymmetric Laplace (AL)/exAL regression with `rhs_ns`
+> diagnostic objects, deterministic Kullback--Leibler (KL) calibration
+> diagnostics, continuous ranked probability score (CRPS) and posterior
+> predictive loss criterion (PPLC) computations, transfer-function wrappers,
+> static asymmetric Laplace (AL)/exAL regression with `rhs_ns`
 > shrinkage-prior support, posterior predictive synthesis, standard R
 > methods, examples, appendices, and replication materials. The revised
-> introduction also includes a compact list of the main software and
-> computational contributions so that the scope of the JSS submission is
-> visible before the methodological and example sections.
+> introduction also includes a compact package-level contribution list so
+> that the scope of the JSS submission is visible before the methodological
+> and example sections.
 >
 > We also added a dedicated package design and implementation section
 > before the examples. The new section describes the package architecture

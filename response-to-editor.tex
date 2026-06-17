@@ -76,11 +76,11 @@ GPL-compatible.
   extended dynamic quantile linear model (exDQLM), the original Markov chain
   Monte Carlo (MCMC) and importance-sampling variational Bayes (ISVB) strategy,
   transfer-function methodology, and the general nonconjugate
-  variational-inference strategy of Wang and Blei identified as methodological
+  variational inference strategy of Wang and Blei identified as methodological
   foundations.
   The revised text then states the software contribution of the present article
-  and a new package design and implementation section describes the object
-  system, fitting engines, exAL distribution utilities, \proglang{C++} backend
+  and a new package design and implementation section describes the S3 object
+  workflow, fitting engines, exAL distribution utilities, \proglang{C++} backend
   paths, diagnostics, forecasting, plotting, and extension points.
 \item[] Revised the package design for standard R use: fitted dynamic and
   static objects now have shared superclass families, diagnostic/forecast/
@@ -94,8 +94,9 @@ GPL-compatible.
   Laplace--delta strategy for nonconjugate models, with legacy ISVB retained
   for historical comparisons. The revised manuscript also identifies documented
   exAL density/cumulative distribution/quantile/sampling utilities, continuous
-  ranked probability score (CRPS) model-selection and held-out forecast
-  diagnostics, and the static \code{rhs\_ns} implementation with closed-form
+  ranked probability score (CRPS) and posterior predictive loss criterion
+  (PPLC) computations for predictive comparison, held-out forecast diagnostics,
+  and the static \code{rhs\_ns} implementation with closed-form
   shrinkage-block MCMC and variational Bayes updates and evidence lower bound
   (ELBO) contributions documented in the appendices.
 \item[] Rewrote the replication materials as a standalone JSS archive. The
@@ -150,14 +151,15 @@ dynamic and static Bayesian quantile modeling, including shared fitted-object
 families, MCMC and LDVB fitting interfaces, a model-specific LDVB adaptation
 for the exAL scale--skewness block, documented exAL distribution utilities,
 compiled backend paths for selected numerical computations, deterministic
-diagnostic objects, continuous ranked probability score (CRPS) model-selection
-and held-out forecast scoring, transfer-function wrappers, static asymmetric
-Laplace (AL)/exAL regression with \code{rhs\_ns} shrinkage-prior support,
-posterior predictive synthesis, standard \proglang{R} methods, examples,
-appendices, and replication materials.
-The revised introduction also includes a compact list of the main software and
-computational contributions so that the scope of the JSS submission is visible
-before the methodological and example sections.
+diagnostic objects, deterministic Kullback--Leibler (KL) calibration
+diagnostics, continuous ranked probability score (CRPS) and posterior predictive
+loss criterion (PPLC) computations, transfer-function wrappers, static
+asymmetric Laplace (AL)/exAL regression with \code{rhs\_ns} shrinkage-prior
+support, posterior predictive synthesis, standard \proglang{R} methods,
+examples, appendices, and replication materials.
+The revised introduction also includes a compact package-level contribution
+list so that the scope of the JSS submission is visible before the
+methodological and example sections.
 
 We also added a dedicated package design and implementation section before the
 examples. The new section describes the package architecture before the reader
