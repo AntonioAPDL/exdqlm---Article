@@ -676,21 +676,28 @@ MCMC done | model=exDQLM | status=complete | iter=5000.00 | runtime_sec=16.272
 \end{CodeOutput}
 \end{CodeChunk}
 
-By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). Consistent with this, the posterior mean of \(\gamma\) is \(-0.012\) with a 95\% credible interval \((-0.429, 0.462)\), while the posterior mean of \(\sigma\) is \(0.369\) with a 95\% credible interval \((0.282, 0.468)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} \citep{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
+By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). For the diagnostic display, we run the median model with a longer burn-in. Consistent with the symmetry of the data, the posterior mean of \(\gamma\) is \(-0.051\) with a 95\% credible interval \((-0.462, 0.411)\), while the posterior mean of \(\sigma\) is \(0.370\) with a 95\% credible interval \((0.286, 0.459)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} \citep{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.82\textwidth]{ex1mcmc.png}
-\caption{Example 1: Lake Huron. Trace and density plots from the median run with 2000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are representative MCMC traces from the recorded run profile; exact trace paths may differ across reruns while retaining comparable posterior summaries.}
+\caption{Example 1: Lake Huron. Trace and density plots from the median run with 7000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are representative MCMC traces from the recorded run profile; exact trace paths may differ across reruns while retaining comparable posterior summaries.}
 \label{fig:ex1mcmc}
 \end{figure}
 
 \begin{CodeChunk}
 \begin{CodeInput}
+R> set.seed(20260620)
+R> M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
++                         df = 0.9, dim.df = 2,
++                         PriorGamma = list(m_gam = 0, s_gam = 0.1,
++                                           df_gam = 1),
++                         n.burn = 7000, n.mcmc = 3000,
++                         verbose = FALSE)
 R> par(mfcol = c(2, 2), mar = c(4.1, 4.1, 2.1, 1.0))
-R> keep.idx = seq(1, length(M50$samp.sigma), by = 10)
-R> sigma.trace = coda::mcmc(M50$samp.sigma[keep.idx], thin = 10)
-R> gamma.trace = coda::mcmc(M50$samp.gamma[keep.idx], thin = 10)
+R> keep.idx = seq(1, length(M50.trace$samp.sigma), by = 10)
+R> sigma.trace = coda::mcmc(M50.trace$samp.sigma[keep.idx], thin = 10)
+R> gamma.trace = coda::mcmc(M50.trace$samp.gamma[keep.idx], thin = 10)
 R> coda::traceplot(sigma.trace, main = "sigma trace")
 R> coda::densplot(sigma.trace, main = "sigma density")
 R> coda::traceplot(gamma.trace, main = "gamma trace")

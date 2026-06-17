@@ -174,7 +174,13 @@ if (!need_ex1) {
   }
 
   if (need_ex1_trace_model) {
-    ex1_trace <- load_or_fit_cache(sprintf("ex1_trace_model_v9_prior579_slice_vbinit_2000_3000_seed%s", trace_seed), {
+    trace_cache_key <- sprintf(
+      "ex1_trace_model_v10_prior579_slice_vbinit_b%d_m%d_seed%s",
+      nburn_trace,
+      nmcmc_trace,
+      trace_seed
+    )
+    ex1_trace <- load_or_fit_cache(trace_cache_key, {
       M50_trace <- with_local_seed(trace_seed, {
         exdqlm::exdqlmMCMC(
           y = y, p0 = 0.50, model = model,
@@ -188,7 +194,7 @@ if (!need_ex1) {
         )
       })
       list(M50_trace = M50_trace)
-    }, note = sprintf("ex1_trace_model_v9_prior579_slice_vbinit_2000_3000_seed%s", trace_seed))
+    }, note = trace_cache_key)
 
     M50_trace <- ex1_trace$M50_trace
     sigma_trace <- as.numeric(M50_trace$samp.sigma)

@@ -31,7 +31,7 @@ benchmark_profiles:
 profiles:
   quick:
     ex1:
-      trace_seed: 20260616
+      trace_seed: 20260620
       n_burn: 350
       n_mcmc: 180
       n_burn_trace: 1500
@@ -115,10 +115,10 @@ profiles:
 
   standard:
     ex1:
-      trace_seed: 20260616
+      trace_seed: 20260620
       n_burn: 2000
       n_mcmc: 3000
-      n_burn_trace: 2000
+      n_burn_trace: 7000
       n_mcmc_trace: 3000
       thin_trace: 10
       n_chains_kernel: 4
@@ -200,7 +200,7 @@ profiles:
 
   full:
     ex1:
-      trace_seed: 20260616
+      trace_seed: 20260620
       n_burn: 1800
       n_mcmc: 1000
       n_burn_trace: 7000
