@@ -35,7 +35,8 @@ distributed under the MIT License, which is GPL-compatible.
   the extended asymmetric Laplace (exAL) family/static exAL regression,
   the extended dynamic quantile linear model (exDQLM), the original
   Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes
-  (ISVB) strategy, and transfer-function methodology identified as
+  (ISVB) strategy, transfer-function methodology, and the general
+  nonconjugate variational-inference strategy of Wang and Blei identified as
   methodological foundations. The revised text then states the software
   contribution of the present article and a new package design and
   implementation section describes the object system, fitting engines,
@@ -50,14 +51,16 @@ distributed under the MIT License, which is GPL-compatible.
 
 - Clarified the computational contributions beyond the earlier
   methodological papers: Laplace--delta variational Bayes (LDVB) is now
-  the main variational route for the nonconjugate scale--skewness block,
-  legacy ISVB is retained for historical comparisons, exAL
-  density/cumulative distribution/quantile/sampling functions are
-  documented package utilities, continuous ranked probability score
-  (CRPS) model-selection and held-out forecast diagnostics are exposed
-  as package workflows, and the static `rhs_ns` implementation includes
-  closed-form shrinkage-block MCMC and variational Bayes updates and
-  evidence lower bound (ELBO) contributions documented in the appendices.
+  the main variational route for the nonconjugate scale--skewness block.
+  This is presented as a model-specific adaptation and implementation of
+  the Laplace--delta strategy for nonconjugate models, with legacy ISVB
+  retained for historical comparisons. The revised manuscript also
+  identifies documented exAL density/cumulative distribution/quantile/
+  sampling utilities, continuous ranked probability score (CRPS)
+  model-selection and held-out forecast diagnostics, and the static
+  `rhs_ns` implementation with closed-form shrinkage-block MCMC and
+  variational Bayes updates and evidence lower bound (ELBO) contributions
+  documented in the appendices.
 
 - Rewrote the replication materials as a standalone JSS archive. The
   public workflow is now centered on `Rscript code.R`, with documented
@@ -82,9 +85,9 @@ Examples 3 and 4 (D6, D9--D10), the rewritten conclusion (G1), and the
 integrated appendices (D11). The corresponding package changes are
 reflected in the 1.1.0 source tarball, `DESCRIPTION`, `NEWS.md`,
 `NAMESPACE`, the help pages, and the test suite. The
-replication-material changes are reflected in `README.md`, `code.R`,
-`code.html`, `manuscript-reproducibility-index.md`, and
-`analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md`.
+replication-material changes are reflected in the submitted archive
+README, `code.R`, `code.html`, reproducibility index, and reproducibility
+protocol.
 
 # General Editorial Comments
 
@@ -107,13 +110,15 @@ replication-material changes are reflected in `README.md`, `code.R`,
 > and Barata, Prado, and Sansó as the source for the extended dynamic
 > quantile linear model (exDQLM), the original dynamic Markov chain Monte
 > Carlo (MCMC) and importance-sampling variational Bayes (ISVB) strategy, and
-> the transfer-function extension. The manuscript then states that the
+> the transfer-function extension. The revision also identifies Wang and
+> Blei as the source of the general Laplace--delta strategy for variational
+> inference in nonconjugate models. The manuscript then states that the
 > contribution of the present article is software-centered: <span
 > class="sans-serif">exdqlm</span> provides a public R workflow for
 > dynamic and static Bayesian quantile modeling, including shared
-> fitted-object families, MCMC and Laplace--delta variational Bayes
-> (LDVB) fitting interfaces, documented exAL distribution utilities,
-> compiled backend paths for selected numerical computations,
+> fitted-object families, MCMC and LDVB fitting interfaces, a
+> model-specific LDVB adaptation for the exAL scale--skewness block,
+> documented exAL distribution utilities, compiled backend paths for selected numerical computations,
 > deterministic diagnostic objects, continuous ranked probability score
 > (CRPS) model-selection and held-out forecast scoring, transfer-function
 > wrappers, static asymmetric Laplace (AL)/exAL regression with `rhs_ns`

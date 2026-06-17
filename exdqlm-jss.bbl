@@ -286,9 +286,9 @@ Venables WN, Ripley BD (2002).
 
 \bibitem[{Wang and Blei(2013)}]{wang2013nonconjugatevb}
 Wang C, Blei DM (2013).
-\newblock \enquote{Variational Inference in Non-Conjugate Models.}
-\newblock \emph{arXiv preprint arXiv:1209.4360}.
-\newblock \urlprefix\url{https://arxiv.org/abs/1209.4360}.
+\newblock \enquote{Variational Inference in Nonconjugate Models.}
+\newblock \emph{Journal of Machine Learning Research}, \textbf{14}, 1005--1031.
+\newblock \urlprefix\url{https://jmlr.org/papers/v14/wang13b.html}.
 
 \bibitem[{West and Harrison(1997)}]{west1997bayesian}
 West M, Harrison J (1997).
