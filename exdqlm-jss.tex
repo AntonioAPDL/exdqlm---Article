@@ -169,7 +169,7 @@ Related implementations also exist outside \proglang{R}. In Python, \pkg{statsmo
 
 Viewed against the comparison in Table \ref{table:software}, \pkg{exdqlm} is not intended to replace broad general-purpose quantile-regression toolkits, additive quantile-regression packages, or software designed specifically for joint multi-quantile estimation. Its role is more specific: it fills a gap between general quantile-regression software and general Gaussian state-space software by providing a dedicated Bayesian workflow for dynamic quantile state-space models. General state-space packages such as \pkg{dlm} \citep{dlm} and \pkg{dynr} \citep{dynr} remain useful for dynamic modeling, but they do not provide the quantile likelihoods, filtered and smoothed quantile-state summaries, diagnostics, forecasting, or synthesis tools targeted here.
 
-Given this positioning, the package-level contributions are:
+Within this scope, \pkg{exdqlm} makes the following software contributions:
 \begin{itemize}
 \item a model-construction application programming interface (API) for trend, seasonal, regression, and transfer-function components in Bayesian dynamic quantile state-space models;
 \item coordinated MCMC and LDVB fitting interfaces for dynamic and static fits, with LDVB specializing the Laplace--delta nonconjugate variational inference strategy of \citet{wang2013nonconjugatevb} to the exAL scale--skewness block through model-specific evidence lower bound (ELBO) terms, convergence diagnostics, and variational posterior draws, while legacy ISVB is retained for backward-compatible dynamic analyses;
