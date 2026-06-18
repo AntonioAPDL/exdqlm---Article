@@ -1,22 +1,21 @@
 % Appendix source input for exdqlm-jss.tex.
 % This file is intentionally not a standalone JSS manuscript.
 
-\section{Scope and notation}
+\section{Technical overview and notation}
 \label{sec:app_scope}
 
-These appendices collect the implementation details most relevant for checking
-the \pkg{exdqlm} software contribution. They are intentionally selective. The
-main text gives the user-facing workflow, examples, and package interface; the
-package help pages and source code document function-level arguments and
-backend options; the replication materials regenerate the reported figures,
-tables, and benchmark quantities. The appendices below record the posterior
-targets, nonconjugate Laplace--delta variational Bayes (LDVB) blocks,
-shrinkage-prior updates, diagnostic quantities, and posterior-predictive
-synthesis algorithm used by the package.
+This appendix connects the package interface in the main text with the
+posterior targets and computations implemented in \pkg{exdqlm}. It records the
+distributional conventions, compact dynamic and static posterior targets, the
+Laplace--delta variational Bayes (LDVB) scale--skewness block, the static
+\code{rhs\_ns} shrinkage block, diagnostic and scoring quantities, and the
+posterior-predictive synthesis algorithm. Standard Gaussian filtering,
+smoothing, and backward-sampling recursions are cited rather than rederived.
+Function-level arguments and backend controls are documented in the package
+help pages, and the replication materials provide executable code for the
+reported figures, tables, and benchmark quantities.
 
-Table~\ref{tab:app_roadmap} summarizes the appendix organization. Standard
-Gaussian filtering, smoothing, and backward-sampling recursions are cited and
-used in the package, but not rederived here.
+Table~\ref{tab:app_roadmap} gives an overview of the appendix contents.
 
 \begin{table}[!htb]
 \centering
@@ -27,8 +26,9 @@ used in the package, but not rederived here.
 \toprule
 Appendix topic & Purpose \\
 \midrule
-A. Scope and notation &
-Defines the distributional conventions used by the package. \\
+A. Technical overview and notation &
+Defines the role of the appendix and the distributional conventions used by
+the package. \\
 B. Posterior targets and model blocks &
 Records compact dynamic, static, and transfer-function targets. \\
 C. Laplace--delta VB implementation &
@@ -44,7 +44,7 @@ package-level backend documentation. \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{Compact roadmap for the appendices.}
+\caption{Overview of appendix contents.}
 \label{tab:app_roadmap}
 \end{table}
 
