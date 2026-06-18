@@ -69,7 +69,9 @@ distributed under the MIT License, which is GPL-compatible.
   Git checkout or internal author-maintenance modes.
 
 - Merged the former supplement into the main manuscript as appendices
-  and prepared a single manuscript PDF.
+  and streamlined the appendix material to focus on posterior targets,
+  package-specific computational details, diagnostics, predictive synthesis,
+  and numerical identities needed for software review.
 
 - Rebuilt the final replication archive without Git metadata, author
   audit notes, model-cache `.rds` files, scratch LaTeX files, or nested
@@ -83,7 +85,7 @@ and forecasting section (D9--D10), the new package design and
 implementation section and workflow table (G3, D6--D10), the revised
 reader-facing example code and replication discussion (G2, D1--D5),
 Examples 3 and 4 (D6, D9--D10), the rewritten conclusion (G1), and the
-integrated appendices (D11). The corresponding package changes are
+streamlined integrated appendices (D11). The corresponding package changes are
 reflected in the 1.1.0 source tarball, `DESCRIPTION`, `NEWS.md`,
 `NAMESPACE`, the help pages, and the test suite. The
 replication-material changes are reflected in the submitted archive
@@ -452,11 +454,14 @@ protocol.
 ------------------------------------------------------------------------
 
 > We merged the former supplement into the main manuscript as appendices
-> and are submitting one manuscript PDF, `exdqlm-jss.pdf`. The obsolete
-> standalone supplement PDF and separate supplement bibliography
-> artifact were removed from the submission bundle. The appendix source
-> is maintained as `exdqlm-appendix.tex`, a LaTeX input file compiled
-> directly into the single manuscript PDF.
+> and are submitting one manuscript PDF, `exdqlm-jss.pdf`. The appendix
+> material was also streamlined to focus on posterior targets,
+> package-specific computational details, diagnostics, predictive synthesis,
+> and numerical identities needed to review the software implementation.
+> The obsolete standalone supplement PDF and separate supplement
+> bibliography artifact were removed from the submission bundle. The
+> appendix source is maintained as `exdqlm-appendix.tex`, a LaTeX input
+> file compiled directly into the single manuscript PDF.
 
 ------------------------------------------------------------------------
 

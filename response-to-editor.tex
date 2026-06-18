@@ -104,7 +104,9 @@ GPL-compatible.
   quick and single-example options. The public path no longer requires a Git
   checkout or internal author-maintenance modes.
 \item[] Merged the former supplement into the main manuscript as appendices and
-  prepared a single manuscript PDF.
+  streamlined the appendix material to focus on posterior targets,
+  package-specific computational details, diagnostics, predictive synthesis,
+  and numerical identities needed for software review.
 \item[] Rebuilt the final replication archive without Git metadata, author audit
   notes, model-cache \code{.rds} files, scratch LaTeX files, or nested archives.
   We tested both a quick archive smoke run and a full replication run from a
@@ -116,7 +118,7 @@ Introduction and software-comparison discussion (G1), the diagnostics and
 forecasting section (D9--D10), the new package design and implementation
 section and workflow table (G3, D6--D10), the revised reader-facing example code
 and replication discussion (G2, D1--D5), Examples 3 and 4 (D6, D9--D10), the
-rewritten conclusion (G1), and the integrated appendices (D11). The
+rewritten conclusion (G1), and the streamlined integrated appendices (D11). The
 corresponding package changes are reflected in the 1.1.0 source tarball,
 \code{DESCRIPTION}, \code{NEWS.md}, \code{NAMESPACE}, the help pages, and the
 test suite. The replication-material changes are reflected in the submitted
@@ -421,11 +423,13 @@ should be included directly as appendices. JSS has no page limits.
 \responseheading
 \begin{responsebox}
 We merged the former supplement into the main manuscript as appendices and are
-submitting one manuscript PDF, \code{exdqlm-jss.pdf}. The obsolete standalone
-supplement PDF and separate supplement bibliography artifact were removed from
-the submission bundle. The appendix source is maintained as
-\code{exdqlm-appendix.tex}, a LaTeX input file compiled directly into the single
-manuscript PDF.
+submitting one manuscript PDF, \code{exdqlm-jss.pdf}. The appendix material was
+also streamlined to focus on posterior targets, package-specific computational
+details, diagnostics, predictive synthesis, and numerical identities needed to
+review the software implementation. The obsolete standalone supplement PDF and
+separate supplement bibliography artifact were removed from the submission
+bundle. The appendix source is maintained as \code{exdqlm-appendix.tex}, a
+LaTeX input file compiled directly into the single manuscript PDF.
 \end{responsebox}
 
 \section{Validation and Final Submission Checks}
