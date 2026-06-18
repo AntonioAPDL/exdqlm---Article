@@ -38,9 +38,9 @@ Records the Nishimura--Suchard regularized horseshoe updates used in static
 regression. \\
 E. Forecasting, diagnostics, and synthesis &
 Defines the predictive scoring quantities and post hoc synthesis algorithm. \\
-F. Numerical identities and backend notes &
-Lists the small set of moment and entropy identities used by the ELBO
-calculations and points to package-level backend documentation. \\
+F. Laplace--delta and backend notes &
+Records the generic Laplace--delta approximation used by LDVB and points to
+package-level backend documentation. \\
 \bottomrule
 \end{tabularx}
 \endgroup
@@ -388,8 +388,8 @@ The dynamic and static exAL ELBOs have the same block structure:
 \end{equation}
 For dynamic models, the Gaussian block is the state trajectory
 $q(\vect{\theta}_{0:T})$; for static models, it is $q(\vect{\beta})$.
-The factor-specific entropy and moment identities used in this decomposition
-are listed in Section~\ref{sec:numerical_blocks}. For AL/DQLM fits,
+The entropy terms use the distributional conventions stated in
+Section~\ref{sec:app_distributional_conventions}. For AL/DQLM fits,
 $\gamma=0$, the $s$ block is omitted, and $q(\sigma)$ is inverse-gamma.
 
 \section{Static regression with the Nishimura--Suchard regularized horseshoe}
@@ -594,55 +594,8 @@ distribution.
 \end{enumerate}
 \end{appalgorithm}
 
-\section{Selected numerical identities and backend notes}
+\section{Laplace--delta and backend notes}
 \label{sec:numerical_blocks}
-
-\subsection{Moment and entropy identities}
-\label{sec:elbo_building_blocks}
-
-The ELBO calculations use a small set of reusable entropy identities. If
-$\vect{x}\sim\N(\vect{m},\mat{V})$ in dimension $d$, then
-\begin{equation}
-H\{\N(\vect{m},\mat{V})\}
-=\frac{1}{2}\log\{(2\pi e)^d|\mat{V}|\}.
-\label{eq:entropy_gaussian}
-\end{equation}
-For $x\sim\IG(a,b)$ under the convention above,
-\begin{equation}
-H\{\IG(a,b)\}
-=
-a+\log b+\log\Gamma(a)-(a+1)\psi(a).
-\label{eq:entropy_ig}
-\end{equation}
-For $x\sim\GIG(\lambda,\chi,\psi_{\mathrm{GIG}})$,
-\begin{align}
-H(x)
-&=
-\log\left\{
-2K_\lambda(\sqrt{\chi\psi_{\mathrm{GIG}}})
-\left(\frac{\chi}{\psi_{\mathrm{GIG}}}\right)^{\lambda/2}
-\right\}\nonumber\\
-&\quad
--(\lambda-1)\E(\log x)
-+\frac{1}{2}\chi\E(x^{-1})
-+\frac{1}{2}\psi_{\mathrm{GIG}}\E(x),
-\label{eq:entropy_gig}
-\end{align}
-with moments from \eqref{eq:gig_moments}. For a positive truncated normal
-$x\sim\TNp(\mu,V)$, the entropy is computed from the corresponding normal
-entropy plus the log normalizing probability and the standard correction for
-left truncation:
-\begin{equation}
-H\{\TNp(\mu,V)\}
-=
-\frac{1}{2}\log(2\pi e V)
-+\log\Phi(\mu/\sqrt V)
--\frac{\mu}{2\sqrt V}
-\frac{\phi(\mu/\sqrt V)}{\Phi(\mu/\sqrt V)}.
-\label{eq:entropy_tnp}
-\end{equation}
-
-\subsection{Laplace--delta approximation}
 
 Let $z$ denote the transformed nonconjugate parameter vector with mode
 $\hat z$ and negative Hessian $\mat{H}$ at the mode. The LDVB block uses
@@ -667,9 +620,13 @@ H\{q(z)\}
 \end{equation}
 The Jacobian terms for transforming from $(\ell_\sigma,z_\gamma)$ back to
 $(\sigma,\gamma)$ are included in the objective in
-\eqref{eq:dyn_exdqlm_ld_objective}.
+\eqref{eq:dyn_exdqlm_ld_objective}. Other ELBO terms use standard entropy
+identities for Gaussian, inverse-gamma, GIG, and positive truncated-normal
+factors under the parameterizations in
+Section~\ref{sec:app_distributional_conventions}. Those bookkeeping terms are
+implemented in the package and exercised by the package tests rather than
+rederived here.
 
-\subsection{Slice sampler and backend options}
 \label{sec:slice}
 
 The MCMC routines use bounded one-dimensional slice sampling for selected

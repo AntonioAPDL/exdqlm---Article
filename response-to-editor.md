@@ -70,8 +70,8 @@ distributed under the MIT License, which is GPL-compatible.
 
 - Merged the former supplement into the main manuscript as appendices
   and streamlined the appendix material to focus on posterior targets,
-  package-specific computational details, diagnostics, predictive synthesis,
-  and numerical identities needed for software review.
+  package-specific LDVB and shrinkage-prior blocks, diagnostics, and
+  predictive synthesis needed for software review.
 
 - Rebuilt the final replication archive without Git metadata, author
   audit notes, model-cache `.rds` files, scratch LaTeX files, or nested
@@ -456,8 +456,8 @@ protocol.
 > We merged the former supplement into the main manuscript as appendices
 > and are submitting one manuscript PDF, `exdqlm-jss.pdf`. The appendix
 > material was also streamlined to focus on posterior targets,
-> package-specific computational details, diagnostics, predictive synthesis,
-> and numerical identities needed to review the software implementation.
+> package-specific LDVB and shrinkage-prior blocks, diagnostics, and
+> predictive synthesis needed to review the software implementation.
 > The obsolete standalone supplement PDF and separate supplement
 > bibliography artifact were removed from the submission bundle. The
 > appendix source is maintained as `exdqlm-appendix.tex`, a LaTeX input
