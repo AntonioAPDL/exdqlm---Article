@@ -4,7 +4,7 @@
 \section{Technical overview and notation}
 \label{sec:app_scope}
 
-This appendix connects the package interface in the main text with the
+The appendix aims to connect the package interface discussed in the article with the
 posterior targets and computations implemented in \pkg{exdqlm}. It records the
 distributional conventions, compact dynamic and static posterior targets, the
 Laplace--delta variational Bayes (LDVB) scale--skewness block, the static
@@ -14,39 +14,6 @@ smoothing, and backward-sampling recursions are cited rather than rederived.
 Function-level arguments and backend controls are documented in the package
 help pages, and the replication materials provide executable code for the
 reported figures, tables, and benchmark quantities.
-
-Table~\ref{tab:app_roadmap} gives an overview of the appendix contents.
-
-\begin{table}[!htb]
-\centering
-\begingroup
-\TableStyle
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
->{\raggedright\arraybackslash}X@{}}
-\toprule
-Appendix topic & Purpose \\
-\midrule
-A. Technical overview and notation &
-Defines the role of the appendix and the distributional conventions used by
-the package. \\
-B. Posterior targets and model blocks &
-Records compact dynamic, static, and transfer-function targets. \\
-C. Laplace--delta VB implementation &
-Shows the exAL scale--skewness block and its model-specific moments. \\
-D. Static \code{rhs\_ns} shrinkage block &
-Records the Nishimura--Suchard regularized horseshoe updates used in static
-regression. \\
-E. Forecasting, diagnostics, and synthesis &
-Defines the predictive scoring quantities and post hoc synthesis algorithm. \\
-F. Laplace--delta and backend notes &
-Records the generic Laplace--delta approximation used by LDVB and points to
-package-level backend documentation. \\
-\bottomrule
-\end{tabularx}
-\endgroup
-\caption{Overview of appendix contents.}
-\label{tab:app_roadmap}
-\end{table}
 
 \subsection{Distributional conventions}
 \label{sec:app_distributional_conventions}
