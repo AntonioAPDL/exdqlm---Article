@@ -554,6 +554,13 @@ Selected numerical computations are implemented in \proglang{C++} through \pkg{R
     \code{diagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics; use \code{plot()} to visualize them. \\
     % \code{exdqlmPlot()} / \code{compPlot()} & Invisible \code{list} & Explicit helpers for fitted quantile, component, and state plots.\\
     \addlinespace[2pt]
+
+    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}\textcolor{red}{{\it Dynamic forecast examination} -- Input \code{exdqlmForecast} objects}} \\
+    \rule{0pt}{3ex}\code{print()} / \code{summary()} & Console summary / \code{list} & \\
+    \code{plot()} & Display plus invisible \code{list} & \\
+    \code{diagnostics()} & \code{exdqlmForecastDiagnostic} & Compute forecast diagnostics. \\
+    \addlinespace[2pt]
+
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticFit} objects} \\
     \code{print()} / \code{summary()} & Console summary / \code{list} & Inspect class, engine, sample size, design dimension, stored draws, and run time.\\
      \textcolor{red}{\code{plot()}} & Display plus invisible \code{list} & \textcolor{red}{add description here}\\
@@ -608,6 +615,7 @@ In this example, we consider the Lake Huron time series from the package \pkg{da
 
 To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space structure and prior used to estimate the quantiles (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function. The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero.
 
+\textcolor{red}{Output needs to be updated:}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> model = polytrendMod(order = 2, m0 = c(579, 0),
@@ -757,7 +765,8 @@ R> fGG =  model$GG
 \end{CodeChunk}
 
 \begin{AChange}
-We plot the time series data in a narrower range for closer examination. Forecast objects can be created with \code{predict()} on a fitted dynamic model, or with the explicit forecast helper. Here we create the forecast objects first and then call \code{plot()} with \code{add = TRUE}. Notice we start the forecast at the last time index of the data, i.e. \code{start.t = length(LakeHuron)}.
+We plot the time series data in a narrower range for closer examination. Forecast objects can be created with \code{predict()} on a fitted dynamic model. %, or with the explicit forecast helper. 
+Here we create the forecast objects first and then call \code{plot()} with \code{add = TRUE}. Notice we start the forecast at the last time index of the data, i.e. \code{start.t = length(LakeHuron)}.
 \end{AChange}
 
 \begin{CodeChunk}
@@ -946,13 +955,15 @@ R> title("exDQLM posterior draws of gamma (p0 = 0.85)")
 \end{CodeChunk}
 
 \begin{AChange}
-To further examine the two models, we use the function \code{exdqlmDiagnostics()} to create an \code{exdqlmDiagnostic} object and then call its \code{plot()} method. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals.
+To further examine the two models, we use the \code{diagnostics()} method to create an \code{exdqlmDiagnostic} object and then call its \code{plot()} method. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals.
 \end{AChange}
+
+\textcolor{red}{chunk updated:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> par(mfrow = c(2, 3))
-R> diagM1M2 = exdqlmDiagnostics(M1, M2)
+R> diagM1M2 = diagnostics(M1, M2)
 R> plot(diagM1M2, cols = c("red", "blue"))
 \end{CodeInput}
 \end{CodeChunk}
@@ -979,7 +990,9 @@ Use with: summary(), plot()
 \end{CodeOutput}
 \end{CodeChunk}
 
-The function \code{exdqlmDiagnostics()} can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the LDVB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. The selected discount factors are the row with the smallest CRPS.
+The \code{diagnostics()} method can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the LDVB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. The selected discount factors are the row with the smallest CRPS.
+
+\textcolor{red}{chunk updated:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1001,7 +1014,7 @@ R> for (i in 1:nrow(possible.dfs)) {
 +                  df = possible.dfs[i, ], dim.df = c(1, 8),
 +                  sig.init = 2, fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
-+   temp.check = exdqlmDiagnostics(temp.M2)
++   temp.check = diagnostics(temp.M2)
 +   metrics[i, ] = c(temp.check$m1.CRPS, temp.check$m1.KL)
 + }
 R> possible.dfs[which.min(metrics[, "CRPS"]), ]
@@ -1059,7 +1072,7 @@ Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. With
 trend-seasonal baseline with no covariates, direct regression through
 \code{regMod()}, and transfer-function covariate effects. Forecast objects are
 created with the standard \code{predict()} method, and the held-out forecast
-table uses \code{exdqlmForecastDiagnostics()} rather than article-local scoring
+table uses \code{diagnostics()} rather than article-local scoring
 functions.}
 
 For the third example, we use observed average monthly water flow (cubic feet
@@ -1159,9 +1172,11 @@ The transfer rate \(\lambda\) is selected using the training period only. Guided
 by an initial coarse scan, the replication script fits the transfer model over
 \(\lambda\in\{0.70,0.75,0.80,0.85,0.90,0.95,0.99\}\) and chooses the value with
 the smallest posterior predictive loss criterion (PPLC) from
-\code{exdqlmDiagnostics()}. The held-out months are not used in this selection
+\code{diagnostics()}. The held-out months are not used in this selection
 step. The following code shows the selection pattern used by the replication
 script.
+
+\textcolor{red}{updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1176,7 +1191,7 @@ R> for (i in seq_along(lambda.grid)) {
 +                 tf.C0 = diag(c(0.1, 1, 1), 3),
 +                 sig.init = 0.1, gam.init = -0.1,
 +                 n.samp = 1000, tol = 0.05, verbose = FALSE)
-+     temp.diag = exdqlmDiagnostics(temp.MTF)
++     temp.diag = diagnostics(temp.MTF)
 +     pplc.grid[i] = temp.diag$m1.pplc
 +   }
 R> lambda.star = lambda.grid[which.min(pplc.grid)]
@@ -1255,7 +1270,7 @@ differences: the middle panel shows that the seasonal contribution is similar
 across models, while the lower panel separates the contemporaneous climate-index
 contribution in \code{MREG} from the accumulated transfer contribution in
 \code{MTF}. Component and state views are available from the fitted-object
-\code{plot()} method, which delegates to the \code{compPlot()} summaries. We
+\code{plot()} method by specifying the parameter \code{type = "component"} or \code{type = "state"}, respectively. We
 begin with the combined seasonal contribution. Because the seasonal block
 contains three harmonics, this contribution is formed from the second through
 seventh elements of the state vector. The middle panel of Figure
@@ -1351,8 +1366,8 @@ R> MTF$median.kt
 We next produce 18-month-ahead forecasts over the held-out window. The
 future state-space matrices are passed through the \code{fFF} and \code{fGG}
 arguments of the \code{predict()} method for fitted dynamic objects. This
-method returns \code{exdqlmForecast} objects and wraps the lower-level
-\code{exdqlmForecast()} constructor described in the forecast subsection above. The
+method returns \code{exdqlmForecast} objects. % and wraps the lower-level \code{exdqlmForecast()} constructor described in the forecast subsection above. 
+The
 code below shows the relevant matrix construction and forecast calls; the
 replication script wraps these steps in dimension checks and output-writing
 code. For \code{M0}, the future state-space matrices repeat the trend and
@@ -1438,15 +1453,17 @@ R> legend("topleft",
 \end{CodeChunk}
 
 The numerical comparison in Table
-\ref{tab:ex3} uses \code{exdqlmDiagnostics()} so that all reported quantities
+\ref{tab:ex3} uses \code{diagnostics()} so that all reported quantities
 are exported package diagnostics, as defined in Section \ref{sec:diags}. These
 diagnostics are computed from the final-training fitted objects.
 
+\textcolor{red}{updated chunk:}
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> diag.M0 = exdqlmDiagnostics(M0)
-R> diag.MREG = exdqlmDiagnostics(MREG)
-R> diag.MTF = exdqlmDiagnostics(MTF)
+R> diag.M0 = diagnostics(M0)
+R> diag.MREG = diagnostics(MREG)
+R> diag.MTF = diagnostics(MTF)
 R> tab.ex3 = data.frame(
 +     model = c("M0", "MREG", "MTF"),
 +     KL = c(diag.M0$m1.KL, diag.MREG$m1.KL, diag.MTF$m1.KL),
@@ -1468,19 +1485,21 @@ R> tab.ex3 = data.frame(
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
-\code{exdqlmDiagnostics()} for the no-covariate baseline \code{M0}, direct-regression model \code{MREG}, and transfer-function model \code{MTF}, computed on the final-training fitted objects. KL denotes the deterministic Kullback--Leibler normality diagnostic for the MAP standardized forecast errors, CRPS denotes the continuous ranked probability score, and PPLC denotes the posterior predictive loss criterion. Lower values are preferred; bold entries mark the smallest value for each diagnostic.}
+\code{diagnostics()} for the no-covariate baseline \code{M0}, direct-regression model \code{MREG}, and transfer-function model \code{MTF}, computed on the final-training fitted objects. KL denotes the deterministic Kullback--Leibler normality diagnostic for the MAP standardized forecast errors, CRPS denotes the continuous ranked probability score, and PPLC denotes the posterior predictive loss criterion. Lower values are preferred; bold entries mark the smallest value for each diagnostic.}
 \label{tab:ex3}
 \end{table}
 
 Alternatively, Table
 \ref{tab:ex3forecastmetrics} reports held-out forecast scores over the final 18
-months. These diagnostics are computed from the forecast objects using \code{exdqlmForecastDiagnostics()}.
+months. These diagnostics are computed from the forecast objects using the corresponding \code{diagnostics()} method. The held-out observations are a required input for this method. 
+
+\textcolor{red}{updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> fc.diag.M0 = exdqlmForecastDiagnostics(fc.M0, y = y.holdout)
-R> fc.diag.MREG = exdqlmForecastDiagnostics(fc.MREG, y = y.holdout)
-R> fc.diag.MTF = exdqlmForecastDiagnostics(fc.MTF, y = y.holdout)
+R> fc.diag.M0 = diagnostics(fc.M0, y = y.holdout)
+R> fc.diag.MREG = diagnostics(fc.MREG, y = y.holdout)
+R> fc.diag.MTF = diagnostics(fc.MTF, y = y.holdout)
 R> tab.ex3.fc = data.frame(
 +     model = c("M0", "MREG", "MTF"),
 +     check.loss = c(fc.diag.M0$m1.check_loss,
@@ -1506,7 +1525,7 @@ Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-re
  \code{MTF} transfer function & 0.155 & 0.550 \\
  \bottomrule
 \end{tabular}
-\caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022, computed with \code{exdqlmForecastDiagnostics()} from \code{exdqlmForecast} objects returned by \code{predict(..., return.draws = TRUE)}. Check loss is computed at \(p_0=0.15\), and CRPS is computed from posterior predictive forecast draws using the integrated-quantile-score approximation. Lower values are preferred; bold entries mark the smallest value in each column.}
+\caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022, computed with \code{diagnostics()} from \code{exdqlmForecast} objects returned by \code{predict(..., return.draws = TRUE)}. Check loss is computed at \(p_0=0.15\), and CRPS is computed from posterior predictive forecast draws using the integrated-quantile-score approximation. Lower values are preferred; bold entries mark the smallest value in each column.}
 \label{tab:ex3forecastmetrics}
 \end{table}
 
@@ -1601,12 +1620,14 @@ R> for (i in seq_along(p.grid)) {
 \end{CodeInput}
 \end{CodeChunk}
 
-For static fits, the helper function \code{exalStaticDiagnostics()} summarizes fitted quantiles on a common design matrix and, when holdout responses or a reference quantile are supplied, reports predictive evaluation metrics such as check loss and reference-quantile error. It also stores posterior coefficient summaries that can be plotted with the \code{plot()} method. In this simulated example, the true coefficient vector is known, so Figure \ref{fig:ex4static} overlays it as a visual reference. This truth overlay is optional through the parameter \code{beta.ref} and is not needed for real data applications.
+For static fits, \code{diagnostics()} method summarizes fitted quantiles on a common design matrix and, when holdout responses or a reference quantile are supplied, reports predictive evaluation metrics such as check loss and reference-quantile error. It also stores posterior coefficient summaries that can be plotted with the \code{plot()} method with option \code{type = "coefficients"}. In this simulated example, the true coefficient vector is known, so Figure \ref{fig:ex4static} overlays it as a visual reference. This truth overlay is optional through the parameter \code{beta.ref} and is not needed for real data applications.
+
+\textcolor{red}{updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> diag.static = Map(function(ldvb, mcmc, y.h) {
-+     exalStaticDiagnostics(ldvb, mcmc,
++     diagnostics(ldvb, mcmc,
 +                           X = X.hold, y = y.h, ref = ref.hold)
 +   }, M.ldvb, M.mcmc, y.hold)
 R> y.lim = range(beta.true,
@@ -1661,7 +1682,7 @@ Figure \ref{fig:ex4static} shows that both methods recover the main sparse signa
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient MAE; both are simulation-benchmark summaries computed separately from the package diagnostics. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is smaller at \(p_0 = 0.25\). Active-signal recovery shows the same pattern, and LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 9-fold at \(p_0 = 0.05\), 13-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, while static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient MAE, \textcolor{red}{sorted in the \code{exalStaticDiagnostics} objects returned by \code{diagnostics()}}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is smaller at \(p_0 = 0.25\). Active-signal recovery shows the same pattern, and LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 9-fold at \(p_0 = 0.05\), 13-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, while static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
 \end{AChange}
 
 \section{Conclusion}
