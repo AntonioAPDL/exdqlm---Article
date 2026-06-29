@@ -512,8 +512,7 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
 
 \ReviewNote{Response items G3 and D6--D10: This is a new JSS-facing design section added in response to the
 editor. It explains model-construction objects, shared S3 fit families,
-\code{print()}, \code{summary()}, \code{plot()}, and \code{predict()} methods,
-visible diagnostic/forecast/synthesis objects, and backend controls. Table
+\code{print()}, \code{summary()}, \code{plot()}, \code{predict()}, \code{diagnostics()} and  methods, visible diagnostic/forecast/synthesis objects, and backend controls. Table
 \ref{table:flow} is the main roadmap for the revised package API.}
 
 The package implementation separates model specification, estimation, and post-processing. Model specification functions such as \code{polytrendMod()}, \code{seasMod()}, and \code{regMod()} return objects of class \code{exdqlm}. These objects store the state-space matrices, initial-state prior, and component structure used by the fitting routines, and they can be combined with the \code{+} method to build larger dynamic models from smaller pieces. This separation lets the same model object be used with different inference engines, reduced AL/DQLM settings, or transfer-function extensions.
@@ -554,13 +553,6 @@ Selected numerical computations are implemented in \proglang{C++} through \pkg{R
     \code{diagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics; use \code{plot()} to visualize them. \\
     % \code{exdqlmPlot()} / \code{compPlot()} & Invisible \code{list} & Explicit helpers for fitted quantile, component, and state plots.\\
     \addlinespace[2pt]
-
-    \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}\textcolor{red}{{\it Dynamic forecast examination} -- Input \code{exdqlmForecast} objects}} \\
-    \rule{0pt}{3ex}\code{print()} / \code{summary()} & Console summary / \code{list} & \\
-    \code{plot()} & Display plus invisible \code{list} & \\
-    \code{diagnostics()} & \code{exdqlmForecastDiagnostic} & Compute forecast diagnostics. \\
-    \addlinespace[2pt]
-
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticFit} objects} \\
     \code{print()} / \code{summary()} & Console summary / \code{list} & Inspect class, engine, sample size, design dimension, stored draws, and run time.\\
      \textcolor{red}{\code{plot()}} & Display plus invisible \code{list} & \textcolor{red}{add description here}\\
@@ -615,7 +607,7 @@ In this example, we consider the Lake Huron time series from the package \pkg{da
 
 To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space structure and prior used to estimate the quantiles (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function. The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero.
 
-\textcolor{red}{Output needs to be updated:}
+\textcolor{red}{Output updated:}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> model = polytrendMod(order = 2, m0 = c(579, 0),
@@ -623,32 +615,39 @@ R> model = polytrendMod(order = 2, m0 = c(579, 0),
 R> model
 \end{CodeInput}
 \begin{CodeOutput}
-Prior mean of the state vector:
+
+Dynamic quantile state-space model specification (exdqlm)
+
+Prior mean of the state vector: 
 $m0
-         [,1]
-[1,] 579.0000
-[2,]   0.0000
+     [,1]
+[1,]  579
+[2,]    0
 
 
-Prior covariance of the state vector:
+Prior covariance of the state vector: 
 $C0
      [,1] [,2]
 [1,]   10    0
 [2,]    0   10
 
 
-Observational vector:
+Observational vector: 
 $FF
      [,1]
 [1,]    1
 [2,]    0
 
 
-Evolution matrix:
+Evolution matrix: 
 $GG
      [,1] [,2]
 [1,]    1    1
 [2,]    0    1
+
+
+Class: "exdqlm"
+Use with: exdqlmMCMC(), exdqlmLDVB(), exdqlmTransferMCMC(), or exdqlmTransferLDVB()
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -986,6 +985,8 @@ Models: exdqlmLDVB vs exdqlmLDVB
          CRPS    8.5460    6.2551
          pplc 3853.4604 2331.6722
  run-time (s)   24.9910  128.7250
+
+Class: "exdqlmDiagnostic"
 Use with: summary(), plot()
 \end{CodeOutput}
 \end{CodeChunk}
@@ -1627,8 +1628,7 @@ For static fits, \code{diagnostics()} method summarizes fitted quantiles on a co
 \begin{CodeChunk}
 \begin{CodeInput}
 R> diag.static = Map(function(ldvb, mcmc, y.h) {
-+     diagnostics(ldvb, mcmc,
-+                           X = X.hold, y = y.h, ref = ref.hold)
++     diagnostics(ldvb, mcmc, X = X.hold, y = y.h, ref = ref.hold)
 +   }, M.ldvb, M.mcmc, y.hold)
 R> y.lim = range(beta.true,
 +                unlist(lapply(diag.static, function(z) {
@@ -1682,7 +1682,7 @@ Figure \ref{fig:ex4static} shows that both methods recover the main sparse signa
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient MAE, \textcolor{red}{sorted in the \code{exalStaticDiagnostics} objects returned by \code{diagnostics()}}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is smaller at \(p_0 = 0.25\). Active-signal recovery shows the same pattern, and LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 9-fold at \(p_0 = 0.05\), 13-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, while static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient MAE, \textcolor{red}{stored in the \code{exalStaticDiagnostics} objects returned by \code{diagnostics()}}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is smaller at \(p_0 = 0.25\). Active-signal recovery shows the same pattern, and LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 9-fold at \(p_0 = 0.05\), 13-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, while static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
 \end{AChange}
 
 \section{Conclusion}
