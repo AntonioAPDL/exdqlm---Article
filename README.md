@@ -108,16 +108,18 @@ the generated environment/provenance files.
 
 ## HTML replication log
 
-The included `code.html` file is produced from `code.R`. To refresh a quick
-HTML log, run:
+The included `code.html` file is produced from `code.R`. By default,
+`knitr::spin("code.R", knit = TRUE)` uses the quick check path so the HTML log
+can be refreshed without accidentally refitting every manuscript example:
 
 ```r
 Sys.setenv(EXDQLM_REPLICATION_QUICK = "true")
 knitr::spin("code.R", knit = TRUE)
 ```
 
-For a final full refresh, run `Rscript code.R` first and then regenerate
-`code.html` from the same `code.R`.
+For a final author-side refresh, run `Rscript code.R` first and then set
+`EXDQLM_REPLICATION_SPIN_MODE=replay-cache` before `knitr::spin()` to rebuild
+`code.html` from the standard cached manuscript artifacts.
 
 ## Notes for development runs
 

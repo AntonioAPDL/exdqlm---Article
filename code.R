@@ -57,9 +57,11 @@
 #' knitr::spin("code.R", knit = TRUE)
 #' ```
 #'
-#' The script detects execution inside `knitr::spin()` and uses the quick check
-#' path for the HTML refresh. For a final full regeneration, run
-#' `Rscript code.R` before refreshing the archive.
+#' By default, the script detects execution inside `knitr::spin()` and uses the
+#' quick check path for the HTML refresh. For author-side final checks, set
+#' `EXDQLM_REPLICATION_SPIN_MODE=replay-cache` before `knitr::spin()` to
+#' regenerate the HTML log from the standard cached manuscript artifacts, or
+#' `EXDQLM_REPLICATION_SPIN_MODE=standard` to run the standard profile directly.
 
 env_flag <- function(name, default = FALSE) {
   value <- Sys.getenv(name, unset = if (isTRUE(default)) "true" else "false")
@@ -104,13 +106,19 @@ example_targets <- function(example) {
 }
 
 parse_replication_args <- function(args) {
+  spin_mode <- tolower(trimws(Sys.getenv("EXDQLM_REPLICATION_SPIN_MODE", unset = "")))
+  spin_in_progress <- isTRUE(getOption("knitr.in.progress"))
+  spin_forces_standard <- spin_in_progress && spin_mode %in% c("standard", "full")
+  spin_replay_cache <- spin_in_progress && spin_mode %in% c("replay-cache", "replay_cache", "replay")
+  spin_uses_quick <- spin_in_progress && !spin_forces_standard && !spin_replay_cache
+
   out <- list(
     profile = "standard",
     quick = env_flag("EXDQLM_REPLICATION_QUICK") ||
       env_flag("EXDQLM_BUILDING_CODE_HTML") ||
-      isTRUE(getOption("knitr.in.progress")),
+      spin_uses_quick,
     example = Sys.getenv("EXDQLM_REPLICATION_EXAMPLE", unset = ""),
-    replay_cache = env_flag("EXDQLM_REPLICATION_REPLAY_CACHE"),
+    replay_cache = env_flag("EXDQLM_REPLICATION_REPLAY_CACHE") || spin_replay_cache,
     show_help = FALSE
   )
 

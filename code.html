@@ -157,9 +157,11 @@ replication driver.</p>
 submissions this can be refreshed with:</p>
 <pre><code class="language-r">knitr::spin(&quot;code.R&quot;, knit = TRUE)
 </code></pre>
-<p>The script detects execution inside <code>knitr::spin()</code> and uses the quick check
-path for the HTML refresh. For a final full regeneration, run
-<code>Rscript code.R</code> before refreshing the archive.</p>
+<p>By default, the script detects execution inside <code>knitr::spin()</code> and uses the
+quick check path for the HTML refresh. For author-side final checks, set
+<code>EXDQLM_REPLICATION_SPIN_MODE=replay-cache</code> before <code>knitr::spin()</code> to
+regenerate the HTML log from the standard cached manuscript artifacts, or
+<code>EXDQLM_REPLICATION_SPIN_MODE=standard</code> to run the standard profile directly.</p>
 <pre><code class="language-r">env_flag &lt;- function(name, default = FALSE) {
   value &lt;- Sys.getenv(name, unset = if (isTRUE(default)) &quot;true&quot; else &quot;false&quot;)
   tolower(trimws(value)) %in% c(&quot;true&quot;, &quot;1&quot;, &quot;yes&quot;, &quot;y&quot;)
@@ -203,13 +205,19 @@ example_targets &lt;- function(example) {
 }
 
 parse_replication_args &lt;- function(args) {
+  spin_mode &lt;- tolower(trimws(Sys.getenv(&quot;EXDQLM_REPLICATION_SPIN_MODE&quot;, unset = &quot;&quot;)))
+  spin_in_progress &lt;- isTRUE(getOption(&quot;knitr.in.progress&quot;))
+  spin_forces_standard &lt;- spin_in_progress &amp;&amp; spin_mode %in% c(&quot;standard&quot;, &quot;full&quot;)
+  spin_replay_cache &lt;- spin_in_progress &amp;&amp; spin_mode %in% c(&quot;replay-cache&quot;, &quot;replay_cache&quot;, &quot;replay&quot;)
+  spin_uses_quick &lt;- spin_in_progress &amp;&amp; !spin_forces_standard &amp;&amp; !spin_replay_cache
+
   out &lt;- list(
     profile = &quot;standard&quot;,
     quick = env_flag(&quot;EXDQLM_REPLICATION_QUICK&quot;) ||
       env_flag(&quot;EXDQLM_BUILDING_CODE_HTML&quot;) ||
-      isTRUE(getOption(&quot;knitr.in.progress&quot;)),
+      spin_uses_quick,
     example = Sys.getenv(&quot;EXDQLM_REPLICATION_EXAMPLE&quot;, unset = &quot;&quot;),
-    replay_cache = env_flag(&quot;EXDQLM_REPLICATION_REPLAY_CACHE&quot;),
+    replay_cache = env_flag(&quot;EXDQLM_REPLICATION_REPLAY_CACHE&quot;) || spin_replay_cache,
     show_help = FALSE
   )
 
@@ -315,7 +323,7 @@ cat(&quot;== exdqlm article replication ==\n&quot;)
 </code></pre>
 <pre><code class="language-r">cat(sprintf(&quot;Profile: %s\n&quot;, args$profile))
 </code></pre>
-<pre><code>## Profile: quick
+<pre><code>## Profile: standard
 </code></pre>
 <pre><code class="language-r">if (length(args$targets)) {
   cat(sprintf(&quot;Target: %s (refitting selected example)\n&quot;, paste(args$targets, collapse = &quot;, &quot;)))
@@ -327,12 +335,13 @@ cat(&quot;== exdqlm article replication ==\n&quot;)
   cat(&quot;Target: full manuscript replication from source fits.\n&quot;)
 }
 </code></pre>
-<pre><code>## Target: quick wiring/test pass; existing outputs are not regenerated.
+<pre><code>## Target: full manuscript artifact regeneration from existing caches.
 </code></pre>
 <pre><code class="language-r">source(file.path(repo_root, &quot;analysis&quot;, &quot;lib&quot;, &quot;manuscript_setup.R&quot;), local = replication_env)
 </code></pre>
-<pre><code>## [2026-07-07 01:10:50] Loaded local exdqlm from source (--pkg-path via pkgload::load_all): /data/jaguir26/local/src/exdqlm__wt__0p5p0_exdqlm_article [version 1.1.0]
-## [2026-07-07 01:10:51] 00_setup complete (profile=quick)
+<pre><code>## [2026-07-07 02:04:55] EXDQLM_LOAD_MODE=installed: ignoring source-path overrides and loading installed exdqlm.
+## [2026-07-07 02:04:56] Loaded installed exdqlm (EXDQLM_LOAD_MODE=installed) [version 1.1.0]
+## [2026-07-07 02:04:56] 00_setup complete (profile=standard)
 </code></pre>
 <pre><code class="language-r">manuscript_stage_root &lt;- file.path(repo_root, &quot;analysis&quot;, &quot;manuscript&quot;)
 example_scripts &lt;- file.path(
@@ -371,11 +380,47 @@ if (isTRUE(args$quick)) {
   }
 }
 </code></pre>
-<pre><code>## [2026-07-07 01:10:51] Quick pass: checking current manuscript outputs without clearing or refitting.
+<pre><code>## [2026-07-07 02:04:56] Clearing previous manuscript figures, tables, and logs.
+## [2026-07-07 02:04:56] Running Example 1 (Lake Huron)
+## [2026-07-07 02:04:56] Example 1 (Lake Huron): start
+## [2026-07-07 02:04:56] Loading cache for ex1_quants_models_v4_prior579_main_2000_3000_seed20260501
+## [2026-07-07 02:04:57] Loading cache for ex1_trace_model_v10_prior579_slice_vbinit_b7000_m3000_seed20260620
+</code></pre>
+<pre><code>## [2026-07-07 02:04:59] Loading cache for ex1_synthesis_v6_prior579_s3_plot_seed20260501
+</code></pre>
+<pre><code>## [2026-07-07 02:05:00] Example 1 (Lake Huron): complete
+## [2026-07-07 02:05:00] Running Example 2 (Sunspots)
+## [2026-07-07 02:05:00] Example 2 (Sunspots): start
+## [2026-07-07 02:05:00] Loading cache for ex2_core_models_ldvb_nsamp3000_tol0.05_v5_prior50
+## [2026-07-07 02:05:02] Loading cache for ex2_dynamic_benchmark_B_nsamp3000_b2000_k3000_v5_prior50
+</code></pre>
+<pre><code>## [2026-07-07 02:05:07] Loading cache for ex2_quant_grid_ldvb_nsamp3000_tol0.05_v5_prior50
+</code></pre>
+<pre><code>## [2026-07-07 02:05:12] Loading cache for ex2_ldvb_diagnostics_fit_nsamp3000_tol0.01_v5_prior50
+</code></pre>
+<pre><code>## [2026-07-07 02:05:14] Loading cache for ex2_df_scan_ldvb_primary_nsamp3000_tol0.05_v5_prior50
+## [2026-07-07 02:05:14] Loading cache for ex2_df_scan_ldvb_support_nsamp3000_tol0.05_v5_prior50
+## [2026-07-07 02:05:15] Example 2 (Sunspots): complete
+## [2026-07-07 02:05:15] Running Example 3 (Big Tree water flow)
+## [2026-07-07 02:05:15] Example 3 (Big Tree): start
+</code></pre>
+<pre><code>## [2026-07-07 02:05:15] Loading cache for ex3_models_trainselect_v6_threemodel_noi_amo_NA_1987-01_2022-12_p015_m03912_c01000_coefc01000_regdf100_zetadf099_psidf100_grid070_075_080_085_090_095_099_PPLC_nsamp1000_tol0_05_h18
+</code></pre>
+<pre><code>## [2026-07-07 02:05:21] Example 3 (Big Tree): complete
+## [2026-07-07 02:05:21] Running Example 4 seed-screen helper
+## [2026-07-07 02:05:21] Example 4 seed screen: skipped (explicit ex4screen target not requested)
+## [2026-07-07 02:05:21] Running Example 4 (static simulation)
+## [2026-07-07 02:05:21] Example 4 (static Nishimura-Suchard RHS sparse simulation): start
+## [2026-07-07 02:05:21] Loading cache for ex4_static_rhsns_sparse_seed_20260712_ns3000_b2000_k3000_v4
+</code></pre>
+<pre><code>## [2026-07-07 02:05:21] Example 4 (static Nishimura-Suchard RHS sparse simulation): complete
+## [2026-07-07 02:05:21] Running manuscript manifest
+## [2026-07-07 02:05:21] Manuscript tracker: start
+## [2026-07-07 02:05:21] Manuscript tracker: complete
 </code></pre>
 <pre><code class="language-r">replication_env$log_msg(&quot;Running manuscript checks&quot;)
 </code></pre>
-<pre><code>## [2026-07-07 01:10:51] Running manuscript checks
+<pre><code>## [2026-07-07 02:05:21] Running manuscript checks
 </code></pre>
 <pre><code class="language-r">run_manuscript_tests(repo_root)
 </code></pre>
@@ -437,25 +482,22 @@ cat(&quot;\n== Session Info ==\n&quot;)
 ## [1] stats     graphics  grDevices utils     datasets  methods   base
 ## 
 ## other attached packages:
-## [1] exdqlm_1.1.0   testthat_3.3.2
+## [1] testthat_3.3.2
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] compiler_4.6.0       brio_1.1.5           Rcpp_1.1.1-1.1
-##  [4] parallel_4.6.0       png_0.1-9            yaml_2.3.12
-##  [7] lattice_0.22-9       coda_0.19-4.1        R6_2.6.1
-## [10] igraph_2.3.1         nimble_1.4.2         Formula_1.2-5
-## [13] knitr_1.51           MASS_7.3-65          desc_1.4.3
-## [16] magic_1.6-1          rprojroot_2.1.1      pillar_1.11.1
-## [19] scoringRules_1.1.3   rlang_1.2.0          xfun_0.57
-## [22] pkgload_1.5.2        truncnorm_1.0-9      dlm_1.1-6.1
-## [25] cli_3.6.6            withr_3.0.2          magrittr_2.0.5
-## [28] tictoc_1.2.1         grid_4.6.0           rstudioapi_0.18.0
-## [31] sandwich_3.1-1       lifecycle_1.0.5      waldo_0.6.2
-## [34] vctrs_0.7.3          crch_1.2-2           glue_1.8.1
-## [37] evaluate_1.0.5       pracma_2.4.6         numDeriv_2016.8-1.1
-## [40] zoo_1.8-15           abind_1.4-8          pkgbuild_1.4.8
-## [43] LaplacesDemon_16.1.8 matrixStats_1.5.0    tools_4.6.0
-## [46] pkgconfig_2.0.3
+##  [1] vctrs_0.7.3         cli_3.6.6           knitr_1.51
+##  [4] rlang_1.2.0         xfun_0.57           dlm_1.1-6.1
+##  [7] png_0.1-9           pkgload_1.5.2       glue_1.8.1
+## [10] rprojroot_2.1.1     pracma_2.4.6        nimble_1.4.2
+## [13] brio_1.1.5          grid_4.6.0          evaluate_1.0.5
+## [16] abind_1.4-8         yaml_2.3.12         lifecycle_1.0.5
+## [19] numDeriv_2016.8-1.1 magic_1.6-1         exdqlm_1.1.0
+## [22] compiler_4.6.0      igraph_2.3.1        coda_0.19-4.1
+## [25] waldo_0.6.2         Rcpp_1.1.1-1.1      pkgconfig_2.0.3
+## [28] rstudioapi_0.18.0   lattice_0.22-9      R6_2.6.1
+## [31] pillar_1.11.1       parallel_4.6.0      magrittr_2.0.5
+## [34] withr_3.0.2         tools_4.6.0         matrixStats_1.5.0
+## [37] desc_1.4.3
 </code></pre>
 <pre><code class="language-r">cat(&quot;\nReplication complete.\n&quot;)
 </code></pre>
