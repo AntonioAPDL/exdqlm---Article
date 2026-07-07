@@ -560,19 +560,25 @@ main <- function() {
   scoring_hits <- character()
   for (path in scoring_files[file.exists(scoring_files)]) {
     lines <- readLines(path, warn = FALSE)
+    text <- paste(lines, collapse = "\n")
     hits <- which(vapply(scoring_patterns, function(pat) any(grepl(pat, lines)), logical(1)))
     if (length(hits)) {
       scoring_hits <- c(scoring_hits, sprintf("%s [%s]", basename(path), paste(scoring_patterns[hits], collapse = ", ")))
     }
-    if (!any(grepl("exdqlmForecastDiagnostics", lines, fixed = TRUE))) {
-      scoring_hits <- c(scoring_hits, sprintf("%s [missing exdqlmForecastDiagnostics]", basename(path)))
+    forecast_diag_call <- grepl(
+      "diagnostics\\s*\\([^)]*(forecast_obj|fc_[A-Za-z0-9_]+|fc\\.[A-Za-z0-9_]+|[A-Za-z0-9_]+\\.forecast)[^)]*y\\s*=",
+      text,
+      perl = TRUE
+    )
+    if (!forecast_diag_call) {
+      scoring_hits <- c(scoring_hits, sprintf("%s [missing diagnostics(forecast, y = ...)]", basename(path)))
     }
   }
   line("stale forecast scoring markers", length(scoring_hits))
   if (length(scoring_hits)) {
     fail(sprintf("Canonical Example 3 files must use package-level forecast diagnostics: %s", paste(scoring_hits, collapse = "; ")))
   } else {
-    ok("Example 3 held-out forecast scores use exdqlmForecastDiagnostics")
+    ok("Example 3 held-out forecast scores use diagnostics() on forecast objects")
   }
 
   ex3_fc_path <- file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex3_forecast_metrics.csv")

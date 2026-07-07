@@ -159,7 +159,7 @@ The current \proglang{R} \citep{R} software ecosystem for quantile regression is
 
 
 \pkg{exdqlm} is released under the MIT License and distributed through the Comprehensive R Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=exdqlm}.
-The revised software source used for this article is submitted as package version 1.1.0 and prepared for CRAN release.
+The revised software source used for this article is submitted as package version 1.1.0 and prepared for CRAN release; the reference replication run records package source commit \code{f0c8773} as provenance.
 
 The frequentist package \pkg{quantreg} \citep{quantreg} remains the broad general-purpose baseline, covering linear, nonlinear, nonparametric, censored, and dynamic quantile regression, together with bootstrap-based and related uncertainty summaries. Its \code{dynrq()} function supports dynamic linear quantile regression through time-series regression formulas involving lags, differences, trends, seasonal factors, and harmonic terms, while preserving time-series attributes. However, the dynamic structure enters through the design matrix rather than through latent states: once these regressors are constructed, estimation proceeds through the standard \pkg{quantreg} fitting routines for a fixed coefficient vector. In that sense, \code{dynrq()} is a regression-style time-series interface rather than a latent-state state-space model, so it does not provide filtered or smoothed state summaries.
 
@@ -447,7 +447,7 @@ For predictive scoring, we compute the mean continuous ranked probability score 
 =2\int_0^1 \rho_p\!\left(y-G^{-1}(p)\right)\,dp,
 \label{eq:crps_main}
 \end{equation}
-which shows that CRPS integrates check loss across all quantile levels and therefore evaluates the full predictive distribution rather than a single target level \(p_0\). In \code{exdqlmDiagnostics()}, the posterior predictive draws define empirical quantiles \(\widehat q_t(\tau_k)\), and the reported pointwise score is the finite integrated quantile-score approximation
+which shows that CRPS integrates check loss across all quantile levels and therefore evaluates the full predictive distribution rather than a single target level \(p_0\). In the dynamic \code{diagnostics()} method, the posterior predictive draws define empirical quantiles \(\widehat q_t(\tau_k)\), and the reported pointwise score is the finite integrated quantile-score approximation
 \begin{equation}
 \widehat{\CRPS}_t
 =
@@ -464,7 +464,7 @@ For a final diagnostic, we include the \cite{gelfand1998model} posterior predict
 \end{align}
 where the expectation is with respect to posterior predictive replicate draws generated from the observation equation \eqref{EQ:exDLM} under posterior draws of the model parameters. Thus, CRPS summarizes the full predictive distribution through the integrated quantile-score approximation in \eqref{eq:crps_iqs_main}, whereas PPLC keeps the target quantile explicit through $\rho_{p_0}$. Smaller PPLC values indicate better performance under this target-quantile loss criterion. Samples from the posterior replicate distributions are included in the output of the \code{exdqlmMCMC()} and \code{exdqlmLDVB()} functions.
 
-The generic function \code{diagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} or \code{exdqlmLDVB()} is passed to \code{diagnostics()}, the resulting \code{exdqlmDiagnostic} object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence and flipped KL divergence, the mean CRPS, \code{pplc}, the ordered pairs of the QQ-plot, and autocorrelations by lag. The object can be inspected with \code{print()} or \code{summary()}, and visualized with its \code{plot()} method, which produces the QQ plot, ACF plot, and MAP standardized forecast-error plot. Examples of the utility of \code{diagnostics()} can be found in Section \ref{sec:exs}.
+The generic function \code{diagnostics()} implements the model checking criteria discussed in this section. When an output from either \code{exdqlmMCMC()} or \code{exdqlmLDVB()} is passed to \code{diagnostics()}, the resulting \code{exdqlmDiagnostic} object includes: the estimated sequence $\{\hat u_t\}$, the KL divergence and flipped KL divergence, the mean CRPS, \code{pplc}, the ordered pairs of the QQ-plot, and autocorrelations by lag. Advanced KL sensitivity checks by nearest-neighbor choice and Gaussian plug-in calculation are stored under \code{kl.details}, rather than printed as competing top-level KL diagnostics. The object can be inspected with \code{print()} or \code{summary()}, and visualized with its \code{plot()} method, which produces the QQ plot, ACF plot, and MAP standardized forecast-error plot. Examples of the utility of \code{diagnostics()} can be found in Section \ref{sec:exs}.
 
 \subsection{k-step-ahead forecast}
 
@@ -512,16 +512,14 @@ where $\mat{a}_{\tilde{t}}(k) = \mat{G}_{\tilde{t}+k} \mat{a}_{\tilde{t}}(k-1)$,
 
 \ReviewNote{Response items G3 and D6--D10: This is a new JSS-facing design section added in response to the
 editor. It explains model-construction objects, shared S3 fit families,
-\code{print()}, \code{summary()}, \code{plot()}, \code{predict()}, \code{diagnostics()} and  methods, visible diagnostic/forecast/synthesis objects, and backend controls. Table
+\code{print()}, \code{summary()}, \code{plot()}, \code{predict()}, and \code{diagnostics()} methods, visible diagnostic/forecast/synthesis objects, and backend controls. Table
 \ref{table:flow} is the main roadmap for the revised package API.}
 
 The package implementation separates model specification, estimation, and post-processing methods. Model specification functions such as \code{polytrendMod()}, \code{seasMod()}, and \code{regMod()} return objects of class \code{exdqlm}. These objects store the state-space matrices, initial-state prior, and component structure used by the fitting routines, and they can be combined with the \code{+} method to build larger dynamic models from smaller pieces. This separation lets the same model object be used with different inference engines, reduced AL/DQLM settings, or transfer-function extensions.
 
 Fitting routines return list-based S3 objects with engine-specific first classes and shared family classes. Dynamic fits keep the first class \code{exdqlmLDVB}, \code{exdqlmMCMC}, or legacy \code{exdqlmISVB}, and also inherit from the shared \code{exdqlmFit} family. Static fits keep the first class \code{exalStaticLDVB} or \code{exalStaticMCMC}, and also inherit from \code{exalStaticFit}. The shared family classes provide common behavior while preserving the engine-specific class names used by existing code. In particular, fitted objects can be inspected with \code{print()} and \code{summary()}; dynamic fits also support \code{plot()} for fitted quantiles, component contributions, and state summaries. 
 
-Post-processing functions follow the same object-oriented pattern. For dynamic fit objects of the family class \code{exdqlmFit}, the available post-processing methods include \code{predict()} and \code{diagnostics()}, which return \code{exdqlmForecast} and \code{exdqlmDiagnostic} objects, respectively. \code{exdqlmForecast} objects contain forecast quantiles which can be inspected with \code{print()}, \code{summary()}, \code{plot()}, as well as \code{diagnostics()}. The \code{diagnostics()} method produces scored held-out forecast objects of class \code{exdqlmForecastDiagnostic}. Alternatively, \code{exdqlmDiagnostic} objects contain calibration and predictive diagnostics of the dynamic fit which can also be examined with \code{print()}, \code{summary()}, and \code{plot()}. Finally, the function \code{quantileSynthesis()} combines posterior predictive draws from separately fitted quantiles into synthesized posterior predictive distrubution. It is compatible with draws from either \code{exdqlmFit} or \code{exdqlmForecast} objects, and returns object of class \code{exdqlmSynthesis} that can be printed, summarized, and plotted. For static fit object of the family class \code{exalStaticFit} the supported methods include \code{diagnostics()} which returns an object of class \code{exalStaticDiagnostic}. The contained quantile diagnostic and coefficient summaries which can be reviewed with \code{plot()}, \code{print()}, or \code{summary()}. 
-
-%Diagnostic constructors, forecast constructors, forecast diagnostics, static diagnostics, and quantile synthesis return explicit objects such as \code{exdqlmDiagnostic}, \code{exdqlmForecast}, \code{exdqlmForecastDiagnostic}, \code{exalStaticDiagnostic}, and \code{exdqlmSynthesis}. These objects can be printed or summarized, and they have \code{plot()} methods when a graphical display is defined. Some workflows remain as named functions rather than generic methods because they require additional inputs or combine several fitted objects; for example, \code{exdqlmDiagnostics()} constructs diagnostic objects, \code{exdqlmForecastDiagnostics()} scores held-out forecast objects, and \code{quantileSynthesis()} combines posterior predictive draws from separately fitted quantiles. The named helpers \code{exdqlmPlot()}, \code{compPlot()}, and \code{exdqlmForecast()} remain available for explicit workflows and backward compatibility, while the examples emphasize standard methods when they are the natural interface.
+Post-processing functions follow the same object-oriented pattern. For dynamic fit objects of the family class \code{exdqlmFit}, \code{predict()} returns an \code{exdqlmForecast} object and \code{diagnostics()} returns an \code{exdqlmDiagnostic} object. Forecast objects store forecast quantiles and, when requested, posterior predictive forecast draws; they can be inspected with \code{print()}, summarized with \code{summary()}, plotted with \code{plot()}, and scored against held-out observations with \code{diagnostics()}. The latter method returns an \code{exdqlmForecastDiagnostic} object. Dynamic diagnostic objects contain calibration and predictive diagnostics for the fitted model and can be inspected with \code{print()}, summarized with \code{summary()}, and visualized with \code{plot()}. The function \code{quantileSynthesis()} combines posterior predictive draws from separately fitted quantiles into a synthesized posterior predictive distribution, returning an \code{exdqlmSynthesis} object. Static fit objects of the family class \code{exalStaticFit} support fitted-quantile plots through \code{plot()} and static diagnostics through \code{diagnostics()}; the latter returns an \code{exalStaticDiagnostic} object with fitted-quantile summaries, optional holdout/reference metrics, and coefficient summaries that can be printed, summarized, or plotted.
 
 Selected numerical computations are implemented in \proglang{C++} through \pkg{Rcpp} and related compiled backends, with \proglang{R} fallbacks retained for parity checks and portability. These include the exported exAL density, distribution, quantile, and random-generation utilities; selected Kalman recursions and model builders; posterior and latent-variable sampling paths; posterior predictive simulation; and MCMC backend routing. Package options control backend routing for Kalman recursions, model builders, posterior sampling, posterior predictive simulation, and MCMC routing; OpenMP-enabled paths also respect the \code{exdqlm.cpp\_threads} thread cap. The variational routines also return standardized traces for ELBO, scale, skewness, and convergence diagnostics, with the closed-form and Laplace--delta ELBO components recorded in the appendices. The default examples use a fixed backend profile so that run times and stochastic outputs are reproducible under the recorded reference environment. These implementation details are meant to be ordinary package controls rather than additional modeling assumptions.
 
@@ -551,13 +549,12 @@ Selected numerical computations are implemented in \proglang{C++} through \pkg{R
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Dynamic fit examination} -- Input \code{exdqlmFit} objects} \\
     \rule{0pt}{3ex}\code{print()} / \code{summary()} & Console summary / \code{list} & Inspect class, engine, sample size, state dimension, stored draws, convergence, and run time.\\
     \code{plot()} & Display plus invisible \code{list} & Plot fitted dynamic quantiles, component contributions, or state summaries.\\
-    \code{predict()} & \code{exdqlmForecast} & Compute forecast quantiles and optional predictive draws; \textcolor{red}{use \code{diagnostics() to compute forecast diagnostics returned in an \code{exdqlmForecastDiagnostic object}}}\\
+    \code{predict()} & \code{exdqlmForecast} & Compute forecast quantiles and optional predictive draws; use \code{diagnostics()} on the forecast object for held-out forecast metrics.\\
     \code{diagnostics()} & \code{exdqlmDiagnostic} & Compute calibration and predictive diagnostics; use \code{plot()} to visualize them. \\
-    % \code{exdqlmPlot()} / \code{compPlot()} & Invisible \code{list} & Explicit helpers for fitted quantile, component, and state plots.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Static fit examination} -- Input \code{exalStaticFit} objects} \\
     \code{print()} / \code{summary()} & Console summary / \code{list} & Inspect class, engine, sample size, design dimension, stored draws, and run time.\\
-     \textcolor{red}{\code{plot()}} & Display plus invisible \code{list} & \textcolor{red}{add description here}\\
+    \code{plot()} & Display plus invisible \code{list} & Plot fitted conditional quantile summaries from static LDVB or MCMC fits.\\
     \code{diagnostics()} & \code{exalStaticDiagnostic} & Compute static fitted-quantile diagnostics and coefficient summaries; use \code{plot()} for quantile or coefficient plots.\\
     \addlinespace[2pt]
     \multicolumn{3}{@{}l@{}}{\rule{0pt}{3ex}{\it Predictive synthesis} -- Input dynamic fit/forecast objects or draw matrices} \\
@@ -609,7 +606,6 @@ In this example, we consider the Lake Huron time series from the package \pkg{da
 
 To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space structure and prior used to estimate the quantiles (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function. The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero.
 
-\textcolor{red}{Output updated:}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> model = polytrendMod(order = 2, m0 = c(579, 0),
@@ -959,8 +955,6 @@ R> title("exDQLM posterior draws of gamma (p0 = 0.85)")
 To further examine the two models, we use the \code{diagnostics()} method to create an \code{exdqlmDiagnostic} object and then call its \code{plot()} method. The results are seen in Figure \ref{fig:ex2checks}. These diagnostic plots are based on the MAP one-step-ahead standardized forecast errors produced by the filtering recursion, together with the corresponding probability integral transform (PIT) sequence. Thus the figure summarizes the fitted diagnostic sequence rather than posterior bands for residuals.
 \end{AChange}
 
-\textcolor{red}{chunk updated:}
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> par(mfrow = c(2, 3))
@@ -994,8 +988,6 @@ Use with: summary(), plot()
 \end{CodeChunk}
 
 The \code{diagnostics()} method can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the LDVB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. The selected discount factors are the row with the smallest CRPS.
-
-\textcolor{red}{chunk updated:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1050,11 +1042,11 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{24.99} & \textbf{0.133} & 8.546 & 3853.5 \\
- & MCMC & 387.80 & 0.141 & \textbf{7.554} & \textbf{2968.3} \\
+ \tworowcell{DQLM} & LDVB & \textbf{52.65} & \textbf{0.133} & 8.523 & 3852.3 \\
+ & MCMC & 591.48 & 0.165 & \textbf{7.562} & \textbf{2961.8} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{128.72} & \textbf{0.120} & 6.255 & 2331.7 \\
- & MCMC & 481.20 & 0.155 & \textbf{5.068} & \textbf{2176.2} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{251.81} & \textbf{0.120} & 6.250 & 2326.2 \\
+ & MCMC & 851.74 & 0.164 & \textbf{5.119} & \textbf{2190.9} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.0, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
@@ -1178,8 +1170,6 @@ the smallest posterior predictive loss criterion (PPLC) from
 \code{diagnostics()}. The held-out months are not used in this selection
 step. The following code shows the selection pattern used by the replication
 script.
-
-\textcolor{red}{updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1460,8 +1450,6 @@ The numerical comparison in Table
 are exported package diagnostics, as defined in Section \ref{sec:diags}. These
 diagnostics are computed from the final-training fitted objects.
 
-\textcolor{red}{updated chunk:}
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> diag.M0 = diagnostics(M0)
@@ -1482,9 +1470,9 @@ R> tab.ex3 = data.frame(
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.168 & 0.471 & \textbf{99.456} \\
- \code{MREG} direct regression & \textbf{0.112} & \textbf{0.348} & 151.582 \\
- \code{MTF} transfer function & 0.155 & 0.366 & 125.554 \\
+ \code{M0} no covariates & 0.168 & 0.470 & \textbf{99.360} \\
+ \code{MREG} direct regression & \textbf{0.112} & \textbf{0.347} & 151.668 \\
+ \code{MTF} transfer function & 0.155 & 0.365 & 124.828 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
@@ -1495,8 +1483,6 @@ R> tab.ex3 = data.frame(
 Alternatively, Table
 \ref{tab:ex3forecastmetrics} reports held-out forecast scores over the final 18
 months. These diagnostics are computed from the forecast objects using the corresponding \code{diagnostics()} method. The held-out observations are a required input for this method. 
-
-\textcolor{red}{updated chunk:}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1623,9 +1609,7 @@ R> for (i in seq_along(p.grid)) {
 \end{CodeInput}
 \end{CodeChunk}
 
-For static fits, \code{diagnostics()} method summarizes fitted quantiles on a common design matrix and, when holdout responses or a reference quantile are supplied, reports predictive evaluation metrics such as check loss and reference-quantile error. It also stores posterior coefficient summaries that can be plotted with the \code{plot()} method with option \code{type = "coefficients"}. In this simulated example, the true coefficient vector is known, so Figure \ref{fig:ex4static} overlays it as a visual reference. This truth overlay is optional through the parameter \code{beta.ref} and is not needed for real data applications.
-
-\textcolor{red}{updated chunk:}
+For static fits, the \code{diagnostics()} method summarizes fitted quantiles on a common design matrix and, when holdout responses or a reference quantile are supplied, reports predictive evaluation metrics such as check loss and reference-quantile error. It also stores posterior coefficient summaries that can be plotted with \code{plot(..., type = "coefficients")}. In this simulated example, the true coefficient vector is known, so Figure \ref{fig:ex4static} overlays it as a visual reference. This truth overlay is optional through the parameter \code{beta.ref} and is not needed for real data applications.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1670,21 +1654,21 @@ Figure \ref{fig:ex4static} shows that both methods recover the main sparse signa
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{21.67} & 0.107 & \textbf{0.034} & 0.674 \\
- & MCMC & 193.88 & \textbf{0.068} & 0.039 & \textbf{0.574} \\
+ \tworowcell{0.05} & LDVB & \textbf{40.95} & 0.107 & \textbf{0.034} & 0.674 \\
+ & MCMC & 239.43 & \textbf{0.069} & 0.036 & \textbf{0.582} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{15.85} & \textbf{0.039} & \textbf{0.061} & \textbf{0.257} \\
- & MCMC & 200.36 & 0.090 & 0.065 & 0.333 \\
+ \tworowcell{0.25} & LDVB & \textbf{14.20} & 0.196 & 0.098 & 0.377 \\
+ & MCMC & 235.54 & \textbf{0.142} & \textbf{0.033} & \textbf{0.278} \\
  \midrule
- \tworowcell{0.50} & LDVB & \textbf{6.03} & 0.073 & 0.127 & 0.314 \\
- & MCMC & 184.13 & \textbf{0.054} & \textbf{0.102} & \textbf{0.264} \\
+\tworowcell{0.50} & LDVB & \textbf{10.05} & \textbf{0.182} & \textbf{0.045} & \textbf{0.278} \\
+ & MCMC & 241.94 & 0.186 & 0.056 & 0.284 \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} includes the active-signal RMSE and null-coefficient MAE, \textcolor{red}{stored in the \code{exalStaticDiagnostics} objects returned by \code{diagnostics()}}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.50\), while LDVB is smaller at \(p_0 = 0.25\). Active-signal recovery shows the same pattern, and LDVB is slightly smaller on null-coefficient MAE at \(p_0 = 0.05\) and \(p_0 = 0.25\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 9-fold at \(p_0 = 0.05\), 13-fold at \(p_0 = 0.25\), and 31-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, while static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
+Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE summaries stored in the \code{exalStaticDiagnostic} objects returned by \code{diagnostics()}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC reference fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is smaller at \(p_0 = 0.50\). Active-signal recovery shows the same pattern for \(p_0 = 0.05\) and \(p_0 = 0.25\), with LDVB slightly smaller at \(p_0 = 0.50\). The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 6-fold at \(p_0 = 0.05\), 17-fold at \(p_0 = 0.25\), and 24-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation remains useful as a rapid first-pass screen, while static MCMC remains the reference method when higher-fidelity posterior uncertainty quantification is required.
 \end{AChange}
 
 \section{Conclusion}

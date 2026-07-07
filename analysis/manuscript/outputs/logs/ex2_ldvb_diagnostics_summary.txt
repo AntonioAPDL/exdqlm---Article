@@ -17,6 +17,6 @@ Last 5 delta ELBO values:
 
 Posterior sample summaries:
 gamma:    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
--0.7653 -0.6804 -0.6591 -0.6596 -0.6373 -0.5530
+-0.7911 -0.6808 -0.6599 -0.6600 -0.6379 -0.5577
 sigma:    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  2.730   3.386   3.590   3.606   3.811   4.737
+  2.666   3.386   3.586   3.599   3.800   4.809

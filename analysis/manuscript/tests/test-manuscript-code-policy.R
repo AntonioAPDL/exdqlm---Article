@@ -106,6 +106,6 @@ testthat::test_that("displayed manuscript code avoids stale local scoring implem
     )
   }
 
-  testthat::expect_true(grepl("exdqlmDiagnostics", code_text, fixed = TRUE))
-  testthat::expect_true(grepl("exdqlmForecastDiagnostics", code_text, fixed = TRUE))
+  testthat::expect_true(grepl("diagnostics(", code_text, fixed = TRUE))
+  testthat::expect_false(grepl("exdqlmForecastDiagnostics", code_text, fixed = TRUE))
 })

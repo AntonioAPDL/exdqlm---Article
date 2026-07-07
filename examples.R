@@ -1,3 +1,15 @@
+# Reader-facing examples for the exdqlm JSS article.
+#
+# This script collects the main code patterns shown in the manuscript in a
+# compact, copy/paste-friendly form. It is intended for readers who want to
+# adapt the examples. For exact replication of all figures, tables, and
+# manuscript outputs, use the standalone driver:
+#
+#   Rscript code.R
+#
+# The full replication driver uses the scripts in analysis/manuscript/ and
+# records provenance for the generated outputs.
+
 library("exdqlm")
 
 
@@ -440,5 +452,3 @@ for (i in seq_along(p.grid)) {
          ylab = if (i == 1) "coefficient value" else "",
          main = sprintf("p0 = %.2f", p.grid[i]), legend = i == 1)
   }
-
-                          

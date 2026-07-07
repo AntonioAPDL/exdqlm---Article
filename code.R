@@ -46,17 +46,20 @@
 #' The code printed in the manuscript is a compact excerpt of the same
 #' workflows. The full executable example scripts live in
 #' `analysis/manuscript/examples/` and are sourced below in manuscript order.
+#' The root-level `examples.R` file is a reader-facing companion for adapting
+#' the displayed manuscript code; it is not used as the authoritative
+#' replication driver.
 #'
 #' JSS encourages an execution log generated from the replication script. For R
 #' submissions this can be refreshed with:
 #'
 #' ```r
-#' Sys.setenv(EXDQLM_REPLICATION_QUICK = "true")
 #' knitr::spin("code.R", knit = TRUE)
 #' ```
 #'
-#' The quick flag keeps the HTML refresh inexpensive. For a final full
-#' regeneration, run `Rscript code.R` before refreshing the archive.
+#' The script detects execution inside `knitr::spin()` and uses the quick check
+#' path for the HTML refresh. For a final full regeneration, run
+#' `Rscript code.R` before refreshing the archive.
 
 env_flag <- function(name, default = FALSE) {
   value <- Sys.getenv(name, unset = if (isTRUE(default)) "true" else "false")
@@ -103,8 +106,11 @@ example_targets <- function(example) {
 parse_replication_args <- function(args) {
   out <- list(
     profile = "standard",
-    quick = env_flag("EXDQLM_REPLICATION_QUICK") || env_flag("EXDQLM_BUILDING_CODE_HTML"),
+    quick = env_flag("EXDQLM_REPLICATION_QUICK") ||
+      env_flag("EXDQLM_BUILDING_CODE_HTML") ||
+      isTRUE(getOption("knitr.in.progress")),
     example = Sys.getenv("EXDQLM_REPLICATION_EXAMPLE", unset = ""),
+    replay_cache = env_flag("EXDQLM_REPLICATION_REPLAY_CACHE"),
     show_help = FALSE
   )
 
@@ -197,7 +203,8 @@ replication_env$profile <- args$profile
 replication_env$pkg_path <- Sys.getenv("EXDQLM_PKG_PATH", unset = "")
 replication_env$seed_override <- NULL
 replication_env$targets <- args$targets
-replication_env$force_refit <- !isTRUE(args$quick)
+replication_env$force_refit <- !isTRUE(args$quick) &&
+  !isTRUE(args$replay_cache)
 
 cat("== exdqlm article replication ==\n")
 cat("Working directory: <replication root>\n")
@@ -206,6 +213,8 @@ if (length(args$targets)) {
   cat(sprintf("Target: %s (refitting selected example)\n", paste(args$targets, collapse = ", ")))
 } else if (isTRUE(args$quick)) {
   cat("Target: quick wiring/test pass; existing outputs are not regenerated.\n")
+} else if (isTRUE(args$replay_cache)) {
+  cat("Target: full manuscript artifact regeneration from existing caches.\n")
 } else {
   cat("Target: full manuscript replication from source fits.\n")
 }

@@ -217,7 +217,8 @@ diagnostics have explicit classes. We expanded standard methods for these
 objects, including informative \code{print()} and \code{summary()} methods and
 \code{plot()} methods for diagnostic, forecast, synthesis, and coefficient
 summary displays. We also added \code{predict()} support for fitted dynamic
-objects where it naturally wraps forecasting. Lastly, we add \code{diagnostics()} for both families of fitted objects, as well as forecasts. 
+objects where it naturally wraps forecasting, and \code{diagnostics()} methods
+for dynamic fits, dynamic forecast objects, and static fits.
 
 On the manuscript side, we added a package design and implementation section
 that describes the object families, fitting engines, returned objects, method
@@ -382,10 +383,13 @@ seem more natural with a suitable class and method system.
 We revised the post-processing workflow to be more object-centered. Operations
 that naturally display, summarize, plot, or predict from an existing object now
 use standard methods where appropriate. For example, fitted dynamic objects can
-be used with \code{plot()}, \code{predict()}, and \code{diagnostics()}. Diagnostics and forecast diagnostics are returned objects that can be printed, summarized, and plotted, and the
-static diagnostic coefficient plots are produced through the returned diagnostic
-object. We kept named workflow function for % operations that construct new analysis objects from substantial additional inputs, such as diagnostics from a fit, held-out forecast diagnostics, and 
-posterior-predictive synthesis as it inputs separately fitted quantile levels. The new design section explains this division.
+be used with \code{plot()}, \code{predict()}, and \code{diagnostics()}; forecast
+objects can be scored with \code{diagnostics(forecast, y = ...)}; and static
+fits can be diagnosed with \code{diagnostics(static\_fit, ...)}. These methods
+return explicit objects that can be printed, summarized, and plotted where a
+display is defined. We retained the named helper functions as explicit and
+backward-compatible entry points, but the revised manuscript examples and Table
+6 emphasize the standard method workflow.
 \end{responsebox}
 
 \commentheading{D10}
@@ -397,9 +401,9 @@ argument.
 
 \responseheading
 \begin{responsebox}
-We changed the diagnostic workflow to be object-first. The dynamic \code{diagnostics()} method now
-return a visible diagnostic object, and the manuscript examples use the
-step-wise pattern:
+We changed the diagnostic workflow to be object-first. The \code{diagnostics()}
+methods return visible diagnostic objects, and the manuscript examples use the
+stepwise pattern:
 \[
 \code{diag <- diagnostics(fit)}
 \]

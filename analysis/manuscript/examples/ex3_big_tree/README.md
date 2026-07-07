@@ -36,10 +36,10 @@ The article currently uses `ex3data.png`, `ex3quantcomps.png`,
 `ex3_diagnostics_summary.csv` and `ex3_forecast_metrics.csv`. The
 transfer-function training screen is stored in `ex3_lambda_selection.csv` and
 selects the transfer-function rate by
-final-training PPLC from the exported `exdqlmDiagnostics()` workflow, with the
+final-training PPLC from the exported `diagnostics()` workflow, with the
 trend, seasonal, and transfer-function discount factors fixed by the manuscript
 configuration. The forecast-metrics table reports 18-month holdout check loss
-and CRPS from `exdqlmForecastDiagnostics()`. The support table
+and CRPS from `diagnostics()` applied to `exdqlmForecast` objects. The support table
 `ex3_sensitivity_forecast_metrics.csv` retains the same forecast scores for
 backward-compatible reproducibility checks. The lambda selection table records
 fit/diagnostic failures and package convergence flags separately:

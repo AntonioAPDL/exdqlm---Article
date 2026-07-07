@@ -183,7 +183,7 @@ but it does not redo the seed screen unless the `ex4screen` target is supplied.
 ## Diagnostic policy
 
 Canonical diagnostics must use the package implementation. The article should
-not use stochastic `FNN::KL.divergence()` calls or random standard-normal
+not use stochastic nearest-neighbor KL calculations or random standard-normal
 reference samples in canonical examples.
 
 CRPS is the primary predictive scoring rule for discount-factor selection in
@@ -193,10 +193,12 @@ primary quantity to report; `KL.flip` is a secondary sensitivity diagnostic,
 and by-`k`/Gaussian plug-in details belong under `kl.details` rather than as
 competing table columns.
 
-Held-out forecast tables must use `exdqlmForecastDiagnostics()` on
-`exdqlmForecast` objects, typically returned by `predict(..., return.draws = TRUE)`
-from a fitted dynamic model. The article should not define local check-loss or
-CRPS functions for manuscript forecast comparisons.
+Held-out forecast tables must use `diagnostics()` on `exdqlmForecast` objects,
+typically returned by `predict(..., return.draws = TRUE)` from a fitted dynamic
+model. The article should not define local check-loss or CRPS functions for
+manuscript forecast comparisons. The named helper
+`exdqlmForecastDiagnostics()` remains available for explicit workflows and
+backward compatibility, but it is not the preferred article workflow.
 
 ## Final acceptance criteria
 

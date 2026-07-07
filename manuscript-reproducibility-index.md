@@ -4,6 +4,9 @@ This note maps the files in the article archive to the manuscript figures,
 tables, and supporting outputs. The public replication entrypoint is the
 top-level script `code.R`; the `analysis/` tree contains the executable example
 scripts, manifests, tests, and generated artifacts used by that script.
+The root-level `examples.R` file is a reader-facing companion script with the
+main code patterns shown in the manuscript; it is not a replacement for
+`code.R`.
 
 The revised submission targets the `exdqlm` package version recorded in
 `analysis/config/params_manuscript.yml`. Install the submitted package source
@@ -60,6 +63,8 @@ is generated from `code.R` with `knitr::spin("code.R", knit = TRUE)`.
 - `README.md`: short archive-level instructions.
 - `code.R`: public standalone replication script.
 - `code.html`: execution log generated from `code.R`.
+- `examples.R`: compact reader-facing examples following the preferred package
+  API shown in the article.
 - `exdqlm-jss.tex`: manuscript source.
 - `exdqlm-appendix.tex`: appendix source input included by
   `exdqlm-jss.tex`.

@@ -1,5 +1,6 @@
 "manuscript_call","reproduced_call","status"
-"exdqlmChecks(y = ..., M1, M2, ...)","exdqlmDiagnostics(M1, M2, ...)","replaced"
+"exdqlmChecks(y = ..., M1, M2, ...)","diagnostics(M1, M2, ...)","replaced"
 "exdqlmPlot(y = ..., M1, ...)","plot(M1, ...)","replaced"
 "compPlot(y = ..., M1, ...)","plot(M1, type = ""component"", ...)","replaced"
 "exdqlmForecast(y = ..., start.t, k, M1, ...)","predict(M1, start.t = ..., k = ..., ...)","replaced"
+"exdqlmForecastDiagnostics(forecast, y = ...)","diagnostics(forecast, y = ...)","preferred generic"

@@ -170,15 +170,17 @@ api_map <- data.frame(
     "exdqlmChecks(y = ..., M1, M2, ...)",
     "exdqlmPlot(y = ..., M1, ...)",
     "compPlot(y = ..., M1, ...)",
-    "exdqlmForecast(y = ..., start.t, k, M1, ...)"
+    "exdqlmForecast(y = ..., start.t, k, M1, ...)",
+    "exdqlmForecastDiagnostics(forecast, y = ...)"
   ),
   reproduced_call = c(
-    "exdqlmDiagnostics(M1, M2, ...)",
+    "diagnostics(M1, M2, ...)",
     "plot(M1, ...)",
     "plot(M1, type = \"component\", ...)",
-    "predict(M1, start.t = ..., k = ..., ...)"
+    "predict(M1, start.t = ..., k = ..., ...)",
+    "diagnostics(forecast, y = ...)"
   ),
-  status = c("replaced", "replaced", "replaced", "replaced"),
+  status = c("replaced", "replaced", "replaced", "replaced", "preferred generic"),
   stringsAsFactors = FALSE
 )
 save_table_csv(

@@ -300,8 +300,9 @@ testthat::test_that("backend options table lives in the appendix source", {
   testthat::expect_false(any(grepl("\\\\label\\{tab:backendopts\\}", main_text)))
   testthat::expect_false(any(grepl("\\\\section\\{Global backend options\\}", main_text)))
   testthat::expect_true(any(grepl("\\\\input\\{exdqlm-appendix\\}", main_text)))
-  testthat::expect_true(any(grepl("\\\\label\\{tab:app_backendopts\\}", appendix_text)))
-  testthat::expect_true(any(grepl("\\\\section\\{Global backend options\\}", appendix_text)))
+  testthat::expect_true(any(grepl("\\\\label\\{sec:app_backend_options\\}", appendix_text)))
+  testthat::expect_true(any(grepl("\\\\section\\{Laplace--delta and backend notes\\}", appendix_text)))
+  testthat::expect_true(any(grepl("exdqlm.use\\_cpp\\_kf", appendix_text, fixed = TRUE)))
   testthat::expect_false(any(grepl("\\\\documentclass|\\\\begin\\{document\\}|\\\\end\\{document\\}|\\\\bibliography", appendix_text)))
 })
 
@@ -350,7 +351,7 @@ testthat::test_that("Example 3 forecast metrics are registered and package-score
 
   testthat::expect_true(any(grepl("tab:ex3forecastmetrics: ex3_forecast_metrics.csv", artifacts, fixed = TRUE)))
   testthat::expect_true(any(grepl("\"tab_ex3_forecast_metrics\"", manifest, fixed = TRUE)))
-  testthat::expect_true(any(grepl("exdqlmForecastDiagnostics", run_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("exdqlm::diagnostics", run_lines, fixed = TRUE)))
 
   fc_path <- file.path(repo_root, "analysis", "manuscript", "outputs", "tables", "ex3_forecast_metrics.csv")
   if (!file.exists(fc_path)) {

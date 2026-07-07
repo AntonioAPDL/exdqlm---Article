@@ -90,7 +90,7 @@ load_exdqlm()
 
 required_fns <- c(
   "polytrendMod", "seasMod", "as.exdqlm",
-  "exdqlmMCMC", "exdqlmLDVB", "exdqlmDiagnostics",
+  "exdqlmMCMC", "exdqlmLDVB", "diagnostics", "exdqlmDiagnostics",
   "exdqlmPlot", "compPlot", "exdqlmForecast", "exdqlmForecastDiagnostics",
   "exalStaticLDVB", "exalStaticMCMC", "exalStaticDiagnostics",
   "quantileSynthesis"
@@ -572,121 +572,13 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
                                  crps_probs = seq(0.01, 0.99, by = 0.01),
                                  crps_weights = NULL,
                                  kl_k = NULL) {
-  safe_metric_mean <- function(x) {
-    x <- as.numeric(x)
-    x <- x[is.finite(x)]
-    if (!length(x)) NA_real_ else mean(x)
+  if (!is.null(y_data) && length(y_data) != length(m1$y)) {
+    stop("y_data must have the same length as m1$y when supplied.", call. = FALSE)
   }
-  kl_normality <- function(x, ref = NULL, kl_k = NULL) {
-    exdqlm:::.exdqlm_kl_normality_1d(x, ref = ref, kl_k = kl_k)
-  }
-  kl_details <- function(x) {
-    exdqlm:::.exdqlm_kl_details(x)
-  }
-  y_full <- if (!is.null(y_data)) as.numeric(y_data) else as.numeric(m1$y)
-  has_y <- length(y_full) > 0L
-  nrow_or_len <- function(x) if (is.null(dim(x))) length(x) else nrow(x)
-
-  m1_msfe_full <- as.numeric(m1$map.standard.forecast.errors)
-  m1_post_full <- m1$samp.post.pred
-  tt_candidates <- c(length(m1_msfe_full), nrow_or_len(m1_post_full))
-  if (has_y) tt_candidates <- c(tt_candidates, length(y_full))
-
-  if (!is.null(m2)) {
-    m2_msfe_full <- as.numeric(m2$map.standard.forecast.errors)
-    m2_post_full <- m2$samp.post.pred
-    tt_candidates <- c(tt_candidates, length(m2_msfe_full), nrow_or_len(m2_post_full))
-  }
-
-  TT <- min(tt_candidates, na.rm = TRUE)
-  if (!is.finite(TT) || TT < 2L) stop("Insufficient aligned observations for diagnostics.", call. = FALSE)
-
-  y <- if (has_y) y_full[seq_len(TT)] else seq_len(TT)
-  m1_msfe <- m1_msfe_full[seq_len(TT)]
-  m1_post_pred <- m1_post_full[seq_len(TT), , drop = FALSE]
-  cols <- c(matrix(cols, 2, 1))
-
-  m1.uts <- stats::pnorm(m1_msfe)
-  if (!is.null(ref)) {
-    ref <- c(ref)
-    if (length(ref) != TT) stop("ref must have size equal to diagnostics span", call. = FALSE)
-  }
-  m1.kl <- kl_normality(m1_msfe, ref = ref, kl_k = kl_k)
-  m1.KL <- m1.kl$KL
-  m1.KL.flip <- m1.kl$KL.flip
-  if (has_y) {
-    m1.loss <- matrix(NA_real_, TT, dim(m1_post_pred)[2])
-    for (t in seq_len(TT)) {
-      m1.loss[t, ] <- exdqlm:::CheckLossFn(m1$p0, y[t] - m1_post_pred[t, ])
-    }
-    m1.pplc <- sum(rowMeans(m1.loss))
-    m1.CRPS <- safe_metric_mean(exdqlm:::.exdqlm_crps_vec(
-      y, m1_post_pred, probs = crps_probs, weights = crps_weights
-    ))
-  } else {
-    m1.pplc <- NA_real_
-    m1.CRPS <- NA_real_
-  }
-  m1.qq <- stats::qqnorm(m1_msfe, plot = FALSE)
-  m1.acf <- stats::acf(m1.uts, plot = FALSE)
-
-  retlist <- list(
-    m1.uts = m1.uts, m1.KL = m1.KL, m1.KL.flip = m1.KL.flip, m1.CRPS = m1.CRPS, m1.pplc = m1.pplc,
-    m1.qq = m1.qq, m1.acf = m1.acf, m1.rt = m1$run.time,
-    m1.msfe = m1_msfe, y = y,
-    kl.details = list(m1 = kl_details(m1.kl)),
-    crps.method = "integrated_quantile_score",
-    crps.probs = crps_probs,
-    crps.weights = crps_weights,
-    kl.method = m1.kl$method,
-    kl.k = m1.kl$k,
-    kl.aggregate = m1.kl$aggregate,
-    kl.reference = m1.kl$reference,
-    kl.n_finite = c(m1 = m1.kl$n_finite),
-    kl.n_ref = c(m1 = m1.kl$n_ref),
-    kl.zero_distance_count = c(m1 = m1.kl$zero_distance_count)
+  exdqlm::diagnostics(
+    m1, m2 = m2, plot = plot, cols = cols, ref = ref,
+    crps_probs = crps_probs, crps_weights = crps_weights, kl_k = kl_k
   )
-
-  if (!is.null(m2)) {
-    if (!is.null(m1$p0) && !is.null(m2$p0) && m1$p0 != m2$p0) {
-      stop("m1 and m2 must target the same quantile p0", call. = FALSE)
-    }
-    m2_msfe <- m2_msfe_full[seq_len(TT)]
-    m2_post_pred <- m2_post_full[seq_len(TT), , drop = FALSE]
-    m2.uts <- stats::pnorm(m2_msfe)
-    if (has_y) {
-      m2.loss <- matrix(NA_real_, TT, dim(m2_post_pred)[2])
-      for (t in seq_len(TT)) {
-        m2.loss[t, ] <- exdqlm:::CheckLossFn(m2$p0, y[t] - m2_post_pred[t, ])
-      }
-      m2.pplc <- sum(rowMeans(m2.loss))
-    } else {
-      m2.pplc <- NA_real_
-    }
-    m2.kl <- kl_normality(m2_msfe, ref = ref, kl_k = retlist$kl.k)
-    retlist$m2.msfe <- m2_msfe
-    retlist$m2.uts <- m2.uts
-    retlist$m2.KL <- m2.kl$KL
-    retlist$m2.KL.flip <- m2.kl$KL.flip
-    retlist$kl.details$m2 <- kl_details(m2.kl)
-    retlist$kl.n_finite <- c(retlist$kl.n_finite, m2 = m2.kl$n_finite)
-    retlist$kl.n_ref <- c(retlist$kl.n_ref, m2 = m2.kl$n_ref)
-    retlist$kl.zero_distance_count <- c(retlist$kl.zero_distance_count, m2 = m2.kl$zero_distance_count)
-    retlist$m2.pplc <- m2.pplc
-    retlist$m2.CRPS <- if (has_y) {
-      safe_metric_mean(exdqlm:::.exdqlm_crps_vec(
-        y, m2_post_pred, probs = crps_probs, weights = crps_weights
-      ))
-    } else {
-      NA_real_
-    }
-    retlist$m2.qq <- stats::qqnorm(m2_msfe, plot = FALSE)
-    retlist$m2.acf <- stats::acf(m2.uts, plot = FALSE)
-    retlist$m2.rt <- m2$run.time
-  }
-  class(retlist) <- "exdqlmDiagnostic"
-  if (plot) plot(retlist, cols = cols)
-  invisible(retlist)
 }
 
 save_table_csv <- function(df, filename, artifact_id, manuscript_target = "", status = "reproduced", notes = "") {
@@ -826,8 +718,8 @@ promote_publication_figures <- function() {
   log_msg(sprintf("Promoted %d manuscript figure(s) to ignored local Figures/ export mirror", length(promote)))
 }
 
-register_note("api_update", "Deprecated exdqlmChecks replaced with exdqlmDiagnostics.")
-register_note("api_update", "Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls.")
+register_note("api_update", "Deprecated exdqlmChecks replaced by the diagnostics() generic.")
+register_note("api_update", "Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls; article examples now prefer plot(), predict(), and diagnostics().")
 register_note("ex2_policy", "Example 2 manuscript workflow now uses LDVB and MCMC only; ISVB support artifacts were retired.")
 register_note(
   "backend",

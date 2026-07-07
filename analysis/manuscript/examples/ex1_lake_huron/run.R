@@ -365,7 +365,8 @@ if (!need_ex1) {
       graphics::legend(
         "topright",
         lty = 1, col = c(ex1_quant_cols$q95, ex1_quant_cols$q50, ex1_quant_cols$q05),
-        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05))
+        legend = c(expression("p"[0] == 0.95), expression("p"[0] == 0.50), expression("p"[0] == 0.05)),
+        bty = "n"
       )
       graphics::title(main = "(a) Dynamic quantiles", cex.main = 0.95)
 

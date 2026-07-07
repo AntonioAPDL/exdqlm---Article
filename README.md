@@ -17,6 +17,9 @@ They do not require a version-control checkout.
   It is not a separate submitted manuscript PDF.
 - `code.R`: standalone replication script for the manuscript results.
 - `code.html`: HTML log generated from `code.R` with `knitr::spin()`.
+- `examples.R`: reader-facing companion script collecting the main code
+  patterns shown in the manuscript. It is intended for adaptation; use
+  `code.R` for exact replication.
 - `analysis/`: scripts, configuration, generated figures/tables/logs, tests,
   and small helper files used by `code.R`.
 - `analysis/manuscript/outputs/`: generated manuscript artifacts.
@@ -76,6 +79,11 @@ Rscript code.R --example 3
 ```
 
 Valid example numbers are `1`, `2`, `3`, and `4`.
+
+For a compact script closer to the displayed manuscript code, open
+`examples.R`. That file illustrates the main example workflows with the
+preferred package API, while `code.R` remains the tested script for reproducing
+all manuscript outputs.
 
 ## Output locations
 

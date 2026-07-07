@@ -324,7 +324,7 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
         )
       }
 
-      diag_holdout <- exdqlm::exalStaticDiagnostics(
+      diag_holdout <- exdqlm::diagnostics(
         fit_ldvb, fit_mcmc,
         X = X_holdout,
         y = y_holdout,

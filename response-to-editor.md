@@ -197,7 +197,8 @@ protocol.
 > informative `print()` and `summary()` methods and `plot()` methods for
 > diagnostic, forecast, synthesis, and coefficient summary displays. We
 > also added `predict()` support for fitted dynamic objects where it
-> naturally wraps forecasting.
+> naturally wraps forecasting, and `diagnostics()` methods for dynamic
+> fits, dynamic forecast objects, and static fits.
 >
 > On the manuscript side, we added a package design and implementation
 > section that describes the object families, fitting engines, returned
@@ -404,15 +405,14 @@ protocol.
 > We revised the post-processing workflow to be more object-centered.
 > Operations that naturally display, summarize, plot, or predict from an
 > existing object now use standard methods where appropriate. For
-> example, fitted dynamic objects can be used with `plot()` and
-> `predict()`, diagnostics and forecast diagnostics return objects that
-> can be printed, summarized, and plotted, and the static diagnostic
-> coefficient plots are produced through the returned diagnostic object.
-> We kept named workflow functions for operations that construct new
-> analysis objects from substantial additional inputs, such as
-> diagnostics from a fit, held-out forecast diagnostics, and
-> posterior-predictive synthesis across separately fitted quantile
-> levels. The new design section explains this division.
+> example, fitted dynamic objects can be used with `plot()`,
+> `predict()`, and `diagnostics()`; forecast objects can be scored with
+> `diagnostics(forecast, y = ...)`; and static fits can be diagnosed
+> with `diagnostics(static_fit, ...)`. These methods return explicit
+> objects that can be printed, summarized, and plotted where a display is
+> defined. We retained the named helper functions as explicit and
+> backward-compatible entry points, but the revised manuscript examples
+> and Table 6 emphasize the standard method workflow.
 
 ------------------------------------------------------------------------
 
@@ -428,11 +428,11 @@ protocol.
 
 ------------------------------------------------------------------------
 
-> We changed the diagnostic workflow to be object-first. Dynamic
-> diagnostics now return a visible diagnostic object, and the manuscript
-> examples use the step-wise pattern:
+> We changed the diagnostic workflow to be object-first. The
+> `diagnostics()` methods return visible diagnostic objects, and the
+> manuscript examples use the stepwise pattern:
 > ``` math
-> \texttt{diag <- exdqlmDiagnostics(fit)}
+> \texttt{diag <- diagnostics(fit)}
 > ```
 > followed by `summary(diag)` or `plot(diag)`. This same object-first
 > style is used for forecast diagnostics and static diagnostics where

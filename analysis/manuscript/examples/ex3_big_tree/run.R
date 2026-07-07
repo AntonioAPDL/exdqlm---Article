@@ -70,7 +70,7 @@ if (!need_ex3) {
 
   forecast_metrics_row <- function(model, label, forecast_obj, y_future,
                                    crps_probs, crps_weights = NULL) {
-    dx <- exdqlm::exdqlmForecastDiagnostics(
+    dx <- exdqlm::diagnostics(
       forecast_obj,
       y = y_future,
       crps_probs = crps_probs,
@@ -399,10 +399,8 @@ if (!need_ex3) {
   ex3_diagnostics <- function(...) {
     args <- list(...)
     args$plot <- FALSE
-    if ("crps_probs" %in% names(formals(exdqlm::exdqlmDiagnostics))) {
-      args$crps_probs <- crps_probs
-    }
-    do.call(exdqlm::exdqlmDiagnostics, args)
+    args$crps_probs <- crps_probs
+    do.call(exdqlm::diagnostics, args)
   }
 
   if (need_ex3data) {
@@ -730,9 +728,9 @@ if (!need_ex3) {
         iter = c(M0$iter %||% NA_integer_, MTF$iter %||% NA_integer_, if (fit_ok(MREG)) MREG$iter %||% NA_integer_ else NA_integer_),
         converged = c(isTRUE(M0$converged), isTRUE(MTF$converged), if (fit_ok(MREG)) isTRUE(MREG$converged) else NA)
       ))
-      cat("\nFinal-training package diagnostics from exdqlmDiagnostics():\n")
+      cat("\nFinal-training package diagnostics from diagnostics():\n")
       print(diagnostics_summary)
-      cat("\nFinal holdout forecast metrics from exdqlmForecastDiagnostics():\n")
+      cat("\nFinal holdout forecast metrics from diagnostics():\n")
       print(forecast_metrics)
       cat("\nSensitivity forecast metrics:\n")
       print(sensitivity_metrics)
@@ -799,7 +797,7 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_diagnostics",
       manuscript_target = "tab:ex3",
       status = "reproduced",
-      notes = "Example 3 final-training package diagnostics from exdqlmDiagnostics for the no-covariate, direct-regression, and transfer-function models."
+      notes = "Example 3 final-training package diagnostics from diagnostics() for the no-covariate, direct-regression, and transfer-function models."
     )
     save_table_csv(
       forecast_metrics,
@@ -807,7 +805,7 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_forecast_metrics",
       manuscript_target = "tab:ex3forecastmetrics",
       status = "reproduced",
-      notes = "Example 3 final 18-month holdout forecast check loss and CRPS from exdqlmForecastDiagnostics for the no-covariate, direct-regression, and transfer-function models."
+      notes = "Example 3 final 18-month holdout forecast check loss and CRPS from diagnostics() for the no-covariate, direct-regression, and transfer-function models."
     )
     save_table_csv(
       sensitivity_metrics,
@@ -815,7 +813,7 @@ if (!need_ex3) {
       artifact_id = "tab_ex3_sensitivity_forecast_metrics",
       manuscript_target = "Example 3 sensitivity forecast metrics",
       status = "reproduced",
-      notes = "Backward-compatible copy of the Example 3 final 18-month holdout forecast check loss and CRPS from exdqlmForecastDiagnostics."
+      notes = "Backward-compatible copy of the Example 3 final 18-month holdout forecast check loss and CRPS from diagnostics()."
     )
     register_note("ex3", sprintf(
       "Example 3 selected lambda=%0.3f using training-data %s with static transfer psi coefficients (discount fixed at %0.3f).",
@@ -843,14 +841,14 @@ if (!need_ex3) {
     xlim_fore <- c(max(min(tx_full), forecast_plot_start), max(tx_full))
 
     if (need_ex3quantcomps) {
-      q0 <- exdqlm::exdqlmPlot(M0, plot = FALSE)
-      qreg <- exdqlm::exdqlmPlot(MREG, plot = FALSE)
-      qtf <- exdqlm::exdqlmPlot(MTF, plot = FALSE)
-      c0_seas <- exdqlm::compPlot(M0, index = seasonal_idx, plot = FALSE)
-      creg_seas <- exdqlm::compPlot(MREG, index = seasonal_idx, plot = FALSE)
-      ctf_seas <- exdqlm::compPlot(MTF, index = seasonal_idx, plot = FALSE)
-      creg_direct <- exdqlm::compPlot(MREG, index = direct_reg_idx, plot = FALSE)
-      ctf_transfer <- exdqlm::compPlot(MTF, index = transfer_zeta_idx, plot = FALSE)
+      q0 <- plot(M0, plot = FALSE)
+      qreg <- plot(MREG, plot = FALSE)
+      qtf <- plot(MTF, plot = FALSE)
+      c0_seas <- plot(M0, type = "component", index = seasonal_idx, plot = FALSE)
+      creg_seas <- plot(MREG, type = "component", index = seasonal_idx, plot = FALSE)
+      ctf_seas <- plot(MTF, type = "component", index = seasonal_idx, plot = FALSE)
+      creg_direct <- plot(MREG, type = "component", index = direct_reg_idx, plot = FALSE)
+      ctf_transfer <- plot(MTF, type = "component", index = transfer_zeta_idx, plot = FALSE)
 
       save_png_plot("ex3quantcomps.png", {
         old_par <- graphics::par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9), oma = c(1.8, 0, 0, 0))
@@ -915,7 +913,7 @@ if (!need_ex3) {
           graphics::par(mfrow = c(1, k_cov + 1L))
         }
         graphics::par(mar = c(3.0, 4.2, 2.1, 0.8), oma = c(0, 0, 0, 0))
-        zeta <- exdqlm::compPlot(MTF, index = transfer_zeta_idx, just.theta = TRUE, plot = FALSE)
+        zeta <- plot(MTF, type = "state", index = transfer_zeta_idx, plot = FALSE)
         graphics::plot(
           zeta$x, zeta$map.comp, type = "n", xlab = "",
           ylab = "component CrIs",
@@ -928,7 +926,7 @@ if (!need_ex3) {
 
         graphics::par(mar = c(3.8, 4.2, 2.1, 0.8))
         for (j in seq_len(k_cov)) {
-          psi <- exdqlm::compPlot(MTF, index = transfer_psi_idx[[j]], just.theta = TRUE, plot = FALSE)
+          psi <- plot(MTF, type = "state", index = transfer_psi_idx[[j]], plot = FALSE)
           psi_ylim <- padded_range(psi$lb.comp, psi$ub.comp, 0)
           graphics::plot(
             psi$x, psi$map.comp, type = "n", xlab = "time",

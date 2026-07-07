@@ -502,7 +502,7 @@ if (!need_ex2) {
         relative_path = "analysis/manuscript/outputs/figures/ex2checks_ldvb.png",
         manuscript_target = "new: fig ex2checks LDVB counterpart",
         status = "reproduced",
-        notes = "LDVB counterpart of ex2checks using exdqlmDiagnostics."
+        notes = "LDVB counterpart of ex2checks using diagnostics()."
       )
     } else {
       register_artifact(
@@ -817,7 +817,7 @@ if (!need_ex2) {
         artifact_id = "tab_ex2_diagnostics_ldvb",
         manuscript_target = "new: Example 2 diagnostic narrative (LDVB)",
         status = "reproduced",
-        notes = "LDVB counterpart computed with exdqlmDiagnostics."
+        notes = "LDVB counterpart computed with diagnostics()."
       )
     } else {
       register_artifact(
