@@ -9,6 +9,26 @@ the JSS article:
 The replication materials are intended to be run from this extracted directory.
 They do not require a version-control checkout.
 
+This README is for the JSS article source and replication archive. It is not
+the general user README for the `exdqlm` R package; package users should use the
+CRAN package page, reference manual, and package README.
+
+## Files for JSS upload
+
+For the revised JSS submission, the files to upload are:
+
+- `exdqlm-jss.pdf`: manuscript PDF, including the appendices.
+- `exdqlm_1.1.0.tar.gz`: `exdqlm` package source tarball.
+- `exdqlm-jss-replication.tar.gz`: article source and replication materials,
+  including `README.md`, `code.R`, `code.html`, `examples.R`, `analysis/`,
+  `exdqlm-jss.tex`, `exdqlm-appendix.tex`, and the supporting manuscript files.
+- `response-to-editor.pdf`: point-by-point response to the JSS comments.
+
+The Overleaf/Git repository is the working article source. It is not meant to
+be uploaded file-by-file. The replication archive is built from this source
+after removing local scratch files, fit caches, audit notes, and LaTeX
+intermediate files.
+
 ## Contents
 
 - `exdqlm-jss.tex`, `exdqlm-jss.pdf`: manuscript source and compiled PDF. The
@@ -25,8 +45,8 @@ They do not require a version-control checkout.
 - `analysis/manuscript/outputs/`: generated manuscript artifacts.
 
 The source code for the `exdqlm` R package is submitted separately as the
-package source tarball. The package is also available from CRAN when the CRAN
-version matches the submitted manuscript version.
+package source tarball. Package version 1.1.0 is also available from CRAN at
+<https://CRAN.R-project.org/package=exdqlm>.
 
 ## Install the package
 
@@ -37,7 +57,7 @@ tarball is available in the current directory, install it with:
 R CMD INSTALL exdqlm_*.tar.gz
 ```
 
-If the matching version is already on CRAN, this is also sufficient:
+Because the matching version is on CRAN, this is also sufficient:
 
 ```sh
 Rscript -e 'install.packages("exdqlm", repos = "https://cloud.r-project.org")'

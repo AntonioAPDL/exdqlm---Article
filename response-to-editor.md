@@ -24,9 +24,8 @@ The current submission files are:
 - Point-by-point response: `response-to-editor.pdf`
 
 The software source submitted with this revision is version 1.1.0 of
-<span class="sans-serif">exdqlm</span>. This version is prepared for
-CRAN submission after the final coauthor checks. The package is
-distributed under the MIT License, which is GPL-compatible.
+<span class="sans-serif">exdqlm</span>. This version is available from
+CRAN and is distributed under the MIT License, which is GPL-compatible.
 
 # Summary of Major Revisions
 
