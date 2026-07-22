@@ -797,16 +797,13 @@ R> library("exdqlm")
 
 In this example, we consider the Lake Huron time series from the package \pkg{datasets}. The data are annual measurements of the level (ft) of Lake Huron from 1875 to 1972, shown in Figure \ref{fig:ex1quants}. This example shows how to build a basic state-space structure, specify a prior on $\gamma$, run the MCMC algorithm, and plot estimated quantiles and forecast distributions.
 
-To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space structure and prior used to estimate the quantiles (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function. The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero.
-
+To estimate the dynamic distribution of the data, we consider three quantiles, $p_0=0.95,0.50,$ and $0.05$. We begin by creating the state-space model structure and the prior parameters (i.e. $\mat{F}_t,\mat{G}_t, \mat{m}_0$, and $\mat{C}_0$ discussed in Section \ref{sec:exdqlm}). We choose to model the quantiles with a second order polynomial trend, which we construct with the \code{polytrendMod()} function. The initial level prior is centered at 579 ft, a rounded domain-scale value chosen before fitting rather than the sample mean, and the initial slope prior is centered at zero.
 \begin{CodeChunk}
 \begin{CodeInput}
-R> model = polytrendMod(order = 2, m0 = c(579, 0),
-+                      C0 = 10 * diag(2))
+R> model = polytrendMod(order = 2, m0 = c(579, 0), C0 = 10 * diag(2))
 R> model
 \end{CodeInput}
 \begin{CodeOutput}
-
 Dynamic quantile state-space model specification (exdqlm)
 
 Prior mean of the state vector: 
@@ -815,13 +812,11 @@ $m0
 [1,]  579
 [2,]    0
 
-
 Prior covariance of the state vector: 
 $C0
      [,1] [,2]
 [1,]   10    0
 [2,]    0   10
-
 
 Observational vector: 
 $FF
@@ -829,20 +824,22 @@ $FF
 [1,]    1
 [2,]    0
 
-
 Evolution matrix: 
 $GG
      [,1] [,2]
 [1,]    1    1
 [2,]    0    1
 
-
 Class: "exdqlm"
 Use with: exdqlmMCMC(), exdqlmLDVB(), exdqlmTransferMCMC(), or exdqlmTransferLDVB()
 \end{CodeOutput}
 \end{CodeChunk}
 
-To allow variability in the dynamic quantile, we select a single discount factor of $0.9$ to define the evolution covariance matrix $\mat{W}_t$. Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. The prior centers for \(\gamma\) are quantile-specific: they are centered at zero for the median and shifted in opposite directions for the upper and lower tails to provide stable tail-specific initialization within the admissible support. In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown below (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}.
+\textcolor{red}{As an illustration here we fix a single discount factor of $0.9$ to define the evolution covariance matrix $\mat{W}_t$}.
+ Discount factors can also be optimized, an example of which we will show in Section \ref{sec:ex2}. 
+ \textcolor{red}{The prior location parameters for \(\gamma\) are quantile-specific: they are set to zero for the median and shifted in opposite directions for the upper and lower tails to provide tail-specific regularization within the admissible support. In these fits, the scale parameter is 0.1 and the number of degrees of freedom is 1. These quantities specify prior information and do not determine the MCMC starting values.} 
+ %We place truncated Student-t priors on the skewness parameters via \code{PriorGamma} as discussed in Section \ref{sec:priors}. The prior centers for \(\gamma\) are quantile-specific: they are centered at zero for the median and shifted in opposite directions for the upper and lower tails to provide stable tail-specific initialization within the admissible support. 
+ In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. For the final fit shown below (\(p_0=0.05\)), we display \proglang{R} progress updates every 1000 iterations using \code{verbose = TRUE} and \code{verbose.every = 1000}.
 The progress output also reports which computational backend is being used. In the
 current implementation, some operations, including dynamic MCMC updates and sampling
 from latent-variable full conditionals, can be routed through either \proglang{R} or
@@ -852,16 +849,13 @@ summarized in Section \ref{sec:design}.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> set.seed(20260501)
-R> M95 = exdqlmMCMC(y = LakeHuron, p0 = 0.95, model = model,
-+                 df = 0.9, dim.df = 2,
+R> M95 = exdqlmMCMC(y = LakeHuron, p0 = 0.95, model = model, df = 0.9, dim.df = 2,
 +                 PriorGamma = list(m_gam = -1, s_gam = 0.1, df_gam = 1),
 +                 n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
-R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
-+                  df = 0.9, dim.df = 2,
+R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model, df = 0.9, dim.df = 2,
 +                  PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
 +                  n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
-R> M5 = exdqlmMCMC(y = LakeHuron, p0 = 0.05, model = model,
-+                 df = 0.9, dim.df = 2,
+R> M5 = exdqlmMCMC(y = LakeHuron, p0 = 0.05, model = model, df = 0.9, dim.df = 2,
 +                 PriorGamma = list(m_gam = 1, s_gam = 0.1, df_gam = 1),
 +                 n.burn = 2000, n.mcmc = 3000, verbose = TRUE, verbose.every = 1000)
 \end{CodeInput}
@@ -892,12 +886,9 @@ By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDV
 \begin{CodeChunk}
 \begin{CodeInput}
 R> set.seed(20260620)
-R> M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
-+                         df = 0.9, dim.df = 2,
-+                         PriorGamma = list(m_gam = 0, s_gam = 0.1,
-+                                           df_gam = 1),
-+                         n.burn = 7000, n.mcmc = 3000,
-+                         verbose = FALSE)
+R> M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,df = 0.9, dim.df = 2,
++                         PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
++                         n.burn = 7000, n.mcmc = 3000,verbose = FALSE)
 R> par(mfcol = c(2, 2), mar = c(4.1, 4.1, 2.1, 1.0))
 R> keep.idx = seq(1, length(M50.trace$samp.sigma), by = 10)
 R> sigma.trace = coda::mcmc(M50.trace$samp.sigma[keep.idx], thin = 10)
@@ -909,15 +900,13 @@ R> coda::densplot(gamma.trace, main = "gamma density")
 \end{CodeInput}
 \end{CodeChunk}
 
-
-The posterior summary does not provide strong evidence that $\gamma$ differs from zero for the median fit. We therefore re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.
+\textcolor{red}{Because the posterior for $\gamma$ is concentrated around zero and the DQLM provides a simpler median specification, we use the fixed-$\gamma$ model for the remaining median analysis. We re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.}
+%The posterior summary does not provide strong evidence that $\gamma$ differs from zero for the median fit. We therefore re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
-+                  df = 0.9, dim.df = 2,
-+                  gam.init = 0, fix.gamma = TRUE,
-+                  n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
+R> M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model, df = 0.9, dim.df = 2,
++             gam.init = 0, fix.gamma = TRUE, n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -927,13 +916,11 @@ The results are \code{exdqlmMCMC} objects that can be used for analysis and fore
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2),
-+        oma = c(0, 0, 0.8, 0))
+R> par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2), oma = c(0, 0, 0.8, 0))
 R> plot(M95); title("(a) Dynamic quantiles")
 R> plot(M50, add = TRUE, col = "blue")
 R> plot(M5, add = TRUE, col = "forest green")
-R> legend("topright", lty = 1, bty = "n",
-+        col = c("purple", "blue", "forest green"),
+R> legend("topright", lty = 1, bty = "n", col = c("purple", "blue", "forest green"),
 +        legend = c(expression('p'[0]*'=0.95'), expression('p'[0]*'=0.50'),
 +                   expression('p'[0]*'=0.05')))
 \end{CodeInput}
@@ -946,7 +933,6 @@ R> legend("topright", lty = 1, bty = "n",
 \end{figure}
 
 Next, we forecast the $k=8$ step-ahead distributions starting in 1972. To do this, we first create the observational vector (\code{fFF}) and evolution matrix (\code{fGG}) that will be used in the forecast updates. In this case both are non-time-varying and identical to those used to estimate the quantile.
-
 \begin{CodeChunk}
 \begin{CodeInput}
 R> fFF = model$FF
@@ -961,11 +947,10 @@ Here we create the forecast objects first and then call \code{plot()} with \code
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(LakeHuron,  xlim = c(1952, 1980), ylim = c(575, 582),
-+        col = "dark grey", main = "(b) Forecasted quantiles",
-+           ylab = "forecast 95% CrIs")
+R> plot(LakeHuron,  xlim = c(1952, 1980), ylim = c(575, 582), col = "dark grey", 
++           main = "(b) Forecasted quantiles", ylab = "forecast 95% CrIs")
 R> fc95 = predict(M95, start.t = length(LakeHuron), k = 8,
-+                fFF = fFF, fGG = fGG, return.draws = TRUE)
++              fFF = fFF, fGG = fGG, return.draws = TRUE)
 R> fc50 = predict(M50, start.t = length(LakeHuron), k = 8,
 +                fFF = fFF, fGG = fGG, return.draws = TRUE)
 R> fc05 = predict(M5, start.t = length(LakeHuron), k = 8,
@@ -982,20 +967,16 @@ When several quantile models are fitted separately, the package also allows thei
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> syn.obs = quantileSynthesis(
-+               draws_list = list(M5, M50, M95),
-+               p = c(0.05, 0.50, 0.95),
+R> syn.obs = quantileSynthesis( draws_list = list(M5, M50, M95), p = c(0.05, 0.50, 0.95),
 +               T_expected = length(LakeHuron))
 \end{CodeInput}
 \end{CodeChunk}
 
-Because the argument \code{return.draws = TRUE} was used when producing the forecast objects (\code{fc05}, \code{fc50}, \code{fc95}) above, each object stores posterior predictive forecast draws in the return value \code{samp.fore}. This allows us to apply the same synthesis step to the eight-step forecast horizon.
+Because the argument \code{return.draws = TRUE} was used, each object stores posterior predictive forecast draws in the return value \code{samp.fore}. This allows us to apply the same synthesis step to the eight-step forecast horizon.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> syn.fore = quantileSynthesis(
-+               draws_list = list(fc05, fc50, fc95),
-+               p = c(0.05, 0.50, 0.95),
+R> syn.fore = quantileSynthesis(draws_list = list(fc05, fc50, fc95), p = c(0.05, 0.50, 0.95),
 +               T_expected = 8)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1006,33 +987,25 @@ The objects \code{syn.obs} and \code{syn.fore} have class \code{exdqlmSynthesis}
 \begin{CodeInput}
 R> synth.obs.col = adjustcolor("#F7D6DE", alpha.f = 0.40)
 R> synth.fore.col = adjustcolor("#D98A9B", alpha.f = 0.38)
-R> plot(syn.obs, y = LakeHuron, time = as.numeric(time(LakeHuron)),
-+         xlim = c(1880, 1972), ylim = c(575.75,582.25),
-+         ylab = "predictive synthesis",
-+         main = "(c) Observed-period synthesis",
-+         show.median = FALSE, band.col = synth.obs.col,
-+         y.col = adjustcolor("grey30", alpha.f = 0.62))
-R> legend("bottomleft",
-+           legend = "Synthesized posterior predictive interval (95%)",
+R> plot(syn.obs, y = LakeHuron, time = as.numeric(time(LakeHuron)), xlim = c(1880, 1972), 
++         ylim = c(575.75,582.25), ylab = "predictive synthesis", 
++         main = "(c) Observed-period synthesis", show.median = FALSE, 
++         band.col = synth.obs.col, y.col = adjustcolor("grey30", alpha.f = 0.62))
+R> legend("bottomleft", legend = "Synthesized posterior predictive interval (95%)",
 +           fill = synth.obs.col, border = NA, bty = "n", cex = 0.68)
-R> plot(syn.obs, y = LakeHuron, time = as.numeric(time(LakeHuron)),
-+         xlim = c(1952, 1980), ylim = c(575.75,581),
-+         ylab = "predictive synthesis",
-+         main = "(d) Forecast synthesis",
-+         show.median = FALSE, band.col = synth.obs.col,
+R> plot(syn.obs, y = LakeHuron, time = as.numeric(time(LakeHuron)), xlim = c(1952, 1980), 
++         ylim = c(575.75,581), ylab = "predictive synthesis",
++         main = "(d) Forecast synthesis", show.median = FALSE, band.col = synth.obs.col,
 +         y.col = adjustcolor("grey30", alpha.f = 0.62))
-R> polygon(c(1972, 1973, 1973, 1972),
-+            c(tail(syn.obs$summary$q025, 1), syn.fore$summary$q025[1],
-+                syn.fore$summary$q975[1], tail(syn.obs$summary$q975, 1)),
-+            col = synth.fore.col, border = NA)
-R> plot(syn.fore, time = 1973:1980, add = TRUE,
-+         show.median = FALSE, band.col = synth.fore.col)
+R> polygon(c(1972, 1973, 1973, 1972), c(tail(syn.obs$summary$q025, 1), 
++         syn.fore$summary$q025[1], syn.fore$summary$q975[1], 
++         tail(syn.obs$summary$q975, 1)), col = synth.fore.col, border = NA)
+R> plot(syn.fore, time = 1973:1980, add = TRUE, show.median = FALSE, 
++          band.col = synth.fore.col)
 R> abline(v = 1972, lty = 3)
-R> legend("bottomleft",
-+           legend = c("Observed-period synthesis (95%)",
-+                        "Forecast synthesis (95%)"),
-+           fill = c(synth.obs.col, synth.fore.col), border = NA,
-+           bty = "n", cex = 0.66)
+R> legend("bottomleft", legend = c("Observed-period synthesis (95%)",
++          "Forecast synthesis (95%)"),
++          fill = c(synth.obs.col, synth.fore.col), border = NA, bty = "n", cex = 0.66)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1045,7 +1018,7 @@ R> legend("bottomleft",
 
 For our next example, we use the yearly Sunspot time series from the package \pkg{datasets}. The data are yearly counts for sunspots from 1700 to 1988, shown in Figure \ref{fig:ex2quant}. In this example we show how to use the \pkg{dlm} package to create the state-space model, combine blocks of a state-space model, apply the LDVB approximation through \code{exdqlmLDVB()}, perform visual model diagnostics to compare the exDQLM with the DQLM, and use those diagnostics for discount-factor selection.
 
-Upper-tail sunspot activity is a natural setting for illustrating dynamic quantile modeling of cyclic count data. We therefore model the \(0.85\) quantile in this example. Again, we begin by building the state-space structure used to estimate the quantile. Here we choose to model the quantile with a first order polynomial trend component as well as a Fourier form seasonal component that incorporates a fundamental period every 11 observations (years), as well as some of its corresponding harmonics. This results in a dynamic model with a total of 9 state parameters, 1 for the first order polynomial component and 8 for the seasonal component. The \pkg{exdqlm} functions are compatible with time-invariant \code{dlm} objects from the \pkg{dlm} package. For example, we create the first order trend component with the function \code{dlmModPoly()} from the \pkg{dlm} package, then use \code{as.exdqlm()} to turn the output into an \code{exdqlm} object.
+Upper-tail sunspot activity is a natural setting for illustrating dynamic quantile modeling of cyclic count data. We therefore model the \(0.85\) quantile in this example. \textcolor{red}{Although sunspot activity is recorded as a count, we use the continuous exAL working likelihood to model its upper conditional quantile; the example is not intended as a discrete-count likelihood analysis.} Again, we begin by building the state-space structure used to estimate the quantile. Here we choose to model the quantile with a first order polynomial trend component as well as a Fourier form seasonal component that incorporates a fundamental period every 11 observations (years), as well as some of its corresponding harmonics. This results in a dynamic model with a total of 9 state parameters, 1 for the first order polynomial component and 8 for the seasonal component. The \pkg{exdqlm} functions are compatible with time-invariant \code{dlm} objects from the \pkg{dlm} package. For example, we create the first order trend component with the function \code{dlmModPoly()} from the \pkg{dlm} package, then use \code{as.exdqlm()} to turn the output into an \code{exdqlm} object.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> dlm.trend.comp = dlm::dlmModPoly(1, m0 = 50, C0 = 2500)
@@ -1064,24 +1037,26 @@ To combine the two components into a single state-space structure, we add the tw
 R> model = trend.comp + seas.comp
 \end{CodeInput}
 \end{CodeChunk}
-The resulting evolution matrix of the combined models is printed for illustration.
-\begin{CodeChunk}
-\begin{CodeInput}
-R> model$GG
-\end{CodeInput}
-\begin{CodeOutput}
-     [,1]    [,2]   [,3]    [,4]   [,5]    [,6]    [,7]    [,8]    [,9]
- [1,]    1  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
- [2,]    0  0.8413 0.5406  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
- [3,]    0 -0.5406 0.8413  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
- [4,]    0  0.0000 0.0000  0.4154 0.9096  0.0000  0.0000  0.0000  0.0000
- [5,]    0  0.0000 0.0000 -0.9096 0.4154  0.0000  0.0000  0.0000  0.0000
- [6,]    0  0.0000 0.0000  0.0000 0.0000 -0.1423  0.9898  0.0000  0.0000
- [7,]    0  0.0000 0.0000  0.0000 0.0000 -0.9898 -0.1423  0.0000  0.0000
- [8,]    0  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000 -0.6549  0.7557
- [9,]    0  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000 -0.7557 -0.6549
-\end{CodeOutput}
-\end{CodeChunk}
+\textcolor{red}{Adding the two model components produces a block-composed state-space model with one trend state and eight seasonal states.}
+
+%The resulting evolution matrix of the combined models is printed for illustration.
+%\begin{CodeChunk}
+%\begin{CodeInput}
+%R> model$GG
+%\end{CodeInput}
+%\begin{CodeOutput}
+%     [,1]    [,2]   [,3]    [,4]   [,5]    [,6]    [,7]    [,8]    [,9]
+ %[1,]    1  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
+ %[2,]    0  0.8413 0.5406  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
+% [3,]    0 -0.5406 0.8413  0.0000 0.0000  0.0000  0.0000  0.0000  0.0000
+% [4,]    0  0.0000 0.0000  0.4154 0.9096  0.0000  0.0000  0.0000  0.0000
+% [5,]    0  0.0000 0.0000 -0.9096 0.4154  0.0000  0.0000  0.0000  0.0000
+% [6,]    0  0.0000 0.0000  0.0000 0.0000 -0.1423  0.9898  0.0000  0.0000
+% [7,]    0  0.0000 0.0000  0.0000 0.0000 -0.9898 -0.1423  0.0000  0.0000
+% [8,]    0  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000 -0.6549  0.7557
+% [9,]    0  0.0000 0.0000  0.0000 0.0000  0.0000  0.0000 -0.7557 -0.6549
+%\end{CodeOutput}
+%\end{CodeChunk}
 
 We will apply discount factors by component, i.e. a discount factor of $0.9$ for the trend component of dimension $1$ and a discount factor of $0.85$ for the seasonal component of dimension $8$. This discounting strategy can be applied with arguments \code{df = c(0.9, 0.85)} and \code{dim.df = c(1, 8)}.
 
@@ -1096,14 +1071,11 @@ We call the function \code{exdqlmLDVB()} to obtain the LDVB approximations. We u
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> M1 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
-+                  df = c(0.9, 0.85), dim.df = c(1, 8),
-+                  dqlm.ind = TRUE, fix.sigma = FALSE,
-+                  n.samp = 3000, verbose = FALSE)
-R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
-+                  df = c(0.9, 0.85), dim.df = c(1, 8),
-+                  fix.sigma = FALSE,
-+                  n.samp = 3000, verbose = FALSE)
+R> M1 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0.85), 
++            dim.df = c(1, 8), dqlm.ind = TRUE, fix.sigma = FALSE,
++            n.samp = 3000, verbose = FALSE)
+R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0.85), 
++            dim.df = c(1, 8), fix.sigma = FALSE, n.samp = 3000, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1115,12 +1087,10 @@ We can visualize the differences between the two resulting dynamic quantiles wit
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(sunspot.year, xlim = c(1780, 1830), col = "dark grey",
-+       ylab = "quantile 95% CrIs")
+R> plot(sunspot.year, xlim = c(1780, 1830), col = "dark grey", ylab = "quantile 95% CrIs")
 R> plot(M1, add = TRUE, col = "red")
 R> plot(M2, add = TRUE, col = "blue")
-R> legend("topleft", lty = 1, bty = "n", col = c("red", "blue"),
-+        legend = c("DQLM", "exDQLM"))
+R> legend("topleft", lty = 1, bty = "n", col = c("red", "blue"), legend= c("DQLM", "exDQLM"))
 R> title("LDVB fit for p0 = 0.85")
 \end{CodeInput}
 \end{CodeChunk}
@@ -1136,9 +1106,8 @@ To examine whether the added flexibility of the exDQLM is supported by the fitte
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> hist(M2$samp.gamma, xlab = expression(gamma), main = "",
-+        col = adjustcolor("#4C72B0", alpha.f = 0.22),
-+        border = "#4C72B0")
+R> hist(M2$samp.gamma, xlab = expression(gamma), main = "", 
++        col = adjustcolor("#4C72B0", alpha.f = 0.22), border = "#4C72B0")
 R> abline(v = median(M2$samp.gamma), col = "#4C72B0", lwd = 2)
 R> title("exDQLM posterior draws of gamma (p0 = 0.85)")
 \end{CodeInput}
@@ -1180,7 +1149,8 @@ Use with: summary(), plot()
 \end{CodeOutput}
 \end{CodeChunk}
 
-The \code{diagnostics()} method can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the LDVB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. The selected discount factors are the row with the smallest CRPS.
+\textcolor{red}{The \code{diagnostics()} method can also be used for a coarse in-sample comparison of candidate model specifications. Here we examine whether the discount factor used for the seasonal component is reasonable under the reported diagnostic criteria. We create a grid of possible discount factors, run the LDVB approximation for each candidate model, and compare the resulting CRPS and KL values. Because these criteria are computed using the observations employed to fit each model, this exercise is a diagnostic screening rather than an out-of-sample predictive validation. We use CRPS as the primary comparison criterion and KL divergence as a complementary calibration check; the selected discount-factor specification is the row with the smallest CRPS.}
+%The \code{diagnostics()} method can also be used for model selection. Say we want to check whether the discount factor we used for the seasonal component is reasonable under a predictive scoring rule. We can create a list of possible discount factors, quickly run the LDVB approximation for each possible model, and compare the resulting CRPS and KL values. In practice we recommend selecting the discount factors with the CRPS and using the KL divergence as a complementary calibration check. The selected discount factors are those corresponding to the row with the smallest CRPS.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1195,12 +1165,10 @@ R> possible.dfs
 [4,]  0.9 1.00
 \end{CodeOutput}
 \begin{CodeInput}
-R> metrics <- matrix(NA_real_, nrow(possible.dfs), 2,
-+                    dimnames = list(NULL, c("CRPS", "KL")))
+R> metrics <- matrix(NA_real_, nrow(possible.dfs), 2, dimnames = list(NULL, c("CRPS", "KL")))
 R> for (i in 1:nrow(possible.dfs)) {
-+   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
-+                  df = possible.dfs[i, ], dim.df = c(1, 8),
-+                  sig.init = 2, fix.sigma = FALSE,
++   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model, df = possible.dfs[i, ], 
++                  dim.df = c(1, 8), sig.init = 2, fix.sigma = FALSE,
 +                  n.samp = 3000, verbose = FALSE)
 +   temp.check = diagnostics(temp.M2)
 +   metrics[i, ] = c(temp.check$m1.CRPS, temp.check$m1.KL)
@@ -1217,13 +1185,11 @@ To compare the fast variational approximation with posterior simulation, we fit 
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
-+                df = c(0.9, 0.85), dim.df = c(1, 8),
-+                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
+R> M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0.85), 
++                dim.df = c(1, 8), n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
 +                dqlm.ind = TRUE, fix.sigma = FALSE)
-R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
-+                df = c(0.9, 0.85), dim.df = c(1, 8),
-+                n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
+R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0.85), 
++                dim.df = c(1, 8), n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
 +                fix.sigma = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1242,7 +1208,9 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
  & MCMC & 851.74 & 0.164 & \textbf{5.119} & \textbf{2190.9} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.0, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.0, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}.
+%; the full provenance is recorded in \code{analysis/manuscript/outputs/tables/benchmark\_environment.csv}. 
+Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1265,10 +1233,16 @@ functions.}
 
 For the third example, we use observed average monthly water flow (cubic feet
 per second) at the Big Tree gauge of the San Lorenzo River in Santa Cruz
-County, CA \citep{btflow}. The \pkg{exdqlm} package includes these measurements
-as the monthly time series \code{BTflow}, which currently extends through March
-2026. Here we use the complete overlap between \code{BTflow} and the package
-data frame \code{climateIndices}, giving 432 monthly observations from January
+County, CA \citep{btflow}. 
+ \textcolor{red}{The \pkg{exdqlm} version 1.1.0 used for this article includes these measurements
+as the monthly time series \code{BTflow}, which extends through March
+2026.} Here we use the complete overlap between \code{BTflow} and the package
+data frame \code{climateIndices}
+%The \pkg{exdqlm} package includes these measurements
+%as the monthly time series \code{BTflow}, which currently extends through March
+%2026. Here we use the complete overlap between \code{BTflow} and the package
+%data frame \code{climateIndices}, 
+giving 432 monthly observations from January
 1987 through December 2022. The final 18 months, July 2021 through December
 2022, are not used for fitting and are shown later in a conditional forecast
 display. This example illustrates the transfer-function workflow: building a
@@ -1311,29 +1285,26 @@ the aligned modeling data to
 \begin{CodeInput}
 R> data("BTflow", package = "exdqlm")
 R> data("climateIndices", package = "exdqlm")
-R> ex3.dates = seq(as.Date("1987-01-01"), by = "month",
-+                  length.out = length(BTflow))
+R> ex3.dates = seq(as.Date("1987-01-01"), by = "month", length.out = length(BTflow))
 R> flow.df = data.frame(date = ex3.dates, flow = as.numeric(BTflow))
-R> ex3.df = merge(flow.df, climateIndices[, c("date", "noi", "amo")],
-+                 by = "date")
+R> ex3.df = merge(flow.df, climateIndices[, c("date", "noi", "amo")], by = "date")
 R> ex3.df = ex3.df[1:432, ]
 R> y.fit = ts(log(ex3.df$flow), start = c(1987, 1), frequency = 12)
 R> y.train = window(y.fit, end = c(2021, 6))
 R> y.holdout = window(y.fit, start = c(2021, 7))
 R> X.raw = as.matrix(ex3.df[, c("noi", "amo")])
 R> X.train = scale(X.raw[1:414, ])
-R> X.holdout = scale(X.raw[415:432, ],
-+                   center = attr(X.train, "scaled:center"),
+R> X.holdout = scale(X.raw[415:432, ], center = attr(X.train, "scaled:center"),
 +                   scale = attr(X.train, "scaled:scale"))
 \end{CodeInput}
 \end{CodeChunk}
 
 The baseline state-space model contains a first-order polynomial trend and a Fourier-form seasonal component with period 12. The seasonal block includes \(h = 1\), \(h = 2\), and \(h \approx 0.147\), corresponding to annual, semiannual, and approximately 7-year cycles on the monthly scale.
+\textcolor{red}{The low-frequency harmonic \(h=0.1469118636\) follows the specification developed in \citet{me}; see that work for its motivation and selection.}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> trend.comp = polytrendMod(1, m0 = log(50), C0 = 1)
-R> seas.comp = seasMod(p = 12, h = c(1, 2, 0.1469118636),
-+                     C0 = diag(1, 6))
+R> seas.comp = seasMod(p = 12, h = c(1, 2, 0.1469118636), C0 = diag(1, 6))
 R> model = trend.comp + seas.comp
 \end{CodeInput}
 \end{CodeChunk}
@@ -1369,16 +1340,13 @@ script.
 R> lambda.grid = c(0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.99)
 R> pplc.grid = rep(NA_real_, length(lambda.grid))
 R> for (i in seq_along(lambda.grid)) {
-+     set.seed(20264001 + i)
-+     temp.MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
-+                 df = c(0.99, 0.99), dim.df = c(1, 6),
-+                 X = X.train, tf.df = c(0.99, 1),
-+                 lam = lambda.grid[i], tf.m0 = rep(0, 3),
-+                 tf.C0 = diag(c(0.1, 1, 1), 3),
-+                 sig.init = 0.1, gam.init = -0.1,
-+                 n.samp = 1000, tol = 0.05, verbose = FALSE)
-+     temp.diag = diagnostics(temp.MTF)
-+     pplc.grid[i] = temp.diag$m1.pplc
++   set.seed(20264001 + i)
++   temp.MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model, df = c(0.99, 0.99), 
++                 dim.df = c(1, 6), X = X.train, tf.df = c(0.99, 1), lam = lambda.grid[i], 
++                 tf.m0 = rep(0, 3), tf.C0 = diag(c(0.1, 1, 1), 3), sig.init = 0.1, 
++                 gam.init = -0.1, n.samp = 1000, tol = 0.05, verbose = FALSE)
++   temp.diag = diagnostics(temp.MTF)
++   pplc.grid[i] = temp.diag$m1.pplc
 +   }
 R> lambda.star = lambda.grid[which.min(pplc.grid)]
 R> lambda.star
@@ -1400,25 +1368,19 @@ The final models are fit on January 1987 through June 2021. We use the LDVB impl
 \begin{CodeChunk}
 \begin{CodeInput}
 R> set.seed(20264101)
-R> M0 = exdqlmLDVB(y = y.train, p0 = 0.15, model = model,
-+                df = c(0.99, 0.99), dim.df = c(1, 6),
-+                sig.init = 0.1, gam.init = -0.1,
+R> M0 = exdqlmLDVB(y = y.train, p0 = 0.15, model = model, df = c(0.99, 0.99), 
++                dim.df = c(1, 6), sig.init = 0.1, gam.init = -0.1,
 +                n.samp = 1000, tol = 0.05, verbose = FALSE)
 R> reg.comp = regMod(X.train, m0 = rep(0, 2), C0 = diag(1, 2))
 R> set.seed(20264301)
-R> MREG = exdqlmLDVB(y = y.train, p0 = 0.15,
-+                  model = model + reg.comp,
-+                  df = c(0.99, 0.99, 1), dim.df = c(1, 6, 2),
-+                  sig.init = 0.1, gam.init = -0.1,
-+                  n.samp = 1000, tol = 0.05, verbose = FALSE)
+R> MREG = exdqlmLDVB(y = y.train, p0 = 0.15, model = model + reg.comp, df = c(0.99, 0.99, 1), 
++                dim.df = c(1, 6, 2), sig.init = 0.1, gam.init = -0.1,
++                n.samp = 1000, tol = 0.05, verbose = FALSE)
 R> set.seed(20264201)
-R> MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
-+                         df = c(0.99, 0.99), dim.df = c(1, 6),
-+                         X = X.train, tf.df = c(0.99, 1),
-+                         lam = lambda.star, tf.m0 = rep(0, 3),
-+                         tf.C0 = diag(c(0.1, 1, 1), 3),
-+                         sig.init = 0.1, gam.init = -0.1,
-+                         n.samp = 1000, tol = 0.05, verbose = FALSE)
+R> MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model, df = c(0.99, 0.99), 
++                dim.df = c(1, 6), X = X.train, tf.df = c(0.99, 1), lam = lambda.star, 
++                tf.m0 = rep(0, 3), tf.C0 = diag(c(0.1, 1, 1), 3), sig.init = 0.1, 
++                gam.init = -0.1, n.samp = 1000, tol = 0.05, verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1427,19 +1389,16 @@ quantiles from the three training fits over 2016--2020. We first plot the data, 
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
-+     oma = c(1.8, 0, 0, 0))
-R> plot(y.train, col = "grey", ylim = c(1, 8), xlim = c(2016, 2020),
-+         ylab = "log flow / quantile")
+R> par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9), oma = c(1.8, 0, 0, 0))
+R> plot(y.train, col = "grey", ylim = c(1, 8), xlim = c(2016, 2020), 
++                ylab = "log flow / quantile")
 R> grid(col = "grey90")
 R> plot(M0, add = TRUE)
 R> plot(MREG, add = TRUE, col = "steelblue")
 R> plot(MTF, add = TRUE, col = "forest green")
-R> legend("topleft",
-+        legend = c("M0 no covariates", "MREG direct regression",
-+                   "MTF transfer function"),
-+        col = c("purple", "steelblue", "forest green"),
-+        lty = 1, lwd = 1.5, bty = "n")
+R> legend("topleft", legend = c("M0 no covariates", "MREG direct regression",
++                "MTF transfer function"), col = c("purple", "steelblue", "forest green"),
++                lty = 1, lwd = 1.5, bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1465,14 +1424,11 @@ over the same 2016--2020 window.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020),
-+      ylab = "seasonal components")
+R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020), ylab = "seasonal components")
 R> grid(col = "grey90")
 R> plot(M0, type = "component", index = 2:7, add = TRUE)
-R> plot(MREG, type = "component", index = 2:7,
-+       add = TRUE, col = "steelblue")
-R> plot(MTF, type = "component", index = 2:7,
-+       add = TRUE, col = "forest green")
+R> plot(MREG, type = "component", index = 2:7, add = TRUE, col = "steelblue")
+R> plot(MTF, type = "component", index = 2:7, add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1486,17 +1442,13 @@ visually close.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-1.5, 1.5), xlim = c(2016, 2020),
-+      ylab = "covariate contribution")
+R> plot(NA, ylim = c(-1.5, 1.5), xlim = c(2016, 2020), ylab = "covariate contribution")
 R> grid(col = "grey90")
-R> plot(MREG, type = "component", index = 8:9,
-+       add = TRUE, col = "steelblue")
-R> plot(MTF, type = "component", index = 8,
-+       add = TRUE, col = "forest green")
+R> plot(MREG, type = "component", index = 8:9, add = TRUE, col = "steelblue")
+R> plot(MTF, type = "component", index = 8, add = TRUE, col = "forest green")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> legend("topleft", legend = c("MREG direct", "MTF transfer"),
-+        col = c("steelblue", "forest green"), lty = 1, lwd = 1.5,
-+        bty = "n")
++        col = c("steelblue", "forest green"), lty = 1, lwd = 1.5, bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1514,22 +1466,17 @@ indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
 \begin{CodeChunk}
 \begin{CodeInput}
 R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE))
-R> plot(MTF, type = "state", index = 8, col = "forest green",
-+       add = FALSE)
+R> plot(MTF, type = "state", index = 8, col = "forest green", add = FALSE)
 R> grid(col = "grey90")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(zeta[t]))
 R> par(mar = c(3.8, 4.2, 2.1, 0.8))
-R> plot(y.train, type = "n", ylim = c(-0.11, 0.01),
-+      xlab = "time", ylab = "component CrIs")
-R> plot(MTF, type = "state", index = 9, col = "steelblue",
-+       add = TRUE)
+R> plot(y.train, type = "n", ylim = c(-0.11, 0.01), xlab = "time", ylab = "component CrIs")
+R> plot(MTF, type = "state", index = 9, col = "steelblue", add = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(NOI, t)]))
-R> plot(y.train, type = "n", ylim = c(-0.005, 0.06),
-+         xlab = "time", ylab = "component CrIs")
-R> plot(MTF, type = "state", index = 10, col = "darkorange",
-+       add = TRUE)
+R> plot(y.train, type = "n", ylim = c(-0.005, 0.06), xlab = "time", ylab = "component CrIs")
+R> plot(MTF, type = "state", index = 10, col = "darkorange", add = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
@@ -1564,10 +1511,8 @@ seasonal model.
 R> k.fore = length(y.holdout)
 R> F0.future = model$FF
 R> G0.future = model$GG
-R> fc.M0 = predict(M0, start.t = length(y.train), k = k.fore,
-+                  fFF = F0.future, fGG = G0.future,
-+                  return.draws = TRUE, n.samp = 1000,
-+                  seed = 20265101)
+R> fc.M0 = predict(M0, start.t = length(y.train), k = k.fore, fFF = F0.future, 
++                  fGG = G0.future, return.draws = TRUE, n.samp = 1000, seed = 20265101)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1580,10 +1525,8 @@ R> reg.future = regMod(X.holdout, m0 = rep(0, n.x), C0 = diag(1, n.x))
 R> model.reg.future = model + reg.future
 R> FREG.future = model.reg.future$FF
 R> GREG.future = model.reg.future$GG
-R> fc.MREG = predict(MREG, start.t = length(y.train), k = k.fore,
-+                    fFF = FREG.future, fGG = GREG.future,
-+                    return.draws = TRUE, n.samp = 1000,
-+                    seed = 20265301)
+R> fc.MREG = predict(MREG, start.t = length(y.train), k = k.fore, fFF = FREG.future, 
++                    fGG = GREG.future, return.draws = TRUE, n.samp = 1000, seed = 20265301)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1595,8 +1538,7 @@ R> n.state = length(model$m0)
 R> FTF.future = matrix(0, nrow = n.state + n.x + 1, ncol = k.fore)
 R> FTF.future[seq_len(n.state), ] = F0.future
 R> FTF.future[n.state + 1, ] = 1
-R> GTF.future = array(0, c(n.state + n.x + 1,
-+                             n.state + n.x + 1, k.fore))
+R> GTF.future = array(0, c(n.state + n.x + 1, n.state + n.x + 1, k.fore))
 R> GTF.future[seq_len(n.state), seq_len(n.state), ] = G0.future
 R> zeta.ind = n.state + 1
 R> psi.ind = n.state + 1 + seq_len(n.x)
@@ -1605,10 +1547,8 @@ R> for (j in seq_len(n.x)) {
 +    GTF.future[zeta.ind, psi.ind[j], ] = X.holdout[, j]
 +    GTF.future[psi.ind[j], psi.ind[j], ] = 1
 +    }
-R> fc.MTF = predict(MTF, start.t = length(y.train), k = k.fore,
-+                   fFF = FTF.future, fGG = GTF.future,
-+                   return.draws = TRUE, n.samp = 1000,
-+                   seed = 20265201)
+R> fc.MTF = predict(MTF, start.t = length(y.train), k = k.fore, fFF = FTF.future, 
++                   fGG = GTF.future, return.draws = TRUE, n.samp = 1000, seed = 20265201)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1625,14 +1565,11 @@ R> plot(fc.MREG, add = TRUE, cols = c("steelblue", "lightblue"))
 R> plot(fc.MTF, add = TRUE, cols = c("forest green", "darkseagreen"))
 R> t.all = as.numeric(time(y.fit))
 R> hold.idx = 415:432
-R> lines(t.all[hold.idx], y.fit[hold.idx],
-+           col = "darkorange", lwd = 1.4)
-R> points(t.all[hold.idx], y.fit[hold.idx],
-+            col = "darkorange", pch = 1, cex = 0.8)
+R> lines(t.all[hold.idx], y.fit[hold.idx], col = "darkorange", lwd = 1.4)
+R> points(t.all[hold.idx], y.fit[hold.idx], col = "darkorange", pch = 1, cex = 0.8)
 R> abline(v = t.all[hold.idx[1]], col = "orange", lty = 5, lwd = 1.2)
-R> legend("topleft",
-+            legend = c("M0 no covariates", "MREG direct regression",
-+                       "MTF transfer", "held-out observations"),
+R> legend("topleft", legend = c("M0 no covariates", "MREG direct regression",
++            "MTF transfer", "held-out observations"),
 +            col = c("purple", "steelblue", "forest green", "darkorange"),
 +            lty = 1, pch = c(NA, NA, NA, 1), bty = "n")
 \end{CodeInput}
@@ -1648,8 +1585,7 @@ diagnostics are computed from the final-training fitted objects.
 R> diag.M0 = diagnostics(M0)
 R> diag.MREG = diagnostics(MREG)
 R> diag.MTF = diagnostics(MTF)
-R> tab.ex3 = data.frame(
-+     model = c("M0", "MREG", "MTF"),
+R> tab.ex3 = data.frame(model = c("M0", "MREG", "MTF"),
 +     KL = c(diag.M0$m1.KL, diag.MREG$m1.KL, diag.MTF$m1.KL),
 +     CRPS = c(diag.M0$m1.CRPS, diag.MREG$m1.CRPS, diag.MTF$m1.CRPS),
 +     PPLC = c(diag.M0$m1.pplc, diag.MREG$m1.pplc, diag.MTF$m1.pplc))
@@ -1682,14 +1618,10 @@ months. These diagnostics are computed from the forecast objects using the corre
 R> fc.diag.M0 = diagnostics(fc.M0, y = y.holdout)
 R> fc.diag.MREG = diagnostics(fc.MREG, y = y.holdout)
 R> fc.diag.MTF = diagnostics(fc.MTF, y = y.holdout)
-R> tab.ex3.fc = data.frame(
-+     model = c("M0", "MREG", "MTF"),
-+     check.loss = c(fc.diag.M0$m1.check_loss,
-+                    fc.diag.MREG$m1.check_loss,
+R> tab.ex3.fc = data.frame(model = c("M0", "MREG", "MTF"),
++     check.loss = c(fc.diag.M0$m1.check_loss, fc.diag.MREG$m1.check_loss,
 +                    fc.diag.MTF$m1.check_loss),
-+     CRPS = c(fc.diag.M0$m1.CRPS,
-+              fc.diag.MREG$m1.CRPS,
-+              fc.diag.MTF$m1.CRPS))
++     CRPS = c(fc.diag.M0$m1.CRPS, fc.diag.MREG$m1.CRPS, fc.diag.MTF$m1.CRPS))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1718,7 +1650,7 @@ Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-re
 display from July 2021 through December 2022. The vertical dot-dashed line marks
 the forecast origin after the final training month, June 2021. Solid lines
 indicate posterior mean forecast quantiles and dotted lines indicate pointwise
-95\% CrIs for \code{M0}, \code{MREG}, and \code{MTF}. Held-out observations are shown as orange circles.}
+95\% CrIs for \code{M0}, \code{MREG}, and \code{MTF}. Held-out observations are shown as orange circles. \textcolor{red}{The forecasts are conditional on the observed holdout-period NOI and AMO values.}}
 \label{fig:ex3forecast}
 \end{figure}
 \end{AChange}
@@ -1754,7 +1686,9 @@ Then
 \[
 Q_Y(p_0 \mid \mat{x}_i) = \mat{x}_i^\top \vect{\beta}^\star,
 \]
-so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. This is a quantile-specific calibration benchmark: each target level is generated so that the known target quantile is the same sparse linear signal, rather than a single-response multi-quantile analysis. Gaussian design matrices are generated with \code{MASS::mvrnorm()} from \pkg{MASS} \citep{MASS}. We use \(n = 160\) training observations and an independent holdout sample of size \(800\).
+so the true \(p_0\)-quantile is the same sparse linear signal at each fitted quantile level. Note that this is a quantile-specific calibration benchmark: each target level is generated so that the known target quantile is the same sparse linear signal, rather than a single-response multi-quantile analysis. \textcolor{red}{The Gaussian data-generating distribution does not coincide with the exAL working likelihood; the benchmark therefore evaluates recovery of a correctly specified conditional quantile under likelihood misspecification.} Gaussian design matrices are generated with \code{MASS::mvrnorm()} from \pkg{MASS} \citep{MASS}.
+%Gaussian design matrices are generated with \code{MASS::mvrnorm()} from \pkg{MASS} \citep{MASS}. 
+We use \(n = 160\) training observations and an independent holdout sample of size \(800\).
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1764,8 +1698,7 @@ R> rhs.ctrl = list(tau0 = 0.15, a_zeta = 2, b_zeta = 9,
 +                  zeta2_fixed = 9, shrink_intercept = FALSE)
 R> set.seed(20260712)
 R> sim.y = function(X.raw, p0) {
-+     drop(X.raw %*% beta.true) + 1.5 * (rnorm(nrow(X.raw)) - qnorm(p0))
-+   }
++     drop(X.raw %*% beta.true) + 1.5 * (rnorm(nrow(X.raw)) - qnorm(p0))}
 R> X.raw = MASS::mvrnorm(160, mu = rep(0, 8), Sigma = Sigma.x)
 R> X = cbind(1, X.raw)
 R> X.hold.raw = MASS::mvrnorm(800, mu = rep(0, 8), Sigma = Sigma.x)
@@ -1784,21 +1717,15 @@ R> for (i in seq_along(p.grid)) {
 +     p0 = p.grid[i]
 +     y.train[[i]] = sim.y(X.raw, p0)
 +     y.hold[[i]] = sim.y(X.hold.raw, p0)
-+     M.ldvb[[i]] = exalStaticLDVB(
-+                    y = y.train[[i]], X = X, p0 = p0,
-+                    beta_prior = "rhs_ns",
-+                    beta_prior_controls = rhs.ctrl,
++     M.ldvb[[i]] = exalStaticLDVB(y = y.train[[i]], X = X, p0 = p0,
++                    beta_prior = "rhs_ns", beta_prior_controls = rhs.ctrl,
 +                    max_iter = ifelse(p0 == 0.05, 420, 260),
 +                    n.samp = 3000, n_samp_xi = 160,
 +                    tol = 1e-4, verbose = FALSE)
-+     M.mcmc[[i]] = exalStaticMCMC(
-+                    y = y.train[[i]], X = X, p0 = p0,
-+                    beta_prior = "rhs_ns",
-+                    beta_prior_controls = rhs.ctrl,
++     M.mcmc[[i]] = exalStaticMCMC(y = y.train[[i]], X = X, p0 = p0,
++                    beta_prior = "rhs_ns", beta_prior_controls = rhs.ctrl,
 +                    n.burn = 2000, n.mcmc = 3000, thin = 1,
-+                    init.from.vb = TRUE,
-+                    verbose = FALSE)
-+   }
++                    init.from.vb = TRUE, verbose = FALSE)}
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1810,23 +1737,18 @@ R> diag.static = Map(function(ldvb, mcmc, y.h) {
 +     diagnostics(ldvb, mcmc, X = X.hold, y = y.h, ref = ref.hold)
 +   }, M.ldvb, M.mcmc, y.hold)
 R> y.lim = range(beta.true,
-+                unlist(lapply(diag.static, function(z) {
-+                  c(z$m1.beta.lb[-1], z$m1.beta.ub[-1],
-+                    z$m2.beta.lb[-1], z$m2.beta.ub[-1])
-+                })))
++                unlist(lapply(diag.static, function(z){
++                  c(z$m1.beta.lb[-1], z$m1.beta.ub[-1], z$m2.beta.lb[-1],
++                  z$m2.beta.ub[-1])})))
 R> y.lim = y.lim + c(-1, 1) * 0.08 * diff(y.lim)
 R> par(mfrow = c(1, 3), mar = c(5.2, 4.0, 2.6, 1.0), xpd = NA)
-R> for (i in seq_along(p.grid)) {
-+     plot(diag.static[[i]], type = "coefficients",
-+          beta.ref = c(0, beta.true),
-+          include.intercept = FALSE,
+R> for (i in seq_along(p.grid)) {plot(diag.static[[i]], type = "coefficients",
++          beta.ref = c(0, beta.true), include.intercept = FALSE,
 +          coef.names = c("(Intercept)", paste0("x", seq_along(beta.true))),
-+          cols = c("orange", "steelblue"),
-+          legend.labels = c("LDVB 95% interval", "MCMC 95% interval"),
-+          beta.ref.label = "truth", ylim = y.lim,
++          cols = c("orange", "steelblue"), legend.labels = c("LDVB 95% interval", 
++          "MCMC 95% interval"), beta.ref.label = "truth", ylim = y.lim,
 +          ylab = if (i == 1) "coefficient value" else "",
-+          main = sprintf("p0 = %.2f", p.grid[i]), legend = i == 1)
-+   }
++          main = sprintf("p0 = %.2f", p.grid[i]), legend = i == 1)}
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1837,7 +1759,7 @@ R> for (i in seq_along(p.grid)) {
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that both methods recover the main sparse signal structure and shrink most null coefficients toward zero across the lower tail, lower-middle quantile, and median. Recovery is not uniform across coefficients: the smaller active coefficient is more difficult in the median fit, and a few null-coefficient intervals can miss zero. Across the three panels, the MCMC intervals tend to give slightly cleaner active-signal recovery, while the LDVB intervals provide a fast approximation to the same coefficient-level summaries.
+Figure \ref{fig:ex4static} shows that, \textcolor{red}{in this simulated realization,} both methods recover the main sparse signal structure and shrink most null coefficients toward zero across the lower tail, lower-middle quantile, and median. Recovery is not uniform across coefficients: the smaller active coefficient is more difficult in the median fit, and a few null-coefficient intervals can miss zero. Across the three panels, the MCMC intervals tend to give slightly cleaner active-signal recovery, while the LDVB intervals provide a fast approximation to the same coefficient-level summaries.
 
 \begin{table}[t!]
 \centering
@@ -1872,9 +1794,13 @@ Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE s
 summarizes the software workflow, keeps claims evidence-bounded, states current
 limitations, and lists future directions without overstating the examples.}
 
-\pkg{exdqlm} provides an \proglang{R} workflow for Bayesian quantile regression with primary emphasis on latent state-space models for a single response quantile. It addresses a gap between broad quantile-regression tools, which do not provide the dedicated latent quantile-state workflow targeted here, and Gaussian dynamic-modeling packages, which do not target AL or exAL quantile likelihoods. Within this setting, \pkg{exdqlm} fits DQLMs and exDQLMs, offers MCMC posterior simulation and LDVB approximate inference, and uses the resulting fitted objects for state and component summaries, forecasting, calibration and predictive diagnostics including deterministic KL, CRPS, and PPLC, and posterior-predictive synthesis across separately fitted quantile levels. The package also includes transfer-function state augmentation and static AL/exAL regression with shrinkage priors.
+\pkg{exdqlm} provides an \proglang{R} workflow for Bayesian quantile regression with primary emphasis on latent state-space models \textcolor{red}{fitted one response quantile at a time}. It addresses a gap between broad quantile-regression tools, which do not provide the dedicated latent quantile-state workflow targeted here, and Gaussian dynamic-modeling packages, which do not target AL or exAL quantile likelihoods. Within this setting, \pkg{exdqlm} fits DQLMs and exDQLMs, offers MCMC posterior simulation and LDVB approximate inference, and uses the resulting fitted objects for state and component summaries, forecasting, calibration and predictive diagnostics including deterministic KL, CRPS, and PPLC, and posterior-predictive synthesis across separately fitted quantile levels. The package also includes transfer-function state augmentation and static AL/exAL regression with shrinkage priors. \textcolor{red}{These capabilities are exposed through composable model constructors and fitted objects supporting standard methods such as \code{summary()}, \code{plot()}, \code{predict()}, and \code{diagnostics()}.}
 
-The examples illustrate how these interfaces are used in analysis. Lake Huron uses separate dynamic fits at three quantile levels, multi-step forecasting, and post hoc synthesis of posterior predictive draws. Sunspots compares DQLM and exDQLM fits at an upper quantile, uses MAP one-step-ahead calibration diagnostics together with CRPS and PPLC, and illustrates discount-factor selection by CRPS with KL used as a complementary calibration check. Big Tree water flow compares no-covariate, direct-regression, and transfer-function specifications built from a common trend-seasonal baseline; its fitted and held-out summaries are mixed, so the example is mainly a workflow comparison rather than evidence for a uniformly preferred covariate structure. The static simulation is a quantile-specific sparse exAL benchmark comparing LDVB and MCMC under a known target quantile.
+The examples illustrate how these interfaces are used in analysis. Lake Huron uses separate dynamic fits at three quantile levels, multi-step forecasting, and post hoc synthesis of posterior predictive draws. Sunspots compares DQLM and exDQLM fits at an upper quantile, uses MAP \textcolor{red}{plug-in} one-step-ahead calibration diagnostics together with CRPS and PPLC, and \textcolor{red}{illustrates an in-sample comparison of candidate discount-factor specifications using CRPS, with KL used as a complementary calibration check.} Big Tree water flow compares no-covariate, direct-regression, and transfer-function specifications built from a common trend-seasonal baseline; its fitted and held-out summaries are mixed, so the example is mainly a workflow comparison rather than evidence for a uniformly preferred covariate structure. \textcolor{red}{The static example uses one quantile-specific sparse simulation realization to illustrate LDVB and MCMC under a known target quantile.}
+
+
+
+
 
 The examples also delineate the current scope of the package. Dynamic models are fitted one quantile level at a time. \code{quantileSynthesis()} combines predictive draws after separate fits and applies monotonicity adjustments when needed; it is not a joint posterior model over multiple quantile levels. LDVB returns samples from fitted variational factors rather than from the exact posterior target, so MCMC remains the reference calculation when posterior tail summaries, interval widths, or approximation error are central. In transfer-function models, lag propagation is controlled by a fixed or grid-selected \(\lambda\); the current implementation does not estimate input-specific lag-decay rates internally. Runtime results are elapsed fitting times under the stated backend profile and should be read alongside predictive and calibration diagnostics.
 
