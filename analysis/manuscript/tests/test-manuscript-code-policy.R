@@ -23,7 +23,7 @@ testthat::test_that("manuscript code chunk map covers every displayed chunk", {
     "exact",
     "excerpt",
     "exact_with_analysis_helpers",
-    "exact_with_package_plot_helpers"
+    "exact_with_package_methods"
   )
   testthat::expect_true(all(map$display_scope %in% allowed_scopes))
   testthat::expect_false(any(!nzchar(map$example)))

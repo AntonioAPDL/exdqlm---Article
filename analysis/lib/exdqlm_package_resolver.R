@@ -224,10 +224,9 @@ exdqlm_load_package <- function(repo_root, pkg_path = NULL, log_msg = message) {
 
   version <- as.character(utils::packageVersion("exdqlm"))
   log_msg(sprintf(
-    "Loaded local exdqlm from source (%s via %s): %s [version %s]",
+    "Loaded local exdqlm from source (%s via %s) [version %s]",
     pkg_spec$source,
     loader_name,
-    pkg_spec$path,
     version
   ))
   invisible(list(mode = "source", path = pkg_spec$path, version = version, git = pkg_spec$git))

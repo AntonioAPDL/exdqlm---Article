@@ -45,8 +45,8 @@ CRAN and is distributed under the MIT License, which is GPL-compatible.
 - Revised the package design for standard R use: fitted dynamic and
   static objects now have shared superclass families,
   diagnostic/forecast/ synthesis objects are visible reusable objects,
-  and standard methods such as `print()`, `summary()`, `plot()`, and
-  `predict()` are used where natural.
+  and standard methods such as `print()`, `summary()`, `plot()`,
+  `predict()`, and `diagnostics()` are used where natural.
 
 - Clarified the computational contributions beyond the earlier
   methodological papers: Laplace--delta variational Bayes (LDVB) is now

@@ -367,7 +367,7 @@ testthat::test_that("Example 3 forecast metrics are registered and package-score
   ) %in% names(fc)))
 })
 
-testthat::test_that("portable generated manuscript tables are coherent", {
+testthat::test_that("generated manuscript tables are coherent", {
   ex2 <- read_required_csv("analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv")
   expect_columns(
     ex2,
@@ -442,7 +442,7 @@ testthat::test_that("portable generated manuscript tables are coherent", {
 testthat::test_that("main manuscript inline table values match generated outputs", {
   testthat::skip_if_not(
     reference_sync_enabled(),
-    "Exact manuscript-value matching is a reference-mode check."
+    "Exact manuscript-value matching is an author-side final synchronization check."
   )
 
   tex <- paste(readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE), collapse = "\n")
