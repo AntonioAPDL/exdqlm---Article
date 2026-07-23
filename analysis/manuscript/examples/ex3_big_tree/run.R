@@ -294,6 +294,10 @@ if (!need_ex3) {
   if (!is.finite(forecast_n_samp) || forecast_n_samp < 1L) forecast_n_samp <- n_samp
   tol <- as.numeric(ex3_cfg$tol)
   max_iter <- as.integer(ex3_cfg$max_iter %||% getOption("exdqlm.max_iter", 200L))
+  if (!is.finite(max_iter) || max_iter < 1L) {
+    stop("Example 3 max_iter must be a positive integer.", call. = FALSE)
+  }
+  vb_control <- list(max_iter = max_iter)
   lambda_grid <- as.numeric(ex3_cfg$lambda_grid)
   lambda_grid <- sort(unique(lambda_grid[is.finite(lambda_grid) & lambda_grid > 0 & lambda_grid < 1]))
   if (!length(lambda_grid)) stop("Example 3 lambda_grid must contain values in (0, 1).", call. = FALSE)
@@ -334,6 +338,7 @@ if (!need_ex3) {
       sig.init = sig_init, gam.init = gam_init,
       fix.sigma = FALSE,
       tol = tol, n.samp = n_samp,
+      vb_control = vb_control,
       verbose = FALSE
     )
     attr(fit, "ex3_base_model") <- base_model
@@ -353,6 +358,7 @@ if (!need_ex3) {
       sig.init = sig_init, gam.init = gam_init,
       fix.sigma = FALSE,
       tol = tol, n.samp = n_samp,
+      vb_control = vb_control,
       verbose = FALSE
     )
     attr(fit, "ex3_base_model") <- base_model
@@ -370,6 +376,7 @@ if (!need_ex3) {
       sig.init = sig_init, gam.init = gam_init,
       fix.sigma = FALSE,
       tol = tol, n.samp = n_samp,
+      vb_control = vb_control,
       verbose = FALSE
     )
     attr(fit, "ex3_base_model") <- base_model
@@ -388,12 +395,6 @@ if (!need_ex3) {
       n.samp = forecast_n_samp,
       seed = seed
     )
-  }
-
-  with_ex3_max_iter <- function(expr) {
-    old <- options(exdqlm.max_iter = max_iter)
-    on.exit(options(old), add = TRUE)
-    eval.parent(substitute(expr))
   }
 
   ex3_diagnostics <- function(...) {
@@ -463,7 +464,7 @@ if (!need_ex3) {
       psi_tag
     )
     cache_key <- sprintf(
-      "ex3_models_trainselect_v6_threemodel_%s_%s_%s_%s_%s_%s_grid%s_%s_nsamp%d_tol%s_h%d",
+      "ex3_models_trainselect_v7_threemodel_%s_%s_%s_%s_%s_%s_grid%s_%s_nsamp%d_tol%s_iter%d_h%d",
       paste(selected_indices, collapse = "_"),
       pkg_commit %||% "unknown",
       window_tag,
@@ -474,6 +475,7 @@ if (!need_ex3) {
       metric_tag,
       n_samp,
       gsub("[^0-9A-Za-z]+", "_", format(tol)),
+      max_iter,
       forecast_horizon
     )
 
@@ -490,10 +492,10 @@ if (!need_ex3) {
             row_id, length(lambda_grid) * length(transfer_psi_df_grid), lambda, psi_df
           ))
           fit <- tryCatch(
-            with_ex3_max_iter(with_local_seed(
+            with_local_seed(
               selection_seed,
               fit_transfer_model(y_train_ts, X_train, lambda = lambda, psi_df = psi_df)
-            )),
+            ),
             error = function(e) e
           )
 
@@ -574,20 +576,20 @@ if (!need_ex3) {
 
       log_msg("Example 3 final fit: M0 no-transfer baseline")
       M0 <- tryCatch(
-        with_ex3_max_iter(with_local_seed(seed_value + 3600L, fit_base_model(y_train_ts))),
+        with_local_seed(seed_value + 3600L, fit_base_model(y_train_ts)),
         error = function(e) e
       )
       log_msg("Example 3 final fit: MTF transfer-function model")
       MTF <- tryCatch(
-        with_ex3_max_iter(with_local_seed(
+        with_local_seed(
           seed_value + 3700L,
           fit_transfer_model(y_train_ts, X_train, lambda = lambda_star, psi_df = psi_df_star)
-        )),
+        ),
         error = function(e) e
       )
       log_msg("Example 3 final fit: MREG direct-regression model")
       MREG <- tryCatch(
-        with_ex3_max_iter(with_local_seed(seed_value + 3800L, fit_direct_model(y_train_ts, X_train))),
+        with_local_seed(seed_value + 3800L, fit_direct_model(y_train_ts, X_train)),
         error = function(e) e
       )
 

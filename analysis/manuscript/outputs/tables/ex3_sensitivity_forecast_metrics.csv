@@ -1,4 +1,4 @@
 "model","label","horizon","mean_check_loss","CRPS"
-"M0_no_transfer","M0 no transfer",18,0.119003867796147,0.497698395886582
-"MREG_direct_regression","MREG direct regression",18,0.113725701188057,0.400817820778994
-"MTF_transfer_function","MTF transfer function",18,0.155457945820219,0.549808774524269
+"M0_no_transfer","M0 no transfer",18,0.119004242925023,0.497664613283798
+"MREG_direct_regression","MREG direct regression",18,0.113733268939155,0.400760789449411
+"MTF_transfer_function","MTF transfer function",18,0.155462722231265,0.549700197273524

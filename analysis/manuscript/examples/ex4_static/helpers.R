@@ -3,8 +3,6 @@ ex4_p_key <- function(p0) sprintf("p%03d", round(100 * p0))
 ex4_build_rhs_ctrl <- function(cfg_ex4) {
   list(
     tau0 = as.numeric(cfg_ex4$rhs_tau0),
-    a_zeta = as.numeric(cfg_ex4$rhs_a_zeta),
-    b_zeta = as.numeric(cfg_ex4$rhs_b_zeta),
     zeta2_fixed = as.numeric(cfg_ex4$rhs_zeta2_fixed),
     shrink_intercept = FALSE
   )
@@ -197,7 +195,6 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
   ldvb_max_iter_tail <- as.integer(cfg_ex4$ldvb_max_iter_tail)
   ldvb_tol <- as.numeric(cfg_ex4$ldvb_tol)
   n_samp <- as.integer(cfg_ex4$n_samp %||% 200L)
-  ldvb_n_samp_xi <- as.integer(cfg_ex4$ldvb_n_samp_xi)
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
   thin <- as.integer(cfg_ex4$thin %||% 1L)
@@ -240,7 +237,6 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
           max_iter = ldvb_budget,
           tol = ldvb_tol,
           n.samp = n_samp,
-          n_samp_xi = ldvb_n_samp_xi,
           verbose = FALSE
         ),
         warning = function(w) {

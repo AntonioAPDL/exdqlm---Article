@@ -26,14 +26,10 @@ M95 = exdqlmMCMC(y = LakeHuron, p0 = 0.95, model = model,
                     df = 0.9, dim.df = 2,
                     PriorGamma = list(m_gam = -1, s_gam = 0.1, df_gam = 1),
                     n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
-M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
-                    df = 0.9, dim.df = 2,
-                    PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
-                    n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
 M5 = exdqlmMCMC(y = LakeHuron, p0 = 0.05, model = model,
                    df = 0.9, dim.df = 2,
                    PriorGamma = list(m_gam = 1, s_gam = 0.1, df_gam = 1),
-                   n.burn = 2000, n.mcmc = 3000, verbose = TRUE, verbose.every = 1000)
+                   n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
 
 set.seed(20260620)
 M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
@@ -51,7 +47,7 @@ coda::densplot(sigma.trace, main = "sigma density")
 coda::traceplot(gamma.trace, main = "gamma trace")
 coda::densplot(gamma.trace, main = "gamma density")
 
-M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
+M50.dqlm = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
                     df = 0.9, dim.df = 2,
                     gam.init = 0, fix.gamma = TRUE,
                     n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
@@ -59,7 +55,7 @@ M50 = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model,
 par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2),
        oma = c(0, 0, 0.8, 0))
 plot(M95); title("(a) Dynamic quantiles")
-plot(M50, add = TRUE, col = "blue")
+plot(M50.dqlm, add = TRUE, col = "blue")
 plot(M5, add = TRUE, col = "forest green")
 legend("topright", lty = 1, bty = "n",
           col = c("purple", "blue", "forest green"),
@@ -74,7 +70,7 @@ plot(LakeHuron, xlim = c(1952, 1980), ylim = c(575, 582),
         ylab = "forecast 95% CrIs")
 fc95 = predict(M95, start.t = length(LakeHuron), k = 8,
                   fFF = fFF, fGG = fGG, return.draws = TRUE)
-fc50 = predict(M50, start.t = length(LakeHuron), k = 8,
+fc50 = predict(M50.dqlm, start.t = length(LakeHuron), k = 8,
                   fFF = fFF, fGG = fGG, return.draws = TRUE)
 fc05 = predict(M5, start.t = length(LakeHuron), k = 8,
                   fFF = fFF, fGG = fGG, return.draws = TRUE)
@@ -83,7 +79,7 @@ plot(fc50, add = TRUE, cols = c("blue", "light blue"))
 plot(fc05, add = TRUE, cols = c("forest green", "green"))
 
 syn.obs = quantileSynthesis(
-  draws_list = list(M5, M50, M95),
+  draws_list = list(M5, M50.dqlm, M95),
   p = c(0.05, 0.50, 0.95),
   T_expected = length(LakeHuron))
 
@@ -134,15 +130,15 @@ seas.comp = seasMod(p = 11, h = 1:4, C0 = 10 * diag(8))
 
 model = trend.comp + seas.comp
 
-model$GG
-
+set.seed(20262601)
 M1 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
                    df = c(0.9, 0.85), dim.df = c(1, 8),
                    dqlm.ind = TRUE, fix.sigma = FALSE,
-                   n.samp = 3000, verbose = FALSE)
+                   sig.init = 2, n.samp = 3000, verbose = FALSE)
+set.seed(20262602)
 M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
                    df = c(0.9, 0.85), dim.df = c(1, 8),
-                   fix.sigma = FALSE,
+                   sig.init = 2, fix.sigma = FALSE,
                    n.samp = 3000, verbose = FALSE)
 
 plot(sunspot.year, xlim = c(1780, 1830), col = "dark grey",
@@ -163,14 +159,13 @@ par(mfrow = c(2, 3))
 diagM1M2 = diagnostics(M1, M2)
 plot(diagM1M2, cols = c("red", "blue"))
 
-print(diagM1M2)
-
 possible.dfs = cbind(0.9, seq(0.85, 1, 0.05))
 possible.dfs
 
 metrics <- matrix(NA_real_, nrow(possible.dfs), 2,
                      dimnames = list(NULL, c("CRPS", "KL")))
 for (i in 1:nrow(possible.dfs)) {
+  set.seed(20262700 + i)
   temp.M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model,
                          df = possible.dfs[i, ], dim.df = c(1, 8),
                          sig.init = 2, fix.sigma = FALSE,
@@ -178,12 +173,16 @@ for (i in 1:nrow(possible.dfs)) {
   temp.check = diagnostics(temp.M2)
   metrics[i, ] = c(temp.check$m1.CRPS, temp.check$m1.KL)
   }
+df.scan = data.frame(possible.dfs, CRPS = metrics[, "CRPS"], KL = metrics[, "KL"])
+round(df.scan, 3)
 possible.dfs[which.min(metrics[, "CRPS"]), ]
 
+set.seed(20262801)
 M1mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
                        df = c(0.9, 0.85), dim.df = c(1, 8),
                        n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
                        dqlm.ind = TRUE, fix.sigma = FALSE)
+set.seed(20262802)
 M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model,
                        df = c(0.9, 0.85), dim.df = c(1, 8),
                        n.burn = 2000, n.mcmc = 3000, verbose = FALSE,
@@ -217,6 +216,7 @@ seas.comp = seasMod(p = 12, h = c(1, 2, 0.1469118636),
 model = trend.comp + seas.comp
 
 lambda.grid = c(0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.99)
+vb.ctrl = list(max_iter = 600L)
 pplc.grid = rep(NA_real_, length(lambda.grid))
 for (i in seq_along(lambda.grid)) {
   set.seed(20264001 + i)
@@ -226,7 +226,8 @@ for (i in seq_along(lambda.grid)) {
                                   lam = lambda.grid[i], tf.m0 = rep(0, 3),
                                   tf.C0 = diag(c(0.1, 1, 1), 3),
                                   sig.init = 0.1, gam.init = -0.1,
-                                  n.samp = 1000, tol = 0.05, verbose = FALSE)
+                                  n.samp = 1000, tol = 0.05,
+                                  vb_control = vb.ctrl, verbose = FALSE)
   temp.diag = diagnostics(temp.MTF)
   pplc.grid[i] = temp.diag$m1.pplc
   }
@@ -237,14 +238,16 @@ set.seed(20264101)
 M0 = exdqlmLDVB(y = y.train, p0 = 0.15, model = model,
                    df = c(0.99, 0.99), dim.df = c(1, 6),
                    sig.init = 0.1, gam.init = -0.1,
-                   n.samp = 1000, tol = 0.05, verbose = FALSE)
+                   n.samp = 1000, tol = 0.05,
+                   vb_control = vb.ctrl, verbose = FALSE)
 reg.comp = regMod(X.train, m0 = rep(0, 2), C0 = diag(1, 2))
 set.seed(20264301)
 MREG = exdqlmLDVB(y = y.train, p0 = 0.15,
                      model = model + reg.comp,
                      df = c(0.99, 0.99, 1), dim.df = c(1, 6, 2),
                      sig.init = 0.1, gam.init = -0.1,
-                     n.samp = 1000, tol = 0.05, verbose = FALSE)
+                     n.samp = 1000, tol = 0.05,
+                     vb_control = vb.ctrl, verbose = FALSE)
 set.seed(20264201)
 MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
                             df = c(0.99, 0.99), dim.df = c(1, 6),
@@ -252,7 +255,8 @@ MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
                             lam = lambda.star, tf.m0 = rep(0, 3),
                             tf.C0 = diag(c(0.1, 1, 1), 3),
                             sig.init = 0.1, gam.init = -0.1,
-                            n.samp = 1000, tol = 0.05, verbose = FALSE)
+                            n.samp = 1000, tol = 0.05,
+                            vb_control = vb.ctrl, verbose = FALSE)
 
 par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
        oma = c(1.8, 0, 0, 0))
@@ -396,8 +400,11 @@ tab.ex3.fc = data.frame(
 
 Sigma.x = 0.5 ^ as.matrix(dist(1:8))
 beta.true = c(3, 1.5, 0, 0, 2, 0, 0, 0)
-rhs.ctrl = list(tau0 = 0.15, a_zeta = 2, b_zeta = 9,
-                   zeta2_fixed = 9, shrink_intercept = FALSE)
+rhs.ctrl = list(
+  tau0 = 0.15,
+  zeta2_fixed = 9,
+  shrink_intercept = FALSE
+)
 set.seed(20260712)
 sim.y = function(X.raw, p0) {
   drop(X.raw %*% beta.true) + 1.5 * (rnorm(nrow(X.raw)) - qnorm(p0))
@@ -419,7 +426,7 @@ for (i in seq_along(p.grid)) {
     beta_prior = "rhs_ns",
     beta_prior_controls = rhs.ctrl,
     max_iter = ifelse(p0 == 0.05, 420, 260),
-    n.samp = 3000, n_samp_xi = 160,
+    n.samp = 3000,
     tol = 1e-4, verbose = FALSE)
   M.mcmc[[i]] = exalStaticMCMC(
     y = y.train[[i]], X = X, p0 = p0,

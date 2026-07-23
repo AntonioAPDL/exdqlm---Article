@@ -1,5 +1,6 @@
 repro_mode <- tolower(Sys.getenv("EXDQLM_REPRO_MODE", unset = "portable"))
 if (!repro_mode %in% c("portable", "reference")) repro_mode <- "portable"
+previous_exdqlm_version <- paste("1", "0", "0", sep = ".")
 
 reference_sync_enabled <- function() {
   flag <- tolower(Sys.getenv(
@@ -147,8 +148,8 @@ testthat::test_that("package resolver includes current and generic source checko
   candidates <- basename(exdqlm_source_candidate_paths(repo_root))
 
   testthat::expect_true("exdqlm" %in% candidates)
-  testthat::expect_true("exdqlm__wt__1p0p0_exdqlm_article" %in% candidates)
-  testthat::expect_true("exdqlm__wt__1.0.0-jss" %in% candidates)
+  testthat::expect_true("exdqlm__wt__1p1p0_exdqlm_article" %in% candidates)
+  testthat::expect_true("exdqlm__wt__1.1.0-jss" %in% candidates)
   testthat::expect_true("exdqlm__wt__0p5p0_exdqlm_article" %in% candidates)
 })
 
@@ -205,8 +206,8 @@ testthat::test_that("replication docs use the simplified public interface", {
     "--mode portable",
     "--mode reference",
     "EXDQLM_REPRO_",
-    "current `1.0.0` package",
-    "version 1.0.0"
+    sprintf("current `%s` package", previous_exdqlm_version),
+    sprintf("version %s", previous_exdqlm_version)
   )
   for (marker in stale_markers) {
     testthat::expect_false(
@@ -254,7 +255,7 @@ testthat::test_that("RNG and benchmark backend reproducibility policy is explici
 
   check_lines <- readLines(file.path(repo_root, "analysis", "check_reproducibility.R"), warn = FALSE)
   testthat::expect_true(any(grepl("expected_exdqlm_version", check_lines, fixed = TRUE)))
-  testthat::expect_false(any(grepl("not 1.0.0", check_lines, fixed = TRUE)))
+  testthat::expect_false(any(grepl(sprintf("not %s", previous_exdqlm_version), check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("Generated benchmark environment records exdqlm version", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("manuscript RNG kind is explicit and stable", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("benchmark profile keeps C++ samplers disabled", check_lines, fixed = TRUE)))
@@ -293,17 +294,17 @@ testthat::test_that("manuscript examples avoid data-centered prior means", {
   }
 })
 
-testthat::test_that("backend options table lives in the appendix source", {
+testthat::test_that("backend options notes live in the manuscript appendix", {
   main_text <- readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE)
-  appendix_text <- readLines(file.path(repo_root, "exdqlm-appendix.tex"), warn = FALSE)
 
   testthat::expect_false(any(grepl("\\\\label\\{tab:backendopts\\}", main_text)))
   testthat::expect_false(any(grepl("\\\\section\\{Global backend options\\}", main_text)))
-  testthat::expect_true(any(grepl("\\\\input\\{exdqlm-appendix\\}", main_text)))
-  testthat::expect_true(any(grepl("\\\\label\\{sec:app_backend_options\\}", appendix_text)))
-  testthat::expect_true(any(grepl("\\\\section\\{Laplace--delta and backend notes\\}", appendix_text)))
-  testthat::expect_true(any(grepl("exdqlm.use\\_cpp\\_kf", appendix_text, fixed = TRUE)))
-  testthat::expect_false(any(grepl("\\\\documentclass|\\\\begin\\{document\\}|\\\\end\\{document\\}|\\\\bibliography", appendix_text)))
+  appendix_input <- paste0("\\\\input\\{", "exdqlm-", "appendix", "\\}")
+  testthat::expect_false(any(grepl(appendix_input, main_text)))
+  testthat::expect_true(any(grepl("\\appendix", main_text, fixed = TRUE)))
+  testthat::expect_true(any(grepl("\\\\label\\{sec:app_backend_options\\}", main_text)))
+  testthat::expect_true(any(grepl("\\\\section\\{Laplace--delta and backend notes\\}", main_text)))
+  testthat::expect_true(any(grepl("exdqlm.use\\_cpp\\_kf", main_text, fixed = TRUE)))
 })
 
 testthat::test_that("Example 3 uses static climate coefficients in the three-model comparison", {

@@ -1,5 +1,5 @@
  \newcommand{\noop}[1]{}
-\begin{thebibliography}{48}
+\begin{thebibliography}{43}
 \newcommand{\enquote}[1]{``#1''}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
@@ -24,11 +24,6 @@ Barlow RE, Bartholomew DJ, Bremner JM, Brunk HD (1972).
 \newblock \emph{Statistical Inference Under Order Restrictions: The Theory and
   Application of Isotonic Regression}.
 \newblock John Wiley \& Sons, New York.
-
-\bibitem[{Beal(2003)}]{beal2003variational}
-Beal MJ (2003).
-\newblock \emph{Variational algorithms for approximate Bayesian inference}.
-\newblock Ph.D. thesis, UCL (University College London).
 
 \bibitem[{Benoit \emph{et~al.}(2023)Benoit, Al-Hamzawi, Yu, and Van~den
   Poel}]{bayesQR}
@@ -66,12 +61,6 @@ Fasiolo M, Griffiths B (2025).
 \newblock \emph{\pkg{qgam}: Smooth Additive Quantile Regression Models}.
 \newblock R package version 2.0.0,
   \urlprefix\url{https://CRAN.R-project.org/package=qgam}.
-
-\bibitem[{Fogarty(2020)}]{QuantRegjl}
-Fogarty B (2020).
-\newblock \enquote{\pkg{QuantReg.jl}: Quickstart Guide.}
-\newblock Documentation page, accessed 2026-04-19,
-  \urlprefix\url{https://fogarty-ben.github.io/QuantReg.jl/v0.1/quickstart/}.
 
 \bibitem[{Fr{\"u}hwirth-Schnatter(1994)}]{fruhwirth1994data}
 Fr{\"u}hwirth-Schnatter S (1994).
@@ -155,12 +144,6 @@ Laio F, Tamea S (2007).
   1267--1277.
 \newblock \doi{10.5194/hess-11-1267-2007}.
 
-\bibitem[{{MathWorks}(2026)}]{matlabQuantile}
-{MathWorks} (2026).
-\newblock \enquote{Working with Quantile Regression Models.}
-\newblock Documentation page, accessed 2026-04-19,
-  \urlprefix\url{https://www.mathworks.com/help/stats/working-with-quantile-regression-models.html}.
-
 \bibitem[{Muggeo(2025)}]{quantregGrowth}
 Muggeo VMR (2025).
 \newblock \emph{\pkg{quantregGrowth}: Non-Crossing Additive Regression
@@ -185,13 +168,6 @@ Nishimura A, Suchard MA (2023).
 {NOAA Physical Sciences Laboratory} (2026).
 \newblock \enquote{Climate Indices: Monthly Atmospheric and Ocean Time Series.}
 \newblock \urlprefix\url{https://psl.noaa.gov/data/climateindices/}.
-
-\bibitem[{Ostwald \emph{et~al.}(2014)Ostwald, Kirilina, Starke, and
-  Blankenburg}]{ostwald2014tutorial}
-Ostwald D, Kirilina E, Starke L, Blankenburg F (2014).
-\newblock \enquote{A tutorial on variational Bayes for latent linear stochastic
-  time-series models.}
-\newblock \emph{Journal of Mathematical Psychology}, \textbf{60}, 1--19.
 
 \bibitem[{Ou \emph{et~al.}(2021)Ou, Hunter, Chow, Ji, Chen, Hung, Lee, Li, and
   Park}]{dynr}
@@ -251,12 +227,6 @@ Sherwood B, Li S, Maidman A (2026).
 \newblock \emph{\pkg{rqPen}: Penalized Quantile Regression}.
 \newblock R package version 4.2,
   \urlprefix\url{https://CRAN.R-project.org/package=rqPen}.
-
-\bibitem[{{statsmodels developers}(2025)}]{statsmodelsQuantReg}
-{statsmodels developers} (2025).
-\newblock \enquote{\pkg{statsmodels}: \code{QuantReg} Documentation.}
-\newblock Version 0.14.6 documentation, accessed 2026-04-19,
-  \urlprefix\url{https://www.statsmodels.org/stable/generated/statsmodels.regression.quantile_regression.QuantReg.html}.
 
 \bibitem[{Taddy and Kottas(2010)}]{taddy2010bayesian}
 Taddy MA, Kottas A (2010).

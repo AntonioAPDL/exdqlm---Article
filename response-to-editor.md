@@ -459,8 +459,8 @@ protocol.
 > predictive synthesis needed to review the software implementation.
 > The obsolete standalone supplement PDF and separate supplement
 > bibliography artifact were removed from the submission bundle. The
-> appendix source is maintained as `exdqlm-appendix.tex`, a LaTeX input
-> file compiled directly into the single manuscript PDF.
+> appendix source is now included directly at the end of `exdqlm-jss.tex`,
+> so the manuscript source corresponds to the single compiled PDF.
 
 ------------------------------------------------------------------------
 

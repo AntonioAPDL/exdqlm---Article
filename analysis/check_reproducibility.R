@@ -518,8 +518,7 @@ main <- function() {
     "analysis/lib/manuscript_setup.R",
     "analysis/manuscript/examples/ex2_sunspots/run.R",
     "analysis/manuscript/examples/ex3_big_tree/run.R",
-    "exdqlm-jss.tex",
-    "exdqlm-appendix.tex"
+    "exdqlm-jss.tex"
   ))
   kl_patterns <- c(
     "FNN::KL",
@@ -596,10 +595,11 @@ main <- function() {
   tex_path <- file.path(repo_root, "exdqlm-jss.tex")
   if (file.exists(tex_path)) {
     tex <- readLines(tex_path, warn = FALSE)
-    rp_count <- sum(grepl("From RP|color\\{magenta\\}", tex))
-    line("RP/magenta markers", rp_count)
+    review_marker_patterns <- paste(c(paste("From", "RP"), paste0("color\\{", "magenta", "\\}")), collapse = "|")
+    rp_count <- sum(grepl(review_marker_patterns, tex))
+    line("coauthor-review markers", rp_count)
     if (rp_count > 0L) {
-      warn("Manuscript still contains Raquel Prado/magenta review markers.")
+      warn("Manuscript still contains coauthor-review markers.")
     }
   }
 

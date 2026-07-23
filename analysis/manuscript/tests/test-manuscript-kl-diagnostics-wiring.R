@@ -4,8 +4,7 @@ testthat::test_that("canonical manuscript KL diagnostics use deterministic packa
     "analysis/manuscript/examples/ex2_sunspots/run.R",
     "analysis/manuscript/examples/ex3_big_tree/run.R",
     "analysis/manuscript/REPRODUCIBILITY_PROTOCOL.md",
-    "exdqlm-jss.tex",
-    "exdqlm-appendix.tex"
+    "exdqlm-jss.tex"
   ))
 
   text <- unlist(lapply(canonical, readLines, warn = FALSE), use.names = FALSE)

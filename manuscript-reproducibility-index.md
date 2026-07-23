@@ -65,9 +65,7 @@ is generated from `code.R` with `knitr::spin("code.R", knit = TRUE)`.
 - `code.html`: execution log generated from `code.R`.
 - `examples.R`: compact reader-facing examples following the preferred package
   API shown in the article.
-- `exdqlm-jss.tex`: manuscript source.
-- `exdqlm-appendix.tex`: appendix source input included by
-  `exdqlm-jss.tex`.
+- `exdqlm-jss.tex`: manuscript source, including the appendices.
 - `analysis/config/params_manuscript.yml`: seeds, profile settings, expected
   package version, and backend profile.
 - `analysis/manuscript/examples/`: canonical scripts for Examples 1--4.

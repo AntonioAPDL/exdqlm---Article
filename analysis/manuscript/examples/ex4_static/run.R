@@ -21,7 +21,6 @@ if (!need_ex4) {
   ldvb_max_iter_tail <- as.integer(cfg_ex4$ldvb_max_iter_tail)
   ldvb_tol <- as.numeric(cfg_ex4$ldvb_tol)
   n_samp <- as.integer(cfg_ex4$n_samp %||% 200L)
-  ldvb_n_samp_xi <- as.integer(cfg_ex4$ldvb_n_samp_xi)
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
   thin <- as.integer(cfg_ex4$thin %||% 1L)
@@ -29,11 +28,16 @@ if (!need_ex4) {
   ex4_seed <- as.integer(ex4_seed_info$seed)
   rhs_ctrl <- ex4_build_rhs_ctrl(cfg_ex4)
   cache_key <- sprintf(
-    "ex4_static_rhsns_sparse_seed_%d_ns%d_b%d_k%d_v4",
+    "ex4_static_rhsns_sparse_seed_%d_ns%d_b%d_k%d_tau%03d_zeta%03d_tol%s_iter%d_%d_v5",
     ex4_seed,
     n_samp,
     n_burn,
-    n_mcmc
+    n_mcmc,
+    round(1000 * rhs_ctrl$tau0),
+    round(1000 * rhs_ctrl$zeta2_fixed),
+    gsub("[^0-9A-Za-z]+", "_", format(ldvb_tol)),
+    ldvb_max_iter,
+    ldvb_max_iter_tail
   )
   ex4_obj <- NULL
   if (!force_refit && identical(ex4_seed_info$source, "screen_selection")) {
@@ -66,8 +70,8 @@ if (!need_ex4) {
     cat(sprintf("cov_rho=%0.2f, sigma_eps=%0.2f\n", cov_rho, sigma_eps))
     cat(sprintf("beta_slopes=%s\n", paste(format(ex4_obj$beta_slopes, trim = TRUE), collapse = ", ")))
     cat(sprintf(
-      "rhs_ctrl: tau0=%0.3f, a_zeta=%0.3f, b_zeta=%0.3f, zeta2_fixed=%0.3f\n",
-      rhs_ctrl$tau0, rhs_ctrl$a_zeta, rhs_ctrl$b_zeta, rhs_ctrl$zeta2_fixed
+      "rhs_ctrl: tau0=%0.3f, zeta2_fixed=%0.3f, shrink_intercept=%s\n",
+      rhs_ctrl$tau0, rhs_ctrl$zeta2_fixed, rhs_ctrl$shrink_intercept
     ))
     cat(sprintf("p_levels=%s\n\n", paste(format(p_levels, digits = 2), collapse = ", ")))
     for (nm in names(ex4_obj$fits)) {

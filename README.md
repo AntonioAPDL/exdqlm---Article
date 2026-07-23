@@ -21,7 +21,7 @@ For the revised JSS submission, the files to upload are:
 - `exdqlm_1.1.0.tar.gz`: `exdqlm` package source tarball.
 - `exdqlm-jss-replication.tar.gz`: article source and replication materials,
   including `README.md`, `code.R`, `code.html`, `examples.R`, `analysis/`,
-  `exdqlm-jss.tex`, `exdqlm-appendix.tex`, and the supporting manuscript files.
+  `exdqlm-jss.tex`, and the supporting manuscript files.
 - `response-to-editor.pdf`: point-by-point response to the JSS comments.
 
 The Overleaf/Git repository is the working article source. It is not meant to
@@ -32,9 +32,7 @@ intermediate files.
 ## Contents
 
 - `exdqlm-jss.tex`, `exdqlm-jss.pdf`: manuscript source and compiled PDF. The
-  compiled manuscript PDF includes the technical appendices.
-- `exdqlm-appendix.tex`: appendix source input used by `exdqlm-jss.tex`.
-  It is not a separate submitted manuscript PDF.
+  manuscript source and compiled PDF include the technical appendices.
 - `code.R`: standalone replication script for the manuscript results.
 - `code.html`: HTML log generated from `code.R` with `knitr::spin()`.
 - `examples.R`: reader-facing companion script collecting the main code

@@ -208,7 +208,7 @@ A final reproducibility sync should have:
 - package check passing with 0 errors, 0 warnings, and 0 notes;
 - article manuscript tests passing under the same R;
 - author maintenance checks with no unresolved warnings relevant to submission;
-- no `From RP`, `TODO`, or `\color{magenta}` markers;
+- no coauthor-review markers, unresolved placeholders, or review-color commands;
 - no stale stochastic/FNN KL wiring in canonical manuscript files;
 - no article-local CRPS/check-loss redefinitions for Example 3 forecast scores;
 - explicit RNG and benchmark-backend provenance recorded in
