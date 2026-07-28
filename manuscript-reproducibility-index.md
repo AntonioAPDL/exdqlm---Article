@@ -11,8 +11,9 @@ main code patterns shown in the manuscript; it is not a replacement for
 The revised submission targets the `exdqlm` package version recorded in
 `analysis/config/params_manuscript.yml`. Install the submitted package source
 tarball before running a full replication. The generated environment table
-records the exact package version, commit, R version, random-number generator,
-backend profile, and platform used for the author benchmark run.
+records the exact package version, source identifier when available, R version,
+random-number generator, backend profile, and platform used for the author
+benchmark run.
 
 ## Public replication entrypoints
 
