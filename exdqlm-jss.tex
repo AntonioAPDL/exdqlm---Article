@@ -1000,7 +1000,7 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0
  & MCMC & 423.47 & 0.195 & \textbf{5.111} & \textbf{2190.8} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.0, package source commit \code{4c50b07}, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.0, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1111,21 +1111,21 @@ by an initial coarse scan, the replication script fits the transfer model over
 the smallest posterior predictive loss criterion (PPLC) from
 \code{diagnostics()}. The held-out months are not used in this selection
 step. The following code shows the selection pattern used by the replication
-script. The list \code{vb.ctrl} sets the LDVB iteration cap used
-in the replication run, so the displayed code records the same convergence
-control as the executable script.
+script. The option \code{exdqlm.max\_iter} sets the LDVB iteration cap used in
+the replication run, so the displayed code records the same convergence control
+as the executable script.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> lambda.grid = c(0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.99)
-R> vb.ctrl = list(max_iter = 600L)
+R> old.opt = options(exdqlm.max_iter = 600L)
 R> pplc.grid = rep(NA_real_, length(lambda.grid))
 R> for (i in seq_along(lambda.grid)) {
 +   set.seed(20264001 + i)
 +   temp.MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model, df = c(0.99, 0.99),
 +                 dim.df = c(1, 6), X = X.train, tf.df = c(0.99, 1), lam = lambda.grid[i],
 +                 tf.m0 = rep(0, 3), tf.C0 = diag(c(0.1, 1, 1), 3), sig.init = 0.1,
-+                 gam.init = -0.1, n.samp = 1000, tol = 0.05, vb_control = vb.ctrl, verbose = FALSE)
++                 gam.init = -0.1, n.samp = 1000, tol = 0.05, verbose = FALSE)
 +   temp.diag = diagnostics(temp.MTF)
 +   pplc.grid[i] = temp.diag$m1.pplc
 +   }
@@ -1151,17 +1151,18 @@ The final models are fit on January 1987 through June 2021. We use the LDVB impl
 R> set.seed(20264101)
 R> M0 = exdqlmLDVB(y = y.train, p0 = 0.15, model = model, df = c(0.99, 0.99),
 +                dim.df = c(1, 6), sig.init = 0.1, gam.init = -0.1,
-+                n.samp = 1000, tol = 0.05, vb_control = vb.ctrl, verbose = FALSE)
++                n.samp = 1000, tol = 0.05, verbose = FALSE)
 R> reg.comp = regMod(X.train, m0 = rep(0, 2), C0 = diag(1, 2))
 R> set.seed(20264301)
 R> MREG = exdqlmLDVB(y = y.train, p0 = 0.15, model = model + reg.comp, df = c(0.99, 0.99, 1),
 +                dim.df = c(1, 6, 2), sig.init = 0.1, gam.init = -0.1,
-+                n.samp = 1000, tol = 0.05, vb_control = vb.ctrl, verbose = FALSE)
++                n.samp = 1000, tol = 0.05, verbose = FALSE)
 R> set.seed(20264201)
 R> MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model, df = c(0.99, 0.99),
 +                dim.df = c(1, 6), X = X.train, tf.df = c(0.99, 1), lam = lambda.star,
 +                tf.m0 = rep(0, 3), tf.C0 = diag(c(0.1, 1, 1), 3), sig.init = 0.1,
-+                gam.init = -0.1, n.samp = 1000, tol = 0.05, vb_control = vb.ctrl, verbose = FALSE)
++                gam.init = -0.1, n.samp = 1000, tol = 0.05, verbose = FALSE)
+R> options(old.opt)
 \end{CodeInput}
 \end{CodeChunk}
 

@@ -297,7 +297,8 @@ if (!need_ex3) {
   if (!is.finite(max_iter) || max_iter < 1L) {
     stop("Example 3 max_iter must be a positive integer.", call. = FALSE)
   }
-  vb_control <- list(max_iter = max_iter)
+  old_exdqlm_max_iter <- getOption("exdqlm.max_iter", NULL)
+  options(exdqlm.max_iter = max_iter)
   lambda_grid <- as.numeric(ex3_cfg$lambda_grid)
   lambda_grid <- sort(unique(lambda_grid[is.finite(lambda_grid) & lambda_grid > 0 & lambda_grid < 1]))
   if (!length(lambda_grid)) stop("Example 3 lambda_grid must contain values in (0, 1).", call. = FALSE)
@@ -338,7 +339,6 @@ if (!need_ex3) {
       sig.init = sig_init, gam.init = gam_init,
       fix.sigma = FALSE,
       tol = tol, n.samp = n_samp,
-      vb_control = vb_control,
       verbose = FALSE
     )
     attr(fit, "ex3_base_model") <- base_model
@@ -358,7 +358,6 @@ if (!need_ex3) {
       sig.init = sig_init, gam.init = gam_init,
       fix.sigma = FALSE,
       tol = tol, n.samp = n_samp,
-      vb_control = vb_control,
       verbose = FALSE
     )
     attr(fit, "ex3_base_model") <- base_model
@@ -376,7 +375,6 @@ if (!need_ex3) {
       sig.init = sig_init, gam.init = gam_init,
       fix.sigma = FALSE,
       tol = tol, n.samp = n_samp,
-      vb_control = vb_control,
       verbose = FALSE
     )
     attr(fit, "ex3_base_model") <- base_model
@@ -989,4 +987,9 @@ if (!need_ex3) {
   }
 
   log_msg("Example 3 (Big Tree): complete")
+  if (is.null(old_exdqlm_max_iter)) {
+    options(exdqlm.max_iter = NULL)
+  } else {
+    options(exdqlm.max_iter = old_exdqlm_max_iter)
+  }
 }

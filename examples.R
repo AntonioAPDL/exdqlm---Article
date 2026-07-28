@@ -220,7 +220,7 @@ seas.comp = seasMod(p = 12, h = c(1, 2, 0.1469118636),
 model = trend.comp + seas.comp
 
 lambda.grid = c(0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.99)
-vb.ctrl = list(max_iter = 600L)
+old.opt = options(exdqlm.max_iter = 600L)
 pplc.grid = rep(NA_real_, length(lambda.grid))
 for (i in seq_along(lambda.grid)) {
   set.seed(20264001 + i)
@@ -230,8 +230,7 @@ for (i in seq_along(lambda.grid)) {
                                   lam = lambda.grid[i], tf.m0 = rep(0, 3),
                                   tf.C0 = diag(c(0.1, 1, 1), 3),
                                   sig.init = 0.1, gam.init = -0.1,
-                                  n.samp = 1000, tol = 0.05,
-                                  vb_control = vb.ctrl, verbose = FALSE)
+                                  n.samp = 1000, tol = 0.05, verbose = FALSE)
   temp.diag = diagnostics(temp.MTF)
   pplc.grid[i] = temp.diag$m1.pplc
   }
@@ -242,16 +241,14 @@ set.seed(20264101)
 M0 = exdqlmLDVB(y = y.train, p0 = 0.15, model = model,
                    df = c(0.99, 0.99), dim.df = c(1, 6),
                    sig.init = 0.1, gam.init = -0.1,
-                   n.samp = 1000, tol = 0.05,
-                   vb_control = vb.ctrl, verbose = FALSE)
+                   n.samp = 1000, tol = 0.05, verbose = FALSE)
 reg.comp = regMod(X.train, m0 = rep(0, 2), C0 = diag(1, 2))
 set.seed(20264301)
 MREG = exdqlmLDVB(y = y.train, p0 = 0.15,
                      model = model + reg.comp,
                      df = c(0.99, 0.99, 1), dim.df = c(1, 6, 2),
                      sig.init = 0.1, gam.init = -0.1,
-                     n.samp = 1000, tol = 0.05,
-                     vb_control = vb.ctrl, verbose = FALSE)
+                     n.samp = 1000, tol = 0.05, verbose = FALSE)
 set.seed(20264201)
 MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
                             df = c(0.99, 0.99), dim.df = c(1, 6),
@@ -259,8 +256,8 @@ MTF = exdqlmTransferLDVB(y = y.train, p0 = 0.15, model = model,
                             lam = lambda.star, tf.m0 = rep(0, 3),
                             tf.C0 = diag(c(0.1, 1, 1), 3),
                             sig.init = 0.1, gam.init = -0.1,
-                            n.samp = 1000, tol = 0.05,
-                            vb_control = vb.ctrl, verbose = FALSE)
+                            n.samp = 1000, tol = 0.05, verbose = FALSE)
+options(old.opt)
 
 par(mfrow = c(3, 1), mar = c(2.8, 4.4, 1.0, 0.9),
        oma = c(1.8, 0, 0, 0))
