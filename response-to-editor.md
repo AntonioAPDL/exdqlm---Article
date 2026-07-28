@@ -10,8 +10,8 @@ guidance on how to make the submission more suitable for review by the
 material as a new submission, together with this point-by-point
 response. The revised manuscript, package, and replication materials now
 put the software contribution first, use a clearer R object and method
-design, and provide a standalone replication archive centered on a
-single reader-facing `code.R` script.
+design, and provide standalone replication materials organized around
+`code.R`.
 
 The current submission files are:
 
@@ -33,13 +33,14 @@ CRAN and is distributed under the MIT License, which is GPL-compatible.
   prior methodology is separated from the software contribution, with
   the extended asymmetric Laplace (exAL) family/static exAL regression,
   the extended dynamic quantile linear model (exDQLM), the original
-  Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes
-  (ISVB) strategy, transfer-function methodology, and the general
-  nonconjugate variational inference strategy of Wang and Blei identified as
-  methodological foundations. The revised text then states the software
-  contribution of the present article and a new package design and
-  implementation section describes the S3 object workflow, fitting engines,
-  exAL distribution utilities, C++ backend paths, diagnostics,
+  Markov chain Monte Carlo (MCMC) and importance-sampling variational
+  Bayes (ISVB) strategy, transfer-function methodology, and the general
+  nonconjugate variational inference strategy of Wang and Blei
+  identified as methodological foundations. The revised text then states
+  the software contribution of the present article and a new package
+  design and implementation section describes the S3 object workflow,
+  fitting engines, exAL distribution utilities,
+  <span class="sans-serif">C++</span> backend paths, diagnostics,
   forecasting, plotting, and extension points.
 
 - Revised the package design for standard R use: fitted dynamic and
@@ -49,18 +50,18 @@ CRAN and is distributed under the MIT License, which is GPL-compatible.
   `predict()`, and `diagnostics()` are used where natural.
 
 - Clarified the computational contributions beyond the earlier
-  methodological papers: Laplace--delta variational Bayes (LDVB) is now
-  the main variational route for the nonconjugate scale--skewness block.
+  methodological papers: Laplace–delta variational Bayes (LDVB) is now
+  the main variational route for the nonconjugate scale–skewness block.
   This is presented as a model-specific adaptation and implementation of
-  the Laplace--delta strategy for nonconjugate models, with legacy ISVB
+  the Laplace–delta strategy for nonconjugate models, with legacy ISVB
   retained for historical comparisons. The revised manuscript also
-  identifies documented exAL density/cumulative distribution/quantile/
-  sampling utilities, continuous ranked probability score (CRPS) and
-  posterior predictive loss criterion (PPLC) computations for predictive
-  comparison, held-out forecast diagnostics, and the static `rhs_ns`
-  implementation with closed-form shrinkage-block MCMC and
-  variational Bayes updates and evidence lower bound (ELBO) contributions
-  documented in the appendices.
+  identifies documented exAL density/cumulative
+  distribution/quantile/sampling utilities, continuous ranked
+  probability score (CRPS) and posterior predictive loss criterion
+  (PPLC) computations for predictive comparison, held-out forecast
+  diagnostics, and the static `rhs_ns` implementation with closed-form
+  shrinkage-block MCMC and variational Bayes updates and evidence lower
+  bound (ELBO) contributions documented in the appendices.
 
 - Rewrote the replication materials as a standalone JSS archive. The
   public workflow is now centered on `Rscript code.R`, with documented
@@ -80,16 +81,16 @@ CRAN and is distributed under the MIT License, which is GPL-compatible.
 
 For cross-reference, the main manuscript changes appear in the revised
 Introduction and software-comparison discussion (G1), the diagnostics
-and forecasting section (D9--D10), the new package design and
-implementation section and workflow table (G3, D6--D10), the revised
-reader-facing example code and replication discussion (G2, D1--D5),
-Examples 3 and 4 (D6, D9--D10), the rewritten conclusion (G1), and the
-streamlined integrated appendices (D11). The corresponding package changes are
-reflected in the 1.1.0 source tarball, `DESCRIPTION`, `NEWS.md`,
-`NAMESPACE`, the help pages, and the test suite. The
+and forecasting section (D9–D10), the new package design and
+implementation section and workflow table (G3, D6–D10), the revised
+reader-facing example code and replication discussion (G2, D1–D5),
+Examples 3 and 4 (D6, D9–D10), the rewritten conclusion (G1), and the
+streamlined integrated appendices (D11). The corresponding package
+changes are reflected in the 1.1.0 source tarball, `DESCRIPTION`,
+`NEWS.md`, `NAMESPACE`, the help pages, and the test suite. The
 replication-material changes are reflected in the submitted archive
-README, `code.R`, `code.html`, reproducibility index, and reproducibility
-protocol.
+README, `code.R`, `code.html`, reproducibility index, and
+reproducibility protocol.
 
 # General Editorial Comments
 
@@ -105,36 +106,33 @@ protocol.
 
 ------------------------------------------------------------------------
 
-> We agree. The revised manuscript now separates the methodological
-> foundations from the JSS software contribution more explicitly. It
-> identifies Yan, Zheng, and Kottas as the source for the extended
-> asymmetric Laplace (exAL) family and static exAL regression framework,
-> and Barata, Prado, and Sansó as the source for the extended dynamic
-> quantile linear model (exDQLM), the original dynamic Markov chain Monte
-> Carlo (MCMC) and importance-sampling variational Bayes (ISVB) strategy, and
-> the transfer-function extension. The revision also identifies Wang and
-> Blei as the source of the general Laplace--delta strategy for variational
-> inference in nonconjugate models. The manuscript then states that the
-> contribution of the present article is software-centered: <span
-> class="sans-serif">exdqlm</span> provides a public R workflow for
-> dynamic and static Bayesian quantile modeling, including shared
-> fitted-object families, MCMC and LDVB fitting interfaces, a
-> model-specific LDVB adaptation for the exAL scale--skewness block,
-> documented exAL distribution utilities, compiled backend paths for selected numerical computations,
-> diagnostic objects, deterministic Kullback--Leibler (KL) calibration
-> diagnostics, continuous ranked probability score (CRPS) and posterior
-> predictive loss criterion (PPLC) computations, transfer-function wrappers,
-> static asymmetric Laplace (AL)/exAL regression with `rhs_ns`
-> shrinkage-prior support, posterior predictive synthesis, standard R
-> methods, examples, appendices, and replication materials. The revised
-> introduction also includes a compact package-level contribution list so
-> that the scope of the JSS submission is visible before the methodological
-> and example sections.
+> The revised manuscript now separates the methodological foundations
+> from the JSS software contribution more explicitly. It identifies Yan,
+> Zheng, and Kottas as the source for the extended asymmetric Laplace
+> (exAL) family and static exAL regression framework, and Barata, Prado,
+> and Sansó as the source for the extended dynamic quantile linear model
+> (exDQLM), the original dynamic MCMC and importance-sampling
+> variational Bayes (ISVB) strategy, and the transfer-function
+> extension. The revision also identifies Wang and Blei as the source of
+> the general Laplace–delta strategy for variational inference in
+> nonconjugate models.
 >
-> We also added a dedicated package design and implementation section
-> before the examples. The new section describes the package architecture
-> before the reader reaches the examples and separates the software
-> interface from the mathematical background and algorithmic appendices.
+> The manuscript then explains that the contribution of the present
+> article is software-centered. The
+> <span class="sans-serif">exdqlm</span> package brings these methods
+> together in a public <span class="sans-serif">R</span> implementation
+> with a common object system and standard methods for fitting,
+> examining, diagnosing, plotting, and forecasting models. It provides
+> MCMC and LDVB inference for dynamic and static models, selected
+> compiled routines for faster computation, predictive diagnostics,
+> transfer-function models, and synthesis across separately fitted
+> quantiles. The article also provides examples, technical appendices,
+> and complete replication materials.
+>
+> We also added a new package design and implementation section before
+> the examples. This section describes the package architecture, fitted
+> and returned objects, available methods, computational options, and
+> ways in which the package can be extended.
 
 ------------------------------------------------------------------------
 
@@ -150,8 +148,8 @@ protocol.
 
 ------------------------------------------------------------------------
 
-> We rewrote the replication archive around a single public entrypoint,
-> `code.R`. The first-page replication command is now:
+> We rewrote the replication materials with `code.R` as the main public
+> replication file. The first-page replication command is now:
 > ``` math
 > \texttt{Rscript code.R}.
 > ```
@@ -290,11 +288,11 @@ protocol.
 > We removed the whole-workflow `main()` wrapper from the reader-facing
 > `code.R`. The revised script is organized as a direct, commented
 > replication script with small helper functions only where they clarify
-> repeated tasks. The example scripts still write the manuscript
-> figures, tables, logs, and provenance files to documented locations,
-> and the public script can be sourced or run with `Rscript`. This makes
-> the replication path easier to inspect and adapt while preserving the
-> tested manuscript-generation workflow.
+> repeated tasks. The example scripts write the manuscript figures,
+> tables, and logs to documented locations, and their code can be
+> inspected and adapted independently. This makes the replication
+> workflow easier to understand and modify while preserving the tested
+> process used to generate the manuscript results.
 
 ------------------------------------------------------------------------
 
@@ -401,17 +399,21 @@ protocol.
 
 ------------------------------------------------------------------------
 
-> We revised the post-processing workflow to be more object-centered.
-> Operations that naturally display, summarize, plot, or predict from an
-> existing object now use standard methods where appropriate. For
-> example, fitted dynamic objects can be used with `plot()`,
-> `predict()`, and `diagnostics()`; forecast objects can be scored with
-> `diagnostics(forecast, y = ...)`; and static fits can be diagnosed
-> with `diagnostics(static_fit, ...)`. These methods return explicit
-> objects that can be printed, summarized, and plotted where a display is
-> defined. We retained the named helper functions as explicit and
-> backward-compatible entry points, but the revised manuscript examples
-> and Table 6 emphasize the standard method workflow.
+> We revised the post-processing workflow to make better use of
+> <span class="sans-serif">R</span> methods. Operations applied to an
+> existing fitted or forecast object now use methods where appropriate.
+> For example, fitted dynamic objects support `plot()`, `predict()`, and
+> `diagnostics()`; forecast objects can be evaluated with
+> `diagnostics()`; and static fitted objects support `plot()` and
+> `diagnostics()`. These methods return objects that can then be
+> printed, summarized, or plotted.
+>
+> We retained named functions for operations that combine information
+> from several objects rather than acting on a single object. In
+> particular, `quantileSynthesis()` combines predictive draws from
+> several separately fitted quantile models, so it remains a named
+> function. The revised manuscript explains this distinction and uses
+> the method-based workflow throughout the examples.
 
 ------------------------------------------------------------------------
 
@@ -456,11 +458,12 @@ protocol.
 > and are submitting one manuscript PDF, `exdqlm-jss.pdf`. The appendix
 > material was also streamlined to focus on posterior targets,
 > package-specific LDVB and shrinkage-prior blocks, diagnostics, and
-> predictive synthesis needed to review the software implementation.
-> The obsolete standalone supplement PDF and separate supplement
+> predictive synthesis needed to review the software implementation. The
+> obsolete standalone supplement PDF and separate supplement
 > bibliography artifact were removed from the submission bundle. The
-> appendix source is now included directly at the end of `exdqlm-jss.tex`,
-> so the manuscript source corresponds to the single compiled PDF.
+> appendix source is now included directly at the end of
+> `exdqlm-jss.tex`, so the manuscript source corresponds to the single
+> compiled PDF.
 
 ------------------------------------------------------------------------
 

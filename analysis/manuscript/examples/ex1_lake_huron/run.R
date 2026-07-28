@@ -294,6 +294,8 @@ if (!need_ex1) {
         exdqlm::quantileSynthesis(
           draws_list = list(M5, M50_dqlm, M95),
           p = c(0.05, 0.50, 0.95),
+          enforce_isotonic = TRUE,
+          rearrange = TRUE,
           T_expected = length(y),
           n_samp = synth_n_samp,
           seed = seed_value + 111L
@@ -304,6 +306,8 @@ if (!need_ex1) {
         exdqlm::quantileSynthesis(
           draws_list = list(fc05, fc50, fc95),
           p = c(0.05, 0.50, 0.95),
+          enforce_isotonic = TRUE,
+          rearrange = TRUE,
           T_expected = k_fore,
           n_samp = synth_n_samp,
           seed = seed_value + 333L

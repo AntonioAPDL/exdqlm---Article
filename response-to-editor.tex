@@ -51,8 +51,8 @@ on how to make the submission more suitable for review by the \emph{Journal of
 Statistical Software}. We are submitting the revised material as a new
 submission, together with this point-by-point response. The revised manuscript,
 package, and replication materials now put the software contribution first,
-use a clearer R object and method design, and provide a standalone replication
-archive centered on a single reader-facing \code{code.R} script.
+use a clearer R object and method design, and provide standalone replication
+materials organized around \code{code.R}.
 
 The current submission files are:
 \begin{itemize}
@@ -136,35 +136,30 @@ already been published and what constitutes the specific contribution for
 
 \responseheading
 \begin{responsebox}
-We agree. The revised manuscript now separates the methodological foundations
+The revised manuscript now separates the methodological foundations
 from the JSS software contribution more explicitly. It identifies
 Yan, Zheng, and Kottas as the source for the extended asymmetric Laplace (exAL)
 family and static exAL regression framework, and Barata, Prado, and Sans\'o as
 the source for the extended dynamic quantile linear model (exDQLM), the
-original dynamic Markov chain Monte Carlo (MCMC) and importance-sampling
+original dynamic MCMC and importance-sampling
 variational Bayes (ISVB) strategy, and the transfer-function extension. The
 revision also identifies Wang and Blei as the source of the general
-Laplace--delta strategy for variational inference in nonconjugate models. The
-manuscript then states that the contribution of the present article is
-software-centered: \pkg{exdqlm} provides a public \proglang{R} workflow for
-dynamic and static Bayesian quantile modeling, including shared fitted-object
-families, MCMC and LDVB fitting interfaces, a model-specific LDVB adaptation
-for the exAL scale--skewness block, documented exAL distribution utilities,
-compiled backend paths for selected numerical computations, deterministic
-diagnostic objects, deterministic Kullback--Leibler (KL) calibration
-diagnostics, continuous ranked probability score (CRPS) and posterior predictive
-loss criterion (PPLC) computations, transfer-function wrappers, static
-asymmetric Laplace (AL)/exAL regression with \code{rhs\_ns} shrinkage-prior
-support, posterior predictive synthesis, standard \proglang{R} methods,
-examples, appendices, and replication materials.
-The revised introduction also includes a compact package-level contribution
-list so that the scope of the JSS submission is visible before the
-methodological and example sections.
+Laplace--delta strategy for variational inference in nonconjugate models.
 
-We also added a dedicated package design and implementation section before the
-examples. The new section describes the package architecture before the reader
-reaches the examples and separates the software interface from the mathematical
-background and algorithmic appendices.
+The manuscript then explains that the contribution of the present article is
+software-centered. The \pkg{exdqlm} package brings these methods together in a
+public \proglang{R} implementation with a common object system and standard
+methods for fitting, examining, diagnosing, plotting, and forecasting models. It
+provides MCMC and LDVB inference for dynamic and static models, selected
+compiled routines for faster computation, predictive diagnostics,
+transfer-function models, and synthesis across separately fitted quantiles. The
+article also provides examples, technical appendices, and complete replication
+materials.
+
+We also added a new package design and implementation section before the
+examples. This section describes the package architecture, fitted and returned
+objects, available methods, computational options, and ways in which the package
+can be extended.
 \end{responsebox}
 
 \commentheading{G2}
@@ -175,8 +170,8 @@ option should be used to re-run all computations and obtain the article results.
 
 \responseheading
 \begin{responsebox}
-We rewrote the replication archive around a single public entrypoint,
-\code{code.R}. The first-page replication command is now:
+We rewrote the replication materials with \code{code.R} as the main public
+replication file. The first-page replication command is now:
 \[
 \code{Rscript code.R}.
 \]
@@ -292,10 +287,10 @@ the examples to their own analyses.
 We removed the whole-workflow \code{main()} wrapper from the reader-facing
 \code{code.R}. The revised script is organized as a direct, commented
 replication script with small helper functions only where they clarify repeated
-tasks. The example scripts still write the manuscript figures, tables, logs, and
-provenance files to documented locations, and the public script can be sourced
-or run with \code{Rscript}. This makes the replication path easier to inspect
-and adapt while preserving the tested manuscript-generation workflow.
+tasks. The example scripts write the manuscript figures, tables, and logs to
+documented locations, and their code can be inspected and adapted independently.
+This makes the replication workflow easier to understand and modify while
+preserving the tested process used to generate the manuscript results.
 \end{responsebox}
 
 \commentheading{D5}
@@ -379,16 +374,20 @@ seem more natural with a suitable class and method system.
 
 \responseheading
 \begin{responsebox}
-We revised the post-processing workflow to be more object-centered. Operations
-that naturally display, summarize, plot, or predict from an existing object now
-use standard methods where appropriate. For example, fitted dynamic objects can
-be used with \code{plot()}, \code{predict()}, and \code{diagnostics()}; forecast
-objects can be scored with \code{diagnostics(forecast, y = ...)}; and static
-fits can be diagnosed with \code{diagnostics(static\_fit, ...)}. These methods
-return explicit objects that can be printed, summarized, and plotted where a
-display is defined. We retained the named helper functions as explicit and
-backward-compatible entry points, but the revised manuscript examples and Table
-6 emphasize the standard method workflow.
+We revised the post-processing workflow to make better use of \proglang{R}
+methods. Operations applied to an existing fitted or forecast object now use
+methods where appropriate. For example, fitted dynamic objects support
+\code{plot()}, \code{predict()}, and \code{diagnostics()}; forecast objects can
+be evaluated with \code{diagnostics()}; and static fitted objects support
+\code{plot()} and \code{diagnostics()}. These methods return objects that can
+then be printed, summarized, or plotted.
+
+We retained named functions for operations that combine information from several
+objects rather than acting on a single object. In particular,
+\code{quantileSynthesis()} combines predictive draws from several separately
+fitted quantile models, so it remains a named function. The revised manuscript
+explains this distinction and uses the method-based workflow throughout the
+examples.
 \end{responsebox}
 
 \commentheading{D10}

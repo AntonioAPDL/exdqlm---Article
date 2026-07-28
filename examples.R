@@ -81,11 +81,15 @@ plot(fc05, add = TRUE, cols = c("forest green", "green"))
 syn.obs = quantileSynthesis(
   draws_list = list(M5, M50.dqlm, M95),
   p = c(0.05, 0.50, 0.95),
+  enforce_isotonic = TRUE,
+  rearrange = TRUE,
   T_expected = length(LakeHuron))
 
 syn.fore = quantileSynthesis(
   draws_list = list(fc05, fc50, fc95),
   p = c(0.05, 0.50, 0.95),
+  enforce_isotonic = TRUE,
+  rearrange = TRUE,
   T_expected = 8)
 
 synth.obs.col = adjustcolor("#F7D6DE", alpha.f = 0.40)

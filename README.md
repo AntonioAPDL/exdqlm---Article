@@ -24,10 +24,9 @@ For the revised JSS submission, the files to upload are:
   `exdqlm-jss.tex`, and the supporting manuscript files.
 - `response-to-editor.pdf`: point-by-point response to the JSS comments.
 
-The Overleaf/Git repository is the working article source. It is not meant to
-be uploaded file-by-file. The replication archive is built from this source
-after removing local scratch files, fit caches, audit notes, and LaTeX
-intermediate files.
+The working article source is not meant to be uploaded file-by-file. The
+replication archive is built from this source after removing local scratch
+files, fit caches, audit notes, and LaTeX intermediate files.
 
 ## Contents
 

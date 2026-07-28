@@ -193,7 +193,7 @@ The exAL distribution, introduced by \citet{yan2025family}, extends the location
 &\quad \times \Exp(v_t \mid \sigma) \N^+(s_t \mid 0,1) \mathrm{d}v_t \mathrm{d}s_t.
 \end{aligned}
 \end{equation}
-Here, $p = p(p_0,\gamma) = I(\gamma <0) + \{[p_0 - I(\gamma <0)]/g(\gamma) \}$ where $g(\gamma) = 2\Phi(-|\gamma|)\exp(\gamma^2/2)$, $\Phi(\cdot)$ denotes the standard normal CDF, and $I(\cdot)$ is the indicator function. $A(p)$, $B(p)$, $C(p,\gamma)$ are the functions of $p$ and $\gamma$: $A(p) = \frac{1-2p}{p(1-p)}$, $B(p) = \frac{2}{p(1-p)}$, $C(p,\gamma) = [I(\gamma>0) -p]^{-1}$. Lastly, $\Exp(v \mid \sigma)$ denotes the exponential distribution with mean $\sigma$, and $\N^+(s_t \mid 0,1)$ denotes a normal distribution truncated to the positive reals with mean $0$ and variance $1$. \textcolor{red}{Introducing} the latent variables $v_t$ and $s_t$ gives the hierarchical representation:
+Here, $p = p(p_0,\gamma) = I(\gamma <0) + \{[p_0 - I(\gamma <0)]/g(\gamma) \}$ where $g(\gamma) = 2\Phi(-|\gamma|)\exp(\gamma^2/2)$, $\Phi(\cdot)$ denotes the standard normal CDF, and $I(\cdot)$ is the indicator function. $A(p)$, $B(p)$, $C(p,\gamma)$ are the functions of $p$ and $\gamma$: $A(p) = \frac{1-2p}{p(1-p)}$, $B(p) = \frac{2}{p(1-p)}$, $C(p,\gamma) = [I(\gamma>0) -p]^{-1}$. Lastly, $\Exp(v \mid \sigma)$ denotes the exponential distribution with mean $\sigma$, and $\N^+(s_t \mid 0,1)$ denotes a normal distribution truncated to the positive reals with mean $0$ and variance $1$. Introducing the latent variables $v_t$ and $s_t$ gives the hierarchical representation:
 \begin{align}
 \label{EQ:exDQLMobs}
 y_t | \vect{\theta}_t,\sigma,\gamma,v_t,s_t  & \sim \N(y_t \mid \mat{F}_t^\top \vect{\theta}_t + C(p,\gamma) \sigma |\gamma| s_t + A(p) v_t,\sigma B(p) v_t) \\
@@ -682,7 +682,7 @@ R> model = polytrendMod(order = 2, m0 = c(579, 0), C0 = 10 * diag(2))
 \end{CodeChunk}
 
 As an illustration we fix a single discount factor of $0.9$ to define the evolution covariance matrix $\mat{W}_t$.
- \textcolor{red}{Discount factors can also be selected using in-smaple diagnostic criteria, as illustrated in Section \ref{sec:ex2}.}
+ Discount factors can also be selected using in-sample diagnostic criteria, as illustrated in Section \ref{sec:ex2}.
  The prior location parameters for \(\gamma\) are quantile-specific: they are set to zero for the median and shifted in opposite directions for the upper and lower tails to provide tail-specific regularization within the admissible support. In these fits, the scale parameter is 0.1 and the number of degrees of freedom is 1. These quantities specify prior information and do not determine the MCMC starting values.
  In the fits shown here we use \code{n.burn = 2000} and \code{n.mcmc = 3000}. The computation uses the backend settings described in Section \ref{sec:design}; backend and runtime provenance for the manuscript run are recorded in the replication logs.
 
@@ -724,10 +724,7 @@ R> coda::densplot(gamma.trace, main = "gamma density")
 \end{CodeInput}
 \end{CodeChunk}
 
-\textcolor{red}{\bf RP: This is still a bit confusing. Why do we need to do this run with 7000 \code{n.burn} and 3000 \code{n.mcmc} but then when we fix the gamma below we go with  \code{n.burn=2000} and \code{n.mcmc=3000}? Either both should have the same or if a reduced number of iterations is used for \code{M50.dqlm} below it needs to say why and explain convergence was reached with a smaller number of iterations below but for the model with gamma random we needed more iterations.}
-
-
-Because the posterior for $\gamma$ is concentrated around zero and the DQLM provides a simpler median specification, we use the fixed-$\gamma$ model for the remaining median analysis. We re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.
+The unrestricted median run is used only to assess whether the additional skewness parameter is needed at \(p_0=0.50\). We use a longer burn-in for this diagnostic run because \(\gamma\) is sampled in that fit. After the posterior for \(\gamma\) is found to be concentrated near zero, the median model used in the quantile, forecast, and synthesis panels is the fixed-\(\gamma\) DQLM \code{M50.dqlm}. Because \(\gamma\) is fixed in this model, the skewness update is removed from the MCMC kernel and we use the same 2000 burn-in iterations and 3000 retained draws used for the other main fits. We re-run the model with a point-mass prior on $\gamma$ at 0 using the settings \code{gam.init = 0} and \code{fix.gamma = TRUE}, which is equivalent to the setting \code{dqlm.ind = TRUE}. This reduces the model to the DQLM mentioned in Section \ref{sec:special}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -787,27 +784,23 @@ This generates a plot of the data with the forecasted quantile estimates and 95\
 
 When several quantile models are fitted separately, the package also allows their posterior predictive draws to be combined into a single coherent predictive distribution through \code{quantileSynthesis()}. Each fitted model contributes local predictive information near its target quantile, and the synthesis step interpolates across these quantile-specific draws to obtain one posterior predictive distribution. When independently fitted quantiles induce crossing, optional monotonicity corrections based on isotonic adjustment and monotone rearrangement are available \citep{barlow1972,chernozhukov2010}. The synthesis operates on posterior predictive draws indexed by quantile level, so the input fits need not use identical skewness restrictions. For the Lake Huron example, we combine exDQLM tail fits at \(p_0=0.05\) and \(0.95\) with the fixed-\(\gamma\) DQLM median fit \code{M50.dqlm}.
 
-{\color{red}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> syn.obs = quantileSynthesis( draws_list = list(M5, M50.dqlm, M95), p = c(0.05, 0.50, 0.95),
 +               enforce_isotonic = TRUE, rearrange = TRUE, T_expected = length(LakeHuron))
 \end{CodeInput}
 \end{CodeChunk}
-}
 
-\textcolor{red}{In the recorded manuscript run, \code{quantileSynthesis()} uses the package's isotonic adjustment and monotone rearrangement as default options,} and the stored synthesized quantile summaries have no remaining crossings over the observed period.
+The recorded manuscript run uses the package's isotonic adjustment and monotone rearrangement; these are the default correction settings and are shown explicitly in the displayed calls. The stored synthesized quantile summaries have no remaining crossings over the observed period.
 
 Because the argument \code{return.draws = TRUE} was used, each object stores posterior predictive forecast draws in the return value \code{samp.fore}. This allows us to apply the same synthesis step to the eight-step forecast horizon.
 
-{\color{red}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> syn.fore = quantileSynthesis(draws_list = list(fc05, fc50, fc95), p = c(0.05, 0.50, 0.95),
 +               enforce_isotonic = TRUE, rearrange = TRUE, T_expected = 8)
 \end{CodeInput}
 \end{CodeChunk}
-}
 
 The same correction settings are used for the forecast synthesis, and the eight-step synthesized forecast summaries are also ordered across the three input quantile levels.
 
@@ -1431,7 +1424,7 @@ Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-re
 \label{tab:ex3forecastmetrics}
 \end{table}
 
-\textcolor{red}{In the held-out comparison, \code{MREG} has the smallest check loss and CRPS, followed by the no-covariate model \code{M0}; \code{MTF} has the largest value for both metrics. Thus, selecting the transfer parameter \(\lambda\) using training-period PPLC does not make the transfer-function specification the best held-out forecasting model in this example. The purpose of \code{MTF} here is to demonstrate how persistent lagged covariate effects can be specified, inspected, and forecast using the package, rather than to claim predictive superiority over direct regression for these data.}
+In the held-out comparison, \code{MREG} has the smallest check loss and CRPS, followed by the no-covariate model \code{M0}; \code{MTF} has the largest value for both metrics. Thus, selecting the transfer parameter \(\lambda\) using training-period PPLC does not make the transfer-function specification the best held-out forecasting model in this example. The purpose of \code{MTF} here is to demonstrate how persistent lagged covariate effects can be specified, inspected, and forecast using the package, rather than to claim predictive superiority over direct regression for these data.
 
 \begin{figure}[!htb]
 \centering
@@ -1748,32 +1741,45 @@ $A_\gamma v_t+C_\gamma\sigma|\gamma|s_t$ and variance
 $\sigma B_\gamma v_t$.
 
 \subsection{Transfer-function state augmentation}
-\label{sec:transfer_function}
+\label{sec:appendix_transfer_function}
 
-\textcolor{red}{The notation here is different than in the main paper. In the main paper $\mathbf{x}_t$ is a $k$-dimensional input and $\zeta_t$ is one-dimensional. Please clarify}. 
-
-
-For an input $x_t$ and transfer lag depth $r$, the transfer-function block
-adds states
+Appendix notation follows the transfer-function formulation in Section
+\ref{sec:tf}. Let \(\mat{x}_t=(x_{1t},\ldots,x_{kt})^\top\) denote the
+\(k\)-dimensional input vector. The package augments the base dynamic state with
+a scalar accumulated transfer effect \(\zeta_t\) and a vector of instantaneous
+transfer coefficients
 \[
-\vect{\psi}_t=(\psi_{0,t},\ldots,\psi_{r,t})^\top,\qquad
-\vect{\zeta}_t=(\zeta_{0,t},\ldots,\zeta_{r,t})^\top,
+\vect{\psi}_t=(\psi_{1,t},\ldots,\psi_{k,t})^\top.
 \]
-and evolves the accumulated input effect with a lag-decay rate $\lambda$.
-In the package, $\lambda$ is user-specified or selected externally by a grid
-search. The current formulation uses a common lag-decay rate within a
-transfer block. The state augmentation used by
-\code{exdqlmTransferMCMC()} and \code{exdqlmTransferLDVB()} is
+The augmented state is
 \begin{equation}
 \vect{\theta}^{\mathrm{aug}}_t
 =
-(\vect{\theta}^{\mathrm{base}\top}_t,
-\vect{\zeta}^{\top}_t,\vect{\psi}^{\top}_t)^\top,
+(\vect{\theta}^{\mathrm{base}\top}_t,\zeta_t,\vect{\psi}_t^\top)^\top,
 \label{eq:tf_aug_state}
 \end{equation}
-with the base state-space matrices expanded to include the transfer states.
-After augmentation, the fitting algorithms are the same dynamic MCMC or LDVB
-routines used for the corresponding exDQLM.
+with observation row
+\[
+\tilde{\mat{F}}_t^\top=(\mat{F}_t^\top,1,\mat{0}_k^\top).
+\]
+For fixed transfer rate \(\lambda\), the transfer block of the evolution matrix is
+\[
+\mat{G}^{tf}_t =
+\begin{pmatrix}
+\lambda & \mat{x}_t^\top \\
+\mat{0}_k & \mat{I}_k
+\end{pmatrix},
+\]
+so that the scalar accumulated effect evolves as
+\(\zeta_t=\lambda\zeta_{t-1}+\mat{x}_t^\top\vect{\psi}_{t-1}+\omega_t\),
+while \(\vect{\psi}_t\) follows a random walk with evolution variance specified
+through the transfer-function discount factors. In Example \ref{sec:ex3},
+\(k=2\), with normalized NOI and AMO as transfer inputs; the appended transfer
+states are therefore \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
+\(\psi_{\mathrm{AMO},t}\).
+
+After this state augmentation, the fitting algorithms are the same dynamic MCMC
+or LDVB routines used for the corresponding exDQLM.
 
 \subsection{Static AL and exAL regression}
 \label{sec:static_ridge}
