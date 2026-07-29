@@ -29,27 +29,27 @@ CRAN and is distributed under the MIT License, which is GPL-compatible.
 
 # Summary of Major Revisions
 
-- Reorganized the manuscript to make the JSS contribution explicit:
-  prior methodology is separated from the software contribution, with
-  the extended asymmetric Laplace (exAL) family/static exAL regression,
-  the extended dynamic quantile linear model (exDQLM), the original
-  Markov chain Monte Carlo (MCMC) and importance-sampling variational
-  Bayes (ISVB) strategy, transfer-function methodology, and the general
-  nonconjugate variational inference strategy of Wang and Blei
-  identified as methodological foundations. The revised text then states
-  the software contribution of the present article and a new package
-  design and implementation section describes the S3 object workflow,
-  fitting engines, exAL distribution utilities,
+- We reorganized the manuscript to make the JSS contribution explicit:
+  the prior methodology is now separated from the software contribution,
+  with the extended asymmetric Laplace (exAL) family/static exAL
+  regression, the extended dynamic quantile linear model (exDQLM), the
+  original Markov chain Monte Carlo (MCMC) and importance-sampling
+  variational Bayes (ISVB) strategy, transfer-function methodology, and
+  the general nonconjugate variational inference strategy of Wang and
+  Blei identified as methodological foundations. The revised text then
+  states the software contribution and a new package design and
+  implementation section describes the S3 object workflow, fitting
+  engines, exAL distribution utilities,
   <span class="sans-serif">C++</span> backend paths, diagnostics,
   forecasting, plotting, and extension points.
 
-- Revised the package design for standard R use: fitted dynamic and
+- We revised the package design for standard R use: fitted dynamic and
   static objects now have shared superclass families,
   diagnostic/forecast/ synthesis objects are visible reusable objects,
   and standard methods such as `print()`, `summary()`, `plot()`,
   `predict()`, and `diagnostics()` are used where natural.
 
-- Clarified the computational contributions beyond the earlier
+- We clarified the computational contributions beyond the earlier
   methodological papers: Laplace–delta variational Bayes (LDVB) is now
   the main variational route for the nonconjugate scale–skewness block.
   This is presented as a model-specific adaptation and implementation of
@@ -63,17 +63,17 @@ CRAN and is distributed under the MIT License, which is GPL-compatible.
   shrinkage-block MCMC and variational Bayes updates and evidence lower
   bound (ELBO) contributions documented in the appendices.
 
-- Rewrote the replication materials as a standalone JSS archive. The
+- We rewrote the replication materials as a standalone JSS archive. The
   public workflow is now centered on `Rscript code.R`, with documented
   quick and single-example options. The public path no longer requires a
   Git checkout or internal author-maintenance modes.
 
-- Merged the former supplement into the main manuscript as appendices
+- We merged the former supplement into the main manuscript as appendices
   and streamlined the appendix material to focus on posterior targets,
   package-specific LDVB and shrinkage-prior blocks, diagnostics, and
   predictive synthesis needed for software review.
 
-- Rebuilt the final replication archive without Git metadata, author
+- We rebuilt the final replication archive without Git metadata, author
   audit notes, model-cache `.rds` files, scratch LaTeX files, or nested
   archives. We tested the archive from a fresh extraction using the
   submitted package tarball, and the archive includes the
