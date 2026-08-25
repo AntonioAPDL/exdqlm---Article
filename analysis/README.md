@@ -4,14 +4,15 @@ This folder contains the executable analysis support for the article. For JSS
 or reader-facing replication, start from the repository root:
 
 ```sh
-Rscript code.R
-Rscript code.R --quick
-Rscript code.R --example 3
+R CMD BATCH --vanilla code.R code.Rout
+R CMD BATCH --vanilla code-fast.R code-fast.Rout
 ```
 
-The default `code.R` command refits the manuscript examples. The `--quick`
-command checks existing outputs without refitting, and `--example` refits the
-selected example.
+The full `code.R` command refits the manuscript examples, prints the numerical
+tables and selected fitted-object output to `code.Rout`, and writes the graphics
+stream to `Rplots.pdf`. The optional `code-fast.R` command uses reduced
+computation settings for code checking and is not authoritative for manuscript
+values.
 
 The scripts in this directory are internal maintenance tools used by `code.R`
 and by the authors for targeted reruns, preflight checks, and final reference
@@ -28,32 +29,22 @@ syncs.
 
 ## Internal commands
 
-The internal runner can regenerate a full stage:
+The internal runner and preflight utilities remain available for author-side
+maintenance, targeted reruns, and reference-machine checks. They are not part
+of the JSS reviewer-facing execution contract and are excluded from the final
+replication archive.
 
-```sh
-Rscript analysis/run_all.R --stage manuscript --profile standard
-```
-
-Useful targeted maintenance commands:
-
-```sh
-Rscript analysis/run_all.R --stage manuscript --profile quick
-Rscript analysis/run_all.R --stage manuscript --tests-only
-Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
-```
-
-The preflight utility is for final reference-machine checks:
+The preflight utility can be run by authors before rebuilding the public
+scripts and archive:
 
 ```sh
 Rscript analysis/check_reproducibility.R --stage manuscript --profile standard --require-r-version 4.6.0
 ```
 
-By default, the internal analysis workflow loads local `exdqlm` source when
-source mode is requested. Public replication should normally use the submitted
-package source tarball installed into R.
+For targeted reruns, authors should inspect the runner's help and use the
+smallest manuscript target needed for the intended update. Public replication
+should use the submitted package source tarball installed into R, not a local
+source-package resolver.
 
 ## Notes
 

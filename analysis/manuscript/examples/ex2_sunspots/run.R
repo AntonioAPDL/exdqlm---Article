@@ -27,7 +27,17 @@ if (!need_ex2) {
     need_ex2_ldvb_diag, need_ex2_tables_ldvb
   ))
 
-  y_ts <- datasets::sunspot.year
+  full_y_ts <- datasets::sunspot.year
+  n_obs <- as.integer(cfg_profile$ex2$n_obs %||% length(full_y_ts))
+  if (is.finite(n_obs) && n_obs > 0L && n_obs < length(full_y_ts)) {
+    y_ts <- stats::ts(
+      utils::tail(as.numeric(full_y_ts), n_obs),
+      end = stats::end(full_y_ts),
+      frequency = stats::frequency(full_y_ts)
+    )
+  } else {
+    y_ts <- full_y_ts
+  }
   y <- as.numeric(y_ts)
   sunspot_level_prior <- 50
   sunspot_level_c0 <- 2500
@@ -54,6 +64,7 @@ if (!need_ex2) {
   tol <- as.numeric(cfg_profile$ex2$tol)
   ldvb_diag_tol <- as.numeric(cfg_profile$ex2$ldvb_diag_tol %||% tol)
   ldvb_diag_n_samp <- as.integer(cfg_profile$ex2$ldvb_diag_n_samp %||% n_samp)
+  ldvb_max_iter <- as.integer(cfg_profile$ex2$ldvb_max_iter %||% 200L)
   benchmark_n_burn <- as.integer(cfg_profile$ex2$benchmark_n_burn %||% 1000L)
   benchmark_n_mcmc <- as.integer(cfg_profile$ex2$benchmark_n_mcmc %||% 300L)
   df_grid <- as.numeric(cfg_profile$ex2$df_grid)
@@ -72,6 +83,7 @@ if (!need_ex2) {
           df = c(0.9, 0.85), dim.df = c(1, 8),
           dqlm.ind = TRUE, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
+          vb_control = list(max_iter = ldvb_max_iter),
           verbose = FALSE
         ),
         error = function(e) e
@@ -84,6 +96,7 @@ if (!need_ex2) {
           df = c(0.9, 0.85), dim.df = c(1, 8),
           dqlm.ind = TRUE, sig.init = 2, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
+          vb_control = list(max_iter = ldvb_max_iter),
           verbose = FALSE
         ),
         error = function(e) e
@@ -96,6 +109,7 @@ if (!need_ex2) {
           df = c(0.9, 0.85), dim.df = c(1, 8),
           sig.init = 2, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
+          vb_control = list(max_iter = ldvb_max_iter),
           verbose = FALSE
         ),
         error = function(e) e
@@ -113,7 +127,7 @@ if (!need_ex2) {
   capture_output_file("ex2_run_summary.txt", {
     cat(sprintf("profile=%s\n", selected_profile))
     cat(sprintf("level_prior_m0=%s, level_prior_C0=%s\n", sunspot_level_prior, sunspot_level_c0))
-    cat(sprintf("n.samp=%d, tol=%s\n\n", n_samp, format(tol)))
+    cat(sprintf("n.samp=%d, tol=%s, ldvb_max_iter=%d\n\n", n_samp, format(tol), ldvb_max_iter))
     if (fit_ok(M_sigma_ldvb)) {
       cat("Summary(M_sigma_ldvb$samp.sigma):\n")
       print(summary(M_sigma_ldvb$samp.sigma))
@@ -381,6 +395,7 @@ if (!need_ex2) {
             # Stabilize extreme upper-tail DQLM fit under LDVB.
             dqlm.ind = TRUE, sig.init = 10, fix.sigma = FALSE,
             n.samp = n_samp, tol = tol,
+            vb_control = list(max_iter = ldvb_max_iter),
             verbose = FALSE
           ),
           error = function(e) e
@@ -391,6 +406,7 @@ if (!need_ex2) {
           df = c(0.9, 0.85), dim.df = c(1, 8),
           sig.init = 2, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
+          vb_control = list(max_iter = ldvb_max_iter),
           verbose = FALSE
         ),
           error = function(e) e
@@ -401,6 +417,7 @@ if (!need_ex2) {
           df = c(0.9, 0.85), dim.df = c(1, 8),
           dqlm.ind = TRUE, sig.init = 2, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
+          vb_control = list(max_iter = ldvb_max_iter),
           verbose = FALSE
         ),
           error = function(e) e
@@ -411,6 +428,7 @@ if (!need_ex2) {
           df = c(0.9, 0.85), dim.df = c(1, 8),
           sig.init = 2, fix.sigma = FALSE,
           n.samp = n_samp, tol = tol,
+          vb_control = list(max_iter = ldvb_max_iter),
           verbose = FALSE
         ),
           error = function(e) e
@@ -531,6 +549,7 @@ if (!need_ex2) {
         df = c(0.9, 0.85), dim.df = c(1, 8),
         sig.init = 2, fix.sigma = FALSE,
         n.samp = ldvb_diag_n_samp, tol = ldvb_diag_tol,
+        vb_control = list(max_iter = ldvb_max_iter),
         verbose = FALSE
       )
     }, note = sprintf("ex2_ldvb_diagnostics_fit_nsamp%d_tol%s_v6_sig2_prior50", ldvb_diag_n_samp, format(ldvb_diag_tol)))
@@ -644,6 +663,7 @@ if (!need_ex2) {
             df = possible_dfs[i, ], dim.df = c(1, 8),
             sig.init = 2, fix.sigma = FALSE,
             n.samp = n_samp, tol = tol,
+            vb_control = list(max_iter = ldvb_max_iter),
             verbose = FALSE
           ),
           error = function(e) e
@@ -749,6 +769,7 @@ if (!need_ex2) {
             df = possible_dfs[i, ], dim.df = c(1, 8),
             sig.init = 2, fix.sigma = FALSE,
             n.samp = n_samp, tol = tol,
+            vb_control = list(max_iter = ldvb_max_iter),
             verbose = FALSE
           ),
           error = function(e) e

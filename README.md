@@ -1,150 +1,100 @@
 # exdqlm article replication materials
 
-This directory contains the manuscript source and replication materials for
-the JSS article:
+This directory contains the manuscript source and replication materials for the
+JSS article
 
 > exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile
-> Linear Models
+> Linear Models.
 
-The replication materials are intended to be run from this extracted directory.
-They do not require a version-control checkout.
-
-This README is for the JSS article source and replication archive. It is not
-the general user README for the `exdqlm` R package; package users should use the
-CRAN package page, reference manual, and package README.
+This README is for the JSS article archive, not for general package use. Package
+users should consult the CRAN page, package README, and reference manual.
 
 ## Files for JSS upload
 
-For the revised JSS submission, the files to upload are:
+The JSS resubmission should contain these files:
 
-- `exdqlm-jss.pdf`: manuscript PDF, including the appendices.
-- `exdqlm_1.1.0.tar.gz`: `exdqlm` package source tarball.
-- `exdqlm-jss-replication.tar.gz`: article source and replication materials,
-  including `README.md`, `code.R`, `code.html`, `examples.R`, `analysis/`,
-  `exdqlm-jss.tex`, and the supporting manuscript files.
-- `response-to-editor.pdf`: point-by-point response to the JSS comments.
+- `exdqlm-jss.pdf`: manuscript PDF, including appendices.
+- `response-to-editor.pdf`: point-by-point response to the prescreening
+  comments.
+- `exdqlm_1.1.1.tar.gz`: `exdqlm` package source tarball.
+- `exdqlm-jss-replication.tar.gz`: article source and replication materials.
 
-The working article source is not meant to be uploaded file-by-file. The
-replication archive is built from this source after removing local scratch
-files, fit caches, audit notes, and LaTeX intermediate files.
+The replication archive is built from this repository after excluding local
+scratch files, audit notes, interrupted runs, and development-only artifacts.
 
-## Contents
+## Replication scripts
 
-- `exdqlm-jss.tex`, `exdqlm-jss.pdf`: manuscript source and compiled PDF. The
-  manuscript source and compiled PDF include the technical appendices.
-- `code.R`: standalone replication script for the manuscript results.
-- `code.html`: HTML log generated from `code.R` with `knitr::spin()`.
-- `examples.R`: reader-facing companion script collecting the main code
-  patterns shown in the manuscript. It is intended for adaptation; use
-  `code.R` for exact replication.
-- `analysis/`: scripts, configuration, generated figures/tables/logs, tests,
-  and small helper files used by `code.R`.
-- `analysis/manuscript/outputs/`: generated manuscript artifacts.
+The public replication interface is deliberately simple:
 
-The source code for the `exdqlm` R package is submitted separately as the
-package source tarball. Package version 1.1.0 is also available from CRAN at
-<https://CRAN.R-project.org/package=exdqlm>.
+- `code.R`: authoritative full replication script. It refits the manuscript
+  examples, regenerates figures and tables, prints selected fitted-object output
+  and all manuscript tables to `code.Rout`, and writes the full graphics stream
+  to `Rplots.pdf`.
+- `code-fast.R`: reduced code-checking script with the same structure and
+  smaller computation settings. It is not authoritative for manuscript numbers.
+
+Both scripts are flat, commented R scripts. They do not call `source()`, read or
+write saved fit objects, inspect Git metadata, or require local paths.
 
 ## Install the package
 
-Install `exdqlm` before running the replication script. If the submitted source
-tarball is available in the current directory, install it with:
+Install the submitted package source tarball before running the replication:
 
 ```sh
-R CMD INSTALL exdqlm_*.tar.gz
+R CMD INSTALL exdqlm_1.1.1.tar.gz
 ```
 
-Because the matching version is on CRAN, this is also sufficient:
+Confirm the installed version:
 
 ```sh
-Rscript -e 'install.packages("exdqlm", repos = "https://cloud.r-project.org")'
+Rscript -e 'stopifnot(as.character(packageVersion("exdqlm")) == "1.1.1")'
 ```
 
-You can confirm the installed version with:
+## Run the full replication
+
+From the extracted replication directory, run:
 
 ```sh
-Rscript -e 'packageVersion("exdqlm")'
+OMP_NUM_THREADS=1 \
+OMP_THREAD_LIMIT=1 \
+OPENBLAS_NUM_THREADS=1 \
+MKL_NUM_THREADS=1 \
+BLIS_NUM_THREADS=1 \
+VECLIB_MAXIMUM_THREADS=1 \
+R CMD BATCH --vanilla code.R code.Rout
 ```
 
-## Reproduce the article
+The full run can take substantial time because it refits Bayesian dynamic and
+static quantile models. The primary reviewer-facing outputs are `code.Rout` and
+`Rplots.pdf`, together with generated files under
+`analysis/manuscript/outputs/`.
 
-From this directory, run:
+For a shorter code-path check, run:
 
 ```sh
-Rscript code.R
+OMP_NUM_THREADS=1 \
+OMP_THREAD_LIMIT=1 \
+OPENBLAS_NUM_THREADS=1 \
+MKL_NUM_THREADS=1 \
+BLIS_NUM_THREADS=1 \
+VECLIB_MAXIMUM_THREADS=1 \
+R CMD BATCH --vanilla code-fast.R code-fast.Rout
 ```
 
-This is the full manuscript replication command. It refits the manuscript
-examples, regenerates the figures, generated tables, logs, and reproducibility
-manifests under `analysis/manuscript/outputs/`, then runs the manuscript checks
-and prints `sessionInfo()`.
-
-The full run can take substantial time because several examples fit Bayesian
-models. For a faster setup check, run:
-
-```sh
-Rscript code.R --quick
-```
-
-The quick command checks package loading, manuscript wiring, existing generated
-outputs, and the test suite without refitting all examples.
-
-To rerun and refit a single example, use:
-
-```sh
-Rscript code.R --example 3
-```
-
-Valid example numbers are `1`, `2`, `3`, and `4`.
-
-For a compact script closer to the displayed manuscript code, open
-`examples.R`. That file illustrates the main example workflows with the
-preferred package API, while `code.R` remains the tested script for reproducing
-all manuscript outputs.
+`code-fast.Rout` should be used only to check that the workflow executes and
+prints the expected objects, tables, and session information.
 
 ## Output locations
 
-The main generated files are written to:
+The main generated files are:
 
-- `analysis/manuscript/outputs/figures/`
-- `analysis/manuscript/outputs/tables/`
-- `analysis/manuscript/outputs/logs/`
-- `analysis/manuscript/outputs/cache/` (local fit caches recreated by full runs)
+- `code.Rout`: batch console output from the full script.
+- `Rplots.pdf`: graphics stream from the full script, with manuscript figures in
+  manuscript order.
+- `analysis/manuscript/outputs/figures/`: PNG figures used by the manuscript.
+- `analysis/manuscript/outputs/tables/`: CSV sources for manuscript tables.
+- `analysis/manuscript/outputs/logs/`: printed summaries and provenance logs.
 
-The manuscript reads figures from `analysis/manuscript/outputs/figures/`.
-Generated CSV files and logs provide the numerical source for the tables and
-reported values in the manuscript.
-
-Large `.rds` fit caches are local conveniences and are not required in the
-submitted archive. If they are absent, `Rscript code.R` recreates the needed
-fits from the scripts and data.
-
-Runtime values are machine dependent. They are recorded as elapsed fitting
-times for the stated backend profile and should be interpreted together with
-the generated environment/provenance files.
-
-## HTML replication log
-
-The included `code.html` file is produced from `code.R`. By default,
-`knitr::spin("code.R", knit = TRUE)` uses the quick check path so the HTML log
-can be refreshed without accidentally refitting every manuscript example:
-
-```r
-Sys.setenv(EXDQLM_REPLICATION_QUICK = "true")
-knitr::spin("code.R", knit = TRUE)
-```
-
-For a final author-side refresh, run `Rscript code.R` first and then set
-`EXDQLM_REPLICATION_SPIN_MODE=replay-cache` before `knitr::spin()` to rebuild
-`code.html` from the standard cached manuscript artifacts.
-
-## Notes for development runs
-
-The public replication path uses the installed `exdqlm` package. During
-development only, a local package source tree can be used by setting:
-
-```sh
-EXDQLM_LOAD_MODE=source EXDQLM_PKG_PATH=/path/to/exdqlm Rscript code.R --quick
-```
-
-This is not required for reproducing the submitted materials.
+Runtime values are platform dependent. The replication output records the R
+version, package version, RNG settings, backend profile, and platform used for
+the author reference run.

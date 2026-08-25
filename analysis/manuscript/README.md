@@ -5,14 +5,15 @@ manuscript-facing figures, generated tables, logs, caches, and artifact
 manifests. For public JSS replication, use the root script first:
 
 ```sh
-Rscript code.R
-Rscript code.R --quick
-Rscript code.R --example 3
+R CMD BATCH --vanilla code.R code.Rout
+R CMD BATCH --vanilla code-fast.R code-fast.Rout
 ```
 
-The default `code.R` command refits the manuscript examples. The `--quick`
-command checks existing outputs without refitting, and `--example` refits the
-selected example.
+The full `code.R` command refits the manuscript examples, prints the numerical
+tables and selected fitted-object output to `code.Rout`, and writes the graphics
+stream to `Rplots.pdf`. The optional `code-fast.R` command uses reduced
+computation settings for code checking and is not authoritative for manuscript
+values.
 
 The commands below are internal maintenance commands for targeted reruns and
 final reference checks.
@@ -33,7 +34,7 @@ an `artifacts.yml` manifest. Shared setup and helper infrastructure lives in
 When updating an example:
 
 1. Edit the relevant script in `analysis/manuscript/examples/`.
-2. Run the narrowest useful target with `analysis/run_all.R`.
+2. Run the narrowest useful author-side target.
 3. Inspect generated figures/tables/logs.
 4. Update any inline manuscript table/text from generated outputs.
 5. Run manuscript tests or a focused validation pass.
@@ -60,30 +61,16 @@ to satisfy upload-size limits.
 
 ## Internal run commands
 
-From the repository root:
+The author-side runner supports full-stage regeneration, targeted example
+reruns, tests-only checks, and the optional Example 4 seed screen. These
+commands are intended for repository maintenance, not for JSS reviewers. The
+generated root scripts `code.R` and `code-fast.R` are the public batch
+interfaces submitted with the article.
 
-```sh
-Rscript analysis/run_all.R --stage manuscript --profile standard
-```
-
-Useful targeted variants:
-
-```sh
-Rscript analysis/run_all.R --stage manuscript --profile quick
-Rscript analysis/run_all.R --stage manuscript --tests-only
-Rscript analysis/run_all.R --stage manuscript --targets ex1 --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex2 --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex3 --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
-Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --force-refit --skip-tests
-```
-
-For local source-package maintenance:
-
-```sh
-EXDQLM_LOAD_MODE=source EXDQLM_PKG_PATH=/path/to/exdqlm \
-  Rscript analysis/run_all.R --stage manuscript --tests-only
-```
+For internal maintenance, inspect the runner's help from the repository root
+and choose the narrowest target that matches the intended update. Source-package
+maintenance is also author-only; the submitted replication archive expects the
+matching package source tarball to be installed before execution.
 
 The optional Example 4 seed screen is intentionally explicit-only. A full
 standard manuscript run regenerates the Example 4 figure/table from the
@@ -105,5 +92,5 @@ updated from generated CSV/log files whenever a model is rerun.
 
 Internal development checklists and review-audit notes are intentionally not
 part of the submission archive. The maintained reader-facing provenance is the
-root `README.md`, `code.R`, `code.html`, this protocol family, the code chunk
-map, generated tracker files, and example manifests.
+root `README.md`, the flat batch scripts `code.R` and `code-fast.R`, this
+protocol family, generated tracker files, and example manifests.

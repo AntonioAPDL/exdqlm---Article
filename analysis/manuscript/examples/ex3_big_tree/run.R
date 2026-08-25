@@ -447,7 +447,7 @@ if (!need_ex3) {
   }
 
   if (need_ex3_models) {
-    pkg_commit <- git_short_head(resolve_pkg_path()$path)
+    pkg_source_label <- paste0("exdqlm_", as.character(utils::packageVersion("exdqlm")))
     grid_tag <- paste(sprintf("%03d", round(100 * lambda_grid)), collapse = "_")
     psi_tag <- paste(sprintf("%03d", round(100 * transfer_psi_df_grid)), collapse = "_")
     window_tag <- paste(fmt_month(range(model_df$date)), collapse = "_")
@@ -464,7 +464,7 @@ if (!need_ex3) {
     cache_key <- sprintf(
       "ex3_models_trainselect_v7_threemodel_%s_%s_%s_%s_%s_%s_grid%s_%s_nsamp%d_tol%s_iter%d_h%d",
       paste(selected_indices, collapse = "_"),
-      pkg_commit %||% "unknown",
+      pkg_source_label,
       window_tag,
       p0_tag,
       prior_tag,
@@ -698,7 +698,7 @@ if (!need_ex3) {
     )
     capture_output_file("ex3_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
-      cat(sprintf("package_commit=%s\n", git_short_head(resolve_pkg_path()$path)))
+      cat(sprintf("package_source=%s\n", pkg_source_label))
       cat(sprintf("p0=%0.2f\n", p0))
       cat(sprintf("trend_prior_m0=%0.6f, trend_prior_C0=%0.3f\n", trend_m0, trend_c0))
       cat(sprintf("climate_coef_prior_C0=%0.3f\n", climate_coef_c0))

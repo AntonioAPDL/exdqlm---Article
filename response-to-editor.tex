@@ -8,446 +8,196 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{enumitem}
 
-\DeclareUnicodeCharacter{201C}{``}
-\DeclareUnicodeCharacter{201D}{''}
-\DeclareUnicodeCharacter{2019}{'}
-\DeclareUnicodeCharacter{2013}{--}
-\DeclareUnicodeCharacter{2014}{---}
-\DeclareUnicodeCharacter{00A0}{~}
-
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
 \setlist[itemize]{leftmargin=1.4em, itemsep=3pt, topsep=3pt}
 \setlist[enumerate]{leftmargin=1.6em, itemsep=3pt, topsep=3pt}
-\newenvironment{commentblock}{\begin{quote}\small\itshape}{\end{quote}}
-\newenvironment{responsebox}{%
-  \vspace{2pt}\hrule\vspace{6pt}\begin{quote}\small
-}{%
-  \end{quote}\vspace{2pt}\hrule\vspace{6pt}
-}
-\newcommand{\commentheading}[1]{%
-  \vspace{6pt}\noindent\textbf{Comment (#1)}\par
-  \vspace{2pt}\hrule\vspace{6pt}
-}
-\newcommand{\responseheading}{\vspace{2pt}\noindent\textbf{Response}\par}
+
 \newcommand{\pkg}[1]{\textsf{#1}}
 \newcommand{\proglang}[1]{\textsf{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\commentheading}[1]{\vspace{8pt}\noindent\textbf{Comment #1}\par}
 
 \title{\textbf{Response to the Editorial Return}\\
 \pkg{exdqlm}: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}
 \author{Antonio De Leon, Raquel Barata, Raquel Prado, and Bruno Sans\'o}
-\date{Prepared July 2026}
+\date{Prepared August 2026}
 
 \begin{document}
 \maketitle
 
-\begin{flushleft}
 Dear Editors,
-\end{flushleft}
 
-We thank the editorial team for the careful return and for the specific guidance
-on how to make the submission more suitable for review by the \emph{Journal of
-Statistical Software}. We are submitting the revised material as a new
-submission, together with this point-by-point response. The revised manuscript,
-package, and replication materials now put the software contribution first,
-use a clearer R object and method design, and provide standalone replication
-materials organized around \code{code.R}.
+Thank you for the careful second prescreening review. We understand the return
+as a reproducibility-interface and output-provenance problem: the previous
+archive still made it too hard to run the article computations in batch mode and
+compare the resulting output directly with the manuscript. We have restructured
+the replication materials accordingly and are resubmitting as a new submission
+with a point-by-point response.
 
-The current submission files are:
+The submitted files are:
 \begin{itemize}
-\item Manuscript PDF: \code{exdqlm-jss.pdf}
-\item Software source: \code{exdqlm\_1.1.0.tar.gz}
-\item Replication materials: \code{exdqlm-jss-replication.tar.gz}
-\item Point-by-point response: \code{response-to-editor.pdf}
+\item \code{exdqlm-jss.pdf}: manuscript PDF.
+\item \code{exdqlm\_1.1.1.tar.gz}: software source.
+\item \code{exdqlm-jss-replication.tar.gz}: replication archive.
+\item \code{response-to-editor.pdf}: this response.
 \end{itemize}
 
-The software source submitted with this revision is version 1.1.0 of
-\pkg{exdqlm}. This version is available from CRAN and is distributed under the
-MIT License, which is GPL-compatible.
+The package source is version 1.1.1 of \pkg{exdqlm}. This is a narrow
+reproducibility patch: it does not change the statistical model, exported API,
+or manuscript claims. It corrects compiled stochastic helper paths so they use
+serial \proglang{R}-controlled random-number streams and adds tests for repeated
+seed behavior.
 
-\section*{Summary of Major Revisions}
-
-\begin{itemize}
-\item[] We reorganized the manuscript to make the JSS contribution explicit:
-  the prior methodology is now separated from the software contribution, with the
-  extended asymmetric Laplace (exAL) family/static exAL regression, the
-  extended dynamic quantile linear model (exDQLM), the original Markov chain
-  Monte Carlo (MCMC) and importance-sampling variational Bayes (ISVB) strategy,
-  transfer-function methodology, and the general nonconjugate
-  variational inference strategy of Wang and Blei identified as methodological
-  foundations.
-  The revised text then states the software contribution and a new package design and implementation section describes the S3 object
-  workflow, fitting engines, exAL distribution utilities, \proglang{C++} backend
-  paths, diagnostics, forecasting, plotting, and extension points.
-\item[] We revised the package design for standard R use: fitted dynamic and
-  static objects now have shared superclass families, diagnostic/forecast/
-  synthesis objects are visible reusable objects, and standard methods such as
-  \code{print()}, \code{summary()}, \code{plot()}, \code{predict()}, and \code{diagnostics()} are used where natural.
-\item[] We clarified the computational contributions beyond the earlier
-  methodological papers: Laplace--delta variational Bayes (LDVB) is now the
-  main variational route for the nonconjugate scale--skewness block. This is
-  presented as a model-specific adaptation and implementation of the
-  Laplace--delta strategy for nonconjugate models, with legacy ISVB retained
-  for historical comparisons. The revised manuscript also identifies documented
-  exAL density/cumulative distribution/quantile/sampling utilities, continuous
-  ranked probability score (CRPS) and posterior predictive loss criterion
-  (PPLC) computations for predictive comparison, held-out forecast diagnostics,
-  and the static \code{rhs\_ns} implementation with closed-form
-  shrinkage-block MCMC and variational Bayes updates and evidence lower bound
-  (ELBO) contributions documented in the appendices.
-\item[] We rewrote the replication materials as a standalone JSS archive. The
-  public workflow is now centered on \code{Rscript code.R}, with documented
-  quick and single-example options. The public path no longer requires a Git
-  checkout or internal author-maintenance modes.
-\item[] We merged the former supplement into the main manuscript as appendices and
-  streamlined the appendix material to focus on posterior targets,
-  package-specific LDVB and shrinkage-prior blocks, diagnostics, and predictive
-  synthesis needed for software review.
-\item[] We rebuilt the final replication archive without Git metadata, author audit
-  notes, model-cache \code{.rds} files, scratch LaTeX files, or nested archives.
-  We tested the archive from a fresh extraction using the submitted package
-  tarball, and the archive includes the standard-profile outputs and logs
-  generated by the full replication workflow.
-\end{itemize}
-
-For cross-reference, the main manuscript changes appear in the revised
-Introduction and software-comparison discussion (G1), the diagnostics and
-forecasting section (D9--D10), the new package design and implementation
-section and workflow table (G3, D6--D10), the revised reader-facing example code
-and replication discussion (G2, D1--D5), Examples 3 and 4 (D6, D9--D10), the
-rewritten conclusion (G1), and the streamlined integrated appendices (D11). The
-corresponding package changes are reflected in the 1.1.0 source tarball,
-\code{DESCRIPTION}, \code{NEWS.md}, \code{NAMESPACE}, the help pages, and the
-test suite. The replication-material changes are reflected in the submitted
-archive README, \code{code.R}, \code{code.html}, reproducibility index, and
-reproducibility protocol.
-
-\newpage
-
-\section{General Editorial Comments}
-
-\commentheading{G1}
-\begin{commentblock}
-The submission should better indicate which parts of the methodology have
-already been published and what constitutes the specific contribution for
-\emph{Journal of Statistical Software}.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-The revised manuscript now separates the methodological foundations
-from the JSS software contribution more explicitly. It identifies
-Yan, Zheng, and Kottas as the source for the extended asymmetric Laplace (exAL)
-family and static exAL regression framework, and Barata, Prado, and Sans\'o as
-the source for the extended dynamic quantile linear model (exDQLM), the
-original dynamic MCMC and importance-sampling
-variational Bayes (ISVB) strategy, and the transfer-function extension. The
-revision also identifies Wang and Blei as the source of the general
-Laplace--delta strategy for variational inference in nonconjugate models.
-
-The manuscript then explains that the contribution of the present article is
-software-centered. The \pkg{exdqlm} package brings these methods together in a
-public \proglang{R} implementation with a common object system and standard
-methods for fitting, examining, diagnosing, plotting, and forecasting models. It
-provides MCMC and LDVB inference for dynamic and static models, selected
-compiled routines for faster computation, predictive diagnostics,
-transfer-function models, and synthesis across separately fitted quantiles. The
-article also provides examples, technical appendices, and complete replication
-materials.
-
-We also added a new package design and implementation section before the
-examples. This section describes the package architecture, fitted and returned
-objects, available methods, computational options, and ways in which the package
-can be extended.
-\end{responsebox}
-
-\commentheading{G2}
-\begin{commentblock}
-The replication material was split across many files and it was not clear which
-option should be used to re-run all computations and obtain the article results.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We rewrote the replication materials with \code{code.R} as the main public
-replication file. The first-page replication command is now:
-\[
-\code{Rscript code.R}.
-\]
-Two optional commands are documented for convenience:
-\[
-\code{Rscript code.R --quick}
-\]
-for a short wiring/test pass, and
-\[
-\code{Rscript code.R --example N}
-\]
-for rerunning one manuscript example. The previous public distinction between
-\code{portable} and \code{reference} modes was removed from the reader-facing
-workflow. Internal exact-value checks used by the authors are kept separate
-from the public command path.
-
-The revised \code{README.md} describes the contents of the submitted archive,
-the package installation options, the expected outputs, and the runtime
-interpretation. The generated \code{code.html} is produced from \code{code.R}
-using \code{knitr::spin()} and includes \code{sessionInfo()}.
-\end{responsebox}
-
-\commentheading{G3}
-\begin{commentblock}
-The package implementation needs improvement, in particular the classes and
-methods system. A section on package design and implementation would facilitate
-review.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We revised both the package and the manuscript in response. On the package side,
-dynamic fits now inherit from a common \code{exdqlmFit} family, static fits from
-\code{exalStaticFit}, and post-processing outputs such as diagnostics,
-forecasts, forecast diagnostics, posterior-predictive synthesis, and static
-diagnostics have explicit classes. We expanded standard methods for these
-objects, including informative \code{print()} and \code{summary()} methods and
-\code{plot()} methods for diagnostic, forecast, synthesis, and coefficient
-summary displays. We also added \code{predict()} support for fitted dynamic
-objects where it naturally wraps forecasting, and \code{diagnostics()} methods
-for dynamic fits, dynamic forecast objects, and static fits.
-
-On the manuscript side, we added a package design and implementation section
-that describes the object families, fitting engines, returned objects, method
-dispatch, backend controls, and extension points. The examples were updated to
-show the preferred object-first workflow.
-\end{responsebox}
-
-\section{Detailed Comments}
-
-\commentheading{D1}
-\begin{commentblock}
-The replication README referred to cloning a GitHub repository. JSS replication
-material should be a standalone directory without requiring unstable external
-GitHub repositories.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We rewrote the submitted \code{README.md} as an archive-oriented document. It no
-longer asks the reader to clone or pull a GitHub repository. It begins by
-describing the contents of the submitted replication directory and then gives the
-commands needed to install the submitted package tarball or use the installed
-package and run the replication script. A CRAN installation is sufficient when
-the CRAN version matches the submitted version. The final replication archive
-has also been rebuilt without \code{.git} metadata, local repository state,
-author audit notes, model caches, scratch files, or nested archives.
-\end{responsebox}
-
-\commentheading{D2}
-\begin{commentblock}
-The submitted \code{code.R} launched \code{run\_all.R}, which itself ran the
-different analysis parts. A master script may launch subparts, but the master
-script should not itself be launched by another master script.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-The revised \code{code.R} is now the public master script. It sources the
-manuscript setup and the example scripts directly in manuscript order rather
-than delegating the workflow to a second master script. Author-maintenance
-orchestration remains separate from the public reproduction path. The
-reader-facing script now has visible sections for setup, examples, checks, and
-session information.
-\end{responsebox}
-
-\commentheading{D3}
-\begin{commentblock}
-The README advertised many different ways to launch the replication material,
-and the difference between \code{--mode portable} and \code{--mode reference}
-was unclear.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We simplified the public interface. The submitted archive now documents only the
-full run, the quick run, and the single-example run. The previous
-\code{portable}/\code{reference} terminology is no longer part of the public
-replication instructions. Exact-value author checks remain part of our internal
-acceptance workflow, but they are not required for readers or editors to run the
-submitted replication materials.
-\end{responsebox}
-
-\commentheading{D4}
-\begin{commentblock}
-Embedding the launched code in a \code{main()} function prevents users from
-accessing intermediate analysis results. The scripts should help readers adapt
-the examples to their own analyses.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We removed the whole-workflow \code{main()} wrapper from the reader-facing
-\code{code.R}. The revised script is organized as a direct, commented
-replication script with small helper functions only where they clarify repeated
-tasks. The example scripts write the manuscript figures, tables, and logs to
-documented locations, and their code can be inspected and adapted independently.
-This makes the replication workflow easier to understand and modify while
-preserving the tested process used to generate the manuscript results.
-\end{responsebox}
-
-\commentheading{D5}
-\begin{commentblock}
-Running the documented command failed because the submitted directory was not a
-Git repository and the validation step checked Git remotes and branch metadata.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We split the public replication path from author-side checks. The default
-submitted \code{code.R} workflow no longer requires Git metadata, Git remotes,
-branch freshness, or a GitHub checkout. We verified this by extracting the final
-replication archive into a fresh directory with no \code{.git} metadata and
-running the documented quick command:
-\[
-\code{Rscript code.R --quick}.
-\]
-This quick archive smoke test passed. The standard full manuscript workflow
-generated the outputs, manifests, logs, and manuscript checks included in the
-submitted archive.
-\end{responsebox}
-
-\commentheading{D6}
-\begin{commentblock}
-The manuscript lacks a section describing the package and its design, including
-the methods provided, implementation, possible extensions, and variants.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We added a package design and implementation section before the examples. The
-section describes the principal object families, class inheritance, fitting
-engines, diagnostic and forecast objects, synthesis objects, plotting and
-post-processing methods, backend controls, and extension points. It also
-clarifies why some operations remain named workflow functions while returned
-objects use standard R methods for printing, summarizing, plotting, and
-prediction.
-\end{responsebox}
-
-\commentheading{D7}
-\begin{commentblock}
-It would be preferable to have different, more informative print and summary
-methods for \pkg{exdqlm} objects.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We audited the package object families and revised the standard display methods.
-Representative fit, diagnostic, forecast, forecast-diagnostic, synthesis, and
-static-diagnostic objects now have informative \code{print()} and/or
-\code{summary()} output indicating the object type and key dimensions or
-workflow quantities. The package test suite includes coverage for these
-standard methods.
-\end{responsebox}
-
-\commentheading{D8}
-\begin{commentblock}
-It is unclear why the package does not make use of class inheritance. Fitted
-models could share a generic class with common methods and variant-specific
-additions.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We introduced shared superclass families while preserving existing first-class
-names for backward compatibility. Dynamic fitted objects now inherit from
-\code{exdqlmFit}; static AL/exAL fitted objects inherit from
-\code{exalStaticFit}; and reusable post-processing objects inherit from
-appropriate diagnostic, forecast, synthesis, or static-diagnostic classes. This
-lets shared methods dispatch on common fit families while preserving
-variant-specific behavior where needed.
-\end{responsebox}
-
-\commentheading{D9}
-\begin{commentblock}
-It is unclear why the post-processing functions are not methods. This would
-seem more natural with a suitable class and method system.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We revised the post-processing workflow to make better use of \proglang{R}
-methods. Operations applied to an existing fitted or forecast object now use
-methods where appropriate. For example, fitted dynamic objects support
-\code{plot()}, \code{predict()}, and \code{diagnostics()}; forecast objects can
-be evaluated with \code{diagnostics()}; and static fitted objects support
-\code{plot()} and \code{diagnostics()}. These methods return objects that can
-then be printed, summarized, or plotted.
-
-We retained named functions for operations that combine information from several
-objects rather than acting on a single object. In particular,
-\code{quantileSynthesis()} combines predictive draws from several separately
-fitted quantile models, so it remains a named function. The revised manuscript
-explains this distinction and uses the method-based workflow throughout the
-examples.
-\end{responsebox}
-
-\commentheading{D10}
-\begin{commentblock}
-The diagnostic workflow should return the object in a normal non-invisible way,
-with plotting handled by a \code{plot()} method rather than by a plotting
-argument.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We changed the diagnostic workflow to be object-first. The \code{diagnostics()}
-methods return visible diagnostic objects, and the manuscript examples use the
-stepwise pattern:
-\[
-\code{diag <- diagnostics(fit)}
-\]
-followed by \code{summary(diag)} or \code{plot(diag)}. This same object-first
-style is used for forecast diagnostics and static diagnostics where applicable.
-Compatibility plotting arguments are no longer the primary workflow shown to
-users.
-\end{responsebox}
-
-\commentheading{D11}
-\begin{commentblock}
-A single PDF file should be submitted as the manuscript. Supplementary material
-should be included directly as appendices. JSS has no page limits.
-\end{commentblock}
-
-\responseheading
-\begin{responsebox}
-We merged the former supplement into the main manuscript as appendices and are
-submitting one manuscript PDF, \code{exdqlm-jss.pdf}. The appendix material was
-also streamlined to focus on posterior targets, package-specific LDVB and
-shrinkage-prior blocks, diagnostics, and predictive synthesis needed to review
-the software implementation. The obsolete standalone supplement PDF and
-separate supplement bibliography artifact were removed from the submission
-bundle. The appendix source is now included directly at the end of
-\code{exdqlm-jss.tex}, so the manuscript source corresponds to the single
-compiled PDF.
-\end{responsebox}
-
-\section{Validation and Final Submission Checks}
-
-All final checks below were run with R 4.6.0.
+\section*{Summary of the Revision}
 
 \begin{itemize}
-\item \code{R CMD check --no-manual --run-donttest exdqlm\_1.1.0.tar.gz}
-  completed with 0 errors, 0 warnings, and 0 notes.
-\item The article reproducibility checks completed with 0 errors and 0
-  warnings.
-\item The final replication archive audit found no Git metadata, author audit
-  notes, \code{.rds} caches, obsolete supplement PDF, obsolete supplement
-  bibliography artifact, LaTeX scratch files, or nested archives.
-\item A quick smoke test from the extracted replication archive passed
-  using the installed package from the submitted package tarball.
-\item The submitted archive includes the outputs, logs, manifests, and
-  manuscript checks generated by the standard full replication workflow.
+\item We replaced the previous replication interface with a flat
+  reviewer-facing \code{code.R}. The script does not call \code{source()}, read
+  or write saved fit objects, inspect Git metadata, or require local paths.
+\item The primary command is now the JSS-style batch command
+  \code{R CMD BATCH --vanilla code.R code.Rout}, with native thread variables
+  set before \proglang{R} starts. The full run produces \code{code.Rout} and
+  \code{Rplots.pdf} at the archive root.
+\item We added \code{code-fast.R}, a reduced code-checking script. It follows
+  the same structure with smaller computation settings and is explicitly marked
+  as non-authoritative for manuscript numerical values.
+\item The full \code{code.Rout} prints the fitted object \code{M95},
+  \code{summary(M95)}, \code{MTF\$median.kt}, Tables 7--10, and
+  \code{sessionInfo()}. This makes the numerical output visible in the batch
+  output instead of only in separate files.
+\item The graphics stream produced by \code{code.R} contains the manuscript
+  figures in manuscript order. The same plotting expressions also write the PNG
+  files used by the manuscript.
+\item The manuscript now includes a computational-details paragraph describing
+  the reference \proglang{R} version, \pkg{exdqlm} version, RNG settings,
+  backend/thread configuration, and the role of the full and reduced scripts.
+\item The README and reproducibility notes now describe only the public
+  replication commands and expected outputs. Development-only scripts remain in
+  the repository but are not presented as the public JSS execution path.
 \end{itemize}
 
-We believe these revisions address the editorial return and make the submission
-easier to inspect, reproduce, and review as a JSS software article.
+\section*{Responses to the Specific Comments}
+
+\commentheading{1. Single script and batch-mode output}
+
+The revised archive centers on one authoritative script, \code{code.R}. It is a
+flat, commented \proglang{R} file ordered by the manuscript examples. Running
+\code{R CMD BATCH --vanilla code.R code.Rout} now performs the full manuscript
+replication and creates the batch output file requested in the editorial
+comment.
+
+We removed the ambiguous \code{examples.R} entry point from the JSS-facing
+archive design. The optional \code{code-fast.R} file is included only as a
+reduced code-checking script for readers who want to verify the workflow without
+running the full computation. It is labeled as non-authoritative for manuscript
+values.
+
+\commentheading{2. Exact reproducibility and computing environment}
+
+The public scripts now set
+\[
+\code{RNGversion("4.6.0")}
+\]
+and
+\[
+\code{RNGkind("Mersenne-Twister", "Inversion", "Rejection")}.
+\]
+They also stop immediately unless the loaded package is \pkg{exdqlm} version
+1.1.1.
+
+While investigating the differences reported by the editors, we found that some
+compiled stochastic helper routines in version 1.1.0 could use OpenMP worker
+threads or private C++ seeds in ways that were not appropriate for exact
+seed-based replication. Version 1.1.1 corrects these paths by using serial
+\proglang{R}-controlled random-number streams. We added package tests for
+repeated-seed behavior in the compiled samplers, dynamic MCMC, and static MCMC
+paths, and the package passes \code{R CMD check --no-manual --run-donttest}
+under \proglang{R} 4.6.0.
+
+The manuscript and README now state the reference environment and the thread
+variables used before launching \proglang{R}. Runtime values are still described
+as platform-dependent elapsed fitting times.
+
+\commentheading{3. More output in the manuscript and batch output}
+
+We added visible fitted-object output to the replication script and manuscript
+discussion. The full batch output now includes
+\[
+\code{M95}
+\]
+and
+\[
+\code{summary(M95)}.
+\]
+The script also prints Tables 7--10 and \code{MTF\$median.kt} directly to
+\code{code.Rout}. This allows a reviewer to inspect the generated batch output
+without searching through intermediate files.
+
+\commentheading{4. Figure 1 and Figure 9 differences}
+
+Both figures are now regenerated by \code{code.R} from the same plotting
+functions used to write the manuscript PNG files. The package patch in version
+1.1.1 removes the compiled stochastic RNG/thread behavior that could make
+MCMC-derived outputs differ under repeated seeds or different thread settings.
+The response does not claim this was the only possible source of the previously
+observed visual differences; instead, the revised archive makes the figure
+provenance direct and rerunnable from the submitted script.
+
+\commentheading{5. \code{MTF\$median.kt}}
+
+The manuscript value is now taken from the full \code{code.R} reference run.
+The scalar is printed explicitly in \code{code.Rout}, so it can be compared
+directly with the manuscript.
+
+\commentheading{6. Missing Figure 3 top panel and Figure 5}
+
+\code{code.R} now regenerates the full graphics stream in manuscript order.
+The stream includes the complete Sunspots figure with its top panel and the Big
+Tree data/covariate figure. The corresponding PNG files are written under
+\code{analysis/manuscript/outputs/figures/}.
+
+\commentheading{7. Missing Tables 7 and 10}
+
+Tables 7 and 10 are now generated by the full script and printed to
+\code{code.Rout}. The same table objects are also saved as CSV files under
+\code{analysis/manuscript/outputs/tables/}.
+
+\commentheading{8. \code{tab.ex3} and \code{tab.ex3.fc}}
+
+The Big Tree fitted-diagnostic table and held-out forecast table are now printed
+to \code{code.Rout} as Tables 8 and 9. They are also saved as CSV files in the
+generated table directory.
+
+\commentheading{9. Fitted-object output}
+
+The full script prints the \code{M95} object and \code{summary(M95)}. The
+manuscript now guides the reader through representative fitted-object output,
+so the standard \code{print()} and \code{summary()} methods are visible in the
+article and in the batch output.
+
+\section*{Validation}
+
+Before resubmission we ran the following checks with \proglang{R} 4.6.0:
+\begin{itemize}
+\item targeted package repeatability tests for compiled samplers, dynamic MCMC,
+  and static MCMC;
+\item the package test suite;
+\item \code{R CMD build} and \code{R CMD check --no-manual --run-donttest} for
+  \code{exdqlm\_1.1.1.tar.gz};
+\item \code{R CMD BATCH --vanilla code-fast.R code-fast.Rout};
+\item \code{R CMD BATCH --vanilla code.R code.Rout};
+\item manuscript and response compilation; and
+\item archive extraction and execution checks from a directory without Git
+  metadata.
+\end{itemize}
+
+We believe the revised materials now provide a simpler and more standard JSS
+replication interface, with the numerical and graphical outputs visible in the
+batch artifacts requested by the editors.
+
+Sincerely,
+
+Antonio De Leon, Raquel Barata, Raquel Prado, and Bruno Sans\'o
 
 \end{document}

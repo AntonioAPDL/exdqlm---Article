@@ -2,23 +2,23 @@
 
 #' # exdqlm JSS replication script
 #'
-#' This file is the full manuscript replication for the JSS article
+#' This file is the reduced code-checking run for the JSS article
 #' "exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic
 #' Quantile Linear Models".
 #'
 #' Run from the extracted replication-materials directory with:
 #'
 #' ```sh
-#' R CMD BATCH --vanilla code.R code.Rout
+#' R CMD BATCH --vanilla code-fast.R code-fast.Rout
 #' ```
 #'
-#' This is the authoritative script for the manuscript values. It refits the examples, regenerates the manuscript figures, prints the numerical tables and selected fitted-object output, and records the computational environment.
+#' This reduced script follows the same workflow with smaller Monte Carlo settings. It is for checking code paths and is not authoritative for manuscript numerical values.
 #'
 #' The script is intentionally flat: it contains the setup code, helper code, and example code in manuscript order.
 
 jss_start_time <- proc.time()[[3L]]
 repo_root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
-profile <- "standard"
+profile <- "quick"
 pkg_path <- ""
 seed_override <- NULL
 targets <- character(0)
@@ -36,8 +36,8 @@ RNGversion("4.6.0")
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 
 cat("== exdqlm JSS replication ==\n")
-cat("Profile: standard\n")
-cat("Authoritative manuscript values: yes\n")
+cat("Profile: quick\n")
+cat("Authoritative manuscript values: no\n")
 cat(sprintf("R: %s\n", R.version.string))
 cat(sprintf("Working directory: %s\n", repo_root))
 cat(sprintf("RNGkind: %s\n", paste(RNGkind(), collapse = " / ")))
@@ -96,42 +96,42 @@ cfg_params <-
               cpp_threads = 1L), B = list(label = "manuscript-matched backend",
               use_cpp_kf = TRUE, use_cpp_builders = FALSE, use_cpp_samplers = FALSE,
               use_cpp_postpred = FALSE, use_cpp_mcmc = TRUE, cpp_mcmc_mode = "fast",
-              cpp_threads = 1L)), profiles = list(standard = list(
-          ex1 = list(trace_seed = 20260620L, n_burn = 2000L, n_mcmc = 3000L,
-              n_burn_trace = 7000L, n_mcmc_trace = 3000L, thin_trace = 10L,
-              n_chains_kernel = 4L, n_burn_kernel = 2000L, n_mcmc_kernel = 1000L,
-              thin_kernel_plot = 10L, synth_source_draws = 2000L,
-              synth_n_samp = 5000L, forecast_window_start = 1952L,
-              synth_window_start = 1880L), ex2 = list(n_is = 500L,
-              n_samp = 3000L, tol = 0.05, ldvb_diag_tol = 0.01,
-              ldvb_diag_n_samp = 3000L, benchmark_n_burn = 2000L,
-              benchmark_n_mcmc = 3000L, df_grid = c(0.85, 0.9,
-              0.95, 1)), ex3 = list(p0 = 0.15, selected_indices = c("noi",
-          "amo"), fit_start = "1987-01-01", fit_end = "2022-12-01",
-              forecast_horizon = 18L, focus_window = c(2016L, 2020L
-              ), forecast_plot_start = 2020L, trend_order = 1L,
+              cpp_threads = 1L)), profiles = list(quick = list(
+          ex1 = list(trace_seed = 20260620L, n_burn = 120L, n_mcmc = 80L,
+              n_burn_trace = 500L, n_mcmc_trace = 250L, thin_trace = 5L,
+              n_chains_kernel = 4L, n_burn_kernel = 200L, n_mcmc_kernel = 100L,
+              thin_kernel_plot = 5L, synth_source_draws = 200L,
+              synth_n_samp = 400L, forecast_window_start = 1952L,
+              synth_window_start = 1880L), ex2 = list(n_obs = 80L,
+              n_is = 20L, n_samp = 12L, tol = 0.15, ldvb_diag_tol = 0.08,
+              ldvb_diag_n_samp = 20L, ldvb_max_iter = 25L, benchmark_n_burn = 20L,
+              benchmark_n_mcmc = 12L, df_grid = c(0.85, 1)), ex3 = list(
+              p0 = 0.15, selected_indices = c("noi", "amo"), fit_start = "1987-01-01",
+              fit_end = "2022-12-01", forecast_horizon = 18L, focus_window = c(2016L,
+              2020L), forecast_plot_start = 2020L, trend_order = 1L,
               seasonal_period = 12L, harmonics = c(1, 2, 0.1469118636
               ), trend_df = 0.99, seasonal_df = 0.99, covariate_df = 1,
               transfer_zeta_df = 0.99, transfer_psi_df = 1, transfer_psi_df_grid = 1,
               selection_metric = "PPLC", trend_m0 = 3.91202300542815,
               trend_c0 = 1, seasonal_c0 = 1, climate_coef_c0 = 1,
               reg_c0 = 1, transfer_zeta_c0 = 0.1, transfer_psi_c0 = 1,
-              gam_init = -0.1, sig_init = 0.1, max_iter = 600L,
-              n_is = 500L, n_samp = 1000L, forecast_n_samp = 1000L,
-              tol = 0.05, lambda_grid = c(0.7, 0.75, 0.8, 0.85,
-              0.9, 0.95, 0.99)), ex4 = list(n_train = 160L, holdout_n = 800L,
-              n_predictors = 8L, dataset_seed = 20260712L, dataset_seed_mode = "configured",
+              gam_init = -0.1, sig_init = 0.1, max_iter = 60L,
+              n_is = 60L, n_samp = 40L, forecast_n_samp = 40L,
+              tol = 0.08, lambda_grid = c(0.7, 0.8, 0.9)), ex4 = list(
+              n_train = 160L, holdout_n = 450L, n_predictors = 8L,
+              dataset_seed = 20260712L, dataset_seed_mode = "configured",
               cov_rho = 0.5, sigma_eps = 1.5, true_beta = c(3,
               1.5, 0, 0, 2, 0, 0, 0), p_levels = c(0.05, 0.25,
-              0.5), screen_target_p0 = 0.5, ldvb_max_iter = 260L,
-              ldvb_max_iter_tail = 420L, ldvb_tol = 1e-04, rhs_tau0 = 0.15,
-              rhs_zeta2_fixed = 9, screen_seeds = 20260711:20260718,
-              screen_extra_seed_count = 8L, screen_batch_size = 4L,
-              n_burn = 2000L, n_mcmc = 3000L, thin = 1L, n_samp = 3000L))),
-      figures = list(width = 10L, height = 6L, res = 220L, pointsize = 11L),
-      promotion = list(figures = c("ex1mcmc.png", "ex1quants.png",
-      "ex2quant.png", "ex2checks.png", "ex3data.png", "ex3quantcomps.png",
-      "ex3zetapsi.png", "ex3forecast.png", "ex4static.png")), profile = "standard")
+              0.5), screen_target_p0 = 0.5, screen_seeds = 20260711:20260718,
+              screen_extra_seed_count = 0L, ldvb_max_iter = 220L,
+              ldvb_max_iter_tail = 500L, ldvb_tol = 0.005, n_samp = 80L,
+              rhs_tau0 = 0.15, rhs_zeta2_fixed = 9, n_burn = 60L,
+              n_mcmc = 50L, thin = 1L))), figures = list(width = 10L,
+          height = 6L, res = 220L, pointsize = 11L), promotion = list(
+          figures = c("ex1mcmc.png", "ex1quants.png", "ex2quant.png",
+          "ex2checks.png", "ex3data.png", "ex3quantcomps.png",
+          "ex3zetapsi.png", "ex3forecast.png", "ex4static.png")),
+      profile = "quick")
 selected_profile <- profile %||% "standard"
 if (!selected_profile %in% names(cfg_params$profiles)) {
   stop(
@@ -4432,4 +4432,4 @@ if (isTRUE(getOption("exdqlm.jss_rplots_active", FALSE))) {
   grDevices::dev.off()
   options(exdqlm.jss_rplots_active = FALSE)
 }
-cat("\nReplication complete. Primary batch artifacts: code.Rout and Rplots.pdf.\n")
+cat("\nReplication complete. Primary batch artifacts: code-fast.Rout and Rplots.pdf.\n")

@@ -9,13 +9,13 @@ rhs_ctrl: tau0=0.150, zeta2_fixed=9.000, shrink_intercept=FALSE
 p_levels=0.05, 0.25, 0.50
 
 p0=0.05
-  LDVB: converged=TRUE, iter=301, runtime=29.811, active_rmse=0.1069, inactive_mae=0.0339, holdout_rmse=0.6741
-  MCMC: kernel=slice, runtime=211.269, active_rmse=0.0820, inactive_mae=0.0414, holdout_rmse=0.5857
+  LDVB: converged=TRUE, iter=301, runtime=20.967, active_rmse=0.1069, inactive_mae=0.0339, holdout_rmse=0.6741
+  MCMC: kernel=slice, runtime=80.421, active_rmse=0.0719, inactive_mae=0.0405, holdout_rmse=0.5985
 
 p0=0.25
-  LDVB: converged=TRUE, iter=233, runtime=17.954, active_rmse=0.2643, inactive_mae=0.0639, holdout_rmse=0.4097
-  MCMC: kernel=slice, runtime=216.401, active_rmse=0.1680, inactive_mae=0.0460, holdout_rmse=0.2800
+  LDVB: converged=TRUE, iter=172, runtime=10.694, active_rmse=0.1741, inactive_mae=0.0706, holdout_rmse=0.4262
+  MCMC: kernel=slice, runtime=78.612, active_rmse=0.1597, inactive_mae=0.0843, holdout_rmse=0.4188
 
 p0=0.50
-  LDVB: converged=TRUE, iter=142, runtime=10.574, active_rmse=0.1385, inactive_mae=0.0554, holdout_rmse=0.3063
-  MCMC: kernel=slice, runtime=207.984, active_rmse=0.1388, inactive_mae=0.0615, holdout_rmse=0.3313
+  LDVB: converged=TRUE, iter=94, runtime=5.966, active_rmse=0.1787, inactive_mae=0.0813, holdout_rmse=0.3580
+  MCMC: kernel=slice, runtime=82.869, active_rmse=0.1782, inactive_mae=0.0813, holdout_rmse=0.3649

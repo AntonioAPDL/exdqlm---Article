@@ -1,7 +1,7 @@
 Seed: 20260501
 RNGkind: Mersenne-Twister | Inversion | Rejection
 Profile: standard
-Date: 2026-07-23 01:25:39.921093
+Date: 2026-08-25 02:01:57
 
 R version 4.6.0 (2026-04-24)
 Platform: x86_64-pc-linux-gnu
@@ -24,21 +24,17 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base
 
 other attached packages:
-[1] exdqlm_1.1.0   testthat_3.3.2
+[1] exdqlm_1.1.1
 
 loaded via a namespace (and not attached):
- [1] compiler_4.6.0       brio_1.1.5           Rcpp_1.1.1-1.1
- [4] parallel_4.6.0       png_0.1-9            yaml_2.3.12
- [7] lattice_0.22-9       coda_0.19-4.1        R6_2.6.1
-[10] igraph_2.3.1         nimble_1.4.2         Formula_1.2-5
-[13] knitr_1.51           MASS_7.3-65          desc_1.4.3
-[16] magic_1.6-1          rprojroot_2.1.1      scoringRules_1.1.3
-[19] rlang_1.2.0          xfun_0.57            pkgload_1.5.2
-[22] truncnorm_1.0-9      dlm_1.1-6.1          cli_3.6.6
-[25] withr_3.0.2          magrittr_2.0.5       tictoc_1.2.1
-[28] grid_4.6.0           rstudioapi_0.18.0    sandwich_3.1-1
-[31] lifecycle_1.0.5      waldo_0.6.2          crch_1.2-2
-[34] evaluate_1.0.5       pracma_2.4.6         numDeriv_2016.8-1.1
-[37] zoo_1.8-15           abind_1.4-8          pkgbuild_1.4.8
-[40] LaplacesDemon_16.1.8 matrixStats_1.5.0    tools_4.6.0
-[43] pkgconfig_2.0.3
+ [1] cli_3.6.6           knitr_1.51          rlang_1.2.0
+ [4] xfun_0.57           dlm_1.1-6.1         Formula_1.2-5
+ [7] zoo_1.8-15          crch_1.2-2          pracma_2.4.6
+[10] nimble_1.4.2        grid_4.6.0          abind_1.4-8
+[13] evaluate_1.0.5      MASS_7.3-65         lifecycle_1.0.5
+[16] numDeriv_2016.8-1.1 magic_1.6-1         compiler_4.6.0
+[19] igraph_2.3.1        sandwich_3.1-1      coda_0.19-4.1
+[22] Rcpp_1.1.1-1.1      pkgconfig_2.0.3     truncnorm_1.0-9
+[25] lattice_0.22-9      scoringRules_1.1.3  R6_2.6.1
+[28] parallel_4.6.0      magrittr_2.0.5      tools_4.6.0
+[31] matrixStats_1.5.0   tictoc_1.2.1

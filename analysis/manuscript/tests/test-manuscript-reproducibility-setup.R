@@ -39,46 +39,42 @@ testthat::test_that("clone-grade reproducibility entrypoints exist", {
   testthat::expect_true(file.exists(file.path(repo_root, "analysis", "lib", "exdqlm_package_resolver.R")))
 })
 
-testthat::test_that("code.R is a JSS-facing spin-ready replication script", {
-  code_lines <- readLines(file.path(repo_root, "code.R"), warn = FALSE)
-  code_text <- paste(code_lines, collapse = "\n")
+testthat::test_that("code.R and code-fast.R are flat JSS batch scripts", {
+  scripts <- c("code.R", "code-fast.R")
+  for (script in scripts) {
+    path <- file.path(repo_root, script)
+    code_lines <- readLines(path, warn = FALSE)
+    code_text <- paste(code_lines, collapse = "\n")
 
-  testthat::expect_true(any(grepl("# exdqlm article replication script", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("knitr::spin(\"code.R\", knit = TRUE)", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("sessionInfo()", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("analysis/manuscript/examples", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("replication_env <- new.env", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Rscript code.R --quick", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Rscript code.R --example 3", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Mersenne-Twister / Inversion / Rejection", code_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("force_refit <- !isTRUE(args$quick)", code_lines, fixed = TRUE)))
-  testthat::expect_false(grepl("main <- function", code_text, fixed = TRUE))
-  testthat::expect_false(grepl("analysis/run_all.R", code_text, fixed = TRUE))
-  testthat::expect_false(grepl("--mode", code_text, fixed = TRUE))
-  testthat::expect_false(grepl("--skip-preflight", code_text, fixed = TRUE))
+    testthat::expect_true(any(grepl("# exdqlm JSS replication script", code_lines, fixed = TRUE)))
+    testthat::expect_true(any(grepl("R CMD BATCH --vanilla", code_lines, fixed = TRUE)))
+    testthat::expect_true(any(grepl("sessionInfo()", code_lines, fixed = TRUE)))
+    testthat::expect_true(any(grepl("print_jss_heading(\"M95\")", code_lines, fixed = TRUE)))
+    testthat::expect_true(any(grepl("print_jss_heading(\"summary(M95)\")", code_lines, fixed = TRUE)))
+    testthat::expect_true(any(grepl("print_jss_heading(\"MTF$median.kt\")", code_lines, fixed = TRUE)))
+    testthat::expect_true(any(grepl("Table 7 / tab:ex2bench", code_lines, fixed = TRUE)))
+    testthat::expect_true(any(grepl("Table 10 / tab:ex4static", code_lines, fixed = TRUE)))
+    testthat::expect_silent(parse(path))
 
-  testthat::skip_if_not_installed("knitr")
-  spun <- knitr::spin(text = code_lines, knit = FALSE)
-  testthat::expect_true(any(grepl("exdqlm article replication script", spun, fixed = TRUE)))
-  testthat::expect_true(any(grepl("JSS encourages an execution log", spun, fixed = TRUE)))
-  testthat::expect_true(any(grepl("sessionInfo", spun, fixed = TRUE)))
-})
-
-testthat::test_that("code.html records the JSS replication log when generated", {
-  testthat::skip_if(
-    isTRUE(getOption("knitr.in.progress")) ||
-      tolower(Sys.getenv("EXDQLM_BUILDING_CODE_HTML", unset = "false")) %in% c("true", "1", "yes"),
-    "code.html is written after the knitr::spin() run completes."
-  )
-
-  html_path <- file.path(repo_root, "code.html")
-  testthat::expect_true(file.exists(html_path), info = "Run knitr::spin(\"code.R\", knit = TRUE) to refresh code.html.")
-
-  html <- readLines(html_path, warn = FALSE)
-  testthat::expect_true(any(grepl("exdqlm article replication script", html, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Rscript code.R --quick", html, fixed = TRUE)))
-  testthat::expect_true(any(grepl("Session Info", html, fixed = TRUE)))
-  testthat::expect_true(any(grepl("R version", html, fixed = TRUE)))
+    for (marker in c(
+      "source(",
+      "readRDS(",
+      "saveRDS(",
+      "analysis/manuscript/examples",
+      "replication_env <- new.env",
+      "Rscript code.R",
+      "--quick",
+      "--example",
+      "analysis/run_all.R",
+      "--mode",
+      "--skip-preflight"
+    )) {
+      testthat::expect_false(
+        grepl(marker, code_text, fixed = TRUE),
+        info = sprintf("%s contains old wrapper marker: %s", script, marker)
+      )
+    }
+  }
 })
 
 testthat::test_that("public README and code.R avoid development-only entrypoints", {
@@ -86,13 +82,15 @@ testthat::test_that("public README and code.R avoid development-only entrypoints
   readme_lines <- readLines(file.path(repo_root, "README.md"), warn = FALSE)
   public_text <- paste(c(code_lines, readme_lines), collapse = "\n")
 
-  testthat::expect_true(grepl("Rscript code.R", public_text, fixed = TRUE))
-  testthat::expect_true(grepl("Rscript code.R --quick", public_text, fixed = TRUE))
-  testthat::expect_true(grepl("Rscript code.R --example 3", public_text, fixed = TRUE))
+  testthat::expect_true(grepl("R CMD BATCH --vanilla code.R code.Rout", public_text, fixed = TRUE))
+  testthat::expect_true(grepl("R CMD BATCH --vanilla code-fast.R code-fast.Rout", public_text, fixed = TRUE))
   for (marker in c(
     "git clone",
     "origin/",
     "upstream",
+    "Rscript code.R",
+    "--quick",
+    "--example",
     "--mode reference",
     "--mode portable",
     "--skip-preflight",
@@ -106,7 +104,7 @@ testthat::test_that("public README and code.R avoid development-only entrypoints
   }
 })
 
-testthat::test_that("code.R help works from a no-git archive copy", {
+testthat::test_that("flat scripts parse from a no-git archive copy", {
   testthat::skip_if(
     tolower(Sys.getenv("EXDQLM_SKIP_ARCHIVE_SMOKE", unset = "false")) %in% c("true", "1", "yes"),
     "Archive smoke test skipped by EXDQLM_SKIP_ARCHIVE_SMOKE."
@@ -118,9 +116,8 @@ testthat::test_that("code.R help works from a no-git archive copy", {
   dir.create(archive_root)
   files <- c(
     "code.R",
+    "code-fast.R",
     "README.md",
-    "analysis/lib/manuscript_setup.R",
-    "analysis/lib/exdqlm_package_resolver.R",
     "exdqlm-jss.tex"
   )
   for (rel in files) {
@@ -133,13 +130,8 @@ testthat::test_that("code.R help works from a no-git archive copy", {
 
   old_wd <- setwd(archive_root)
   on.exit(setwd(old_wd), add = TRUE)
-  out <- system2(
-    file.path(R.home("bin"), "Rscript"),
-    c("code.R", "--help"),
-    stdout = TRUE,
-    stderr = TRUE
-  )
-  testthat::expect_true(any(grepl("Rscript code.R --quick", out, fixed = TRUE)))
+  testthat::expect_silent(parse(file.path(archive_root, "code.R")))
+  testthat::expect_silent(parse(file.path(archive_root, "code-fast.R")))
   testthat::expect_false(dir.exists(file.path(archive_root, ".git")))
 })
 
@@ -195,13 +187,14 @@ testthat::test_that("replication docs use the simplified public interface", {
   )
   text <- paste(unlist(lapply(file.path(repo_root, docs), readLines, warn = FALSE), use.names = FALSE), collapse = "\n")
 
-  testthat::expect_true(grepl("Rscript code.R", text, fixed = TRUE))
-  testthat::expect_true(grepl("Rscript code.R --quick", text, fixed = TRUE))
-  testthat::expect_true(grepl("Rscript code.R --example 3", text, fixed = TRUE))
-  testthat::expect_true(grepl("refit", tolower(text), fixed = TRUE))
+  testthat::expect_true(grepl("R CMD BATCH --vanilla code.R code.Rout", text, fixed = TRUE))
+  testthat::expect_true(grepl("R CMD BATCH --vanilla code-fast.R code-fast.Rout", text, fixed = TRUE))
   testthat::expect_true(grepl("internal maintenance", text, fixed = TRUE))
 
   stale_markers <- c(
+    "Rscript code.R",
+    "--quick",
+    "--example",
     "code.R --profile",
     "--mode portable",
     "--mode reference",
@@ -245,7 +238,7 @@ testthat::test_that("RNG and benchmark backend reproducibility policy is explici
   testthat::skip_if_not_installed("yaml")
   cfg <- yaml::read_yaml(file.path(repo_root, "analysis", "config", "params_manuscript.yml"))
 
-  testthat::expect_identical(as.character(cfg$expected_exdqlm_version), "1.1.0")
+  testthat::expect_identical(as.character(cfg$expected_exdqlm_version), "1.1.1")
   testthat::expect_identical(as.character(cfg$rng$kind), "Mersenne-Twister")
   testthat::expect_identical(as.character(cfg$rng$normal_kind), "Inversion")
   testthat::expect_identical(as.character(cfg$rng$sample_kind), "Rejection")
@@ -427,7 +420,7 @@ testthat::test_that("generated manuscript tables are coherent", {
   expected_exdqlm_version <- as.character(cfg$expected_exdqlm_version)
   testthat::expect_match(fields[["exdqlm_version"]], "^[0-9]+\\.[0-9]+\\.[0-9]+$")
   testthat::expect_identical(fields[["exdqlm_version"]], expected_exdqlm_version)
-  testthat::expect_true(nzchar(fields[["exdqlm_commit"]]))
+  testthat::expect_true(nzchar(fields[["exdqlm_source"]]))
   testthat::expect_true(nzchar(fields[["r_version"]]))
   testthat::expect_true(nzchar(fields[["runtime_definition"]]))
   testthat::expect_true("diagnostics_runtime_included" %in% names(fields))
@@ -500,6 +493,6 @@ testthat::test_that("main manuscript inline table values match generated outputs
     header = FALSE,
     stringsAsFactors = FALSE
   )
-  exdqlm_commit <- env$V2[env$V1 == "exdqlm_commit"][[1]]
-  testthat::expect_true(grepl(exdqlm_commit, tex, fixed = TRUE))
+  exdqlm_version <- env$V2[env$V1 == "exdqlm_version"][[1]]
+  testthat::expect_true(grepl(exdqlm_version, tex, fixed = TRUE))
 })

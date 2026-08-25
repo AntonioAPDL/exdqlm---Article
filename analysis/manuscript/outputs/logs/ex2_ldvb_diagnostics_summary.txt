@@ -13,7 +13,7 @@ ELBO summary:
    5131    7217    7217    7174    7220    7231      10
 
 Last 5 delta ELBO values:
-[1] -4.309364e-05 -4.003227e-05 -3.725550e-05 -3.466271e-05 -3.221191e-05
+[1] -4.308465e-05 -4.006929e-05 -3.725270e-05 -3.463992e-05 -3.225524e-05
 
 Posterior sample summaries:
 gamma:    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.

@@ -1,5 +1,5 @@
 seed: 20260501
-expected_exdqlm_version: "1.1.0"
+expected_exdqlm_version: "1.1.1"
 
 rng:
   kind: Mersenne-Twister
@@ -32,28 +32,30 @@ profiles:
   quick:
     ex1:
       trace_seed: 20260620
-      n_burn: 350
-      n_mcmc: 180
-      n_burn_trace: 1500
-      n_mcmc_trace: 800
-      thin_trace: 4
+      n_burn: 120
+      n_mcmc: 80
+      n_burn_trace: 500
+      n_mcmc_trace: 250
+      thin_trace: 5
       n_chains_kernel: 4
-      n_burn_kernel: 800
-      n_mcmc_kernel: 400
-      thin_kernel_plot: 4
-      synth_source_draws: 500
-      synth_n_samp: 1200
+      n_burn_kernel: 200
+      n_mcmc_kernel: 100
+      thin_kernel_plot: 5
+      synth_source_draws: 200
+      synth_n_samp: 400
       forecast_window_start: 1952
       synth_window_start: 1880
     ex2:
-      n_is: 180
-      n_samp: 140
-      tol: 0.08
-      ldvb_diag_tol: 0.02
-      ldvb_diag_n_samp: 250
-      benchmark_n_burn: 400
-      benchmark_n_mcmc: 150
-      df_grid: [0.85, 0.90, 0.95, 1.00]
+      n_obs: 80
+      n_is: 20
+      n_samp: 12
+      tol: 0.15
+      ldvb_diag_tol: 0.08
+      ldvb_diag_n_samp: 20
+      ldvb_max_iter: 25
+      benchmark_n_burn: 20
+      benchmark_n_mcmc: 12
+      df_grid: [0.85, 1.00]
     ex3:
       p0: 0.15
       selected_indices: [noi, amo]
@@ -81,11 +83,11 @@ profiles:
       transfer_psi_c0: 1.0
       gam_init: -0.1
       sig_init: 0.1
-      max_iter: 120
-      n_is: 200
-      n_samp: 80
-      forecast_n_samp: 80
-      tol: 0.05
+      max_iter: 60
+      n_is: 60
+      n_samp: 40
+      forecast_n_samp: 40
+      tol: 0.08
       lambda_grid: [0.70, 0.80, 0.90]
     ex4:
       n_train: 160
@@ -100,14 +102,14 @@ profiles:
       screen_target_p0: 0.50
       screen_seeds: [20260711, 20260712, 20260713, 20260714, 20260715, 20260716, 20260717, 20260718]
       screen_extra_seed_count: 0
-      ldvb_max_iter: 260
-      ldvb_max_iter_tail: 420
-      ldvb_tol: 0.0001
-      n_samp: 300
+      ldvb_max_iter: 220
+      ldvb_max_iter_tail: 500
+      ldvb_tol: 0.005
+      n_samp: 80
       rhs_tau0: 0.15
       rhs_zeta2_fixed: 9.0
-      n_burn: 150
-      n_mcmc: 100
+      n_burn: 60
+      n_mcmc: 50
       thin: 1
 
   standard:

@@ -1,6 +1,6 @@
 profile=standard
 level_prior_m0=50, level_prior_C0=2500
-n.samp=3000, tol=0.05
+n.samp=3000, tol=0.05, ldvb_max_iter=200
 
 Summary(M_sigma_ldvb$samp.sigma):
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
@@ -8,7 +8,7 @@ Summary(M_sigma_ldvb$samp.sigma):
 
 Runtime seconds:
 M_sigma_ldvb.elapsed      M1_ldvb.elapsed      M2_ldvb.elapsed
-              27.996               26.700              134.427
+              23.078               23.150              111.631
 
 LDVB status: success
 Summary(M2_ldvb$samp.gamma):
