@@ -101,12 +101,12 @@
 
 Quantile regression has become a widely used alternative to mean-based modeling in static settings. However, dynamic quantile methods and accompanying software remain comparatively limited. In Bayesian parametric quantile regression, the asymmetric Laplace (AL) likelihood has played a central role because it is linked to the check-loss function used in classical quantile regression \citep{yu2001bayesian,koenkerquantile} and allows convenient mixture representations for posterior computation. Nevertheless, the AL distribution can be restrictive as an error model. More flexible error distributions have been studied extensively in the Bayesian nonparametric literature \citep{kottas2009bayesian,reich2009flexible,taddy2010bayesian}; however, the resulting methods can be computationally demanding for dynamic models and longer time series.
 
-\citet{yan2025family} introduce the extended asymmetric Laplace (exAL) distribution, a parametric extension of the AL distribution that preserves many of its computational advantages while relaxing some restrictive assumptions. Their work also develops Bayesian exAL regression for static quantile models. Building on the exAL family, \citet{me} developed the extended dynamic quantile linear model (exDQLM) framework for modeling time-varying quantiles, together with Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes (ISVB) inference and a transfer-function extension for lagged covariate effects. The Laplace--delta variational Bayes (LDVB) implementation considered here follows the general nonconjugate variational inference strategy of \citet{wang2013nonconjugatevb}, specialized to the exAL scale--skewness block. Thus, the exAL distribution, the exDQLM state-space model formulation, the MCMC and ISVB algorithms in \citet{me}, and the general Laplace--delta variational strategy constitute the principal methodological foundations behind the present work.
+\citet{yan2025family} introduce the extended asymmetric Laplace (exAL) distribution, a parametric extension of the AL distribution that preserves many of its computational advantages while relaxing some restrictive assumptions. Their work also develops Bayesian exAL regression for static quantile models. Building on the exAL family, \citet{me} developed the extended dynamic quantile linear model (exDQLM) framework for modeling time-varying quantiles, together with Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes (ISVB) inference and a transfer-function extension for lagged covariate effects. The Laplace--delta variational Bayes (LDVB) implementation considered here follows the general nonconjugate variational inference strategy of \citet{wang2013nonconjugatevb}, specialized to the exAL scale--skewness block; in version 1.1.1, the default LDVB scale--skewness factor is a structured \(q(\gamma)q(\sigma\mid\gamma)\) approximation that keeps the conditional GIG scale structure explicit. Thus, the exAL distribution, the exDQLM state-space model formulation, the MCMC and ISVB algorithms in \citet{me}, and the general nonconjugate variational strategy constitute the principal methodological foundations behind the present work.
 
 The contribution of the present article is software-centered. The \proglang{R} package \pkg{exdqlm} turns these methodological components into an integrated workflow for specifying, fitting, inspecting, diagnosing, forecasting, and reproducing Bayesian dynamic and static quantile analyses. The package makes five main software contributions:
 \begin{itemize}
 \item a composable model-construction interface for trend, seasonal, regression, and transfer-function components in Bayesian dynamic quantile state-space models;
-\item coordinated MCMC and variational inference interfaces, including LDVB and ISVB, for dynamic and static fits;
+\item coordinated MCMC and variational inference interfaces, including scale-collapsed MCMC, LDVB, and ISVB, for dynamic and static fits;
 \item an S3 object workflow for fitted models, post-processing and forecasting objects with \code{print()}, \code{summary()}, \code{plot()}, \code{predict()}, and \code{diagnostics()} methods where appropriate;
 \item package-level exAL distribution utilities, predictive scoring and calibration diagnostics, and compiled implementations of computationally intensive model-building, posterior sampling and posterior predictive operations, with \proglang{R} fallbacks where applicable; and
 \item support for static AL/exAL regression with shrinkage-prior options, together with scripts and documentation that reproduce the analyses reported in this article.
@@ -237,23 +237,23 @@ Default if omitted & -- & -- & $\mat{0}_q$ & $10^3\mat{I}_q$ & 2.1 & 1.1 & 0 & 1
 The dynamic exDQLM posterior target and the original MCMC and ISVB inference strategy were developed by \citet{me}. The package makes \code{exdqlmISVB()} available for variational inference following the ISVB approach of \citet{me}.
 The principal fitting routines in the package are
 \code{exdqlmMCMC()}, which performs posterior inference via MCMC, and \code{exdqlmLDVB()}, which provides a faster variational approximation based on
-the Laplace--delta strategy of \citet{wang2013nonconjugatevb}.
+the nonconjugate variational strategy of \citet{wang2013nonconjugatevb}.
 
 The MCMC routine uses Gibbs sampling steps to update the latent-variable sequences
 $\{s_t\}_{t=1}^T$ and $\{v_t\}_{t=1}^T$. The dynamic state sequence $\vect{\theta}_{1:T}$ is sampled using a forward-filtering backward-sampling algorithm \citep{carter1994gibbs,fruhwirth1994data}.
-The scale and skewness parameters are updated separately from the latent-state blocks. By default, the package samples $\sigma$ from its conditional distribution given $\gamma$ and then updates $\gamma$ using a bounded univariate slice sampler \citep{neal2003slice}. Joint
+The scale and skewness parameters are updated separately from the latent-state blocks. By default, the package integrates $\sigma$ out of the conditional target for $\gamma$, updates $\gamma$ on its bounded logit scale using a univariate slice sampler \citep{neal2003slice}, and then redraws $\sigma$ from its exact GIG conditional distribution. Joint
 random-walk Metropolis--Hastings (MH) alternatives are also available.
 The chain can optionally be initialized using the variational
 approximation, but this initialization is separate from the subsequent MCMC
 update kernel.
 
 
-For longer time series or repeated model comparisons, MCMC can be computationally demanding. The \code{exdqlmLDVB()} routine uses a mean-field factorization and blockwise coordinate-ascent variational inference. The blocks associated with the latent variables and dynamic states admit closed-form coordinate updates, whereas the joint scale–skewness block is non-conjugate. Following \citet{wang2013nonconjugatevb}, this block is approximated on transformed coordinates, and a second-order delta method evaluates the expectations needed by the remaining updates. The dynamic states are updated at each iteration using forward-filtering backward-smoothing, and convergence is monitored through changes in the state, scale, skewness, and evidence lower bound (ELBO).
+For longer time series or repeated model comparisons, MCMC can be computationally demanding. The \code{exdqlmLDVB()} routine uses a mean-field factorization and blockwise coordinate-ascent variational inference. The blocks associated with the latent variables and dynamic states admit closed-form coordinate updates, whereas the joint scale--skewness block is non-conjugate. By default, \pkg{exdqlm} uses a structured \(q(\gamma)q(\sigma\mid\gamma)\) factor for this block: the marginal factor for \(\gamma\) is represented on its bounded logit scale, and the conditional factor for \(\sigma\) uses the GIG kernel available at each \(\gamma\). The previous two-dimensional Laplace--delta approximation on transformed \((\sigma,\gamma)\) coordinates remains available as a legacy option. The dynamic states are updated at each iteration using forward-filtering backward-smoothing, and convergence is monitored through changes in the state, scale, skewness, and evidence lower bound (ELBO).
 
-Relative to the ISVB implementation, LDVB replaces the stochastic importance-sampling approximation for the non-conjugate scale–skewness block with a deterministic optimization-based approximation conditional on the data and tuning inputs. This leads to reproducible convergence monitoring and provides approximate uncertainty summaries for both $\sigma$ and $\gamma$. After convergence, samples from the fitted variational factors are generated for posterior summarization. These are approximate variational draws rather than draws from the exact posterior, so MCMC remains the reference calculation when posterior tail behavior or interval accuracy is central.
+Relative to the ISVB implementation, LDVB replaces the stochastic importance-sampling approximation for the non-conjugate scale--skewness block with a deterministic variational approximation conditional on the data and tuning inputs. This leads to reproducible convergence monitoring and provides approximate uncertainty summaries for both $\sigma$ and $\gamma$. After convergence, samples from the fitted variational factors are generated for posterior summarization. These are approximate variational draws rather than draws from the exact posterior, so MCMC remains the reference calculation when posterior tail behavior or interval accuracy is central.
 
 Table \ref{table:post} shows selected core inference controls for the fitting functions \code{exdqlmMCMC()} and \code{exdqlmLDVB()}.
-The MCMC routine also accepts \code{Sig.mh} as an optional proposal covariance when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default slice-sampling update.
+The MCMC routine also accepts \code{Sig.mh} as an optional proposal covariance when \code{mh.proposal} selects a joint random-walk MH kernel; it is not used under the default scale-collapsed slice update.
 Both fitting routines also use package-level options to control selected compiled and R backend paths. These runtime options, including ELBO monitoring where applicable, are described in Section
  \ref{sec:design} and are distinct from the function-specific inference controls summarized in Table \ref{table:post}.
 
@@ -500,7 +500,7 @@ The object system also provides several extension points. Compatible user-suppli
 
 Computationally intensive operations have \proglang{C++} implementations through \pkg{Rcpp},  with \proglang{R} implementations retained for numerical parity checks and portability. These include the exported exAL density, distribution, quantile, and random-generation utilities; selected Kalman recursions and model builders; posterior and latent-variable sampling paths; posterior predictive simulation; and MCMC backend routing. Package options control backend routing for Kalman recursions, model builders, posterior sampling, posterior predictive simulation, and MCMC routing. In version 1.1.1, compiled stochastic helper paths used by the manuscript run through serial \proglang{R}-controlled random-number streams, rather than worker-thread or private C++ random-number streams.
 
-The variational routines return standardized traces for the ELBO, scale, skewness, and convergence diagnostics, with the closed-form and Laplace--delta ELBO components documented in the appendices. The examples use a fixed backend profile, recorded random-number seeds, and a documented reference environment so that run times and stochastic outputs are reproducible.
+The variational routines return standardized traces for the ELBO, scale, skewness, and convergence diagnostics, with the closed-form, structured scale--skewness, and legacy Laplace--delta ELBO components documented in the appendices. The examples use a fixed backend profile, recorded random-number seeds, and a documented reference environment so that run times and stochastic outputs are reproducible.
 
 \paragraph{Computational details and replication.}
 The manuscript results were generated with \proglang{R} 4.6.0 and \pkg{exdqlm} 1.1.1 on x86\_64 Linux. The replication scripts set \code{RNGversion("4.6.0")} and \code{RNGkind("Mersenne-Twister", "Inversion", "Rejection")} before applying the recorded seeds. Native thread variables for OpenMP and common BLAS implementations are set to one before launching \proglang{R}; the benchmark profile used in the examples enables the \code{"fast"} C++ MCMC backend and keeps stochastic compiled helper streams controlled by the \proglang{R} random-number generator. The submitted replication archive contains a flat \code{code.R} script intended to be run with \code{R CMD BATCH --vanilla code.R code.Rout}. That run prints fitted-object output, Tables 7--10, selected scalar summaries, and \code{sessionInfo()} to \code{code.Rout}, and writes the manuscript figures to \code{Rplots.pdf} and to the PNG files used by this article. A reduced \code{code-fast.R} script checks the same code paths with smaller computation settings; it is not used for manuscript numerical values. Runtime entries in the tables are elapsed fitting times on the recorded reference platform and are not intended to be machine-independent constants.
@@ -1057,11 +1057,11 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{23.15} & \textbf{0.133} & 8.525 & 3851.4 \\
- & MCMC & 225.09 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
+ \tworowcell{DQLM} & LDVB & \textbf{24.86} & \textbf{0.133} & 8.525 & 3851.4 \\
+ & MCMC & 166.66 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{111.63} & \textbf{0.120} & 6.256 & 2335.3 \\
- & MCMC & 272.45 & 0.175 & \textbf{5.111} & \textbf{2194.2} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{47.85} & \textbf{0.107} & 6.558 & 3015.2 \\
+ & MCMC & 220.39 & 0.152 & \textbf{5.147} & \textbf{2216.1} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.1, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
@@ -1197,7 +1197,7 @@ R> lambda.star = lambda.grid[which.min(pplc.grid)]
 R> lambda.star
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 0.85
+[1] 0.99
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1331,14 +1331,15 @@ R> title(expression(psi[list(AMO, t)]))
 The fitted object also reports \code{median.kt}, the median number of time steps
 until the transfer effect on the \(0.15\) quantile is less than or equal to
 \(1\mathrm{e}{-3}\), as discussed in Section \ref{sec:tf}. Here
-\code{median.kt} is approximately 25.15, indicating a persistent transfer effect
-under the selected \(\lambda\).
+\code{median.kt} is approximately 350.20, reflecting the highly persistent
+transfer effect implied by the selected \(\lambda\) at the upper end of the
+candidate grid.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> MTF$median.kt
 \end{CodeInput}
 \begin{CodeOutput}
-[1] 25.15134
+[1] 350.2047
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1445,9 +1446,9 @@ R> tab.ex3 = data.frame(model = c("M0", "MREG", "MTF"),
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.168 & 0.470 & \textbf{99.340} \\
- \code{MREG} direct regression & \textbf{0.112} & \textbf{0.348} & 151.792 \\
- \code{MTF} transfer function & 0.155 & 0.366 & 125.391 \\
+ \code{M0} no covariates & 0.122 & 0.416 & 177.944 \\
+ \code{MREG} direct regression & \textbf{0.108} & 0.347 & 160.624 \\
+ \code{MTF} transfer function & 0.149 & \textbf{0.314} & \textbf{141.694} \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
@@ -1471,7 +1472,7 @@ R> tab.ex3.fc = data.frame(model = c("M0", "MREG", "MTF"),
 \end{CodeInput}
 \end{CodeChunk}
 
-Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-regression model has the smallest KL and CRPS values, while the no-covariate baseline has the smallest PPLC. The transfer-function model falls between them for PPLC and has diagnostics closer to \code{MREG} than to \code{M0} for CRPS. The example instead shows how \pkg{exdqlm} supports three related dynamic quantile workflows: no external inputs, direct regression through \code{regMod()}, and lagged external-input effects through transfer functions.
+Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-regression model has the smallest KL value, while the transfer-function model has the smallest CRPS and PPLC values after selecting \(\lambda\) by training-period PPLC. The example shows how \pkg{exdqlm} supports three related dynamic quantile workflows: no external inputs, direct regression through \code{regMod()}, and lagged external-input effects through transfer functions.
 
 \begin{table}[ht!]
 \centering
@@ -1480,9 +1481,9 @@ Table \ref{tab:ex3} gives a mixed in-sample diagnostic comparison. The direct-re
  \toprule
  Model & Check loss & CRPS \\
  \midrule
- \code{M0} no covariates & 0.119 & 0.498 \\
- \code{MREG} direct regression & \textbf{0.114} & \textbf{0.401} \\
- \code{MTF} transfer function & 0.155 & 0.550 \\
+ \code{M0} no covariates & 0.120 & 0.473 \\
+ \code{MREG} direct regression & \textbf{0.114} & \textbf{0.399} \\
+ \code{MTF} transfer function & 0.221 & 0.803 \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Held-out forecast metrics over July 2021 through December 2022, computed with \code{diagnostics()} from \code{exdqlmForecast} objects returned by \code{predict(..., return.draws = TRUE)}. Check loss is computed at \(p_0=0.15\), and CRPS is computed from posterior predictive forecast draws using the integrated-quantile-score approximation. Lower values are preferred; bold entries mark the smallest value in each column.}
@@ -1549,7 +1550,7 @@ R> p.grid = c(0.05, 0.25, 0.50)
 \end{CodeInput}
 \end{CodeChunk}
 
-We fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). All fits use the Nishimura--Suchard regularized horseshoe prior \citep{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs\_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit an LDVB approximation with \code{exalStaticLDVB()} using \code{n.samp = 3000}, and an MCMC fit with \code{exalStaticMCMC()} using \code{n.burn = 2000} and \code{n.mcmc = 3000}; the MCMC routine uses its default \code{slice} kernel and is warm-started from the LDVB fit. The lower-tail LDVB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. Setting \code{al.ind = TRUE} (or equivalently \code{dqlm.ind = TRUE}) would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse \code{rhs\_ns} shrinkage.
+We fit separate static exAL models at \(p_0 \in \{0.05,0.25,0.50\}\). All fits use the Nishimura--Suchard regularized horseshoe prior \citep{nishimura2023shrunken}, implemented in the package through \code{beta_prior = "rhs\_ns"}, with \(\tau_0 = 0.15\), fixed slab \(\zeta^2 = 9\), and an unshrunk intercept. We fit an LDVB approximation with \code{exalStaticLDVB()} using \code{n.samp = 3000}, and an MCMC fit with \code{exalStaticMCMC()} using \code{n.burn = 2000} and \code{n.mcmc = 3000}; the MCMC routine uses its default \code{collapsed\_slice} scale--skewness kernel and is warm-started from the LDVB fit. The lower-tail LDVB fit at \(p_0 = 0.05\) converges more slowly, so we allow a larger LDVB iteration budget there. Setting \code{al.ind = TRUE} (or equivalently \code{dqlm.ind = TRUE}) would recover the AL special case discussed in Section \ref{sec:exdqlm}, but here we focus on the general static exAL model under sparse \code{rhs\_ns} shrinkage.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1609,14 +1610,14 @@ Figure \ref{fig:ex4static} shows that, in this simulated realization, both metho
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{20.97} & 0.107 & \textbf{0.034} & 0.674 \\
- & MCMC & 80.42 & \textbf{0.072} & 0.040 & \textbf{0.598} \\
+ \tworowcell{0.05} & LDVB & \textbf{35.30} & 0.108 & \textbf{0.034} & 0.673 \\
+ & MCMC & 81.44 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{10.69} & 0.174 & \textbf{0.071} & 0.426 \\
- & MCMC & 78.61 & \textbf{0.160} & 0.084 & \textbf{0.419} \\
+ \tworowcell{0.25} & LDVB & \textbf{30.91} & 0.310 & 0.078 & 0.371 \\
+ & MCMC & 79.65 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
  \midrule
-\tworowcell{0.50} & LDVB & \textbf{5.97} & 0.179 & 0.081 & \textbf{0.358} \\
- & MCMC & 82.87 & \textbf{0.178} & 0.081 & 0.365 \\
+\tworowcell{0.50} & LDVB & \textbf{14.22} & \textbf{0.128} & 0.103 & 0.341 \\
+ & MCMC & 81.99 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
@@ -1636,7 +1637,7 @@ The examples illustrate how these interfaces are used in analysis. Lake Huron us
 
 The examples also delineate the current scope of the package. Dynamic models are fitted one quantile level at a time. \code{quantileSynthesis()} combines predictive draws after separate fits and applies monotonicity adjustments when needed; it is not a joint posterior model over multiple quantile levels. LDVB returns samples from fitted variational factors rather than from the exact posterior target, so MCMC remains the reference calculation when posterior tail summaries, interval widths, or approximation error are central. In transfer-function models, lag propagation is controlled by a fixed or grid-selected \(\lambda\); the current implementation does not estimate input-specific lag-decay rates internally. Runtime results are elapsed fitting times under the stated backend profile and should be read alongside predictive and calibration diagnostics.
 
-Several development directions follow from these limitations: multivariate-output dynamic quantile models that represent cross-series dependence through a modeled correlation matrix for related time series; improved approximations for the nonconjugate joint \((\gamma,\sigma)\) skewness--scale block; nonlinear dynamic quantile modeling beyond the linear state-space form used here; and joint or regularized fitting across quantile levels. The main text, appendices, and replication materials have separate roles: the main text describes the user-facing workflow, the appendices record selected posterior targets and package-specific computational blocks, and the repository scripts regenerate the reported figures, tables, example artifacts, and benchmark provenance.
+Several development directions follow from these limitations: multivariate-output dynamic quantile models that represent cross-series dependence through a modeled correlation matrix for related time series; further assessment of variational approximation error for the nonconjugate \((\gamma,\sigma)\) skewness--scale block; nonlinear dynamic quantile modeling beyond the linear state-space form used here; and joint or regularized fitting across quantile levels. The main text, appendices, and replication materials have separate roles: the main text describes the user-facing workflow, the appendices record selected posterior targets and package-specific computational blocks, and the repository scripts regenerate the reported figures, tables, example artifacts, and benchmark provenance.
 
 \clearpage
 \appendix
@@ -1648,7 +1649,7 @@ Several development directions follow from these limitations: multivariate-outpu
 The appendix aims to connect the package interface discussed in the article with the
 posterior targets and computations implemented in \pkg{exdqlm}. It records the
 distributional conventions, compact dynamic and static posterior targets, the
-Laplace--delta variational Bayes (LDVB) scale--skewness block, the static
+LDVB scale--skewness block, the static
 \code{rhs\_ns} shrinkage block, diagnostic and scoring quantities, and the
 posterior-predictive synthesis algorithm. Standard Gaussian filtering,
 smoothing, and backward-sampling recursions are cited rather than rederived.
@@ -1885,17 +1886,22 @@ coefficient update is the weighted Gaussian regression update; for
 the expected \code{rhs\_ns} precision described in
 Section~\ref{sec:static_rhs}.
 
-\section{Laplace--delta VB implementation for exAL models}
+\section{LDVB scale--skewness implementation for exAL models}
 \label{sec:ldvb_details}
 
 The nonconjugate part of the exAL posterior is the joint scale--skewness
-block $(\sigma,\gamma)$. The LDVB routines in \pkg{exdqlm} specialize the
-Laplace--delta strategy of \citet{wang2013nonconjugatevb} to this block.
+block $(\sigma,\gamma)$. The LDVB routines in \pkg{exdqlm} specialize
+nonconjugate variational inference \citep{wang2013nonconjugatevb} to this
+block. In version 1.1.1, the default implementation uses a structured
+\(q(\gamma)q(\sigma\mid\gamma)\) factor that preserves the conditional GIG
+scale kernel. The earlier two-dimensional Laplace--delta factor on transformed
+coordinates remains available for comparison and backward-compatible
+workflows.
 The dynamic variational family is
 \begin{equation}
 q(\vect{\theta}_{0:T},\vect{v},\vect{s},\sigma,\gamma)
 =q(\vect{\theta}_{0:T})\prod_{t=1}^Tq(v_t)\prod_{t=1}^Tq(s_t)\,
-q(\sigma,\gamma).
+q_{\sigma\gamma}(\sigma,\gamma).
 \label{eq:dyn_exdqlm_mf}
 \end{equation}
 The static family replaces $q(\vect{\theta}_{0:T})$ by
@@ -1903,7 +1909,7 @@ $q(\vect{\beta})$:
 \begin{equation}
 q(\vect{\beta},\vect{v},\vect{s},\sigma,\gamma)
 =q(\vect{\beta})\prod_{i=1}^nq(v_i)\prod_{i=1}^nq(s_i)\,
-q(\sigma,\gamma).
+q_{\sigma\gamma}(\sigma,\gamma).
 \label{eq:static_exal_mf}
 \end{equation}
 
@@ -1956,7 +1962,7 @@ y_i\kappa_1\E(v_i^{-1})
 where $\vect{\eta}=(\eta_1,\ldots,\eta_n)^\top$.
 
 The latent-variable factors remain closed form conditional on the
-Laplace--delta moments. If $m_{\eta,t}=\E(\mat{F}_t^\top\vect{\theta}_t)$,
+scale--skewness moments. If $m_{\eta,t}=\E(\mat{F}_t^\top\vect{\theta}_t)$,
 $S_{\eta,t}=\Var(\mat{F}_t^\top\vect{\theta}_t)$, and
 $S_{\Delta,t}=(y_t-m_{\eta,t})^2+S_{\eta,t}$, then the dynamic updates are
 \begin{align}
@@ -1978,13 +1984,26 @@ The static updates replace $m_{\eta,t}$ and $S_{\eta,t}$ by
 $\vect{x}_i^\top\vect{m}_\beta$ and
 $\vect{x}_i^\top\mat{\Sigma}_\beta\vect{x}_i$.
 
-The nonconjugate factor is approximated on transformed coordinates
+The default structured factor works on the bounded logit coordinate
 \begin{equation}
-\ell_\sigma=\log\sigma,\qquad
 z_\gamma=\logit\left(\frac{\gamma-L}{U-L}\right).
 \label{eq:dyn_exdqlm_ld_transform}
 \end{equation}
-If $r=\expit(z_\gamma)$, the transformed objective is
+For each candidate value of \(\gamma\), the conditional factor
+\(q(\sigma\mid\gamma)\) has a GIG kernel. The implementation evaluates the
+collapsed objective for \(z_\gamma\), which integrates out \(\sigma\), and then
+computes the expectations needed in \eqref{eq:dyn_exdqlm_kappa} using the
+quadrature weights for \(q(\gamma)\) and GIG moments for
+\(q(\sigma\mid\gamma)\). Approximate posterior draws are obtained by sampling
+\(\gamma\) from this discrete representation and then drawing \(\sigma\) from
+the corresponding conditional GIG distribution.
+
+The legacy Laplace--delta factor instead uses transformed coordinates
+\[
+\ell_\sigma=\log\sigma,\qquad z_\gamma=
+\logit\left(\frac{\gamma-L}{U-L}\right).
+\]
+If $r=\expit(z_\gamma)$, its transformed objective is
 \begin{align}
 h_z(\ell_\sigma,z_\gamma)
 &=
@@ -1995,10 +2014,10 @@ h_z(\ell_\sigma,z_\gamma)
 +\ell_\sigma+\log(U-L)+\log r+\log(1-r).
 \label{eq:dyn_exdqlm_ld_objective}
 \end{align}
-The package maximizes this objective, uses the local Hessian to form a
+The legacy factor maximizes this objective, uses the local Hessian to form a
 Gaussian approximation on $(\ell_\sigma,z_\gamma)$, and evaluates needed
 expectations by the delta method. The returned LDVB objects include the
-transformed mode, approximate covariance, derived moments, ELBO trace, and
+scale--skewness factor description, derived moments, ELBO trace, and
 approximate posterior draws when requested.
 
 The dynamic and static exAL ELBOs have the same block structure:
@@ -2007,7 +2026,7 @@ The dynamic and static exAL ELBOs have the same block structure:
 \elbo_{\mathrm{like}}+\elbo_{\mathrm{Gaussian}}
 +\elbo_v+\elbo_s+\elbo_{\sigma\gamma}
 +H(q_{\mathrm{Gaussian}})
-+\sum H\{q(v)\}+\sum H\{q(s)\}+H\{q(\sigma,\gamma)\}.
++\sum H\{q(v)\}+\sum H\{q(s)\}+H\{q_{\sigma\gamma}(\sigma,\gamma)\}.
 \label{eq:dyn_exdqlm_elbo}
 \end{equation}
 For dynamic models, the Gaussian block is the state trajectory
@@ -2218,10 +2237,11 @@ distribution.
 \end{enumerate}
 \end{appalgorithm}
 
-\section{Laplace--delta and backend notes}
+\section{Nonconjugate VB and backend notes}
 \label{sec:numerical_blocks}
 
-Let $z$ denote the transformed nonconjugate parameter vector with mode
+For the legacy Laplace--delta factor, let $z$ denote the transformed
+nonconjugate parameter vector with mode
 $\hat z$ and negative Hessian $\mat{H}$ at the mode. The LDVB block uses
 \begin{equation}
 q(z)=\N(\hat z,\mat{H}^{-1}).
@@ -2244,9 +2264,12 @@ H\{q(z)\}
 \end{equation}
 The Jacobian terms for transforming from $(\ell_\sigma,z_\gamma)$ back to
 $(\sigma,\gamma)$ are included in the objective in
-\eqref{eq:dyn_exdqlm_ld_objective}. Other ELBO terms use standard entropy
-identities for Gaussian, inverse-gamma, GIG, and positive truncated-normal
-factors under the parameterizations in
+\eqref{eq:dyn_exdqlm_ld_objective}. For the default structured factor, the
+package combines the entropy of the discrete/quadrature approximation to
+\(q(\gamma)\) with the conditional GIG entropy for
+\(q(\sigma\mid\gamma)\). Other ELBO terms use standard entropy identities for
+Gaussian, inverse-gamma, GIG, and positive truncated-normal factors under the
+parameterizations in
 Section~\ref{sec:app_distributional_conventions}. Those bookkeeping terms are
 implemented in the package and exercised by the package tests rather than
 rederived here.
@@ -2254,10 +2277,12 @@ rederived here.
 \label{sec:slice}
 
 The MCMC routines use bounded one-dimensional slice sampling for selected
-nonconjugate skewness updates. This is a standard stepping-out/shrinkage
-slice sampler restricted to the admissible interval $(L,U)$ for $\gamma$; the
-target kernels are the conditional log posteriors induced by the exAL
-augmentation.
+nonconjugate skewness updates. Under the default scale-collapsed kernel, the
+slice sampler is applied on the bounded logit scale after analytically
+integrating out \(\sigma\), and \(\sigma\) is then redrawn from its exact GIG
+conditional distribution. Legacy slice and MH kernels remain available through
+\code{mh.proposal}; their target kernels are the conditional log posteriors
+induced by the exAL augmentation.
 
 \label{sec:app_backend_options}
 The package also exposes backend options for C++ Kalman recursions, builders,

@@ -1092,9 +1092,12 @@ ex4_fit_seed <- function(dataset_seed, cfg_ex4, stop_on_failure = TRUE) {
           call. = FALSE
         )
       }
-      if (!identical(fit_mcmc$mh.diagnostics$proposal, "slice")) {
+      if (!identical(fit_mcmc$mh.diagnostics$proposal, "collapsed_slice")) {
         stop(
-          sprintf("Example 4 expected slice default for static MCMC at p0=%0.2f.", p0),
+          sprintf(
+            "Example 4 expected collapsed-slice default for static MCMC at p0=%0.2f.",
+            p0
+          ),
           call. = FALSE
         )
       }

@@ -12,7 +12,7 @@ testthat::test_that("canonical manuscript KL diagnostics use deterministic packa
   testthat::expect_false(any(grepl("FNN::KL|KL\\.divergence|ref\\.samp", text)))
   testthat::expect_true(any(grepl("exdqlm::diagnostics", text, fixed = TRUE)))
   testthat::expect_false(any(grepl("m[12]\\.KL\\.(by_k|gaussian)\\s*=", text)))
-  testthat::expect_true(any(grepl("kl\\.details", text)))
+  testthat::expect_true(any(grepl("m1\\.KL|m2\\.KL|kl_k", text)))
 })
 
 testthat::test_that("manuscript diagnostics helper preserves deterministic KL outputs", {

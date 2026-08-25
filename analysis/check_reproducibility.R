@@ -402,13 +402,15 @@ main <- function() {
         expected_exdqlm_version
       ))
     }
+    env_exdqlm_commit <- unname(env_fields["exdqlm_commit"])
+    if (is.na(env_exdqlm_commit)) env_exdqlm_commit <- ""
     if (identical(load_spec$mode, "source") && isTRUE(pkg_spec$is_package) &&
-        nzchar(pkg_spec$git$commit %||% "") && nzchar(env_fields[["exdqlm_commit"]] %||% "")) {
-      expected_commit <- substr(pkg_spec$git$commit, 1L, nchar(env_fields[["exdqlm_commit"]]))
-      if (!identical(env_fields[["exdqlm_commit"]], expected_commit)) {
+        nzchar(pkg_spec$git$commit %||% "") && nzchar(env_exdqlm_commit)) {
+      expected_commit <- substr(pkg_spec$git$commit, 1L, nchar(env_exdqlm_commit))
+      if (!identical(env_exdqlm_commit, expected_commit)) {
         fail(sprintf(
           "Generated benchmark environment package commit is %s, not current source package commit %s.",
-          env_fields[["exdqlm_commit"]],
+          env_exdqlm_commit,
           expected_commit
         ))
       } else {

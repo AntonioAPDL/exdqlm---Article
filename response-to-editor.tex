@@ -44,10 +44,11 @@ The submitted files are:
 \end{itemize}
 
 The package source is version 1.1.1 of \pkg{exdqlm}. This is a narrow
-reproducibility patch: it does not change the statistical model, exported API,
-or manuscript claims. It corrects compiled stochastic helper paths so they use
-serial \proglang{R}-controlled random-number streams and adds tests for repeated
-seed behavior.
+reproducibility and inference-stability patch: it does not change the
+statistical model, exported API, or manuscript claims. It corrects compiled
+stochastic helper paths so they use serial \proglang{R}-controlled
+random-number streams, adds tests for repeated seed behavior, and sets more
+stable default exAL scale--skewness updates for MCMC and LDVB.
 
 \section*{Summary of the Revision}
 
@@ -110,10 +111,12 @@ While investigating the differences reported by the editors, we found that some
 compiled stochastic helper routines in version 1.1.0 could use OpenMP worker
 threads or private C++ seeds in ways that were not appropriate for exact
 seed-based replication. Version 1.1.1 corrects these paths by using serial
-\proglang{R}-controlled random-number streams. We added package tests for
-repeated-seed behavior in the compiled samplers, dynamic MCMC, and static MCMC
-paths, and the package passes \code{R CMD check --no-manual --run-donttest}
-under \proglang{R} 4.6.0.
+\proglang{R}-controlled random-number streams. The same patch also uses an
+exact scale-collapsed gamma update for exAL MCMC and a structured
+\(q(\gamma)q(\sigma\mid\gamma)\) scale--skewness factor for LDVB. We added
+package tests for repeated-seed behavior in the compiled samplers, dynamic
+MCMC, static MCMC, and the structured scale--skewness factor, and the package
+passes \code{R CMD check --as-cran} under \proglang{R} 4.6.0.
 
 The manuscript and README now state the reference environment and the thread
 variables used before launching \proglang{R}. Runtime values are still described

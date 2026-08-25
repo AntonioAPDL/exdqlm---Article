@@ -1,6 +1,6 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-08-25 02:01:48
+Generated: 2026-08-25 06:41:22
 Profile: standard
 Seed: 20260501
 
@@ -34,7 +34,7 @@ Seed: 20260501
 - [reproduced] `ex3_run_summary` -> `analysis/manuscript/outputs/logs/ex3_run_summary.txt` (Example 3 textual outputs). Observed BTflow plus NOI/AMO Example 3 summary with training-selected transfer settings, package diagnostics, and held-out forecast metrics.
 - [reproduced] `tab_ex3_model_dataset` -> `analysis/manuscript/outputs/tables/ex3_model_dataset.csv` (Example 3 modeling dataset). Aligned Big Tree flow and climate-index data used by Example 3, with training and forecast-holdout phase labels.
 - [reproduced] `tab_ex3_covariate_scaling` -> `analysis/manuscript/outputs/tables/ex3_covariate_scaling.csv` (Example 3 covariate scaling). Training-window means and standard deviations used to standardize Example 3 climate indices.
-- [reproduced] `tab_ex3_lambda_selection` -> `analysis/manuscript/outputs/tables/ex3_lambda_selection.csv` (Example 3 transfer training-selection output). Example 3 transfer-function training diagnostic grid; selected lambda=0.850 and transfer psi discount=1.000 by training PPLC.
+- [reproduced] `tab_ex3_lambda_selection` -> `analysis/manuscript/outputs/tables/ex3_lambda_selection.csv` (Example 3 transfer training-selection output). Example 3 transfer-function training diagnostic grid; selected lambda=0.990 and transfer psi discount=1.000 by training PPLC.
 - [reproduced] `tab_ex3_diagnostics` -> `analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv` (tab:ex3). Example 3 final-training package diagnostics from diagnostics() for the no-covariate, direct-regression, and transfer-function models.
 - [reproduced] `tab_ex3_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv` (tab:ex3forecastmetrics). Example 3 final 18-month holdout forecast check loss and CRPS from diagnostics() for the no-covariate, direct-regression, and transfer-function models.
 - [reproduced] `tab_ex3_sensitivity_forecast_metrics` -> `analysis/manuscript/outputs/tables/ex3_sensitivity_forecast_metrics.csv` (Example 3 sensitivity forecast metrics). Backward-compatible copy of the Example 3 final 18-month holdout forecast check loss and CRPS from diagnostics().
@@ -55,10 +55,10 @@ Seed: 20260501
 - ex2_policy: Example 2 manuscript workflow now uses LDVB and MCMC only; ISVB support artifacts were retired.
 - backend: Benchmark Profile B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
 - ex1: Lake Huron refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary).
-- ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=200).
+- ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=103).
 - ex2: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
 - ex2_ldvb: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
-- ex3: Example 3 selected lambda=0.850 using training-data PPLC with static transfer psi coefficients (discount fixed at 1.000).
+- ex3: Example 3 selected lambda=0.990 using training-data PPLC with static transfer psi coefficients (discount fixed at 1.000).
 - ex3: Example 3 final forecast metrics are computed only on the 18-month holdout window from 2021-07 to 2022-12.
 - ex4: Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0.
 - ex4: The static sparse benchmark uses the Nishimura-Suchard regularized horseshoe (rhs_ns) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept.

@@ -15,9 +15,11 @@ Submitted files:
 - `response-to-editor.pdf`
 
 The package source is version 1.1.1 of `exdqlm`. This is a narrow
-reproducibility patch. It does not change the statistical model, exported API,
-or manuscript claims. It corrects compiled stochastic helper paths so they use
-serial R-controlled random-number streams and adds repeated-seed tests.
+reproducibility and inference-stability patch. It does not change the
+statistical model, exported API, or manuscript claims. It corrects compiled
+stochastic helper paths so they use serial R-controlled random-number streams,
+adds repeated-seed tests, and sets more stable default exAL scale-skewness
+updates for MCMC and LDVB.
 
 ## Summary
 
@@ -42,7 +44,8 @@ serial R-controlled random-number streams and adds repeated-seed tests.
    `RNGkind("Mersenne-Twister", "Inversion", "Rejection")`, require
    `exdqlm` 1.1.1, and are run with thread variables set before R starts.
    Version 1.1.1 corrects compiled stochastic RNG/thread behavior found while
-   investigating the editorial discrepancies.
+   investigating the editorial discrepancies and adds the stabilized default
+   exAL scale-skewness updates used by the rerun.
 
 3. **More visible output.** The full batch output now includes fitted-object
    output, selected summaries, Tables 7--10, `MTF$median.kt`, and

@@ -1,22 +1,22 @@
-tol=0.01, n.samp=3000, iter=200
+tol=0.01, n.samp=3000, iter=103
 
 seq.gamma summary:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
--2.4617 -0.9698 -0.9546 -1.0768 -0.9538 -0.9538
+-2.4617 -0.9533 -0.9333 -1.1289 -0.9332 -0.9332
 
 seq.sigma summary:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  2.000   5.135   5.135   4.920   5.142   5.179
+  2.000   5.117   5.117   4.767   5.120   5.254
 
 ELBO summary:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.     NAs
-   5131    7217    7217    7174    7220    7231      10
+   5143    7213    7213    7163    7214    7247      10
 
 Last 5 delta ELBO values:
-[1] -4.308465e-05 -4.006929e-05 -3.725270e-05 -3.463992e-05 -3.225524e-05
+[1] -1.349362e-06 -1.080432e-06 -8.649477e-07 -6.923510e-07 -5.541306e-07
 
 Posterior sample summaries:
 gamma:    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
--0.7735 -0.6807 -0.6603 -0.6605 -0.6394 -0.5571
+-1.1727 -0.9885 -0.9311 -0.9339 -0.8818 -0.5853
 sigma:    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  2.597   3.386   3.588   3.602   3.806   4.897
+  4.345   4.967   5.116   5.120   5.267   5.974

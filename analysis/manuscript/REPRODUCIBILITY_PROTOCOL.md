@@ -56,6 +56,9 @@ RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 The scripts also require `exdqlm` version 1.1.1 at load time. The package patch
 for 1.1.1 makes compiled stochastic helper paths use serial R-controlled RNG
 streams, avoiding OpenMP worker RNG calls and wall-clock/thread-indexed seeds.
+The same patch uses the stabilized exAL scale-skewness defaults exercised by
+the manuscript rerun: an exact scale-collapsed gamma update for MCMC and a
+structured `q(gamma) q(sigma | gamma)` factor for LDVB.
 
 The thread environment variables are set before R starts so BLAS/OpenMP
 configuration is visible to the full R session. Runtime values are expected to

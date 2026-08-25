@@ -10,34 +10,34 @@ forecast_holdout_window=2021-07 to 2022-12
 n_observations=432, n_train=414, n_holdout=18
 selected_indices=NOI, AMO
 n.samp=1000, forecast_n.samp=1000, tol=0.05, max_iter=600
-lambda_star_by_training_pplc=0.850
+lambda_star_by_training_pplc=0.990
 transfer_psi_df_star=1.000
 
 Training transfer grid diagnostics:
   lambda transfer_zeta_df transfer_psi_df selection_metric selection_value
-1   0.70             0.99               1             PPLC        139.4981
-2   0.75             0.99               1             PPLC        133.4877
-3   0.80             0.99               1             PPLC        128.7254
-4   0.85             0.99               1             PPLC        125.7198
-5   0.90             0.99               1             PPLC        128.0053
-6   0.95             0.99               1             PPLC        142.3080
-7   0.99             0.99               1             PPLC        161.1224
+1   0.70             0.99               1             PPLC        156.8455
+2   0.75             0.99               1             PPLC        156.5730
+3   0.80             0.99               1             PPLC        157.3983
+4   0.85             0.99               1             PPLC        158.3615
+5   0.90             0.99               1             PPLC        157.5136
+6   0.95             0.99               1             PPLC        154.6998
+7   0.99             0.99               1             PPLC        141.7538
           KL KL_flipped      CRPS     PPLC runtime iter converged status
-1 0.08771908 0.04452472 0.3527897 139.4981 424.831  524      TRUE     ok
-2 0.11831353 0.06527462 0.3590470 133.4877 428.767  537      TRUE     ok
-3 0.13216937 0.07149887 0.3629537 128.7254 428.592  523      TRUE     ok
-4 0.15506320 0.09120069 0.3655207 125.7198 412.456  505      TRUE     ok
-5 0.14064248 0.05926320 0.3616929 128.0053 430.553  514      TRUE     ok
-6 0.12516516 0.06990392 0.3510508 142.3080 386.371  459      TRUE     ok
-7 0.14014320 0.08214136 0.3196771 161.1224 290.826  347      TRUE     ok
+1 0.09986853 0.05045460 0.3516085 156.8455  36.588   82      TRUE     ok
+2 0.11175101 0.04974232 0.3532050 156.5730  36.641   80      TRUE     ok
+3 0.11648240 0.06277005 0.3556971 157.3983  36.927   81      TRUE     ok
+4 0.16292489 0.07404151 0.3584447 158.3615  35.490   81      TRUE     ok
+5 0.12770113 0.06093202 0.3559304 157.5136  34.340   78      TRUE     ok
+6 0.10396791 0.06014222 0.3483669 154.6998  37.036   83      TRUE     ok
+7 0.14891262 0.07723087 0.3137740 141.7538  31.204   71      TRUE     ok
   error_message     seed selected
 1               20264002    FALSE
 2               20264003    FALSE
 3               20264004    FALSE
-4               20264005     TRUE
+4               20264005    FALSE
 5               20264006    FALSE
 6               20264007    FALSE
-7               20264008    FALSE
+7               20264008     TRUE
 
 Final-training covariate scaling:
     index label     center     scale
@@ -45,44 +45,44 @@ noi   noi   NOI 0.11707246 2.8974165
 amo   amo   AMO 0.07316425 0.1889801
 
 MTF$median.kt:
-[1] 25.15134
+[1] 350.2047
 
 Run times:
   M0.elapsed  MTF.elapsed MREG.elapsed
-     293.590      410.472      405.920
+      24.010       31.070       41.401
 
 Convergence:
   model iter converged
-1    M0  478      TRUE
-2   MTF  505      TRUE
-3  MREG  538      TRUE
+1    M0   58      TRUE
+2   MTF   71      TRUE
+3  MREG   95      TRUE
 
 Final-training package diagnostics from diagnostics():
                    model                  label        KL KL_flipped      CRPS
-1         M0_no_transfer         M0 no transfer 0.1683276 0.11192086 0.4696713
-2 MREG_direct_regression MREG direct regression 0.1116686 0.04643197 0.3477368
-3  MTF_transfer_function  MTF transfer function 0.1550632 0.09120069 0.3655067
-       PPLC
-1  99.34026
-2 151.79224
-3 125.39080
+1         M0_no_transfer         M0 no transfer 0.1220467 0.06611444 0.4161584
+2 MREG_direct_regression MREG direct regression 0.1084268 0.03935311 0.3470891
+3  MTF_transfer_function  MTF transfer function 0.1489126 0.07723087 0.3135160
+      PPLC
+1 177.9442
+2 160.6239
+3 141.6944
 
 Final holdout forecast metrics from diagnostics():
                    model                  label horizon mean_check_loss
-1         M0_no_transfer         M0 no transfer      18       0.1190042
-2 MREG_direct_regression MREG direct regression      18       0.1137333
-3  MTF_transfer_function  MTF transfer function      18       0.1554627
+1         M0_no_transfer         M0 no transfer      18       0.1197884
+2 MREG_direct_regression MREG direct regression      18       0.1138821
+3  MTF_transfer_function  MTF transfer function      18       0.2212879
        CRPS
-1 0.4976646
-2 0.4007608
-3 0.5497002
+1 0.4728687
+2 0.3990580
+3 0.8026444
 
 Sensitivity forecast metrics:
                    model                  label horizon mean_check_loss
-1         M0_no_transfer         M0 no transfer      18       0.1190042
-2 MREG_direct_regression MREG direct regression      18       0.1137333
-3  MTF_transfer_function  MTF transfer function      18       0.1554627
+1         M0_no_transfer         M0 no transfer      18       0.1197884
+2 MREG_direct_regression MREG direct regression      18       0.1138821
+3  MTF_transfer_function  MTF transfer function      18       0.2212879
        CRPS
-1 0.4976646
-2 0.4007608
-3 0.5497002
+1 0.4728687
+2 0.3990580
+3 0.8026444

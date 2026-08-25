@@ -9,6 +9,9 @@ for code-path checks only.
 
 The manuscript and replication materials target `exdqlm` version 1.1.1. Install
 the submitted source tarball before running either script.
+This version uses serial R-controlled RNG streams in manuscript stochastic
+helpers and the stabilized default exAL scale-skewness updates for MCMC and
+LDVB.
 
 ## Public commands
 

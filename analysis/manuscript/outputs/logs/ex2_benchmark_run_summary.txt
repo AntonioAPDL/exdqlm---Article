@@ -4,13 +4,13 @@ ldvb_n.samp=3000, benchmark_n.burn=2000, benchmark_n.mcmc=3000
 
 LDVB benchmark diagnostics:
    model runtime_sec        KL     CRPS     pplc
-1   DQLM      23.150 0.1328951 8.524955 3851.391
-2 exDQLM     111.631 0.1197573 6.256206 2335.316
+1   DQLM      24.858 0.1328951 8.524955 3851.391
+2 exDQLM      47.853 0.1074556 6.558450 3015.184
 
 MCMC benchmark diagnostics:
    model runtime_sec        KL     CRPS     pplc
-1   DQLM     225.095 0.1745106 7.607727 2968.978
-2 exDQLM     272.450 0.1747272 5.110775 2194.199
+1   DQLM     166.659 0.1745106 7.607727 2968.978
+2 exDQLM     220.387 0.1515319 5.146676 2216.085
 
 MCMC backend metadata:
 $mcmc

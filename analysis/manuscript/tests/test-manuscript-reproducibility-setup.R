@@ -141,7 +141,7 @@ testthat::test_that("package resolver includes current and generic source checko
 
   testthat::expect_true("exdqlm" %in% candidates)
   testthat::expect_true("exdqlm__wt__1p1p0_exdqlm_article" %in% candidates)
-  testthat::expect_true("exdqlm__wt__1.1.0-jss" %in% candidates)
+  testthat::expect_true("exdqlm__wt__1.1.1-jss" %in% candidates)
   testthat::expect_true("exdqlm__wt__0p5p0_exdqlm_article" %in% candidates)
 })
 
@@ -296,7 +296,7 @@ testthat::test_that("backend options notes live in the manuscript appendix", {
   testthat::expect_false(any(grepl(appendix_input, main_text)))
   testthat::expect_true(any(grepl("\\appendix", main_text, fixed = TRUE)))
   testthat::expect_true(any(grepl("\\\\label\\{sec:app_backend_options\\}", main_text)))
-  testthat::expect_true(any(grepl("\\\\section\\{Laplace--delta and backend notes\\}", main_text)))
+  testthat::expect_true(any(grepl("\\\\section\\{Nonconjugate VB and backend notes\\}", main_text)))
   testthat::expect_true(any(grepl("exdqlm.use\\_cpp\\_kf", main_text, fixed = TRUE)))
 })
 
