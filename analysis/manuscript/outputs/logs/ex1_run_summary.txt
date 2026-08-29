@@ -39,4 +39,4 @@ $gig
 
 Run times (seconds):
       M95.elapsed M50_trace.elapsed        M5.elapsed  M50_dqlm.elapsed
-           73.385           136.827            74.171            33.640
+           71.993           134.046            71.723            32.663

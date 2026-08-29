@@ -66,7 +66,7 @@ R CMD BATCH --vanilla code.R code.Rout
 
 The full run can take substantial time because it refits Bayesian dynamic and
 static quantile models. On the reference Linux platform used for the manuscript,
-the complete batch run finished in about 50 minutes. Runtime values are
+the complete batch run finished in about 45 minutes. Runtime values are
 platform dependent, so the manuscript and generated output record the reference
 environment.
 

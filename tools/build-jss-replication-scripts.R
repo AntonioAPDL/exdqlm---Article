@@ -487,7 +487,7 @@ save_png_override <- c(
   "    eval.parent(plot_expr),",
   "    finally = grDevices::dev.off()",
   "  )",
-  "  manuscript_figures <- as.character(cfg_params$promotion$figures %||% character())",
+  "  manuscript_figures <- as.character(cfg_params$manuscript_output$figures %||% character())",
   "  if (isTRUE(getOption(\"exdqlm.jss_rplots_active\", FALSE)) && filename %in% manuscript_figures) {",
   "    eval.parent(plot_expr)",
   "  }",
@@ -560,6 +560,7 @@ validate_generated <- function(path) {
     "parse_replication_args",
     "target_enabled",
     "targeted_run",
+    "promotion",
     "artifact_registry",
     "register_artifact",
     "register_note",
@@ -589,6 +590,8 @@ build_script <- function(repo_root, out_file) {
   cfg_params$manuscript_benchmark_profile <- NULL
   cfg_params$benchmark_settings <- cfg_params$benchmark_profiles
   cfg_params$benchmark_profiles <- NULL
+  cfg_params$manuscript_output <- cfg_params$promotion
+  cfg_params$promotion <- NULL
   cfg_params$expected_exdqlm_version <- "1.1.1"
 
   setup <- sanitize_setup(read_file(file.path(repo_root, "analysis", "lib", "manuscript_setup.R")), cfg_params)

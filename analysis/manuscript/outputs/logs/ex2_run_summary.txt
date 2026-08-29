@@ -8,7 +8,7 @@ Summary(M_sigma_ldvb$samp.sigma):
 
 Runtime seconds:
 M_sigma_ldvb.elapsed      M1_ldvb.elapsed      M2_ldvb.elapsed
-              23.521               22.736               43.579
+              23.056               22.273               42.952
 
 LDVB status: success
 Summary(M2_ldvb$samp.gamma):
