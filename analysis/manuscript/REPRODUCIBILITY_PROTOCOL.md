@@ -27,33 +27,19 @@ R CMD BATCH --vanilla code.R code.Rout
 
 The full script refits the examples, regenerates figures and tables, prints the
 manuscript tables and selected fitted-object output, writes `Rplots.pdf`, and
-prints `sessionInfo()`.
-
-For a shorter code-path check:
-
-```sh
-OMP_NUM_THREADS=1 \
-OMP_THREAD_LIMIT=1 \
-OPENBLAS_NUM_THREADS=1 \
-MKL_NUM_THREADS=1 \
-BLIS_NUM_THREADS=1 \
-VECLIB_MAXIMUM_THREADS=1 \
-R CMD BATCH --vanilla code-fast.R code-fast.Rout
-```
-
-`code-fast.R` follows the same script structure with smaller computation
-settings. It is not authoritative for manuscript numerical values.
+prints `sessionInfo()`. This is the only public R script in the JSS replication
+archive.
 
 ## Randomness and backend policy
 
-Both public scripts set:
+The public script sets:
 
 ```r
 RNGversion("4.6.0")
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 ```
 
-The scripts also require `exdqlm` version 1.1.1 at load time. The package patch
+The script also requires `exdqlm` version 1.1.1 at load time. The package patch
 for 1.1.1 makes compiled stochastic helper paths use serial R-controlled RNG
 streams, avoiding OpenMP worker RNG calls and wall-clock/thread-indexed seeds.
 The same patch uses the stabilized exAL scale-skewness defaults exercised by
@@ -71,9 +57,9 @@ The full script writes:
 
 - `code.Rout`
 - `Rplots.pdf`
-- `analysis/manuscript/outputs/figures/*.png`
-- `analysis/manuscript/outputs/tables/*.csv`
-- `analysis/manuscript/outputs/logs/*.txt`
+- `figures/*.png`
+- `tables/*.csv`
+- `logs/*.txt`
 
 The batch output includes `M95`, `summary(M95)`, `MTF$median.kt`, Tables 7--10,
 and `sessionInfo()`.
@@ -81,14 +67,14 @@ and `sessionInfo()`.
 ## Author-side maintenance
 
 The repository keeps modular source files under `analysis/` and the generator
-`tools/build-jss-replication-scripts.R` to make `code.R` and `code-fast.R`
-maintainable. These development files are not the public execution interface.
+`tools/build-jss-replication-scripts.R` to make `code.R` maintainable. These
+development files are not the public execution interface.
 
 Before resubmission, the required author checks are:
 
 - package test suite and `R CMD check` for `exdqlm_1.1.1.tar.gz`;
-- `R CMD BATCH --vanilla code-fast.R code-fast.Rout`;
 - `R CMD BATCH --vanilla code.R code.Rout`;
 - manuscript and response compilation;
 - archive extraction in a directory without Git metadata, followed by the
-  README commands.
+  README command or a parse-and-output check when a full second run is
+  impractical.

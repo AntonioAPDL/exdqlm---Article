@@ -724,9 +724,9 @@ register_note("ex2_policy", "Example 2 manuscript workflow now uses LDVB and MCM
 register_note(
   "backend",
   sprintf(
-    "Benchmark Profile %s (%s) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=%s and exdqlm.cpp_mcmc_mode='%s'.",
+    "Benchmark setting %s (%s) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=%s and exdqlm.cpp_mcmc_mode='%s'.",
     selected_benchmark_profile,
-    cfg_benchmark_profiles[[selected_benchmark_profile]]$label %||% "backend profile",
+    cfg_benchmark_profiles[[selected_benchmark_profile]]$label %||% "backend setting",
     as.character(isTRUE(getOption("exdqlm.use_cpp_mcmc"))),
     as.character(getOption("exdqlm.cpp_mcmc_mode"))
   )

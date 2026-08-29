@@ -6,7 +6,7 @@
 \usepackage{enumitem}
 \IfFileExists{placeins.sty}{\usepackage{placeins}}{\newcommand{\FloatBarrier}{}}
 \raggedbottom
-\graphicspath{{analysis/manuscript/outputs/figures/}}
+\graphicspath{{figures/}{analysis/manuscript/outputs/figures/}}
 
 \RequirePackage{amsthm,amsmath,amsfonts,amssymb}
 
@@ -500,10 +500,10 @@ The object system also provides several extension points. Compatible user-suppli
 
 Computationally intensive operations have \proglang{C++} implementations through \pkg{Rcpp},  with \proglang{R} implementations retained for numerical parity checks and portability. These include the exported exAL density, distribution, quantile, and random-generation utilities; selected Kalman recursions and model builders; posterior and latent-variable sampling paths; posterior predictive simulation; and MCMC backend routing. Package options control backend routing for Kalman recursions, model builders, posterior sampling, posterior predictive simulation, and MCMC routing. In version 1.1.1, compiled stochastic helper paths used by the manuscript run through serial \proglang{R}-controlled random-number streams, rather than worker-thread or private C++ random-number streams.
 
-The variational routines return standardized traces for the ELBO, scale, skewness, and convergence diagnostics, with the closed-form, structured scale--skewness, and legacy Laplace--delta ELBO components documented in the appendices. The examples use a fixed backend profile, recorded random-number seeds, and a documented reference environment so that run times and stochastic outputs are reproducible.
+The variational routines return standardized traces for the ELBO, scale, skewness, and convergence diagnostics, with the closed-form, structured scale--skewness, and legacy Laplace--delta ELBO components documented in the appendices. The examples use fixed benchmark settings, recorded random-number seeds, and a documented reference environment so that run times and stochastic outputs are reproducible.
 
 \paragraph{Computational details and replication.}
-The manuscript results were generated with \proglang{R} 4.6.0 and \pkg{exdqlm} 1.1.1 on x86\_64 Linux. The replication scripts set \code{RNGversion("4.6.0")} and \code{RNGkind("Mersenne-Twister", "Inversion", "Rejection")} before applying the recorded seeds. Native thread variables for OpenMP and common BLAS implementations are set to one before launching \proglang{R}; the benchmark profile used in the examples enables the \code{"fast"} C++ MCMC backend and keeps stochastic compiled helper streams controlled by the \proglang{R} random-number generator. The submitted replication archive contains a flat \code{code.R} script intended to be run with \code{R CMD BATCH --vanilla code.R code.Rout}. That run prints fitted-object output, Tables 7--10, selected scalar summaries, and \code{sessionInfo()} to \code{code.Rout}, and writes the manuscript figures to \code{Rplots.pdf} and to the PNG files used by this article. A reduced \code{code-fast.R} script checks the same code paths with smaller computation settings; it is not used for manuscript numerical values. Runtime entries in the tables are elapsed fitting times on the recorded reference platform and are not intended to be machine-independent constants.
+The manuscript results were generated with \proglang{R} 4.6.0 and \pkg{exdqlm} 1.1.1 on x86\_64 Linux. The replication script sets \code{RNGversion("4.6.0")} and \code{RNGkind("Mersenne-Twister", "Inversion", "Rejection")} before applying the recorded seeds. Native thread variables for OpenMP and common BLAS implementations are set to one before launching \proglang{R}; the benchmark settings used in the examples enable the \code{"fast"} C++ MCMC backend and keep stochastic compiled helper streams controlled by the \proglang{R} random-number generator. The submitted replication archive contains a flat \code{code.R} script intended to be run with \code{R CMD BATCH --vanilla code.R code.Rout}. That run prints fitted-object output, Tables 7--10, selected scalar summaries, and \code{sessionInfo()} to \code{code.Rout}, and writes the manuscript figures to \code{Rplots.pdf} and to the PNG files used by this article. Runtime entries in the tables are elapsed fitting times on the recorded reference platform and are not intended to be machine-independent constants.
 These computational controls affect implementation and performance rather than the statistical models being fitted.
 
 \begin{table}[!htbp]
@@ -767,7 +767,7 @@ By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDV
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.82\textwidth]{ex1mcmc.png}
-\caption{Example 1: Lake Huron. Trace and density plots from the median run with 7000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are representative MCMC traces from the recorded run profile; exact trace paths may differ across reruns while retaining comparable posterior summaries.}
+\caption{Example 1: Lake Huron. Trace and density plots from the median run with 7000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are representative MCMC traces from the recorded reference run; exact trace paths may differ across reruns while retaining comparable posterior summaries.}
 \label{fig:ex1mcmc}
 \end{figure}
 
@@ -950,7 +950,7 @@ R> M2 = exdqlmLDVB(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0.85)
 \end{CodeInput}
 \end{CodeChunk}
 
-The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded backend profile. These runtimes are fit elapsed times stored in the returned fit objects; they are intended for within-profile comparison and should not be interpreted as machine-independent timing constants.
+The fitted objects can be summarized with the \code{summary()} generic, which reports the model class, sample size, state dimension, discount factors, convergence iterations, and run time. For this dataset of length 289, the DQLM LDVB fit completes more quickly, while the corresponding exDQLM LDVB fit is more computationally demanding because the skewness parameter is estimated rather than fixed. The timing comparison in Table \ref{tab:ex2bench} reports the benchmark values used in the manuscript under the recorded benchmark settings. These runtimes are fit elapsed times stored in the returned fit objects; they are intended for within-setting comparison and should not be interpreted as machine-independent timing constants.
 
 We can visualize the differences between the two resulting dynamic quantiles with the fitted-object \code{plot()} method, shown in the lower-left panel of Figure \ref{fig:ex2quant}. For clarity we limit that panel to years 1780 to 1830.
 
@@ -1057,14 +1057,14 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{24.86} & \textbf{0.133} & 8.525 & 3851.4 \\
- & MCMC & 166.66 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
+ \tworowcell{DQLM} & LDVB & \textbf{22.74} & \textbf{0.133} & 8.525 & 3851.4 \\
+ & MCMC & 148.37 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{47.85} & \textbf{0.107} & 6.558 & 3015.2 \\
- & MCMC & 220.39 & 0.152 & \textbf{5.147} & \textbf{2216.1} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{43.58} & \textbf{0.107} & 6.558 & 3015.2 \\
+ & MCMC & 196.96 & 0.152 & \textbf{5.147} & \textbf{2216.1} \\
  \bottomrule
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark profile B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.1, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark setting B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.1, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1610,21 +1610,21 @@ Figure \ref{fig:ex4static} shows that, in this simulated realization, both metho
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{35.30} & 0.108 & \textbf{0.034} & 0.673 \\
- & MCMC & 81.44 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
+ \tworowcell{0.05} & LDVB & \textbf{32.71} & 0.108 & \textbf{0.034} & 0.673 \\
+ & MCMC & 72.06 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{30.91} & 0.310 & 0.078 & 0.371 \\
- & MCMC & 79.65 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
+ \tworowcell{0.25} & LDVB & \textbf{29.83} & 0.310 & 0.078 & 0.371 \\
+ & MCMC & 74.65 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
  \midrule
-\tworowcell{0.50} & LDVB & \textbf{14.22} & \textbf{0.128} & 0.103 & 0.341 \\
- & MCMC & 81.99 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
+\tworowcell{0.50} & LDVB & \textbf{13.64} & \textbf{0.128} & 0.103 & 0.341 \\
+ & MCMC & 75.33 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE summaries stored in the \code{exalStaticDiagnostic} objects returned by \code{diagnostics()}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is smaller at \(p_0 = 0.50\). MCMC gives slightly smaller active-signal RMSE in all three fits, whereas null-coefficient MAE favors LDVB for \(p_0 = 0.05\) and \(p_0 = 0.25\) and is essentially tied at the median. The LDVB fit is nevertheless substantially faster in all three cases, with runtime reductions of roughly 4-fold at \(p_0 = 0.05\), 7-fold at \(p_0 = 0.25\), and 14-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
+Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE summaries stored in the \code{exalStaticDiagnostic} objects returned by \code{diagnostics()}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is smaller at \(p_0 = 0.50\). MCMC gives slightly smaller active-signal RMSE in all three fits, whereas null-coefficient MAE favors LDVB for \(p_0 = 0.05\) and \(p_0 = 0.25\) and is essentially tied at the median. The LDVB fit is nevertheless faster in all three cases, with runtime reductions of roughly 2.2-fold at \(p_0 = 0.05\), 2.5-fold at \(p_0 = 0.25\), and 5.5-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
 
 \section{Conclusion}
 \label{sec:summary}
@@ -1635,9 +1635,9 @@ Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE s
 The examples illustrate how these interfaces are used in analysis. Lake Huron uses separate dynamic fits at three quantile levels, multi-step forecasting, and post hoc synthesis of posterior predictive draws. Sunspots compares DQLM and exDQLM fits at an upper quantile, uses MAP plug-in one-step-ahead calibration diagnostics together with CRPS and PPLC, and illustrates an in-sample comparison of candidate discount-factor specifications using CRPS, with KL used as a complementary calibration check. Big Tree water flow compares no-covariate, direct-regression, and transfer-function specifications built from a common trend-seasonal baseline; its fitted and held-out summaries are mixed, so the example is mainly a workflow comparison rather than evidence for a uniformly preferred covariate structure. The static example uses one quantile-specific sparse simulation realization to illustrate LDVB and MCMC under a known target quantile.
 
 
-The examples also delineate the current scope of the package. Dynamic models are fitted one quantile level at a time. \code{quantileSynthesis()} combines predictive draws after separate fits and applies monotonicity adjustments when needed; it is not a joint posterior model over multiple quantile levels. LDVB returns samples from fitted variational factors rather than from the exact posterior target, so MCMC remains the reference calculation when posterior tail summaries, interval widths, or approximation error are central. In transfer-function models, lag propagation is controlled by a fixed or grid-selected \(\lambda\); the current implementation does not estimate input-specific lag-decay rates internally. Runtime results are elapsed fitting times under the stated backend profile and should be read alongside predictive and calibration diagnostics.
+The examples also delineate the current scope of the package. Dynamic models are fitted one quantile level at a time. \code{quantileSynthesis()} combines predictive draws after separate fits and applies monotonicity adjustments when needed; it is not a joint posterior model over multiple quantile levels. LDVB returns samples from fitted variational factors rather than from the exact posterior target, so MCMC remains the reference calculation when posterior tail summaries, interval widths, or approximation error are central. In transfer-function models, lag propagation is controlled by a fixed or grid-selected \(\lambda\); the current implementation does not estimate input-specific lag-decay rates internally. Runtime results are elapsed fitting times under the stated benchmark settings and should be read alongside predictive and calibration diagnostics.
 
-Several development directions follow from these limitations: multivariate-output dynamic quantile models that represent cross-series dependence through a modeled correlation matrix for related time series; further assessment of variational approximation error for the nonconjugate \((\gamma,\sigma)\) skewness--scale block; nonlinear dynamic quantile modeling beyond the linear state-space form used here; and joint or regularized fitting across quantile levels. The main text, appendices, and replication materials have separate roles: the main text describes the user-facing workflow, the appendices record selected posterior targets and package-specific computational blocks, and the repository scripts regenerate the reported figures, tables, example artifacts, and benchmark provenance.
+Several development directions follow from these limitations: multivariate-output dynamic quantile models that represent cross-series dependence through a modeled correlation matrix for related time series; further assessment of variational approximation error for the nonconjugate \((\gamma,\sigma)\) skewness--scale block; nonlinear dynamic quantile modeling beyond the linear state-space form used here; and joint or regularized fitting across quantile levels. The main text, appendices, and replication materials have separate roles: the main text describes the user-facing workflow, the appendices record selected posterior targets and package-specific computational blocks, and the submitted replication script regenerates the reported figures, tables, selected fitted-object output, and benchmark information.
 
 \clearpage
 \appendix

@@ -1,4 +1,4 @@
-profile=standard
+settings=standard
 quantile run settings: n.burn=2000, n.mcmc=3000
 trace run settings: seed=20260620, n.burn=7000, n.mcmc=3000, thin=10, saved_for_plot=300
 
@@ -39,4 +39,4 @@ $gig
 
 Run times (seconds):
       M95.elapsed M50_trace.elapsed        M5.elapsed  M50_dqlm.elapsed
-           84.218           156.520            85.664            39.244
+           73.385           136.827            74.171            33.640

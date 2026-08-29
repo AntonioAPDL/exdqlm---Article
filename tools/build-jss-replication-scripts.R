@@ -33,6 +33,15 @@ braces_delta <- function(x) {
   open - close
 }
 
+paren_delta <- function(x) {
+  stripped <- sub("#.*$", "", x)
+  open_match <- gregexpr("(", stripped, fixed = TRUE)[[1L]]
+  close_match <- gregexpr(")", stripped, fixed = TRUE)[[1L]]
+  open <- if (open_match[[1L]] == -1L) 0L else length(open_match)
+  close <- if (close_match[[1L]] == -1L) 0L else length(close_match)
+  open - close
+}
+
 function_extent <- function(lines, name) {
   start <- grep(sprintf("^%s\\s*<-\\s*function\\b", name), lines)
   if (length(start) != 1L) {
@@ -88,6 +97,83 @@ replace_between <- function(lines, start_pattern, end_pattern, replacement, fixe
   replace_range(lines, first, last - 1L, replacement)
 }
 
+remove_call_blocks <- function(lines, call_name) {
+  out <- character()
+  i <- 1L
+  pattern <- sprintf("\\b%s\\s*\\(", call_name)
+  while (i <= length(lines)) {
+    if (!grepl(pattern, lines[[i]])) {
+      out <- c(out, lines[[i]])
+      i <- i + 1L
+      next
+    }
+
+    depth <- 0L
+    repeat {
+      depth <- depth + paren_delta(lines[[i]])
+      i <- i + 1L
+      if (i > length(lines) || depth <= 0L) break
+    }
+  }
+  out
+}
+
+replace_assignment_call <- function(lines, name, replacement) {
+  idx <- grep(sprintf("^\\s*%s\\s*<-", name), lines)
+  if (length(idx) == 0L) return(lines)
+  if (length(idx) > 1L) {
+    stop(sprintf("Expected at most one assignment to %s, found %d.", name, length(idx)), call. = FALSE)
+  }
+  first <- idx[[1L]]
+  depth <- 0L
+  last <- first
+  for (i in seq.int(first, length(lines))) {
+    depth <- depth + paren_delta(lines[[i]])
+    last <- i
+    if (i > first && depth <= 0L) break
+    if (i == first && depth <= 0L) break
+  }
+  replace_range(lines, first, last, replacement)
+}
+
+rename_public_terms <- function(lines) {
+  replacements <- c(
+    selected_profile = "selected_run",
+    cfg_profile = "cfg_run",
+    cfg_benchmark_profiles = "cfg_benchmark_settings",
+    selected_benchmark_profile = "selected_benchmark_setting",
+    benchmark_profiles_table = "benchmark_settings_table",
+    apply_backend_profile = "apply_backend_settings",
+    with_backend_profile = "with_backend_settings",
+    load_or_fit_cache = "run_step",
+    ex4_load_or_fit_cache_safe = "ex4_run_step",
+    ex4_seed_screen_cache_key = "ex4_seed_screen_step_id",
+    trace_cache_key = "trace_step_id",
+    screen_cache_key = "screen_step_id",
+    cache_key = "step_id",
+    artifact_id = "output_id",
+    artifact_type = "output_type",
+    artifact_registry = "output_registry",
+    register_artifact = "record_output",
+    register_note = "record_note",
+    manuscript_target = "manuscript_label",
+    benchmark_profiles = "benchmark_settings",
+    manuscript_benchmark_profile = "manuscript_benchmark_setting",
+    profiles = "run_settings"
+  )
+  for (from in names(replacements)) {
+    lines <- gsub(from, replacements[[from]], lines, fixed = TRUE)
+  }
+  lines <- gsub("Profile", "Settings", lines, fixed = TRUE)
+  lines <- gsub("profile", "settings", lines, fixed = TRUE)
+  lines <- gsub("cached", "stored", lines, fixed = TRUE)
+  lines <- gsub("cache", "stored result", lines, fixed = TRUE)
+  lines <- gsub("authoritative", "full", lines, fixed = TRUE)
+  lines <- gsub("artifacts", "outputs", lines, fixed = TRUE)
+  lines <- gsub("artifact", "output", lines, fixed = TRUE)
+  lines
+}
+
 dput_lines <- function(object, name) {
   c(
     sprintf("%s <-", name),
@@ -97,16 +183,23 @@ dput_lines <- function(object, name) {
 
 sanitize_setup <- function(lines, cfg_params) {
   lines <- gsub('"yaml",\\s*', "", lines)
-  lines <- replace_line(
+  lines <- replace_between(
     lines,
-    "cache_dir <- file.path(output_root, \"cache\")",
-    "# The generated JSS scripts refit all manuscript computations.",
+    "analysis_root <- file.path(repo_root, \"analysis\")",
+    "for (d in c(figures_dir, tables_dir, logs_dir, cache_dir)) ensure_dir(d)",
+    c(
+      "analysis_root <- file.path(repo_root, \"analysis\")",
+      "figures_dir <- file.path(repo_root, \"figures\")",
+      "tables_dir <- file.path(repo_root, \"tables\")",
+      "logs_dir <- file.path(repo_root, \"logs\")",
+      "",
+      "for (d in c(figures_dir, tables_dir, logs_dir)) ensure_dir(d)"
+    ),
     fixed = TRUE
   )
-  lines <- replace_line(
+  lines <- remove_matching_lines(
     lines,
     "for (d in c(figures_dir, tables_dir, logs_dir, cache_dir)) ensure_dir(d)",
-    "for (d in c(figures_dir, tables_dir, logs_dir)) ensure_dir(d)",
     fixed = TRUE
   )
   lines <- replace_line(
@@ -146,40 +239,27 @@ sanitize_setup <- function(lines, cfg_params) {
     )
   )
   for (fn in c("safe_system_output", "git_short_head", "git_branch", "git_upstream", "git_dirty_state")) {
-    lines <- replace_function(lines, fn, c(sprintf("%s <- function(...) NA_character_", fn)))
+    if (fn == "safe_system_output") next
+    lines <- replace_function(lines, fn, character())
   }
-  lines <- replace_function(
-    lines,
-    "cache_file",
-    c(
-      "jss_step_file <- function(step_id) {",
-      "  file.path(logs_dir, sprintf(\"%s_%s.txt\", step_id, selected_profile))",
-      "}"
-    )
-  )
   lines <- replace_function(
     lines,
     "git_state_snapshot",
     c(
-      "git_state_snapshot <- function(path) {",
-      "  list(path = NA_character_, identifier = \"installed package\")",
+      "source_state_snapshot <- function(path) {",
+      "  list(path = NA_character_, identifier = \"CRAN package\")",
       "}"
     )
   )
-  replacements <- c(
-    git_short_head = "source_identifier",
-    git_branch = "source_branch_placeholder",
-    git_upstream = "source_remote_placeholder",
-    git_dirty_state = "source_state_placeholder",
-    git_state_snapshot = "source_state_snapshot",
-    article_git_at_setup = "article_state_at_setup",
-    pkg_git_at_setup = "pkg_state_at_setup",
-    exdqlm_commit = "exdqlm_source"
+  lines <- replace_function(
+    lines,
+    "cache_file",
+    c(
+      "step_output_file <- function(step_id) {",
+      "  file.path(logs_dir, sprintf(\"%s.txt\", step_id))",
+      "}"
+    )
   )
-  for (from in names(replacements)) {
-    lines <- gsub(from, replacements[[from]], lines, fixed = TRUE)
-  }
-  lines <- gsub("pkg_state_at_setup$commit", "pkg_state_at_setup$identifier", lines, fixed = TRUE)
   lines <- replace_function(
     lines,
     "load_or_fit_cache",
@@ -189,6 +269,80 @@ sanitize_setup <- function(lines, cfg_params) {
       "}"
     )
   )
+  lines <- replace_between(
+    lines,
+    "targets <- if (exists(\"targets\")) as.character(targets) else character(0)",
+    "force_refit <- isTRUE(force_refit)",
+    character(),
+    fixed = TRUE
+  )
+  lines <- remove_matching_lines(lines, "force_refit <- isTRUE(force_refit)", fixed = TRUE)
+  lines <- replace_between(
+    lines,
+    "artifact_registry <- data.frame(",
+    "save_png_plot <- function",
+    character(),
+    fixed = TRUE
+  )
+  lines <- replace_function(
+    lines,
+    "save_table_csv",
+    c(
+      "save_table_csv <- function(df, filename, ...) {",
+      "  path <- file.path(tables_dir, filename)",
+      "  utils::write.csv(df, file = path, row.names = FALSE)",
+      "  invisible(path)",
+      "}"
+    )
+  )
+  lines <- replace_function(
+    lines,
+    "write_tracker",
+    c(
+      "write_replication_index <- function() {",
+      "  invisible(TRUE)",
+      "}"
+    )
+  )
+  lines <- replace_function(
+    lines,
+    "write_session_info",
+    c(
+      "write_session_info <- function() {",
+      "  path <- file.path(logs_dir, \"sessionInfo.txt\")",
+      "  txt <- utils::capture.output({",
+      "    cat(sprintf(\"Seed: %s\\n\", seed_value))",
+      "    cat(sprintf(\"RNGkind: %s\\n\", paste(RNGkind(), collapse = \" | \")))",
+      "    cat(sprintf(\"Date: %s\\n\\n\", as.character(Sys.time())))",
+      "    print(sessionInfo())",
+      "  })",
+      "  txt <- sanitize_reference_paths(txt)",
+      "  write_log_lines(txt, path)",
+      "}"
+    )
+  )
+  lines <- replace_function(lines, "promote_publication_figures", character())
+  lines <- replace_function(lines, "target_enabled", character())
+  lines <- remove_call_blocks(lines, "register_note")
+  lines <- gsub("article_git_at_setup", "article_state_at_setup", lines, fixed = TRUE)
+  lines <- gsub("pkg_git_at_setup", "pkg_state_at_setup", lines, fixed = TRUE)
+  lines <- gsub("git_state_snapshot", "source_state_snapshot", lines, fixed = TRUE)
+  lines <- gsub("pkg_state_at_setup$commit", "pkg_state_at_setup$identifier", lines, fixed = TRUE)
+  lines <- gsub("\"exdqlm_commit\"", "\"exdqlm_source\"", lines, fixed = TRUE)
+  lines <- replace_line(
+    lines,
+    "log_msg(sprintf(\"00_setup complete (profile=%s)\", selected_profile))",
+    "log_msg(\"Setup complete\")",
+    fixed = TRUE
+  )
+  lines <- gsub(
+    "repo_root is not defined. Run via code.R or the internal analysis runner.",
+    "repo_root is not defined. Run code.R from the extracted replication directory.",
+    lines,
+    fixed = TRUE
+  )
+  lines <- rename_public_terms(lines)
+  lines <- replace_line(lines, "selected_run <- settings %||% \"standard\"", "selected_run <- \"standard\"", fixed = TRUE)
   lines
 }
 
@@ -202,7 +356,14 @@ sanitize_ex4_helpers <- function(lines) {
       "}"
     )
   )
-  gsub("ex4_seed_screen_cache_key", "ex4_seed_screen_step_id", lines, fixed = TRUE)
+  lines <- gsub("ex4_seed_screen_cache_key", "ex4_seed_screen_step_id", lines, fixed = TRUE)
+  lines <- gsub(
+    "Run the ex4screen target first.",
+    "Use a configured Example 4 seed before running the full replication.",
+    lines,
+    fixed = TRUE
+  )
+  lines
 }
 
 sanitize_example <- function(lines) {
@@ -230,43 +391,56 @@ sanitize_example <- function(lines) {
   lines <- gsub("cache_key", "step_id", lines, fixed = TRUE)
   lines <- gsub(
     "Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary).",
-    "Lake Huron refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary).",
+    "Lake Huron refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements depend on the reference computer (see ex1_run_summary).",
     lines,
     fixed = TRUE
   )
+  lines <- gsub("skipped (target filter)", "skipped", lines, fixed = TRUE)
+  need_assignments <- c(
+    "need_ex1", "need_ex1mcmc", "need_ex1quants", "need_ex1synth",
+    "need_ex2", "need_ex2quant", "need_ex2quant_ldvb", "need_ex2checks",
+    "need_ex2checks_ldvb", "need_ex2benchmark", "need_ex2_ldvb_diag",
+    "need_ex2_tables", "need_ex2_tables_ldvb",
+    "need_ex3", "need_ex3data", "need_ex3forecast", "need_ex3quantcomps",
+    "need_ex3zetapsi", "need_ex3tables",
+    "need_ex4", "need_ex4figure", "need_ex4table"
+  )
+  for (name in need_assignments) {
+    lines <- replace_assignment_call(lines, name, sprintf("%s <- TRUE", name))
+  }
+  lines <- replace_assignment_call(lines, "need_ex1kernel", "need_ex1kernel <- FALSE")
+  lines <- remove_call_blocks(lines, "register_artifact")
+  lines <- remove_call_blocks(lines, "register_note")
+  lines <- rename_public_terms(lines)
   lines
 }
 
-script_header <- function(profile, authoritative) {
-  profile_label <- if (identical(profile, "standard")) "full manuscript replication" else "reduced code-checking run"
+script_header <- function() {
   c(
     "#!/usr/bin/env Rscript",
     "",
     "#' # exdqlm JSS replication script",
     "#'",
-    sprintf("#' This file is the %s for the JSS article", profile_label),
+    "#' This file is the full manuscript replication script for the JSS article",
     "#' \"exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic",
     "#' Quantile Linear Models\".",
     "#'",
     "#' Run from the extracted replication-materials directory with:",
     "#'",
-    if (authoritative) "#' ```sh\n#' R CMD BATCH --vanilla code.R code.Rout\n#' ```" else "#' ```sh\n#' R CMD BATCH --vanilla code-fast.R code-fast.Rout\n#' ```",
+    "#' ```sh",
+    "#' R CMD BATCH --vanilla code.R code.Rout",
+    "#' ```",
     "#'",
-    if (authoritative) {
-      "#' This is the authoritative script for the manuscript values. It refits the examples, regenerates the manuscript figures, prints the numerical tables and selected fitted-object output, and records the computational environment."
-    } else {
-      "#' This reduced script follows the same workflow with smaller Monte Carlo settings. It is for checking code paths and is not authoritative for manuscript numerical values."
-    },
+    "#' This script refits the four examples, regenerates the manuscript figures,",
+    "#' prints the numerical tables and selected fitted-object output, and records",
+    "#' the computational environment.",
     "#'",
-    "#' The script is intentionally flat: it contains the setup code, helper code, and example code in manuscript order.",
+    "#' The script is intentionally flat: it contains the setup code, helper code,",
+    "#' and example code in manuscript order.",
     "",
     "jss_start_time <- proc.time()[[3L]]",
     "repo_root <- normalizePath(getwd(), winslash = \"/\", mustWork = TRUE)",
-    sprintf("profile <- \"%s\"", profile),
-    "pkg_path <- \"\"",
     "seed_override <- NULL",
-    "targets <- character(0)",
-    "force_refit <- TRUE",
     "Sys.setenv(",
     "  TZ = \"America/New_York\",",
     "  OMP_NUM_THREADS = Sys.getenv(\"OMP_NUM_THREADS\", unset = \"1\"),",
@@ -280,8 +454,7 @@ script_header <- function(profile, authoritative) {
     "RNGkind(\"Mersenne-Twister\", \"Inversion\", \"Rejection\")",
     "",
     "cat(\"== exdqlm JSS replication ==\\n\")",
-    sprintf("cat(\"Profile: %s\\n\")", profile),
-    sprintf("cat(\"Authoritative manuscript values: %s\\n\")", if (authoritative) "yes" else "no"),
+    "cat(\"Run: full manuscript replication\\n\")",
     "cat(sprintf(\"R: %s\\n\", R.version.string))",
     "cat(sprintf(\"Working directory: %s\\n\", repo_root))",
     "cat(sprintf(\"RNGkind: %s\\n\", paste(RNGkind(), collapse = \" / \")))",
@@ -322,7 +495,7 @@ save_png_override <- c(
   "}"
 )
 
-final_output_block <- function(batch_output) c(
+final_output_block <- function() c(
   "print_jss_heading <- function(label) {",
   "  cat(\"\\n\")",
   "  cat(strrep(\"=\", 72), \"\\n\", sep = \"\")",
@@ -337,16 +510,30 @@ final_output_block <- function(batch_output) c(
   "  print(utils::read.csv(path, stringsAsFactors = FALSE), row.names = FALSE)",
   "}",
   "",
+  "write_printed_output <- function(filename, expr) {",
+  "  path <- file.path(logs_dir, filename)",
+  "  txt <- utils::capture.output(eval.parent(substitute(expr)))",
+  "  writeLines(txt, con = path)",
+  "  invisible(path)",
+  "}",
+  "",
+  "save_table_csv(benchmark_environment_table(), \"benchmark_environment.csv\")",
+  "save_table_csv(benchmark_settings_table(), \"benchmark_backend_settings.csv\")",
+  "write_session_info()",
+  "",
   "print_jss_heading(\"M95\")",
   "print(M95)",
+  "write_printed_output(\"M95-print.txt\", print(M95))",
   "print_jss_heading(\"summary(M95)\")",
   "print(summary(M95))",
+  "write_printed_output(\"M95-summary.txt\", print(summary(M95)))",
   "print_jss_heading(\"MTF$median.kt\")",
   "print(MTF$median.kt)",
-  "print_csv_table(\"Table 7 / tab:ex2bench\", \"analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv\")",
-  "print_csv_table(\"Table 8 / tab:ex3\", \"analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv\")",
-  "print_csv_table(\"Table 9 / tab:ex3forecastmetrics\", \"analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv\")",
-  "print_csv_table(\"Table 10 / tab:ex4static\", \"analysis/manuscript/outputs/tables/ex4static_summary.csv\")",
+  "write_printed_output(\"MTF-median-kt.txt\", print(MTF$median.kt))",
+  "print_csv_table(\"Table 7 / tab:ex2bench\", \"tables/ex2_dynamic_benchmark.csv\")",
+  "print_csv_table(\"Table 8 / tab:ex3\", \"tables/ex3_diagnostics_summary.csv\")",
+  "print_csv_table(\"Table 9 / tab:ex3forecastmetrics\", \"tables/ex3_forecast_metrics.csv\")",
+  "print_csv_table(\"Table 10 / tab:ex4static\", \"tables/ex4static_summary.csv\")",
   "print_jss_heading(\"sessionInfo()\")",
   "print(utils::sessionInfo())",
   "cat(sprintf(\"\\nTotal elapsed seconds: %.3f\\n\", proc.time()[[3L]] - jss_start_time))",
@@ -354,7 +541,7 @@ final_output_block <- function(batch_output) c(
   "  grDevices::dev.off()",
   "  options(exdqlm.jss_rplots_active = FALSE)",
   "}",
-  sprintf("cat(\"\\nReplication complete. Primary batch artifacts: %s and Rplots.pdf.\\n\")", batch_output)
+  "cat(\"\\nReplication complete. Primary batch outputs: code.Rout and Rplots.pdf.\\n\")"
 )
 
 validate_generated <- function(path) {
@@ -363,12 +550,22 @@ validate_generated <- function(path) {
     "source(",
     "readRDS(",
     "saveRDS(",
+    "code-fast.R",
+    "examples.R",
     "EXDQLM_LOAD_MODE",
     "EXDQLM_PKG_PATH",
     "run_all.R",
     "--quick",
     "--example",
-    "parse_replication_args"
+    "parse_replication_args",
+    "target_enabled",
+    "targeted_run",
+    "artifact_registry",
+    "register_artifact",
+    "register_note",
+    "cache_dir",
+    "cache_file",
+    "load_or_fit_cache"
   )
   bad <- forbidden[vapply(forbidden, grepl, logical(1), x = txt, fixed = TRUE)]
   if (length(bad)) {
@@ -380,13 +577,18 @@ validate_generated <- function(path) {
   invisible(TRUE)
 }
 
-build_script <- function(repo_root, profile, out_file, authoritative = identical(profile, "standard")) {
+build_script <- function(repo_root, out_file) {
   if (!requireNamespace("yaml", quietly = TRUE)) {
     stop("The yaml package is required to build the generated scripts.", call. = FALSE)
   }
   cfg_params <- yaml::read_yaml(file.path(repo_root, "analysis", "config", "params_manuscript.yml"))
-  cfg_params$profile <- profile
-  cfg_params$profiles <- cfg_params$profiles[profile]
+  cfg_params$run_name <- "standard"
+  cfg_params$run_settings <- cfg_params$profiles["standard"]
+  cfg_params$profiles <- NULL
+  cfg_params$manuscript_benchmark_setting <- cfg_params$manuscript_benchmark_profile
+  cfg_params$manuscript_benchmark_profile <- NULL
+  cfg_params$benchmark_settings <- cfg_params$benchmark_profiles
+  cfg_params$benchmark_profiles <- NULL
   cfg_params$expected_exdqlm_version <- "1.1.1"
 
   setup <- sanitize_setup(read_file(file.path(repo_root, "analysis", "lib", "manuscript_setup.R")), cfg_params)
@@ -401,15 +603,14 @@ build_script <- function(repo_root, profile, out_file, authoritative = identical
         "ex1_lake_huron/run.R",
         "ex2_sunspots/run.R",
         "ex3_big_tree/run.R",
-        "ex4_static/run.R",
-        "_manifest/run.R"
+        "ex4_static/run.R"
       )
     ),
     function(path) c(sprintf("\n# ---- %s ----", basename(dirname(path))), sanitize_example(read_file(path)))
   )
 
   lines <- c(
-    script_header(profile, authoritative),
+    script_header(),
     "",
     "# ---- inlined manuscript setup ----",
     setup,
@@ -423,9 +624,10 @@ build_script <- function(repo_root, profile, out_file, authoritative = identical
     unlist(examples, use.names = FALSE),
     "",
     "# ---- stable batch-visible outputs ----",
-    final_output_block(if (authoritative) "code.Rout" else "code-fast.Rout")
+    final_output_block()
   )
 
+  lines <- rename_public_terms(lines)
   write_file(out_file, lines)
   Sys.chmod(out_file, mode = "0755")
   validate_generated(out_file)
@@ -433,6 +635,7 @@ build_script <- function(repo_root, profile, out_file, authoritative = identical
 }
 
 repo_root <- find_repo_root()
-build_script(repo_root, "standard", file.path(repo_root, "code.R"), authoritative = TRUE)
-build_script(repo_root, "quick", file.path(repo_root, "code-fast.R"), authoritative = FALSE)
-cat("Generated code.R and code-fast.R\n")
+build_script(repo_root, file.path(repo_root, "code.R"))
+old_fast <- file.path(repo_root, "code-fast.R")
+if (file.exists(old_fast)) unlink(old_fast, force = TRUE)
+cat("Generated code.R\n")

@@ -24,22 +24,17 @@ inference-stability patch. It corrects compiled stochastic helper paths so they
 use serial R-controlled random-number streams and uses the stabilized exAL
 scale-skewness defaults exercised by the manuscript rerun.
 
-The replication archive is built from this repository after excluding local
-scratch files, audit notes, interrupted runs, and development-only artifacts.
+## Replication script
 
-## Replication scripts
+The public replication interface is deliberately simple. The archive contains
+one full R script:
 
-The public replication interface is deliberately simple:
+- `code.R`: refits the manuscript examples, regenerates the figures and tables,
+  prints selected fitted-object output and all manuscript tables to `code.Rout`,
+  and writes the full graphics stream to `Rplots.pdf`.
 
-- `code.R`: authoritative full replication script. It refits the manuscript
-  examples, regenerates figures and tables, prints selected fitted-object output
-  and all manuscript tables to `code.Rout`, and writes the full graphics stream
-  to `Rplots.pdf`.
-- `code-fast.R`: reduced code-checking script with the same structure and
-  smaller computation settings. It is not authoritative for manuscript numbers.
-
-Both scripts are flat, commented R scripts. They do not call `source()`, read or
-write saved fit objects, inspect Git metadata, or require local paths.
+The script is flat and commented. It does not call `source()`, read or write
+saved fit objects, inspect Git metadata, or require local paths.
 
 ## Install the package
 
@@ -55,7 +50,7 @@ Confirm the installed version:
 Rscript -e 'stopifnot(as.character(packageVersion("exdqlm")) == "1.1.1")'
 ```
 
-## Run the full replication
+## Run the replication
 
 From the extracted replication directory, run:
 
@@ -70,24 +65,10 @@ R CMD BATCH --vanilla code.R code.Rout
 ```
 
 The full run can take substantial time because it refits Bayesian dynamic and
-static quantile models. The primary reviewer-facing outputs are `code.Rout` and
-`Rplots.pdf`, together with generated files under
-`analysis/manuscript/outputs/`.
-
-For a shorter code-path check, run:
-
-```sh
-OMP_NUM_THREADS=1 \
-OMP_THREAD_LIMIT=1 \
-OPENBLAS_NUM_THREADS=1 \
-MKL_NUM_THREADS=1 \
-BLIS_NUM_THREADS=1 \
-VECLIB_MAXIMUM_THREADS=1 \
-R CMD BATCH --vanilla code-fast.R code-fast.Rout
-```
-
-`code-fast.Rout` should be used only to check that the workflow executes and
-prints the expected objects, tables, and session information.
+static quantile models. On the reference Linux platform used for the manuscript,
+the complete batch run finished in about 50 minutes. Runtime values are
+platform dependent, so the manuscript and generated output record the reference
+environment.
 
 ## Output locations
 
@@ -96,10 +77,11 @@ The main generated files are:
 - `code.Rout`: batch console output from the full script.
 - `Rplots.pdf`: graphics stream from the full script, with manuscript figures in
   manuscript order.
-- `analysis/manuscript/outputs/figures/`: PNG figures used by the manuscript.
-- `analysis/manuscript/outputs/tables/`: CSV sources for manuscript tables.
-- `analysis/manuscript/outputs/logs/`: printed summaries and provenance logs.
+- `figures/`: PNG manuscript figures and supporting diagnostic figures generated
+  by `code.R`.
+- `tables/`: CSV sources for manuscript tables and computational details.
+- `logs/`: printed summaries and session information.
 
-Runtime values are platform dependent. The replication output records the R
-version, package version, RNG settings, backend profile, and platform used for
-the author reference run.
+The batch output includes `M95`, `summary(M95)`, `MTF$median.kt`, Tables 7--10,
+and `sessionInfo()`, so the main manuscript quantities can be checked directly
+from `code.Rout`.

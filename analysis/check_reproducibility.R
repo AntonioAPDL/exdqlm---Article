@@ -329,19 +329,19 @@ main <- function() {
 
     bench_name <- as.character(cfg$manuscript_benchmark_profile %||% "")
     bench <- cfg$benchmark_profiles[[bench_name]] %||% list()
-    line("benchmark profile", bench_name)
+    line("benchmark settings", bench_name)
     if (!identical(bench_name, "B")) {
-      warn(sprintf("Manuscript benchmark profile is %s; expected B for current paper values.", bench_name))
+      warn(sprintf("Manuscript benchmark settings are %s; expected B for current paper values.", bench_name))
     }
     if (!identical(as.integer(bench$cpp_threads %||% NA_integer_), 1L)) {
-      fail("Manuscript benchmark profile must use exdqlm.cpp_threads = 1 for reference timing/provenance.")
+      fail("Manuscript benchmark settings must use exdqlm.cpp_threads = 1 for reference timing/provenance.")
     } else {
-      ok("benchmark profile uses one C++ thread")
+      ok("benchmark settings use one C++ thread")
     }
     if (isTRUE(bench$use_cpp_samplers)) {
-      fail("Manuscript benchmark profile must keep C++ samplers disabled unless sampler reproducibility is revalidated.")
+      fail("Manuscript benchmark settings must keep C++ samplers disabled unless sampler reproducibility is revalidated.")
     } else {
-      ok("benchmark profile keeps C++ samplers disabled")
+      ok("benchmark settings keep C++ samplers disabled")
     }
   } else {
     fail("Could not read analysis/config/params_manuscript.yml.")

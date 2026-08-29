@@ -2,7 +2,7 @@
 
 #' # exdqlm JSS replication script
 #'
-#' This file is the full manuscript replication for the JSS article
+#' This file is the full manuscript replication script for the JSS article
 #' "exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic
 #' Quantile Linear Models".
 #'
@@ -12,17 +12,16 @@
 #' R CMD BATCH --vanilla code.R code.Rout
 #' ```
 #'
-#' This is the authoritative script for the manuscript values. It refits the examples, regenerates the manuscript figures, prints the numerical tables and selected fitted-object output, and records the computational environment.
+#' This script refits the four examples, regenerates the manuscript figures,
+#' prints the numerical tables and selected fitted-object output, and records
+#' the computational environment.
 #'
-#' The script is intentionally flat: it contains the setup code, helper code, and example code in manuscript order.
+#' The script is intentionally flat: it contains the setup code, helper code,
+#' and example code in manuscript order.
 
 jss_start_time <- proc.time()[[3L]]
 repo_root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
-profile <- "standard"
-pkg_path <- ""
 seed_override <- NULL
-targets <- character(0)
-force_refit <- TRUE
 Sys.setenv(
   TZ = "America/New_York",
   OMP_NUM_THREADS = Sys.getenv("OMP_NUM_THREADS", unset = "1"),
@@ -36,8 +35,7 @@ RNGversion("4.6.0")
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 
 cat("== exdqlm JSS replication ==\n")
-cat("Profile: standard\n")
-cat("Authoritative manuscript values: yes\n")
+cat("Run: full manuscript replication\n")
 cat(sprintf("R: %s\n", R.version.string))
 cat(sprintf("Working directory: %s\n", repo_root))
 cat(sprintf("RNGkind: %s\n", paste(RNGkind(), collapse = " / ")))
@@ -58,7 +56,7 @@ on.exit({
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0L) y else x
 
 if (!exists("repo_root")) {
-  stop("repo_root is not defined. Run via code.R or the internal analysis runner.", call. = FALSE)
+  stop("repo_root is not defined. Run code.R from the extracted replication directory.", call. = FALSE)
 }
 
 required_pkgs <- c("matrixStats", "coda", "dlm")
@@ -77,81 +75,75 @@ ensure_dir <- function(path) {
 }
 
 analysis_root <- file.path(repo_root, "analysis")
-stage_root <- file.path(analysis_root, "manuscript")
-output_root <- file.path(stage_root, "outputs")
-figures_dir <- file.path(output_root, "figures")
-tables_dir <- file.path(output_root, "tables")
-logs_dir <- file.path(output_root, "logs")
-# The generated JSS scripts refit all manuscript computations.
+figures_dir <- file.path(repo_root, "figures")
+tables_dir <- file.path(repo_root, "tables")
+logs_dir <- file.path(repo_root, "logs")
 
 for (d in c(figures_dir, tables_dir, logs_dir)) ensure_dir(d)
 
 cfg_params <-
   list(seed = 20260501L, expected_exdqlm_version = "1.1.1", rng = list(
       kind = "Mersenne-Twister", normal_kind = "Inversion", sample_kind = "Rejection"),
-      manuscript_benchmark_profile = "B", benchmark_profiles = list(
+      figures = list(width = 10L, height = 6L, res = 220L, pointsize = 11L),
+      promotion = list(figures = c("ex1mcmc.png", "ex1quants.png",
+      "ex2quant.png", "ex2checks.png", "ex3data.png", "ex3quantcomps.png",
+      "ex3zetapsi.png", "ex3forecast.png", "ex4static.png")), run_name = "standard",
+      run_settings = list(standard = list(ex1 = list(trace_seed = 20260620L,
+          n_burn = 2000L, n_mcmc = 3000L, n_burn_trace = 7000L,
+          n_mcmc_trace = 3000L, thin_trace = 10L, n_chains_kernel = 4L,
+          n_burn_kernel = 2000L, n_mcmc_kernel = 1000L, thin_kernel_plot = 10L,
+          synth_source_draws = 2000L, synth_n_samp = 5000L, forecast_window_start = 1952L,
+          synth_window_start = 1880L), ex2 = list(n_is = 500L,
+          n_samp = 3000L, tol = 0.05, ldvb_diag_tol = 0.01, ldvb_diag_n_samp = 3000L,
+          benchmark_n_burn = 2000L, benchmark_n_mcmc = 3000L, df_grid = c(0.85,
+          0.9, 0.95, 1)), ex3 = list(p0 = 0.15, selected_indices = c("noi",
+      "amo"), fit_start = "1987-01-01", fit_end = "2022-12-01",
+          forecast_horizon = 18L, focus_window = c(2016L, 2020L
+          ), forecast_plot_start = 2020L, trend_order = 1L, seasonal_period = 12L,
+          harmonics = c(1, 2, 0.1469118636), trend_df = 0.99, seasonal_df = 0.99,
+          covariate_df = 1, transfer_zeta_df = 0.99, transfer_psi_df = 1,
+          transfer_psi_df_grid = 1, selection_metric = "PPLC",
+          trend_m0 = 3.91202300542815, trend_c0 = 1, seasonal_c0 = 1,
+          climate_coef_c0 = 1, reg_c0 = 1, transfer_zeta_c0 = 0.1,
+          transfer_psi_c0 = 1, gam_init = -0.1, sig_init = 0.1,
+          max_iter = 600L, n_is = 500L, n_samp = 1000L, forecast_n_samp = 1000L,
+          tol = 0.05, lambda_grid = c(0.7, 0.75, 0.8, 0.85, 0.9,
+          0.95, 0.99)), ex4 = list(n_train = 160L, holdout_n = 800L,
+          n_predictors = 8L, dataset_seed = 20260712L, dataset_seed_mode = "configured",
+          cov_rho = 0.5, sigma_eps = 1.5, true_beta = c(3, 1.5,
+          0, 0, 2, 0, 0, 0), p_levels = c(0.05, 0.25, 0.5), screen_target_p0 = 0.5,
+          ldvb_max_iter = 260L, ldvb_max_iter_tail = 420L, ldvb_tol = 1e-04,
+          rhs_tau0 = 0.15, rhs_zeta2_fixed = 9, screen_seeds = 20260711:20260718,
+          screen_extra_seed_count = 8L, screen_batch_size = 4L,
+          n_burn = 2000L, n_mcmc = 3000L, thin = 1L, n_samp = 3000L))),
+      manuscript_benchmark_setting = "B", benchmark_settings = list(
           A = list(label = "pure-R baseline", use_cpp_kf = FALSE,
               use_cpp_builders = FALSE, use_cpp_samplers = FALSE,
               use_cpp_postpred = FALSE, use_cpp_mcmc = FALSE, cpp_mcmc_mode = "strict",
               cpp_threads = 1L), B = list(label = "manuscript-matched backend",
               use_cpp_kf = TRUE, use_cpp_builders = FALSE, use_cpp_samplers = FALSE,
               use_cpp_postpred = FALSE, use_cpp_mcmc = TRUE, cpp_mcmc_mode = "fast",
-              cpp_threads = 1L)), profiles = list(standard = list(
-          ex1 = list(trace_seed = 20260620L, n_burn = 2000L, n_mcmc = 3000L,
-              n_burn_trace = 7000L, n_mcmc_trace = 3000L, thin_trace = 10L,
-              n_chains_kernel = 4L, n_burn_kernel = 2000L, n_mcmc_kernel = 1000L,
-              thin_kernel_plot = 10L, synth_source_draws = 2000L,
-              synth_n_samp = 5000L, forecast_window_start = 1952L,
-              synth_window_start = 1880L), ex2 = list(n_is = 500L,
-              n_samp = 3000L, tol = 0.05, ldvb_diag_tol = 0.01,
-              ldvb_diag_n_samp = 3000L, benchmark_n_burn = 2000L,
-              benchmark_n_mcmc = 3000L, df_grid = c(0.85, 0.9,
-              0.95, 1)), ex3 = list(p0 = 0.15, selected_indices = c("noi",
-          "amo"), fit_start = "1987-01-01", fit_end = "2022-12-01",
-              forecast_horizon = 18L, focus_window = c(2016L, 2020L
-              ), forecast_plot_start = 2020L, trend_order = 1L,
-              seasonal_period = 12L, harmonics = c(1, 2, 0.1469118636
-              ), trend_df = 0.99, seasonal_df = 0.99, covariate_df = 1,
-              transfer_zeta_df = 0.99, transfer_psi_df = 1, transfer_psi_df_grid = 1,
-              selection_metric = "PPLC", trend_m0 = 3.91202300542815,
-              trend_c0 = 1, seasonal_c0 = 1, climate_coef_c0 = 1,
-              reg_c0 = 1, transfer_zeta_c0 = 0.1, transfer_psi_c0 = 1,
-              gam_init = -0.1, sig_init = 0.1, max_iter = 600L,
-              n_is = 500L, n_samp = 1000L, forecast_n_samp = 1000L,
-              tol = 0.05, lambda_grid = c(0.7, 0.75, 0.8, 0.85,
-              0.9, 0.95, 0.99)), ex4 = list(n_train = 160L, holdout_n = 800L,
-              n_predictors = 8L, dataset_seed = 20260712L, dataset_seed_mode = "configured",
-              cov_rho = 0.5, sigma_eps = 1.5, true_beta = c(3,
-              1.5, 0, 0, 2, 0, 0, 0), p_levels = c(0.05, 0.25,
-              0.5), screen_target_p0 = 0.5, ldvb_max_iter = 260L,
-              ldvb_max_iter_tail = 420L, ldvb_tol = 1e-04, rhs_tau0 = 0.15,
-              rhs_zeta2_fixed = 9, screen_seeds = 20260711:20260718,
-              screen_extra_seed_count = 8L, screen_batch_size = 4L,
-              n_burn = 2000L, n_mcmc = 3000L, thin = 1L, n_samp = 3000L))),
-      figures = list(width = 10L, height = 6L, res = 220L, pointsize = 11L),
-      promotion = list(figures = c("ex1mcmc.png", "ex1quants.png",
-      "ex2quant.png", "ex2checks.png", "ex3data.png", "ex3quantcomps.png",
-      "ex3zetapsi.png", "ex3forecast.png", "ex4static.png")), profile = "standard")
-selected_profile <- profile %||% "standard"
-if (!selected_profile %in% names(cfg_params$profiles)) {
+              cpp_threads = 1L)))
+selected_run <- "standard"
+if (!selected_run %in% names(cfg_params$run_settings)) {
   stop(
     sprintf(
-      "Unknown manuscript profile '%s'. Valid: %s",
-      selected_profile,
-      paste(names(cfg_params$profiles), collapse = ", ")
+      "Unknown manuscript settings '%s'. Valid: %s",
+      selected_run,
+      paste(names(cfg_params$run_settings), collapse = ", ")
     ),
     call. = FALSE
   )
 }
-cfg_profile <- cfg_params$profiles[[selected_profile]]
-cfg_benchmark_profiles <- cfg_params$benchmark_profiles %||% list()
-selected_benchmark_profile <- cfg_params$manuscript_benchmark_profile %||% "B"
-if (!selected_benchmark_profile %in% names(cfg_benchmark_profiles)) {
+cfg_run <- cfg_params$run_settings[[selected_run]]
+cfg_benchmark_settings <- cfg_params$benchmark_settings %||% list()
+selected_benchmark_setting <- cfg_params$manuscript_benchmark_setting %||% "B"
+if (!selected_benchmark_setting %in% names(cfg_benchmark_settings)) {
   stop(
     sprintf(
-      "Unknown benchmark backend profile '%s'. Valid: %s",
-      selected_benchmark_profile,
-      paste(names(cfg_benchmark_profiles), collapse = ", ")
+      "Unknown benchmark backend settings '%s'. Valid: %s",
+      selected_benchmark_setting,
+      paste(names(cfg_benchmark_settings), collapse = ", ")
     ),
     call. = FALSE
   )
@@ -169,10 +161,6 @@ seed_value <- seed_override %||% cfg_params$seed
 selected_rng_kind <- set_manuscript_rng()
 set.seed(seed_value)
 
-targets <- if (exists("targets")) as.character(targets) else character(0)
-targets <- targets[nzchar(targets)]
-targeted_run <- length(targets) > 0L
-force_refit <- isTRUE(force_refit)
 
 
 resolve_pkg_path <- function(fail_if_missing = FALSE) {
@@ -206,10 +194,10 @@ if (length(missing_fns) > 0L) {
   stop(sprintf("Missing required exdqlm functions: %s", paste(missing_fns, collapse = ", ")), call. = FALSE)
 }
 
-apply_backend_profile <- function(profile_name = selected_benchmark_profile) {
-  prof <- cfg_benchmark_profiles[[profile_name]]
+apply_backend_settings <- function(settings_name = selected_benchmark_setting) {
+  prof <- cfg_benchmark_settings[[settings_name]]
   if (is.null(prof)) {
-    stop(sprintf("Unknown benchmark backend profile '%s'.", profile_name), call. = FALSE)
+    stop(sprintf("Unknown benchmark backend settings '%s'.", settings_name), call. = FALSE)
   }
   options(
     exdqlm.use_cpp_kf = isTRUE(prof$use_cpp_kf),
@@ -223,7 +211,7 @@ apply_backend_profile <- function(profile_name = selected_benchmark_profile) {
   invisible(prof)
 }
 
-with_backend_profile <- function(profile_name, expr) {
+with_backend_settings <- function(settings_name, expr) {
   old <- options(
     exdqlm.use_cpp_kf = getOption("exdqlm.use_cpp_kf"),
     exdqlm.use_cpp_builders = getOption("exdqlm.use_cpp_builders"),
@@ -234,22 +222,24 @@ with_backend_profile <- function(profile_name, expr) {
     exdqlm.cpp_threads = getOption("exdqlm.cpp_threads")
   )
   on.exit(options(old), add = TRUE)
-  apply_backend_profile(profile_name)
+  apply_backend_settings(settings_name)
   eval.parent(substitute(expr))
 }
 
-safe_system_output <- function(...) NA_character_
+safe_system_output <- function(cmd, args = character()) {
+  out <- tryCatch(
+    suppressWarnings(system2(cmd, args = args, stdout = TRUE, stderr = FALSE)),
+    error = function(e) character()
+  )
+  trimws(out[nzchar(trimws(out))])
+}
 
-source_identifier <- function(...) NA_character_
 
-source_branch_placeholder <- function(...) NA_character_
 
-source_remote_placeholder <- function(...) NA_character_
 
-source_state_placeholder <- function(...) NA_character_
 
 source_state_snapshot <- function(path) {
-  list(path = NA_character_, identifier = "installed package")
+  list(path = NA_character_, identifier = "CRAN package")
 }
 
 article_state_at_setup <- source_state_snapshot(repo_root)
@@ -271,11 +261,11 @@ detect_cpu_model <- function() {
   as.character(Sys.info()[["machine"]] %||% NA_character_)
 }
 
-benchmark_profiles_table <- function() {
-  rows <- lapply(names(cfg_benchmark_profiles), function(name) {
-    prof <- cfg_benchmark_profiles[[name]]
+benchmark_settings_table <- function() {
+  rows <- lapply(names(cfg_benchmark_settings), function(name) {
+    prof <- cfg_benchmark_settings[[name]]
     data.frame(
-      profile = name,
+      settings = name,
       label = as.character(prof$label %||% ""),
       use_cpp_kf = isTRUE(prof$use_cpp_kf),
       use_cpp_builders = isTRUE(prof$use_cpp_builders),
@@ -290,7 +280,7 @@ benchmark_profiles_table <- function() {
   do.call(rbind, rows)
 }
 
-resolve_ex4_dataset_seed_for_reporting <- function(cfg_ex4 = cfg_profile$ex4) {
+resolve_ex4_dataset_seed_for_reporting <- function(cfg_ex4 = cfg_run$ex4) {
   mode <- tolower(trimws(as.character(cfg_ex4$dataset_seed_mode %||% "configured")))
   configured_seed <- as.integer(cfg_ex4$dataset_seed %||% NA_integer_)
   if (!identical(mode, "screen_selection")) {
@@ -332,8 +322,8 @@ benchmark_environment_table <- function() {
 
   data.frame(
     field = c(
-      "selected_profile",
-      "benchmark_profile",
+      "selected_run",
+      "benchmark_settings",
       "seed",
       "cpu_model",
       "os",
@@ -362,8 +352,8 @@ benchmark_environment_table <- function() {
       "ex4_dataset_seed"
     ),
     value = c(
-      selected_profile,
-      selected_benchmark_profile,
+      selected_run,
+      selected_benchmark_setting,
       as.character(seed_value),
       cpu_model,
       paste(Sys.info()[c("sysname", "release", "machine")], collapse = " | "),
@@ -387,9 +377,9 @@ benchmark_environment_table <- function() {
       as.character(ex1_len),
       as.character(ex2_len),
       as.character(ex3_len),
-      as.character(cfg_profile$ex4$n_train %||% NA_integer_),
-      as.character(cfg_profile$ex4$holdout_n %||% NA_integer_),
-      as.character(resolve_ex4_dataset_seed_for_reporting(cfg_profile$ex4))
+      as.character(cfg_run$ex4$n_train %||% NA_integer_),
+      as.character(cfg_run$ex4$holdout_n %||% NA_integer_),
+      as.character(resolve_ex4_dataset_seed_for_reporting(cfg_run$ex4))
     ),
     stringsAsFactors = FALSE
   )
@@ -404,58 +394,15 @@ sanitize_reference_paths <- function(lines) {
   lines
 }
 
-apply_backend_profile(selected_benchmark_profile)
+apply_backend_settings(selected_benchmark_setting)
 
-# High-contrast LDVB palette used across LD-only counterpart artifacts.
+# High-contrast LDVB palette used across LD-only counterpart outputs.
 ldvb_cols <- list(
   m1 = "#E69F00",
   m2 = "#0072B2",
   m1_aux = "#CC79A7",
   m2_aux = "#009E73"
 )
-
-artifact_registry <- data.frame(
-  artifact_id = character(),
-  artifact_type = character(),
-  relative_path = character(),
-  manuscript_target = character(),
-  status = character(),
-  notes = character(),
-  stringsAsFactors = FALSE
-)
-
-run_notes <- data.frame(
-  topic = character(),
-  detail = character(),
-  stringsAsFactors = FALSE
-)
-
-register_artifact <- function(artifact_id,
-                              artifact_type,
-                              relative_path,
-                              manuscript_target = "",
-                              status = "reproduced",
-                              notes = "") {
-  artifact_registry <<- rbind(
-    artifact_registry,
-    data.frame(
-      artifact_id = artifact_id,
-      artifact_type = artifact_type,
-      relative_path = relative_path,
-      manuscript_target = manuscript_target,
-      status = status,
-      notes = notes,
-      stringsAsFactors = FALSE
-    )
-  )
-}
-
-register_note <- function(topic, detail) {
-  run_notes <<- rbind(
-    run_notes,
-    data.frame(topic = as.character(topic), detail = as.character(detail), stringsAsFactors = FALSE)
-  )
-}
 
 save_png_plot <- function(filename, expr,
                           width = cfg_params$figures$width,
@@ -474,8 +421,8 @@ save_png_plot <- function(filename, expr,
   invisible(path)
 }
 
-jss_step_file <- function(step_id) {
-  file.path(logs_dir, sprintf("%s_%s.txt", step_id, selected_profile))
+step_output_file <- function(step_id) {
+  file.path(logs_dir, sprintf("%s.txt", step_id))
 }
 
 run_step <- function(step_id, expr, note = NULL) {
@@ -543,10 +490,6 @@ time_window_to_index <- function(ts_ref, t_from, t_to) {
   c(min(idx), max(idx))
 }
 
-target_enabled <- function(id, aliases = character()) {
-  if (!targeted_run) return(TRUE)
-  any(c(id, aliases) %in% targets)
-}
 
 plot_quantile_summary <- function(qsum, col = "purple", add = TRUE, lwd = 1.5) {
   if (!add) {
@@ -641,99 +584,21 @@ diagnostics_from_fit <- function(m1, m2 = NULL, plot = TRUE, cols = c("red", "bl
   )
 }
 
-save_table_csv <- function(df, filename, artifact_id, manuscript_target = "", status = "reproduced", notes = "") {
+save_table_csv <- function(df, filename, ...) {
   path <- file.path(tables_dir, filename)
   utils::write.csv(df, file = path, row.names = FALSE)
-  register_artifact(
-    artifact_id = artifact_id,
-    artifact_type = "table",
-    relative_path = file.path("analysis", "manuscript", "outputs", "tables", filename),
-    manuscript_target = manuscript_target,
-    status = status,
-    notes = notes
-  )
   invisible(path)
 }
 
-write_tracker <- function() {
-  tracker_csv <- file.path(tables_dir, "manuscript_repro_tracker.csv")
-  if (targeted_run && file.exists(tracker_csv) && nrow(artifact_registry) > 0L) {
-    existing <- utils::read.csv(tracker_csv, stringsAsFactors = FALSE)
-    required <- names(artifact_registry)
-    if (all(required %in% names(existing))) {
-      existing <- existing[, required, drop = FALSE]
-      existing <- existing[!existing$artifact_id %in% artifact_registry$artifact_id, , drop = FALSE]
-      artifact_registry <<- rbind(existing, artifact_registry)
-    }
-  }
-  utils::write.csv(artifact_registry, tracker_csv, row.names = FALSE)
-
-  notes_csv <- file.path(tables_dir, "manuscript_repro_notes.csv")
-  if (targeted_run && file.exists(notes_csv) && nrow(run_notes) > 0L) {
-    existing_notes <- utils::read.csv(notes_csv, stringsAsFactors = FALSE)
-    required_notes <- names(run_notes)
-    if (all(required_notes %in% names(existing_notes))) {
-      existing_notes <- existing_notes[, required_notes, drop = FALSE]
-      run_notes <<- unique(rbind(existing_notes, run_notes))
-    }
-  }
-  utils::write.csv(run_notes, notes_csv, row.names = FALSE)
-
-  md_path <- file.path(tables_dir, "manuscript_repro_tracker.md")
-  con <- file(md_path, open = "wt")
-  on.exit(close(con), add = TRUE)
-  writeLines("# Manuscript Reproducibility Tracker", con)
-  writeLines("", con)
-  writeLines(sprintf("Generated: %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")), con)
-  writeLines(sprintf("Profile: %s", selected_profile), con)
-  writeLines(sprintf("Seed: %s", seed_value), con)
-  writeLines("", con)
-  writeLines("## Artifact Status", con)
-  writeLines("", con)
-  if (nrow(artifact_registry) == 0L) {
-    writeLines("No artifacts registered.", con)
-  } else {
-    for (i in seq_len(nrow(artifact_registry))) {
-      r <- artifact_registry[i, ]
-      writeLines(
-        sprintf(
-          "- [%s] `%s` -> `%s` (%s). %s",
-          r$status, r$artifact_id, r$relative_path, r$manuscript_target, r$notes
-        ),
-        con
-      )
-    }
-  }
-  writeLines("", con)
-  writeLines("## Notes", con)
-  writeLines("", con)
-  if (nrow(run_notes) == 0L) {
-    writeLines("- none", con)
-  } else {
-    for (i in seq_len(nrow(run_notes))) {
-      writeLines(sprintf("- %s: %s", run_notes$topic[i], run_notes$detail[i]), con)
-    }
-  }
-
-  register_artifact(
-    artifact_id = "manuscript_repro_tracker",
-    artifact_type = "table",
-    relative_path = "analysis/manuscript/outputs/tables/manuscript_repro_tracker.csv",
-    manuscript_target = "all",
-    status = "reproduced",
-    notes = "Machine-readable artifact status tracker."
-  )
+write_replication_index <- function() {
+  invisible(TRUE)
 }
 
 write_session_info <- function() {
   path <- file.path(logs_dir, "sessionInfo.txt")
-  if (!nzchar(Sys.getenv("TZ", unset = ""))) {
-    Sys.setenv(TZ = "America/New_York")
-  }
   txt <- utils::capture.output({
     cat(sprintf("Seed: %s\n", seed_value))
     cat(sprintf("RNGkind: %s\n", paste(RNGkind(), collapse = " | ")))
-    cat(sprintf("Profile: %s\n", selected_profile))
     cat(sprintf("Date: %s\n\n", as.character(Sys.time())))
     print(sessionInfo())
   })
@@ -741,58 +606,9 @@ write_session_info <- function() {
   write_log_lines(txt, path)
 }
 
-promote_publication_figures <- function() {
-  promote <- cfg_params$promotion$figures
-  if (length(promote) == 0L) {
-    log_msg("No manuscript promotion list found in config.")
-    return(invisible(NULL))
-  }
 
-  target_dir <- file.path(repo_root, "Figures")
-  ensure_dir(target_dir)
 
-  copy_binary_file <- function(src, dst) {
-    if (file.exists(dst)) unlink(dst, force = TRUE)
-    in_con <- file(src, open = "rb")
-    out_con <- file(dst, open = "wb")
-    on.exit(try(close(out_con), silent = TRUE), add = TRUE)
-    on.exit(try(close(in_con), silent = TRUE), add = TRUE)
-
-    repeat {
-      buf <- readBin(in_con, what = "raw", n = 1024L * 1024L)
-      if (length(buf) == 0L) break
-      writeBin(buf, out_con)
-    }
-    invisible(dst)
-  }
-
-  for (f in promote) {
-    src <- file.path(figures_dir, f)
-    dst <- file.path(target_dir, f)
-    if (!file.exists(src)) {
-      stop(sprintf("Promotion source figure missing: %s", src), call. = FALSE)
-    }
-    copy_binary_file(src, dst)
-  }
-
-  log_msg(sprintf("Promoted %d manuscript figure(s) to ignored local Figures/ export mirror", length(promote)))
-}
-
-register_note("api_update", "Deprecated exdqlmChecks replaced by the diagnostics() generic.")
-register_note("api_update", "Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls; article examples now prefer plot(), predict(), and diagnostics().")
-register_note("ex2_policy", "Example 2 manuscript workflow now uses LDVB and MCMC only; ISVB support artifacts were retired.")
-register_note(
-  "backend",
-  sprintf(
-    "Benchmark Profile %s (%s) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=%s and exdqlm.cpp_mcmc_mode='%s'.",
-    selected_benchmark_profile,
-    cfg_benchmark_profiles[[selected_benchmark_profile]]$label %||% "backend profile",
-    as.character(isTRUE(getOption("exdqlm.use_cpp_mcmc"))),
-    as.character(getOption("exdqlm.cpp_mcmc_mode"))
-  )
-)
-
-log_msg(sprintf("00_setup complete (profile=%s)", selected_profile))
+log_msg("Setup complete")
 
 # ---- JSS-facing plotting override ----
 save_png_plot <- function(filename, expr,
@@ -918,7 +734,7 @@ ex4_resolve_dataset_seed <- function(cfg_ex4) {
         paste(
           "Example 4 is configured to use a screen-selected dataset seed, but the selection file was not found:",
           "%s",
-          "Run the ex4screen target first."
+          "Use a configured Example 4 seed before running the full replication."
         ),
         selection_path
       ),
@@ -1241,16 +1057,16 @@ ex4_summary_rows <- function(ex4_obj, cfg_ex4 = NULL) {
 
 
 # ---- ex1_lake_huron ----
-need_ex1 <- target_enabled("ex1", c("ex1mcmc", "ex1quants", "ex1synth", "ex1kernel"))
+need_ex1 <- TRUE
 if (!need_ex1) {
-  log_msg("Example 1 (Lake Huron): skipped (target filter)")
+  log_msg("Example 1 (Lake Huron): skipped")
 } else {
   log_msg("Example 1 (Lake Huron): start")
 
-  need_ex1mcmc <- target_enabled("ex1mcmc", "ex1")
-  need_ex1quants <- target_enabled("ex1quants", "ex1")
-  need_ex1synth <- target_enabled("ex1synth", "ex1")
-  need_ex1kernel <- isTRUE(targeted_run) && target_enabled("ex1kernel")
+need_ex1mcmc <- TRUE
+need_ex1quants <- TRUE
+need_ex1synth <- TRUE
+need_ex1kernel <- FALSE
   need_ex1_runtime <- need_ex1mcmc || need_ex1quants
   need_ex1_quants_models <- need_ex1quants || need_ex1_runtime || need_ex1synth
   need_ex1_synthesis <- need_ex1quants || need_ex1synth
@@ -1263,29 +1079,21 @@ if (!need_ex1) {
   capture_output_file("ex1_model_output.txt", {
     print(model)
   })
-  register_artifact(
-    artifact_id = "ex1_model_output",
-    artifact_type = "log",
-    relative_path = "analysis/manuscript/outputs/logs/ex1_model_output.txt",
-    manuscript_target = "Example 1 model block",
-    status = "reproduced",
-    notes = "polytrend model object output."
-  )
 
-  nburn <- as.integer(cfg_profile$ex1$n_burn)
-  nmcmc <- as.integer(cfg_profile$ex1$n_mcmc)
-  trace_seed <- as.integer(cfg_profile$ex1$trace_seed %||% seed_value)
-  nburn_trace <- as.integer(cfg_profile$ex1$n_burn_trace %||% nburn)
-  nmcmc_trace <- as.integer(cfg_profile$ex1$n_mcmc_trace %||% nmcmc)
-  thin_trace <- max(1L, as.integer(cfg_profile$ex1$thin_trace %||% 1L))
-  n_chains_kernel <- as.integer(cfg_profile$ex1$n_chains_kernel %||% 4L)
-  nburn_kernel <- as.integer(cfg_profile$ex1$n_burn_kernel %||% nburn)
-  nmcmc_kernel <- as.integer(cfg_profile$ex1$n_mcmc_kernel %||% nmcmc)
-  thin_kernel_plot <- max(1L, as.integer(cfg_profile$ex1$thin_kernel_plot %||% 1L))
-  synth_source_draws <- max(50L, as.integer(cfg_profile$ex1$synth_source_draws %||% 1000L))
-  synth_n_samp <- max(100L, as.integer(cfg_profile$ex1$synth_n_samp %||% 1000L))
-  forecast_window_start <- as.numeric(cfg_profile$ex1$forecast_window_start %||% 1952)
-  synth_window_start <- as.numeric(cfg_profile$ex1$synth_window_start %||% 1952)
+  nburn <- as.integer(cfg_run$ex1$n_burn)
+  nmcmc <- as.integer(cfg_run$ex1$n_mcmc)
+  trace_seed <- as.integer(cfg_run$ex1$trace_seed %||% seed_value)
+  nburn_trace <- as.integer(cfg_run$ex1$n_burn_trace %||% nburn)
+  nmcmc_trace <- as.integer(cfg_run$ex1$n_mcmc_trace %||% nmcmc)
+  thin_trace <- max(1L, as.integer(cfg_run$ex1$thin_trace %||% 1L))
+  n_chains_kernel <- as.integer(cfg_run$ex1$n_chains_kernel %||% 4L)
+  nburn_kernel <- as.integer(cfg_run$ex1$n_burn_kernel %||% nburn)
+  nmcmc_kernel <- as.integer(cfg_run$ex1$n_mcmc_kernel %||% nmcmc)
+  thin_kernel_plot <- max(1L, as.integer(cfg_run$ex1$thin_kernel_plot %||% 1L))
+  synth_source_draws <- max(50L, as.integer(cfg_run$ex1$synth_source_draws %||% 1000L))
+  synth_n_samp <- max(100L, as.integer(cfg_run$ex1$synth_n_samp %||% 1000L))
+  forecast_window_start <- as.numeric(cfg_run$ex1$forecast_window_start %||% 1952)
+  synth_window_start <- as.numeric(cfg_run$ex1$synth_window_start %||% 1952)
 
   if (!is.finite(n_chains_kernel) || n_chains_kernel < 2L) {
     stop("Example 1 kernel comparison requires n_chains_kernel >= 2.", call. = FALSE)
@@ -1475,7 +1283,7 @@ if (!need_ex1) {
 
   if (need_ex1_runtime) {
     capture_output_file("ex1_run_summary.txt", {
-      cat(sprintf("profile=%s\n", selected_profile))
+      cat(sprintf("settings=%s\n", selected_run))
       cat(sprintf("quantile run settings: n.burn=%d, n.mcmc=%d\n", nburn, nmcmc))
       cat(sprintf("trace run settings: seed=%d, n.burn=%d, n.mcmc=%d, thin=%d, saved_for_plot=%d\n\n", trace_seed, nburn_trace, nmcmc_trace, thin_trace, length(thin_idx)))
       cat("M50_trace sigma summary:\n")
@@ -1503,14 +1311,6 @@ if (!need_ex1) {
       cat("\nRun times (seconds):\n")
       print(c(M95 = M95$run.time, M50_trace = M50_trace$run.time, M5 = M5$run.time, M50_dqlm = M50_dqlm$run.time))
     })
-    register_artifact(
-      artifact_id = "ex1_run_summary",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex1_run_summary.txt",
-      manuscript_target = "Example 1 textual outputs",
-      status = "reproduced",
-      notes = "Includes backend metadata and high-iteration trace diagnostics."
-    )
   }
 
   if (need_ex1mcmc) {
@@ -1521,14 +1321,6 @@ if (!need_ex1) {
       coda::traceplot(gamma_trace_thin, main = "gamma trace")
       coda::densplot(gamma_trace_thin, main = "gamma density")
     }, width = 8.2, height = 5.8, pointsize = 13)
-    register_artifact(
-      artifact_id = "fig_ex1mcmc",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex1mcmc.png",
-      manuscript_target = "fig:ex1mcmc",
-      status = "reproduced",
-      notes = sprintf("Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=%d.", thin_trace)
-    )
   }
 
   if (need_ex1_synthesis) {
@@ -1571,8 +1363,8 @@ if (!need_ex1) {
     save_table_csv(
       ex1_synthesis_bridge_check,
       filename = "ex1_synthesis_bridge_check.csv",
-      artifact_id = "tab_ex1_synthesis_bridge",
-      manuscript_target = "auxiliary: Example 1 synthesis forecast-origin check",
+      output_id = "tab_ex1_synthesis_bridge",
+      manuscript_label = "auxiliary: Example 1 synthesis forecast-origin check",
       notes = "Checks that the forecast synthesis begins one Lake Huron time step after the observed-period synthesis endpoint; Figure 2(d) uses these endpoints for the visual interval bridge."
     )
   }
@@ -1692,19 +1484,11 @@ if (!need_ex1) {
         inset = c(0.015, 0.025)
       )
     }, width = 9.2, height = 6.3, pointsize = 12.5)
-    register_artifact(
-      artifact_id = "fig_ex1quants",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex1quants.png",
-      manuscript_target = "fig:ex1quants",
-      status = "reproduced",
-      notes = "Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row. Panel (d) uses a darker related forecast synthesis band and bridges the observed synthesis endpoint to the first forecast synthesis endpoint for visual continuity on the annual time scale."
-    )
   }
 
   if (need_ex1synth) {
     capture_output_file("ex1_synthesis_summary.txt", {
-      cat(sprintf("profile=%s\n", selected_profile))
+      cat(sprintf("settings=%s\n", selected_run))
       cat(sprintf("source_draws=%d | synthesized_draws=%d\n", synth_source_draws, synth_n_samp))
       cat(sprintf("window_start=%s | forecast_horizon=%d\n\n", format(synth_window_start), k_fore))
       cat("Forecast-origin synthesis alignment:\n")
@@ -1715,14 +1499,6 @@ if (!need_ex1) {
       cat("\nForecast-period synthesis summary:\n")
       print(summary(ex1_synthesis$syn_future$summary$q500))
     })
-    register_artifact(
-      artifact_id = "log_ex1_synthesis_summary",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt",
-      manuscript_target = "auxiliary: Example 1 synthesis summary",
-      status = "reproduced",
-      notes = "Synthesis settings and compact summaries for the Lake Huron predictive synthesis figure."
-    )
 
     save_png_plot("ex1synth.png", {
       ts_xy <- grDevices::xy.coords(y_ts)
@@ -1786,14 +1562,6 @@ if (!need_ex1) {
         inset = c(0.015, 0.025)
       )
     })
-    register_artifact(
-      artifact_id = "fig_ex1synth",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex1synth.png",
-      manuscript_target = "auxiliary: Example 1 standalone synthesis figure",
-      status = "reproduced",
-      notes = "Standalone auxiliary figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon, with a darker forecast synthesis band and one-step visual bridge at the forecast origin."
-    )
   }
 
   if (need_ex1kernel) {
@@ -1966,7 +1734,7 @@ if (!need_ex1) {
     )
 
     capture_output_file("ex1_kernel_compare_summary.txt", {
-      cat(sprintf("profile=%s\n", selected_profile))
+      cat(sprintf("settings=%s\n", selected_run))
       cat(sprintf("n.chains=%d, n.burn=%d, n.mcmc=%d, thin.plot=%d\n\n", n_chains_kernel, nburn_kernel, nmcmc_kernel, thin_kernel_plot))
       cat("Kernel summary:\n")
       print(kernel_summary)
@@ -1984,20 +1752,12 @@ if (!need_ex1) {
       cat("\nNarrative note:\n")
       cat(kernel_compare_note, "\n")
     })
-    register_artifact(
-      artifact_id = "log_ex1_kernel_compare",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex1_kernel_compare_summary.txt",
-      manuscript_target = "auxiliary: Example 1 kernel comparison summary",
-      status = "reproduced",
-      notes = "Four-chain Lake Huron median comparison of slice and laplace_rw."
-    )
 
     save_table_csv(
       kernel_summary,
       filename = "ex1_kernel_summary.csv",
-      artifact_id = "tab_ex1_kernel_summary",
-      manuscript_target = "auxiliary: Example 1 kernel summary",
+      output_id = "tab_ex1_kernel_summary",
+      manuscript_label = "auxiliary: Example 1 kernel summary",
       status = "reproduced",
       notes = "Pooled sigma/gamma posterior, runtime, Rhat, and ESS summaries for free-sigma slice and laplace_rw fits."
     )
@@ -2005,8 +1765,8 @@ if (!need_ex1) {
     save_table_csv(
       kernel_chain_stability,
       filename = "ex1_kernel_chain_stability.csv",
-      artifact_id = "tab_ex1_kernel_chain_stability",
-      manuscript_target = "auxiliary: Example 1 kernel chain stability",
+      output_id = "tab_ex1_kernel_chain_stability",
+      manuscript_label = "auxiliary: Example 1 kernel chain stability",
       status = "reproduced",
       notes = "Per-chain sigma/gamma posterior summaries, runtimes, and acceptance diagnostics."
     )
@@ -2093,16 +1853,7 @@ if (!need_ex1) {
                            ex1_kernel$laplace_rw$summary_row$accept_total_mean)
       )
     })
-    register_artifact(
-      artifact_id = "fig_ex1_kernel_compare",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex1_kernel_compare.png",
-      manuscript_target = "auxiliary: Example 1 slice vs laplace_rw kernel comparison",
-      status = "reproduced",
-      notes = "Four-chain Lake Huron median comparison with sigma and gamma trace overlays under free sigma."
-    )
 
-    register_note("ex1_kernel", kernel_compare_note)
   }
 
   if (need_ex1_runtime) {
@@ -2113,42 +1864,32 @@ if (!need_ex1) {
     save_table_csv(
       ex1_runtime,
       filename = "ex1_runtime_summary.csv",
-      artifact_id = "tab_ex1_runtime",
-      manuscript_target = "Example 1 runtime statements",
+      output_id = "tab_ex1_runtime",
+      manuscript_label = "Example 1 runtime statements",
       status = "approximate",
-      notes = "Runtimes vary by hardware/profile; trace run intentionally uses higher iterations."
+      notes = "Runtimes vary by hardware/settings; trace run intentionally uses higher iterations."
     )
 
-    register_note("ex1", "Lake Huron refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary).")
   }
 
   log_msg("Example 1 (Lake Huron): complete")
 }
 
 # ---- ex2_sunspots ----
-need_ex2 <- target_enabled(
-  "ex2",
-  c(
-    "ex2bench",
-    "ex2quant", "ex2quant_ldvb",
-    "ex2checks", "ex2checks_ldvb",
-    "ex2_ldvb_diagnostics",
-    "ex2tables", "ex2tables_ldvb"
-  )
-)
+need_ex2 <- TRUE
 if (!need_ex2) {
-  log_msg("Example 2 (Sunspots): skipped (target filter)")
+  log_msg("Example 2 (Sunspots): skipped")
 } else {
   log_msg("Example 2 (Sunspots): start")
 
-  need_ex2quant <- target_enabled("ex2quant", "ex2")
-  need_ex2quant_ldvb <- target_enabled("ex2quant_ldvb", "ex2")
-  need_ex2checks <- target_enabled("ex2checks", "ex2")
-  need_ex2checks_ldvb <- target_enabled("ex2checks_ldvb", "ex2")
-  need_ex2benchmark <- target_enabled("ex2bench", "ex2") || need_ex2checks
-  need_ex2_ldvb_diag <- target_enabled("ex2_ldvb_diagnostics", "ex2")
-  need_ex2_tables <- target_enabled("ex2tables", "ex2")
-  need_ex2_tables_ldvb <- target_enabled("ex2tables_ldvb", "ex2")
+need_ex2quant <- TRUE
+need_ex2quant_ldvb <- TRUE
+need_ex2checks <- TRUE
+need_ex2checks_ldvb <- TRUE
+need_ex2benchmark <- TRUE
+need_ex2_ldvb_diag <- TRUE
+need_ex2_tables <- TRUE
+need_ex2_tables_ldvb <- TRUE
   need_ex2_ldvb_core <- any(c(
     need_ex2quant, need_ex2quant_ldvb,
     need_ex2checks, need_ex2checks_ldvb,
@@ -2156,7 +1897,7 @@ if (!need_ex2) {
   ))
 
   full_y_ts <- datasets::sunspot.year
-  n_obs <- as.integer(cfg_profile$ex2$n_obs %||% length(full_y_ts))
+  n_obs <- as.integer(cfg_run$ex2$n_obs %||% length(full_y_ts))
   if (is.finite(n_obs) && n_obs > 0L && n_obs < length(full_y_ts)) {
     y_ts <- stats::ts(
       utils::tail(as.numeric(full_y_ts), n_obs),
@@ -2179,23 +1920,15 @@ if (!need_ex2) {
     cat("Combined GG matrix:\n")
     print(model$GG)
   })
-  register_artifact(
-    artifact_id = "ex2_model_output",
-    artifact_type = "log",
-    relative_path = "analysis/manuscript/outputs/logs/ex2_model_output.txt",
-    manuscript_target = "Example 2 model matrix output",
-    status = "reproduced",
-    notes = "Combined trend/seasonal state-space matrix."
-  )
 
-  n_samp <- as.integer(cfg_profile$ex2$n_samp)
-  tol <- as.numeric(cfg_profile$ex2$tol)
-  ldvb_diag_tol <- as.numeric(cfg_profile$ex2$ldvb_diag_tol %||% tol)
-  ldvb_diag_n_samp <- as.integer(cfg_profile$ex2$ldvb_diag_n_samp %||% n_samp)
-  ldvb_max_iter <- as.integer(cfg_profile$ex2$ldvb_max_iter %||% 200L)
-  benchmark_n_burn <- as.integer(cfg_profile$ex2$benchmark_n_burn %||% 1000L)
-  benchmark_n_mcmc <- as.integer(cfg_profile$ex2$benchmark_n_mcmc %||% 300L)
-  df_grid <- as.numeric(cfg_profile$ex2$df_grid)
+  n_samp <- as.integer(cfg_run$ex2$n_samp)
+  tol <- as.numeric(cfg_run$ex2$tol)
+  ldvb_diag_tol <- as.numeric(cfg_run$ex2$ldvb_diag_tol %||% tol)
+  ldvb_diag_n_samp <- as.integer(cfg_run$ex2$ldvb_diag_n_samp %||% n_samp)
+  ldvb_max_iter <- as.integer(cfg_run$ex2$ldvb_max_iter %||% 200L)
+  benchmark_n_burn <- as.integer(cfg_run$ex2$benchmark_n_burn %||% 1000L)
+  benchmark_n_mcmc <- as.integer(cfg_run$ex2$benchmark_n_mcmc %||% 300L)
+  df_grid <- as.numeric(cfg_run$ex2$df_grid)
 
   fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
   M_sigma_ldvb <- M1_ldvb <- M2_ldvb <- NULL
@@ -2253,7 +1986,7 @@ if (!need_ex2) {
   ex2_ldvb_pair_ok <- fit_ok(M1_ldvb) && fit_ok(M2_ldvb)
 
   capture_output_file("ex2_run_summary.txt", {
-    cat(sprintf("profile=%s\n", selected_profile))
+    cat(sprintf("settings=%s\n", selected_run))
     cat(sprintf("level_prior_m0=%s, level_prior_C0=%s\n", sunspot_level_prior, sunspot_level_c0))
     cat(sprintf("n.samp=%d, tol=%s, ldvb_max_iter=%d\n\n", n_samp, format(tol), ldvb_max_iter))
     if (fit_ok(M_sigma_ldvb)) {
@@ -2283,26 +2016,18 @@ if (!need_ex2) {
       cat(M2_ldvb$message, "\n")
     }
   })
-  register_artifact(
-    artifact_id = "ex2_run_summary",
-    artifact_type = "log",
-    relative_path = "analysis/manuscript/outputs/logs/ex2_run_summary.txt",
-    manuscript_target = "Example 2 textual outputs",
-    status = if (fit_ok(M_sigma_ldvb) && fit_ok(M1_ldvb) && fit_ok(M2_ldvb)) "reproduced" else "approximate",
-    notes = "Includes sigma summary and LDVB runtime diagnostics for the manuscript Example 2 workflow."
-  )
 
   if (need_ex2benchmark && ex2_ldvb_pair_ok) {
     benchmark_step_id <- sprintf(
       "ex2_dynamic_benchmark_%s_nsamp%d_b%d_k%d_v6_sig2_prior50",
-      selected_benchmark_profile,
+      selected_benchmark_setting,
       n_samp,
       benchmark_n_burn,
       benchmark_n_mcmc
     )
     ex2_benchmark <- run_step(benchmark_step_id, {
       set.seed(20262801)
-      M1_mcmc <- with_backend_profile(selected_benchmark_profile, {
+      M1_mcmc <- with_backend_settings(selected_benchmark_setting, {
         exdqlm::exdqlmMCMC(
           y = y_ts, p0 = 0.85, model = model,
           df = c(0.9, 0.85), dim.df = c(1, 8),
@@ -2313,7 +2038,7 @@ if (!need_ex2) {
       })
 
       set.seed(20262802)
-      M2_mcmc <- with_backend_profile(selected_benchmark_profile, {
+      M2_mcmc <- with_backend_settings(selected_benchmark_setting, {
         exdqlm::exdqlmMCMC(
           y = y_ts, p0 = 0.85, model = model,
           df = c(0.9, 0.85), dim.df = c(1, 8),
@@ -2335,8 +2060,8 @@ if (!need_ex2) {
     }, note = benchmark_step_id)
 
     capture_output_file("ex2_benchmark_run_summary.txt", {
-      cat(sprintf("profile=%s\n", selected_profile))
-      cat(sprintf("backend_profile=%s\n", selected_benchmark_profile))
+      cat(sprintf("settings=%s\n", selected_run))
+      cat(sprintf("backend_settings=%s\n", selected_benchmark_setting))
       cat(sprintf("ldvb_n.samp=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", n_samp, benchmark_n_burn, benchmark_n_mcmc))
       cat("LDVB benchmark diagnostics:\n")
       print(data.frame(
@@ -2357,14 +2082,6 @@ if (!need_ex2) {
       cat("\nMCMC backend metadata:\n")
       print(ex2_benchmark$M2_mcmc$backend)
     })
-    register_artifact(
-      artifact_id = "log_ex2_benchmark_run_summary",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex2_benchmark_run_summary.txt",
-      manuscript_target = "auxiliary: Example 2 dynamic benchmark summary",
-      status = "reproduced",
-      notes = "Runtime and diagnostics summary for the dynamic LDVB versus MCMC benchmark under the disclosed backend profile."
-    )
 
     ex2_benchmark_table <- data.frame(
       model = c("DQLM", "exDQLM", "DQLM", "exDQLM"),
@@ -2393,7 +2110,7 @@ if (!need_ex2) {
         ex2_benchmark$diag_mcmc$m1.pplc,
         ex2_benchmark$diag_mcmc$m2.pplc
       ),
-      backend_profile = rep(selected_benchmark_profile, 4),
+      backend_settings = rep(selected_benchmark_setting, 4),
       posterior_draws = rep(n_samp, 4),
       burn_in = c(NA_integer_, NA_integer_, benchmark_n_burn, benchmark_n_burn),
       n_burn = rep(benchmark_n_burn, 4),
@@ -2403,23 +2120,15 @@ if (!need_ex2) {
     save_table_csv(
       ex2_benchmark_table,
       filename = "ex2_dynamic_benchmark.csv",
-      artifact_id = "tab_ex2_dynamic_benchmark",
-      manuscript_target = "tab:ex2bench",
+      output_id = "tab_ex2_dynamic_benchmark",
+      manuscript_label = "tab:ex2bench",
       status = "reproduced",
       notes = sprintf(
-        "Representative dynamic LDVB versus MCMC benchmark for Example 2 under backend Profile %s.",
-        selected_benchmark_profile
+        "Representative dynamic LDVB versus MCMC benchmark for Example 2 under backend setting %s.",
+        selected_benchmark_setting
       )
     )
   } else if (need_ex2benchmark) {
-    register_artifact(
-      artifact_id = "tab_ex2_dynamic_benchmark",
-      artifact_type = "table",
-      relative_path = "analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv",
-      manuscript_target = "tab:ex2bench",
-      status = "not_reproduced",
-      notes = "Missing LDVB fits required to seed the Example 2 dynamic benchmark."
-    )
   }
 
   xlim_time <- c(1780, 1830)
@@ -2472,44 +2181,12 @@ if (!need_ex2) {
 
     if (ex2_ldvb_pair_ok && need_ex2quant) {
       plot_quant_triplet_ldvb("ex2quant.png", M1_ldvb, M2_ldvb, "0.85")
-      register_artifact(
-        artifact_id = "fig_ex2quant",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
-        manuscript_target = "fig:ex2quant",
-        status = "reproduced",
-        notes = "Composite Sunspots figure with full-series panel, quantile-comparison panel, and gamma histogram."
-      )
     } else if (need_ex2quant) {
-      register_artifact(
-        artifact_id = "fig_ex2quant",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant.png",
-        manuscript_target = "fig:ex2quant",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for the primary Example 2 quantile panel."
-      )
     }
 
     if (ex2_ldvb_pair_ok && need_ex2quant_ldvb) {
       plot_quant_triplet_ldvb("ex2quant_ldvb.png", M1_ldvb, M2_ldvb, "0.85")
-      register_artifact(
-        artifact_id = "fig_ex2quant_ldvb",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb.png",
-        manuscript_target = "new: fig ex2quant LDVB counterpart",
-        status = "reproduced",
-        notes = "Composite Sunspots figure with full-series panel, quantile-comparison panel, and gamma histogram."
-      )
     } else {
-      register_artifact(
-        artifact_id = "fig_ex2quant_ldvb",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb.png",
-        manuscript_target = "new: fig ex2quant LDVB counterpart",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.85 quantile panel."
-      )
     }
 
     if (need_ex2quant_ldvb) {
@@ -2572,44 +2249,12 @@ if (!need_ex2) {
 
       if (ldvb_p099_ok) {
         plot_quant_triplet_ldvb("ex2quant_ldvb_p099.png", ex2_extreme_ldvb$M99_dqlm_ldvb, ex2_extreme_ldvb$M99_exdqlm_ldvb, "0.99")
-        register_artifact(
-          artifact_id = "fig_ex2quant_ldvb_p099",
-          artifact_type = "figure",
-          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
-          manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
-          status = "reproduced",
-          notes = "Three-panel LDVB figure for p0=0.99 comparing DQLM and exDQLM."
-        )
       } else {
-        register_artifact(
-          artifact_id = "fig_ex2quant_ldvb_p099",
-          artifact_type = "figure",
-          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p099.png",
-          manuscript_target = "new: fig ex2quant LDVB upper-tail (p0=0.99)",
-          status = "not_reproduced",
-          notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.99 quantile panel."
-        )
       }
 
       if (ldvb_p005_ok) {
         plot_quant_triplet_ldvb("ex2quant_ldvb_p005.png", ex2_extreme_ldvb$M05_dqlm_ldvb, ex2_extreme_ldvb$M05_exdqlm_ldvb, "0.05")
-        register_artifact(
-          artifact_id = "fig_ex2quant_ldvb_p005",
-          artifact_type = "figure",
-          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
-          manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
-          status = "reproduced",
-          notes = "Three-panel LDVB figure for p0=0.05 comparing DQLM and exDQLM."
-        )
       } else {
-        register_artifact(
-          artifact_id = "fig_ex2quant_ldvb_p005",
-          artifact_type = "figure",
-          relative_path = "analysis/manuscript/outputs/figures/ex2quant_ldvb_p005.png",
-          manuscript_target = "new: fig ex2quant LDVB lower-tail (p0=0.05)",
-          status = "not_reproduced",
-          notes = "Missing LDVB DQLM/exDQLM fits required for p0=0.05 quantile panel."
-        )
       }
     }
   }
@@ -2620,23 +2265,7 @@ if (!need_ex2) {
         graphics::par(mfrow = c(2, 3))
         diagnostics_from_fit(M1_ldvb, M2_ldvb, plot = TRUE, cols = c(ex2_cols$dqlm, ex2_cols$exdqlm), y_data = y)
       }, width = 9.2, height = 6.4, pointsize = 12.5)
-      register_artifact(
-        artifact_id = "fig_ex2checks",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2checks.png",
-        manuscript_target = "fig:ex2checks",
-        status = "reproduced",
-        notes = "Primary Example 2 diagnostics figure generated from the LDVB fits."
-      )
     } else {
-      register_artifact(
-        artifact_id = "fig_ex2checks",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2checks.png",
-        manuscript_target = "fig:ex2checks",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for the primary diagnostics panel."
-      )
     }
   }
 
@@ -2647,23 +2276,7 @@ if (!need_ex2) {
         diagnostics_from_fit(M1_ldvb, plot = TRUE, cols = c(ldvb_cols$m1, ldvb_cols$m1), y_data = y)
         diagnostics_from_fit(M2_ldvb, plot = TRUE, cols = c(ldvb_cols$m2, ldvb_cols$m2), y_data = y)
       })
-      register_artifact(
-        artifact_id = "fig_ex2checks_ldvb",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2checks_ldvb.png",
-        manuscript_target = "new: fig ex2checks LDVB counterpart",
-        status = "reproduced",
-        notes = "LDVB counterpart of ex2checks using diagnostics()."
-      )
     } else {
-      register_artifact(
-        artifact_id = "fig_ex2checks_ldvb",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2checks_ldvb.png",
-        manuscript_target = "new: fig ex2checks LDVB counterpart",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for diagnostics panel."
-      )
     }
   }
 
@@ -2720,26 +2333,7 @@ if (!need_ex2) {
           graphics::title("ELBO trace unavailable")
         }
       })
-      register_artifact(
-        artifact_id = "fig_ex2_ldvb_diagnostics",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png",
-        manuscript_target = "new: LDVB convergence diagnostics",
-        status = "reproduced",
-        notes = sprintf(
-          "LDVB diagnostics with stricter tolerance (tol=%s, n.samp=%d); includes DQLM/exDQLM LDVB fit overlay, seq.gamma, seq.sigma, and ELBO trace.",
-          format(ldvb_diag_tol), ldvb_diag_n_samp
-        )
-      )
     } else {
-      register_artifact(
-        artifact_id = "fig_ex2_ldvb_diagnostics",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex2_ldvb_diagnostics.png",
-        manuscript_target = "new: LDVB convergence diagnostics",
-        status = "not_reproduced",
-        notes = sprintf("LDVB DQLM reference fit failed: %s", M1_ldvb$message)
-      )
     }
 
     capture_output_file("ex2_ldvb_diagnostics_summary.txt", {
@@ -2760,20 +2354,7 @@ if (!need_ex2) {
       cat("gamma: "); print(summary(as.numeric(ldvb_diag$samp.gamma)))
       cat("sigma: "); print(summary(as.numeric(ldvb_diag$samp.sigma)))
     })
-    register_artifact(
-      artifact_id = "ex2_ldvb_diagnostics_summary",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex2_ldvb_diagnostics_summary.txt",
-      manuscript_target = "new: LDVB convergence diagnostics summary",
-      status = "reproduced",
-      notes = "Text summary for LDVB convergence diagnostics."
-    )
 
-    register_note(
-      "ex2_ldvb_diag",
-      sprintf("Added LDVB diagnostic refit for convergence checks (tol=%s, n.samp=%d, iter=%d).",
-              format(ldvb_diag_tol), ldvb_diag_n_samp, ldvb_diag$iter)
-    )
   }
 
   if (need_ex2_tables) {
@@ -2824,8 +2405,8 @@ if (!need_ex2) {
         save_table_csv(
         df_scan,
         filename = "ex2_df_scan_kl.csv",
-        artifact_id = "tab_ex2_df_scan",
-        manuscript_target = "Example 2 discount-factor CRPS/KL selection",
+        output_id = "tab_ex2_df_scan",
+        manuscript_label = "Example 2 discount-factor CRPS/KL selection",
         status = "reproduced",
         notes = sprintf(
           "Best pair by CRPS in this run: (%0.2f, %0.2f). Best pair by KL: (%s, %s).",
@@ -2835,19 +2416,12 @@ if (!need_ex2) {
         )
       )
 
-      register_note(
-        "ex2",
-        sprintf(
-          "Sunspots LDVB discount-factor screen selects seasonal discount factor=%0.2f by CRPS for this run profile; KL is reported alongside it.",
-          best_df[2]
-        )
-      )
     } else {
       save_table_csv(
         df_scan,
         filename = "ex2_df_scan_kl.csv",
-        artifact_id = "tab_ex2_df_scan",
-        manuscript_target = "Example 2 discount-factor CRPS/KL selection",
+        output_id = "tab_ex2_df_scan",
+        manuscript_label = "Example 2 discount-factor CRPS/KL selection",
         status = "not_reproduced",
         notes = "No finite CRPS values were obtained in the primary LDVB discount-factor scan."
       )
@@ -2865,20 +2439,12 @@ if (!need_ex2) {
       save_table_csv(
         diag_table,
         filename = "ex2_diagnostics_summary.csv",
-        artifact_id = "tab_ex2_diagnostics",
-        manuscript_target = "Example 2 diagnostic narrative",
+        output_id = "tab_ex2_diagnostics",
+        manuscript_label = "Example 2 diagnostic narrative",
         status = "reproduced",
         notes = "Primary Example 2 diagnostics summary computed from the LDVB fits."
       )
     } else {
-      register_artifact(
-        artifact_id = "tab_ex2_diagnostics",
-        artifact_type = "table",
-        relative_path = "analysis/manuscript/outputs/tables/ex2_diagnostics_summary.csv",
-        manuscript_target = "Example 2 diagnostic narrative",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for the primary diagnostics summary."
-      )
     }
   }
 
@@ -2930,8 +2496,8 @@ if (!need_ex2) {
       save_table_csv(
         df_scan_ld,
         filename = "ex2_df_scan_kl_ldvb.csv",
-        artifact_id = "tab_ex2_df_scan_ldvb",
-        manuscript_target = "new: Example 2 discount-factor CRPS/KL selection (LDVB)",
+        output_id = "tab_ex2_df_scan_ldvb",
+        manuscript_label = "new: Example 2 discount-factor CRPS/KL selection (LDVB)",
         status = "reproduced",
         notes = sprintf(
           "Best pair by CRPS in this run: (%0.2f, %0.2f). Best pair by KL: (%s, %s).",
@@ -2940,19 +2506,12 @@ if (!need_ex2) {
           format(best_df_kl_ld[2], trim = TRUE, digits = 2)
         )
       )
-      register_note(
-        "ex2_ldvb",
-        sprintf(
-          "Sunspots LDVB discount-factor screen selects seasonal discount factor=%0.2f by CRPS for this run profile; KL is reported alongside it.",
-          best_df_ld[2]
-        )
-      )
     } else {
       save_table_csv(
         df_scan_ld,
         filename = "ex2_df_scan_kl_ldvb.csv",
-        artifact_id = "tab_ex2_df_scan_ldvb",
-        manuscript_target = "new: Example 2 discount-factor CRPS/KL selection (LDVB)",
+        output_id = "tab_ex2_df_scan_ldvb",
+        manuscript_label = "new: Example 2 discount-factor CRPS/KL selection (LDVB)",
         status = "not_reproduced",
         notes = "No finite CRPS values were obtained in LDVB discount-factor scan."
       )
@@ -2971,20 +2530,12 @@ if (!need_ex2) {
       save_table_csv(
         diag_table_ld,
         filename = "ex2_diagnostics_summary_ldvb.csv",
-        artifact_id = "tab_ex2_diagnostics_ldvb",
-        manuscript_target = "new: Example 2 diagnostic narrative (LDVB)",
+        output_id = "tab_ex2_diagnostics_ldvb",
+        manuscript_label = "new: Example 2 diagnostic narrative (LDVB)",
         status = "reproduced",
         notes = "LDVB counterpart computed with diagnostics()."
       )
     } else {
-      register_artifact(
-        artifact_id = "tab_ex2_diagnostics_ldvb",
-        artifact_type = "table",
-        relative_path = "analysis/manuscript/outputs/tables/ex2_diagnostics_summary_ldvb.csv",
-        manuscript_target = "new: Example 2 diagnostic narrative (LDVB)",
-        status = "not_reproduced",
-        notes = "Missing LDVB DQLM/exDQLM fits required for diagnostics summary."
-      )
     }
   }
 
@@ -2992,27 +2543,18 @@ if (!need_ex2) {
 }
 
 # ---- ex3_big_tree ----
-need_ex3 <- target_enabled(
-  "ex3",
-  c(
-    "ex3data",
-    "ex3forecast", "ex3forecast_ldvb",
-    "ex3quantcomps", "ex3quantcomps_ldvb",
-    "ex3zetapsi", "ex3zetapsi_ldvb",
-    "ex3tables", "ex3tables_ldvb"
-  )
-)
+need_ex3 <- TRUE
 
 if (!need_ex3) {
-  log_msg("Example 3 (Big Tree): skipped (target filter)")
+  log_msg("Example 3 (Big Tree): skipped")
 } else {
   log_msg("Example 3 (Big Tree): start")
 
-  need_ex3data <- target_enabled("ex3data", "ex3")
-  need_ex3forecast <- target_enabled("ex3forecast", c("ex3", "ex3forecast_ldvb"))
-  need_ex3quantcomps <- target_enabled("ex3quantcomps", c("ex3", "ex3quantcomps_ldvb"))
-  need_ex3zetapsi <- target_enabled("ex3zetapsi", c("ex3", "ex3zetapsi_ldvb"))
-  need_ex3tables <- target_enabled("ex3tables", c("ex3", "ex3tables_ldvb"))
+need_ex3data <- TRUE
+need_ex3forecast <- TRUE
+need_ex3quantcomps <- TRUE
+need_ex3zetapsi <- TRUE
+need_ex3tables <- TRUE
   need_ex3_models <- any(c(need_ex3forecast, need_ex3quantcomps, need_ex3zetapsi, need_ex3tables))
 
   fit_ok <- function(x) !is.null(x) && !inherits(x, "error")
@@ -3151,7 +2693,7 @@ if (!need_ex3) {
     stop("Required package dataset climateIndices is not available as a data frame.", call. = FALSE)
   }
 
-  ex3_cfg <- cfg_profile$ex3
+  ex3_cfg <- cfg_run$ex3
   p0 <- as.numeric(ex3_cfg$p0 %||% 0.15)
   selected_indices <- tolower(as.character(ex3_cfg$selected_indices %||% c("noi", "amo")))
   selected_indices <- selected_indices[nzchar(selected_indices)]
@@ -3425,19 +2967,6 @@ if (!need_ex3) {
       )
       graphics::mtext("time", side = 1, outer = TRUE, line = 0.4)
     })
-    register_artifact(
-      artifact_id = "fig_ex3data",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex3data.png",
-      manuscript_target = "fig:ex3data",
-      status = "reproduced",
-      notes = sprintf(
-        "Top: log observed monthly package BTflow. Bottom: standardized %s over %s to %s; vertical line marks the 18-month forecast holdout.",
-        paste(selected_labels, collapse = " and "),
-        fmt_month(min(model_df$date)),
-        fmt_month(max(model_df$date))
-      )
-    )
   }
 
   if (need_ex3_models) {
@@ -3652,7 +3181,7 @@ if (!need_ex3) {
     fc_MTF <- ex3_models$fc_MTF
     fc_MREG <- ex3_models$fc_MREG
     if (!fit_ok(M0) || !fit_ok(MREG) || !fit_ok(MTF)) {
-      stop("Example 3 final LDVB fits failed; cannot regenerate manuscript artifacts.", call. = FALSE)
+      stop("Example 3 final LDVB fits failed; cannot regenerate manuscript outputs.", call. = FALSE)
     }
 
     M0$y <- y_train_ts
@@ -3691,7 +3220,7 @@ if (!need_ex3) {
       diagnostic_row("MTF_transfer_function", "MTF transfer function", MTF)
     )
     capture_output_file("ex3_run_summary.txt", {
-      cat(sprintf("profile=%s\n", selected_profile))
+      cat(sprintf("settings=%s\n", selected_run))
       cat(sprintf("package_source=%s\n", pkg_source_label))
       cat(sprintf("p0=%0.2f\n", p0))
       cat(sprintf("trend_prior_m0=%0.6f, trend_prior_C0=%0.3f\n", trend_m0, trend_c0))
@@ -3729,14 +3258,6 @@ if (!need_ex3) {
       cat("\nSensitivity forecast metrics:\n")
       print(sensitivity_metrics)
     })
-    register_artifact(
-      artifact_id = "ex3_run_summary",
-      artifact_type = "log",
-      relative_path = "analysis/manuscript/outputs/logs/ex3_run_summary.txt",
-      manuscript_target = "Example 3 textual outputs",
-      status = "reproduced",
-      notes = "Observed BTflow plus NOI/AMO Example 3 summary with training-selected transfer settings, package diagnostics, and held-out forecast metrics."
-    )
 
     model_dataset <- data.frame(
       date = model_df$date,
@@ -3751,8 +3272,8 @@ if (!need_ex3) {
     save_table_csv(
       model_dataset,
       filename = "ex3_model_dataset.csv",
-      artifact_id = "tab_ex3_model_dataset",
-      manuscript_target = "Example 3 modeling dataset",
+      output_id = "tab_ex3_model_dataset",
+      manuscript_label = "Example 3 modeling dataset",
       status = "reproduced",
       notes = "Aligned Big Tree flow and climate-index data used by Example 3, with training and forecast-holdout phase labels."
     )
@@ -3767,16 +3288,16 @@ if (!need_ex3) {
     save_table_csv(
       covariate_scaling,
       filename = "ex3_covariate_scaling.csv",
-      artifact_id = "tab_ex3_covariate_scaling",
-      manuscript_target = "Example 3 covariate scaling",
+      output_id = "tab_ex3_covariate_scaling",
+      manuscript_label = "Example 3 covariate scaling",
       status = "reproduced",
       notes = "Training-window means and standard deviations used to standardize Example 3 climate indices."
     )
     save_table_csv(
       selection_table,
       filename = "ex3_lambda_selection.csv",
-      artifact_id = "tab_ex3_lambda_selection",
-      manuscript_target = "Example 3 transfer training-selection output",
+      output_id = "tab_ex3_lambda_selection",
+      manuscript_label = "Example 3 transfer training-selection output",
       status = "reproduced",
       notes = sprintf(
         "Example 3 transfer-function training diagnostic grid; selected lambda=%0.3f and transfer psi discount=%0.3f by training %s.",
@@ -3788,39 +3309,27 @@ if (!need_ex3) {
     save_table_csv(
       diagnostics_summary,
       filename = "ex3_diagnostics_summary.csv",
-      artifact_id = "tab_ex3_diagnostics",
-      manuscript_target = "tab:ex3",
+      output_id = "tab_ex3_diagnostics",
+      manuscript_label = "tab:ex3",
       status = "reproduced",
       notes = "Example 3 final-training package diagnostics from diagnostics() for the no-covariate, direct-regression, and transfer-function models."
     )
     save_table_csv(
       forecast_metrics,
       filename = "ex3_forecast_metrics.csv",
-      artifact_id = "tab_ex3_forecast_metrics",
-      manuscript_target = "tab:ex3forecastmetrics",
+      output_id = "tab_ex3_forecast_metrics",
+      manuscript_label = "tab:ex3forecastmetrics",
       status = "reproduced",
       notes = "Example 3 final 18-month holdout forecast check loss and CRPS from diagnostics() for the no-covariate, direct-regression, and transfer-function models."
     )
     save_table_csv(
       sensitivity_metrics,
       filename = "ex3_sensitivity_forecast_metrics.csv",
-      artifact_id = "tab_ex3_sensitivity_forecast_metrics",
-      manuscript_target = "Example 3 sensitivity forecast metrics",
+      output_id = "tab_ex3_sensitivity_forecast_metrics",
+      manuscript_label = "Example 3 sensitivity forecast metrics",
       status = "reproduced",
       notes = "Backward-compatible copy of the Example 3 final 18-month holdout forecast check loss and CRPS from diagnostics()."
     )
-    register_note("ex3", sprintf(
-      "Example 3 selected lambda=%0.3f using training-data %s with static transfer psi coefficients (discount fixed at %0.3f).",
-      lambda_star,
-      ex3_models$selection_metric,
-      psi_df_star
-    ))
-    register_note("ex3", sprintf(
-      "Example 3 final forecast metrics are computed only on the %d-month holdout window from %s to %s.",
-      forecast_horizon,
-      fmt_month(model_df$date[min(holdout_idx)]),
-      fmt_month(model_df$date[max(holdout_idx)])
-    ))
 
     xlim_mid <- as.numeric(ex3_cfg$focus_window %||% c(2016, 2020))
     if (length(xlim_mid) != 2L || any(!is.finite(xlim_mid)) || xlim_mid[[1L]] >= xlim_mid[[2L]]) {
@@ -3886,14 +3395,6 @@ if (!need_ex3) {
         )
         graphics::mtext("time", side = 1, outer = TRUE, line = 0.5)
       }, width = 8.2, height = 7.2, pointsize = 12.5)
-      register_artifact(
-        artifact_id = "fig_ex3quantcomps",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex3quantcomps.png",
-        manuscript_target = "fig:ex3quant",
-        status = "reproduced",
-        notes = "Example 3 quantile, seasonal, and covariate-contribution comparison for M0, MREG, and MTF."
-      )
     }
 
     if (need_ex3zetapsi) {
@@ -3932,14 +3433,6 @@ if (!need_ex3) {
           graphics::title(climate_psi_title(selected_labels[[j]]))
         }
       }, width = 8.8, height = 5.8, pointsize = 12.5)
-      register_artifact(
-        artifact_id = "fig_ex3zetapsi",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex3zetapsi.png",
-        manuscript_target = "fig:ex3tftheta",
-        status = "reproduced",
-        notes = "Transfer-function zeta state and NOI/AMO psi states for the final Example 3 fit."
-      )
     }
 
     if (need_ex3forecast) {
@@ -3964,19 +3457,6 @@ if (!need_ex3) {
           lty = c(1, 1, 1, 1), pch = c(NA, NA, NA, 1), lwd = c(1.4, 1.4, 1.4, 1.2), bty = "n"
         )
       }, width = 8.4, height = 5.5, pointsize = 12.5)
-      register_artifact(
-        artifact_id = "fig_ex3forecast",
-        artifact_type = "figure",
-        relative_path = "analysis/manuscript/outputs/figures/ex3forecast.png",
-        manuscript_target = "fig:ex3forecast",
-        status = "reproduced",
-        notes = sprintf(
-          "Example 3 %d-step holdout forecast over %s to %s.",
-          forecast_horizon,
-          fmt_month(model_df$date[min(holdout_idx)]),
-          fmt_month(model_df$date[max(holdout_idx)])
-        )
-      )
     }
   }
 
@@ -3989,17 +3469,17 @@ if (!need_ex3) {
 }
 
 # ---- ex4_static ----
-need_ex4 <- target_enabled("ex4", c("ex4figure", "ex4table"))
+need_ex4 <- TRUE
 if (!need_ex4) {
-  log_msg("Example 4 (static Nishimura-Suchard RHS sparse simulation): skipped (target filter)")
+  log_msg("Example 4 (static Nishimura-Suchard RHS sparse simulation): skipped")
 } else {
   log_msg("Example 4 (static Nishimura-Suchard RHS sparse simulation): start")
 
 
-  need_ex4figure <- target_enabled("ex4figure", "ex4")
-  need_ex4table <- target_enabled("ex4table", "ex4")
+need_ex4figure <- TRUE
+need_ex4table <- TRUE
 
-  cfg_ex4 <- cfg_profile$ex4
+  cfg_ex4 <- cfg_run$ex4
   train_n <- as.integer(cfg_ex4$n_train)
   holdout_n <- as.integer(cfg_ex4$holdout_n)
   predictor_n <- as.integer(cfg_ex4$n_predictors)
@@ -4035,7 +3515,7 @@ if (!need_ex4) {
     note = step_id
   )
   capture_output_file("ex4_run_summary.txt", {
-    cat(sprintf("profile=%s\n", selected_profile))
+    cat(sprintf("settings=%s\n", selected_run))
     cat(sprintf("seed=%d\n", ex4_obj$seed))
     cat(sprintf("seed_source=%s\n", ex4_seed_info$source))
     if (!is.na(ex4_seed_info$selection_file)) {
@@ -4073,14 +3553,6 @@ if (!need_ex4) {
       ))
     }
   })
-  register_artifact(
-    artifact_id = "log_ex4_run_summary",
-    artifact_type = "log",
-    relative_path = "analysis/manuscript/outputs/logs/ex4_run_summary.txt",
-    manuscript_target = "Example 4 textual outputs",
-    status = "reproduced",
-    notes = "Sparse Nishimura-Suchard RHS static simulation settings and recovery metrics for Example 4."
-  )
 
   summary_rows <- ex4_summary_rows(ex4_obj, cfg_ex4 = cfg_ex4)
 
@@ -4088,8 +3560,8 @@ if (!need_ex4) {
     save_table_csv(
       summary_rows,
       filename = "ex4static_summary.csv",
-      artifact_id = "tab_ex4static_summary",
-      manuscript_target = "tab:ex4static",
+      output_id = "tab_ex4static_summary",
+      manuscript_label = "tab:ex4static",
       status = "reproduced",
       notes = "Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior."
     )
@@ -4135,273 +3607,13 @@ if (!need_ex4) {
       }
     }, width = 9.2, height = 4.8, pointsize = 12.5)
 
-    register_artifact(
-      artifact_id = "fig_ex4static",
-      artifact_type = "figure",
-      relative_path = "analysis/manuscript/outputs/figures/ex4static.png",
-      manuscript_target = "fig:ex4static",
-      status = "reproduced",
-      notes = "Sparse Nishimura-Suchard RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50."
-    )
   }
 
-  register_note(
-    "ex4",
-    "Example 4 uses a sparse correlated-Gaussian regression benchmark with a target-quantile-centered Gaussian response model, so the true p0-quantile equals X beta at each fitted p0."
-  )
-  register_note(
-    "ex4",
-    "The static sparse benchmark uses the Nishimura-Suchard regularized horseshoe (rhs_ns) prior with tau0 = 0.15, zeta2_fixed = 9, and an unshrunk intercept."
-  )
-  register_note(
-    "ex4",
-    "The p0=0.05 LDVB fit uses an expanded iteration budget; p0=0.25 and p0=0.50 use the standard Example 4 LDVB budget."
-  )
   if (identical(ex4_seed_info$source, "screen_selection")) {
-    register_note(
-      "ex4",
-      sprintf(
-        "The tracked Example 4 dataset seed (%d) was selected by the optional ex4screen workflow using the p0=%0.2f MCMC full-coverage criterion for the plotted slope coefficients.",
-        ex4_seed,
-        ex4_seed_info$target_p0
-      )
-    )
   }
-  register_note(
-    "ex4",
-    "Example 4 focuses on the general static exAL model; the AL special case remains available via al.ind = TRUE (static alias of dqlm.ind = TRUE)."
-  )
 
   log_msg("Example 4 (static Nishimura-Suchard RHS sparse simulation): complete")
 }
-
-# ---- _manifest ----
-log_msg("Manuscript tracker: start")
-
-expected_targets <- data.frame(
-  artifact_id = c(
-    "fig_ex1mcmc",
-    "fig_ex1quants",
-    "fig_ex2quant",
-    "fig_ex2checks",
-    "tab_ex2_dynamic_benchmark",
-    "fig_ex3data",
-    "fig_ex3quantcomps",
-    "fig_ex3zetapsi",
-    "fig_ex3forecast",
-    "tab_ex3_diagnostics",
-    "tab_ex3_forecast_metrics",
-    "fig_ex4static",
-    "tab_ex4static_summary"
-  ),
-  manuscript_target = c(
-    "fig:ex1mcmc",
-    "fig:ex1quants",
-    "fig:ex2quant",
-    "fig:ex2checks",
-    "tab:ex2bench",
-    "fig:ex3data",
-    "fig:ex3quant",
-    "fig:ex3tftheta",
-    "fig:ex3forecast",
-    "tab:ex3",
-    "tab:ex3forecastmetrics",
-    "fig:ex4static",
-    "tab:ex4static"
-  ),
-  stringsAsFactors = FALSE
-)
-
-if (targeted_run) {
-  target_map <- list(
-    ex1 = c("fig_ex1mcmc", "fig_ex1quants", "tab_ex1_synthesis_bridge", "tab_ex1_runtime"),
-    ex1mcmc = c("fig_ex1mcmc"),
-    ex1quants = c("fig_ex1quants", "tab_ex1_synthesis_bridge"),
-    ex1synth = c("fig_ex1synth", "tab_ex1_synthesis_bridge", "log_ex1_synthesis_summary"),
-    ex1kernel = c("fig_ex1_kernel_compare", "tab_ex1_kernel_summary", "tab_ex1_kernel_chain_stability", "log_ex1_kernel_compare"),
-    ex2 = c(
-      "fig_ex2quant", "fig_ex2quant_ldvb",
-      "fig_ex2checks", "fig_ex2checks_ldvb",
-      "tab_ex2_dynamic_benchmark",
-      "fig_ex2_ldvb_diagnostics",
-      "tab_ex2_diagnostics", "tab_ex2_diagnostics_ldvb",
-      "tab_ex2_df_scan", "tab_ex2_df_scan_ldvb"
-    ),
-    ex2quant = c("fig_ex2quant"),
-    ex2quant_ldvb = c("fig_ex2quant_ldvb"),
-    ex2checks = c("fig_ex2checks", "tab_ex2_dynamic_benchmark"),
-    ex2checks_ldvb = c("fig_ex2checks_ldvb"),
-    ex2bench = c("tab_ex2_dynamic_benchmark"),
-    ex2_ldvb_diagnostics = c("fig_ex2_ldvb_diagnostics"),
-    ex2tables = c("tab_ex2_diagnostics", "tab_ex2_df_scan"),
-    ex2tables_ldvb = c("tab_ex2_diagnostics_ldvb", "tab_ex2_df_scan_ldvb"),
-    ex3 = c(
-      "fig_ex3data",
-      "fig_ex3quantcomps",
-      "fig_ex3zetapsi",
-      "fig_ex3forecast",
-      "tab_ex3_diagnostics",
-      "tab_ex3_lambda_selection",
-      "tab_ex3_forecast_metrics",
-      "tab_ex3_sensitivity_forecast_metrics"
-    ),
-    ex3data = c("fig_ex3data"),
-    ex3quantcomps = c("fig_ex3quantcomps"),
-    ex3quantcomps_ldvb = c("fig_ex3quantcomps"),
-    ex3zetapsi = c("fig_ex3zetapsi"),
-    ex3zetapsi_ldvb = c("fig_ex3zetapsi"),
-    ex3forecast = c("fig_ex3forecast"),
-    ex3forecast_ldvb = c("fig_ex3forecast"),
-    ex3tables = c("tab_ex3_diagnostics", "tab_ex3_lambda_selection", "tab_ex3_forecast_metrics", "tab_ex3_sensitivity_forecast_metrics"),
-    ex3tables_ldvb = c("tab_ex3_diagnostics", "tab_ex3_lambda_selection", "tab_ex3_forecast_metrics", "tab_ex3_sensitivity_forecast_metrics"),
-    ex4screen = c("tab_ex4_seed_screen_p050_summary", "tab_ex4_seed_screen_p050_selection", "log_ex4_seed_screen_p050_summary"),
-    ex4 = c("fig_ex4static", "tab_ex4static_summary"),
-    ex4figure = c("fig_ex4static"),
-    ex4table = c("tab_ex4static_summary")
-  )
-  exp_ids <- unique(unlist(target_map[intersect(names(target_map), targets)], use.names = FALSE))
-  if (length(exp_ids) > 0L) {
-    expected_targets <- expected_targets[expected_targets$artifact_id %in% exp_ids, , drop = FALSE]
-  } else {
-    expected_targets <- expected_targets[0, , drop = FALSE]
-  }
-
-  if ("ex1kernel" %in% targets) {
-    expected_targets <- rbind(
-      expected_targets,
-      data.frame(
-        artifact_id = c(
-          "fig_ex1_kernel_compare",
-          "tab_ex1_kernel_summary",
-          "tab_ex1_kernel_chain_stability",
-          "log_ex1_kernel_compare"
-        ),
-        manuscript_target = c(
-          "auxiliary: Example 1 slice vs laplace_rw kernel comparison",
-          "auxiliary: Example 1 kernel summary",
-          "auxiliary: Example 1 kernel chain stability",
-          "auxiliary: Example 1 kernel comparison summary"
-        ),
-        stringsAsFactors = FALSE
-      )
-    )
-  }
-
-  if ("ex4screen" %in% targets) {
-    expected_targets <- rbind(
-      expected_targets,
-      data.frame(
-        artifact_id = c(
-          "tab_ex4_seed_screen_p050_summary",
-          "tab_ex4_seed_screen_p050_selection",
-          "log_ex4_seed_screen_p050_summary"
-        ),
-        manuscript_target = c(
-          "auxiliary: Example 4 seed screen metrics",
-          "auxiliary: Example 4 seed screen selection",
-          "auxiliary: Example 4 seed screen summary"
-        ),
-        stringsAsFactors = FALSE
-      )
-    )
-  }
-}
-
-for (i in seq_len(nrow(expected_targets))) {
-  id <- expected_targets$artifact_id[i]
-  if (!any(artifact_registry$artifact_id == id)) {
-    artifact_registry <<- rbind(
-      artifact_registry,
-      data.frame(
-        artifact_id = id,
-        artifact_type = "unknown",
-        relative_path = "",
-        manuscript_target = expected_targets$manuscript_target[i],
-        status = "not_reproduced",
-        notes = "Artifact was expected but not registered by example scripts.",
-        stringsAsFactors = FALSE
-      )
-    )
-  }
-}
-
-if (nrow(artifact_registry) > 0L) {
-  for (i in seq_len(nrow(artifact_registry))) {
-    rel <- artifact_registry$relative_path[i]
-    if (nzchar(rel)) {
-      abs_path <- file.path(repo_root, rel)
-      if (!file.exists(abs_path)) {
-        artifact_registry$status[i] <- "not_reproduced"
-        old_note <- artifact_registry$notes[i]
-        artifact_registry$notes[i] <- paste(
-          trimws(old_note),
-          "Output file missing on disk at tracker time.",
-          sep = if (nzchar(trimws(old_note))) " " else ""
-        )
-      }
-    }
-  }
-}
-
-api_map <- data.frame(
-  manuscript_call = c(
-    "exdqlmChecks(y = ..., M1, M2, ...)",
-    "exdqlmPlot(y = ..., M1, ...)",
-    "compPlot(y = ..., M1, ...)",
-    "exdqlmForecast(y = ..., start.t, k, M1, ...)",
-    "exdqlmForecastDiagnostics(forecast, y = ...)"
-  ),
-  reproduced_call = c(
-    "diagnostics(M1, M2, ...)",
-    "plot(M1, ...)",
-    "plot(M1, type = \"component\", ...)",
-    "predict(M1, start.t = ..., k = ..., ...)",
-    "diagnostics(forecast, y = ...)"
-  ),
-  status = c("replaced", "replaced", "replaced", "replaced", "preferred generic"),
-  stringsAsFactors = FALSE
-)
-save_table_csv(
-  api_map,
-  filename = "manuscript_api_migration_map.csv",
-  artifact_id = "tab_api_migration_map",
-  manuscript_target = "global code migration",
-  status = "reproduced",
-  notes = "Maps deprecated manuscript calls to current package API."
-)
-
-save_table_csv(
-  benchmark_profiles_table(),
-  filename = "benchmark_backend_profiles.csv",
-  artifact_id = "tab_benchmark_backend_profiles",
-  manuscript_target = "auxiliary: benchmark backend profiles",
-  status = "reproduced",
-  notes = "Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend)."
-)
-
-save_table_csv(
-  benchmark_environment_table(),
-  filename = "benchmark_environment.csv",
-  artifact_id = "tab_benchmark_environment",
-  manuscript_target = "auxiliary: benchmark environment details",
-  status = "reproduced",
-  notes = "CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run."
-)
-
-if (targeted_run) {
-  register_note("coverage", sprintf("Targeted run; requested targets: %s.", paste(targets, collapse = ", ")))
-} else {
-  register_note("coverage", "All publication-set manuscript artifacts were targeted in this pipeline.")
-}
-register_note("timing", "Exact runtime printouts in manuscript are historical and expected to differ.")
-register_note("timing", "Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.")
-register_note("benchmark", sprintf("Benchmark tables reported in the manuscript use backend Profile %s; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.", selected_benchmark_profile))
-register_note("benchmark", "benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.")
-register_note("scope", "Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.")
-
-write_tracker()
-
-log_msg("Manuscript tracker: complete")
 
 # ---- stable batch-visible outputs ----
 print_jss_heading <- function(label) {
@@ -4418,16 +3630,30 @@ print_csv_table <- function(label, relative_path) {
   print(utils::read.csv(path, stringsAsFactors = FALSE), row.names = FALSE)
 }
 
+write_printed_output <- function(filename, expr) {
+  path <- file.path(logs_dir, filename)
+  txt <- utils::capture.output(eval.parent(substitute(expr)))
+  writeLines(txt, con = path)
+  invisible(path)
+}
+
+save_table_csv(benchmark_environment_table(), "benchmark_environment.csv")
+save_table_csv(benchmark_settings_table(), "benchmark_backend_settings.csv")
+write_session_info()
+
 print_jss_heading("M95")
 print(M95)
+write_printed_output("M95-print.txt", print(M95))
 print_jss_heading("summary(M95)")
 print(summary(M95))
+write_printed_output("M95-summary.txt", print(summary(M95)))
 print_jss_heading("MTF$median.kt")
 print(MTF$median.kt)
-print_csv_table("Table 7 / tab:ex2bench", "analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv")
-print_csv_table("Table 8 / tab:ex3", "analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv")
-print_csv_table("Table 9 / tab:ex3forecastmetrics", "analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv")
-print_csv_table("Table 10 / tab:ex4static", "analysis/manuscript/outputs/tables/ex4static_summary.csv")
+write_printed_output("MTF-median-kt.txt", print(MTF$median.kt))
+print_csv_table("Table 7 / tab:ex2bench", "tables/ex2_dynamic_benchmark.csv")
+print_csv_table("Table 8 / tab:ex3", "tables/ex3_diagnostics_summary.csv")
+print_csv_table("Table 9 / tab:ex3forecastmetrics", "tables/ex3_forecast_metrics.csv")
+print_csv_table("Table 10 / tab:ex4static", "tables/ex4static_summary.csv")
 print_jss_heading("sessionInfo()")
 print(utils::sessionInfo())
 cat(sprintf("\nTotal elapsed seconds: %.3f\n", proc.time()[[3L]] - jss_start_time))
@@ -4435,4 +3661,4 @@ if (isTRUE(getOption("exdqlm.jss_rplots_active", FALSE))) {
   grDevices::dev.off()
   options(exdqlm.jss_rplots_active = FALSE)
 }
-cat("\nReplication complete. Primary batch artifacts: code.Rout and Rplots.pdf.\n")
+cat("\nReplication complete. Primary batch outputs: code.Rout and Rplots.pdf.\n")

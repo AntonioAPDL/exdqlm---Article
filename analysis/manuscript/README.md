@@ -1,24 +1,21 @@
 # Manuscript Reproduction Stage
 
-This stage contains the canonical scripts used to regenerate the article's
-manuscript-facing figures, generated tables, logs, caches, and artifact
-manifests. For public JSS replication, use the root script first:
+This stage contains the maintained scripts used to regenerate the article's
+manuscript-facing figures, tables, logs, and run manifests. For public JSS
+replication, use the root script first:
 
 ```sh
 R CMD BATCH --vanilla code.R code.Rout
-R CMD BATCH --vanilla code-fast.R code-fast.Rout
 ```
 
-The full `code.R` command refits the manuscript examples, prints the numerical
+The root `code.R` command refits the manuscript examples, prints the numerical
 tables and selected fitted-object output to `code.Rout`, and writes the graphics
-stream to `Rplots.pdf`. The optional `code-fast.R` command uses reduced
-computation settings for code checking and is not authoritative for manuscript
-values.
+stream to `Rplots.pdf`.
 
-The commands below are internal maintenance commands for targeted reruns and
+The commands below are internal maintenance commands for focused reruns and
 final reference checks.
 
-## Canonical example workflow
+## Maintained example workflow
 
 The maintained example scripts live under:
 
@@ -35,11 +32,11 @@ When updating an example:
 
 1. Edit the relevant script in `analysis/manuscript/examples/`.
 2. Run the narrowest useful author-side target.
-3. Inspect generated figures/tables/logs.
-4. Update any inline manuscript table/text from generated outputs.
+3. Inspect generated figures, tables, and logs.
+4. Update any inline manuscript table or text from generated outputs.
 5. Run manuscript tests or a focused validation pass.
-6. Commit the script, regenerated artifacts, manuscript text, and tracker
-   updates together.
+6. Commit the script, regenerated outputs, manuscript text, and tracker updates
+   together.
 
 ## Scope
 
@@ -49,26 +46,26 @@ When updating an example:
 - Rebuilds Example 3 Big Tree figures, package diagnostic table, and held-out
   forecast-score table.
 - Rebuilds Example 4 sparse static exAL simulation figure and summary table.
-- Writes the reproducibility tracker, run notes, backend-profile table, and
-  benchmark-environment table.
+- Writes run notes, benchmark-setting information, and benchmark-environment
+  information.
 
-Optional developer targets can regenerate support artifacts such as the
-Example 1 kernel comparison or the Example 4 seed screen.
+Optional developer targets can regenerate support outputs such as the Example 1
+kernel comparison or the Example 4 seed screen.
 
-Large `.rds` fit caches are local accelerators. They are recreated by
-full/example runs and should be excluded from the submitted archive if needed
-to satisfy upload-size limits.
+Large saved fit files are local accelerators. They are recreated by full or
+focused runs and should be excluded from the submitted archive if needed to
+satisfy upload-size limits.
 
 ## Internal run commands
 
-The author-side runner supports full-stage regeneration, targeted example
+The author-side runner supports full-stage regeneration, focused example
 reruns, tests-only checks, and the optional Example 4 seed screen. These
 commands are intended for repository maintenance, not for JSS reviewers. The
-generated root scripts `code.R` and `code-fast.R` are the public batch
-interfaces submitted with the article.
+generated root script `code.R` is the public batch interface submitted with the
+article.
 
-For internal maintenance, inspect the runner's help from the repository root
-and choose the narrowest target that matches the intended update. Source-package
+For internal maintenance, inspect the runner's help from the repository root and
+choose the narrowest target that matches the intended update. Source-package
 maintenance is also author-only; the submitted replication archive expects the
 matching package source tarball to be installed before execution.
 
@@ -79,18 +76,19 @@ configured `dataset_seed`, but does not redo the seed screen unless the
 
 ## Outputs
 
-- `outputs/figures/`: generated manuscript figure files.
+- `outputs/figures/`: generated manuscript figure files tracked for manuscript
+  compilation.
 - `outputs/tables/`: diagnostics summaries, generated tables, tracker files,
-  backend profile, and benchmark environment.
+  benchmark settings, and benchmark environment.
 - `outputs/logs/`: compact textual outputs and session metadata.
-- `outputs/cache/`: cached fitted objects supporting fast targeted reruns.
+- `outputs/cache/`: local saved fit files supporting focused author-side reruns.
 
-Figures cited by `exdqlm-jss.tex` are resolved from
-`analysis/manuscript/outputs/figures/` through the manuscript `\graphicspath`.
-Tables in `exdqlm-jss.tex` are inline LaTeX, so displayed values must be
-updated from generated CSV/log files whenever a model is rerun.
+Figures cited by `exdqlm-jss.tex` are resolved from the root `figures/` folder
+when the public script has just been run, with
+`analysis/manuscript/outputs/figures/` retained as the tracked manuscript-source
+fallback.
 
 Internal development checklists and review-audit notes are intentionally not
 part of the submission archive. The maintained reader-facing provenance is the
-root `README.md`, the flat batch scripts `code.R` and `code-fast.R`, this
-protocol family, generated tracker files, and example manifests.
+root `README.md`, the flat batch script `code.R`, this protocol family,
+generated tracker files, and example manifests.

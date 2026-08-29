@@ -194,11 +194,11 @@ save_table_csv(
 
 save_table_csv(
   benchmark_profiles_table(),
-  filename = "benchmark_backend_profiles.csv",
-  artifact_id = "tab_benchmark_backend_profiles",
-  manuscript_target = "auxiliary: benchmark backend profiles",
+  filename = "benchmark_backend_settings.csv",
+  artifact_id = "tab_benchmark_backend_settings",
+  manuscript_target = "auxiliary: benchmark backend settings",
   status = "reproduced",
-  notes = "Defines Profile A (pure-R baseline) and Profile B (manuscript-matched backend)."
+  notes = "Defines setting A (pure-R baseline) and setting B (manuscript-matched backend)."
 )
 
 save_table_csv(
@@ -217,7 +217,7 @@ if (targeted_run) {
 }
 register_note("timing", "Exact runtime printouts in manuscript are historical and expected to differ.")
 register_note("timing", "Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.")
-register_note("benchmark", sprintf("Benchmark tables reported in the manuscript use backend Profile %s; benchmark_backend_profiles.csv defines both disclosed benchmark profiles.", selected_benchmark_profile))
+register_note("benchmark", sprintf("Benchmark tables reported in the manuscript use backend setting %s; benchmark_backend_settings.csv defines both disclosed benchmark settings.", selected_benchmark_profile))
 register_note("benchmark", "benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.")
 register_note("scope", "Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.")
 

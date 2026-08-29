@@ -7,8 +7,12 @@ kl_posterior_standard_normal_v2.tex
 
 # Generated runtime logs
 code.Rout
-code-fast.Rout
 Rplots.pdf
+/code.Rmd
+/code.html
+/figures/
+/tables/
+/logs/
 analysis/exal/outputs/logs/*
 !analysis/exal/outputs/logs/.gitkeep
 analysis/manuscript/outputs/logs/*
