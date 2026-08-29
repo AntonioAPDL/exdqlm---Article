@@ -1,4 +1,4 @@
-profile=standard
+settings=standard
 source_draws=2000 | synthesized_draws=5000
 window_start=1880 | forecast_horizon=8
 

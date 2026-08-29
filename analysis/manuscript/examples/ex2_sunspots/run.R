@@ -208,7 +208,7 @@ if (!need_ex2) {
 
     capture_output_file("ex2_benchmark_run_summary.txt", {
       cat(sprintf("profile=%s\n", selected_profile))
-      cat(sprintf("backend_profile=%s\n", selected_benchmark_profile))
+      cat(sprintf("backend_settings=%s\n", selected_benchmark_profile))
       cat(sprintf("ldvb_n.samp=%d, benchmark_n.burn=%d, benchmark_n.mcmc=%d\n\n", n_samp, benchmark_n_burn, benchmark_n_mcmc))
       cat("LDVB benchmark diagnostics:\n")
       print(data.frame(
@@ -235,7 +235,7 @@ if (!need_ex2) {
       relative_path = "analysis/manuscript/outputs/logs/ex2_benchmark_run_summary.txt",
       manuscript_target = "auxiliary: Example 2 dynamic benchmark summary",
       status = "reproduced",
-      notes = "Runtime and diagnostics summary for the dynamic LDVB versus MCMC benchmark under the disclosed backend profile."
+      notes = "Runtime and diagnostics summary for the dynamic LDVB versus MCMC benchmark under the disclosed backend settings."
     )
 
     ex2_benchmark_table <- data.frame(
@@ -265,7 +265,7 @@ if (!need_ex2) {
         ex2_benchmark$diag_mcmc$m1.pplc,
         ex2_benchmark$diag_mcmc$m2.pplc
       ),
-      backend_profile = rep(selected_benchmark_profile, 4),
+      backend_settings = rep(selected_benchmark_profile, 4),
       posterior_draws = rep(n_samp, 4),
       burn_in = c(NA_integer_, NA_integer_, benchmark_n_burn, benchmark_n_burn),
       n_burn = rep(benchmark_n_burn, 4),
@@ -279,7 +279,7 @@ if (!need_ex2) {
       manuscript_target = "tab:ex2bench",
       status = "reproduced",
       notes = sprintf(
-        "Representative dynamic LDVB versus MCMC benchmark for Example 2 under backend Profile %s.",
+        "Representative dynamic LDVB versus MCMC benchmark for Example 2 under backend setting %s.",
         selected_benchmark_profile
       )
     )

@@ -23,11 +23,9 @@ updates for MCMC and LDVB.
 
 ## Summary
 
-- `code.R` is now the authoritative flat batch script.
+- `code.R` is now the single flat batch script for the replication archive.
 - The primary command is `R CMD BATCH --vanilla code.R code.Rout`.
 - `code.R` produces `code.Rout` and `Rplots.pdf` at the archive root.
-- `code-fast.R` is a reduced code-checking script and is not authoritative for
-  manuscript numerical values.
 - `code.Rout` prints `M95`, `summary(M95)`, `MTF$median.kt`, Tables 7--10, and
   `sessionInfo()`.
 - The manuscript and README now state the reference environment, RNG settings,
@@ -37,12 +35,14 @@ updates for MCMC and LDVB.
 
 1. **Single script and batch-mode output.** The revised archive centers on
    `code.R`, a flat, commented R file ordered by manuscript examples. Running
-   `R CMD BATCH --vanilla code.R code.Rout` performs the full replication.
+   `R CMD BATCH --vanilla code.R code.Rout` performs the full replication. The
+   ambiguous `examples.R` entry point has been removed from the JSS-facing
+   archive.
 
-2. **Exact reproducibility and computing environment.** The public scripts set
+2. **Exact reproducibility and computing environment.** The public script sets
    `RNGversion("4.6.0")` and
-   `RNGkind("Mersenne-Twister", "Inversion", "Rejection")`, require
-   `exdqlm` 1.1.1, and are run with thread variables set before R starts.
+   `RNGkind("Mersenne-Twister", "Inversion", "Rejection")`, requires
+   `exdqlm` 1.1.1, and is run with thread variables set before R starts.
    Version 1.1.1 corrects compiled stochastic RNG/thread behavior found while
    investigating the editorial discrepancies and adds the stabilized default
    exAL scale-skewness updates used by the rerun.
@@ -73,7 +73,5 @@ updates for MCMC and LDVB.
 ## Validation
 
 Before resubmission we ran the package repeatability tests, package test suite,
-`R CMD build`, `R CMD check --no-manual --run-donttest`,
-`R CMD BATCH --vanilla code-fast.R code-fast.Rout`,
-`R CMD BATCH --vanilla code.R code.Rout`, manuscript/response compilation, and
-archive extraction checks using R 4.6.0.
+CRAN submission checks, `R CMD BATCH --vanilla code.R code.Rout`,
+manuscript/response compilation, and archive extraction checks using R 4.6.0.

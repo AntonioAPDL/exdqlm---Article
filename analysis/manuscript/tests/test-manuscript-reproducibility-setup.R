@@ -39,8 +39,8 @@ testthat::test_that("clone-grade reproducibility entrypoints exist", {
   testthat::expect_true(file.exists(file.path(repo_root, "analysis", "lib", "exdqlm_package_resolver.R")))
 })
 
-testthat::test_that("code.R and code-fast.R are flat JSS batch scripts", {
-  scripts <- c("code.R", "code-fast.R")
+testthat::test_that("code.R is a flat JSS batch script", {
+  scripts <- "code.R"
   for (script in scripts) {
     path <- file.path(repo_root, script)
     code_lines <- readLines(path, warn = FALSE)
@@ -83,11 +83,13 @@ testthat::test_that("public README and code.R avoid development-only entrypoints
   public_text <- paste(c(code_lines, readme_lines), collapse = "\n")
 
   testthat::expect_true(grepl("R CMD BATCH --vanilla code.R code.Rout", public_text, fixed = TRUE))
-  testthat::expect_true(grepl("R CMD BATCH --vanilla code-fast.R code-fast.Rout", public_text, fixed = TRUE))
+  testthat::expect_false(file.exists(file.path(repo_root, "code-fast.R")))
   for (marker in c(
     "git clone",
     "origin/",
     "upstream",
+    "examples.R",
+    "code-fast.R",
     "Rscript code.R",
     "--quick",
     "--example",
@@ -116,7 +118,6 @@ testthat::test_that("flat scripts parse from a no-git archive copy", {
   dir.create(archive_root)
   files <- c(
     "code.R",
-    "code-fast.R",
     "README.md",
     "exdqlm-jss.tex"
   )
@@ -131,7 +132,6 @@ testthat::test_that("flat scripts parse from a no-git archive copy", {
   old_wd <- setwd(archive_root)
   on.exit(setwd(old_wd), add = TRUE)
   testthat::expect_silent(parse(file.path(archive_root, "code.R")))
-  testthat::expect_silent(parse(file.path(archive_root, "code-fast.R")))
   testthat::expect_false(dir.exists(file.path(archive_root, ".git")))
 })
 
@@ -188,10 +188,11 @@ testthat::test_that("replication docs use the simplified public interface", {
   text <- paste(unlist(lapply(file.path(repo_root, docs), readLines, warn = FALSE), use.names = FALSE), collapse = "\n")
 
   testthat::expect_true(grepl("R CMD BATCH --vanilla code.R code.Rout", text, fixed = TRUE))
-  testthat::expect_true(grepl("R CMD BATCH --vanilla code-fast.R code-fast.Rout", text, fixed = TRUE))
   testthat::expect_true(grepl("internal maintenance", text, fixed = TRUE))
 
   stale_markers <- c(
+    "code-fast.R",
+    "examples.R",
     "Rscript code.R",
     "--quick",
     "--example",
@@ -251,7 +252,7 @@ testthat::test_that("RNG and benchmark backend reproducibility policy is explici
   testthat::expect_false(any(grepl(sprintf("not %s", previous_exdqlm_version), check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("Generated benchmark environment records exdqlm version", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("manuscript RNG kind is explicit and stable", check_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("benchmark profile keeps C++ samplers disabled", check_lines, fixed = TRUE)))
+  testthat::expect_true(any(grepl("benchmark settings keep C++ samplers disabled", check_lines, fixed = TRUE)))
 })
 
 testthat::test_that("preflight enforces the manuscript code policy", {
@@ -364,7 +365,7 @@ testthat::test_that("generated manuscript tables are coherent", {
   ex2 <- read_required_csv("analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv")
   expect_columns(
     ex2,
-    c("model", "method", "runtime_sec", "KL", "CRPS", "pplc", "backend_profile"),
+    c("model", "method", "runtime_sec", "KL", "CRPS", "pplc", "backend_settings"),
     "Example 2 benchmark table"
   )
   testthat::expect_true(all(c("DQLM", "exDQLM") %in% ex2$model))
