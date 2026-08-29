@@ -19,10 +19,9 @@ The JSS resubmission should contain these files:
 - `exdqlm_1.1.1.tar.gz`: `exdqlm` package source tarball.
 - `exdqlm-jss-replication.tar.gz`: article source and replication materials.
 
-The package source is version 1.1.1 of `exdqlm`, a narrow reproducibility and
-inference-stability patch. It corrects compiled stochastic helper paths so they
-use serial R-controlled random-number streams and uses the stabilized exAL
-scale-skewness defaults exercised by the manuscript rerun.
+The package source is version 1.1.1 of `exdqlm`, a narrow reproducibility patch
+for the manuscript rerun. It corrects compiled stochastic helper paths so the
+manuscript computations use serial R-controlled random-number streams.
 
 ## Replication script
 

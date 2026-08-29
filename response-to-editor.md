@@ -15,11 +15,10 @@ Submitted files:
 - `response-to-editor.pdf`
 
 The package source is version 1.1.1 of `exdqlm`. This is a narrow
-reproducibility and inference-stability patch. It does not change the
+reproducibility patch for the manuscript rerun. It does not change the
 statistical model, exported API, or manuscript claims. It corrects compiled
-stochastic helper paths so they use serial R-controlled random-number streams,
-adds repeated-seed tests, and sets more stable default exAL scale-skewness
-updates for MCMC and LDVB.
+stochastic helper paths so the manuscript computations use serial R-controlled
+random-number streams.
 
 ## Summary
 
@@ -44,8 +43,8 @@ updates for MCMC and LDVB.
    `RNGkind("Mersenne-Twister", "Inversion", "Rejection")`, requires
    `exdqlm` 1.1.1, and is run with thread variables set before R starts.
    Version 1.1.1 corrects compiled stochastic RNG/thread behavior found while
-   investigating the editorial discrepancies and adds the stabilized default
-   exAL scale-skewness updates used by the rerun.
+   investigating the editorial discrepancies. The full JSS replication was
+   rerun with this public package version.
 
 3. **More visible output.** The full batch output now includes fitted-object
    output, selected summaries, Tables 7--10, `MTF$median.kt`, and
@@ -72,6 +71,6 @@ updates for MCMC and LDVB.
 
 ## Validation
 
-Before resubmission we ran the package repeatability tests, package test suite,
-CRAN submission checks, `R CMD BATCH --vanilla code.R code.Rout`,
-manuscript/response compilation, and archive extraction checks using R 4.6.0.
+Before resubmission we ran the package test suite, CRAN submission checks,
+`R CMD BATCH --vanilla code.R code.Rout`, manuscript/response compilation, and
+archive extraction checks using R 4.6.0.
