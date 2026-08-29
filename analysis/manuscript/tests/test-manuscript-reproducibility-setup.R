@@ -497,3 +497,101 @@ testthat::test_that("main manuscript inline table values match generated outputs
   exdqlm_version <- env$V2[env$V1 == "exdqlm_version"][[1]]
   testthat::expect_true(grepl(exdqlm_version, tex, fixed = TRUE))
 })
+
+testthat::test_that("Example 1 displayed MCMC trace seed and summaries match reference output", {
+  testthat::skip_if_not(
+    reference_sync_enabled(),
+    "Exact Example 1 trace matching is an author-side final synchronization check."
+  )
+
+  tex <- paste(readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE), collapse = "\n")
+  ex1_log <- paste(readLines(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "logs", "ex1_run_summary.txt"),
+    warn = FALSE
+  ), collapse = "\n")
+
+  testthat::expect_true(grepl("trace run settings: seed=20260616", ex1_log, fixed = TRUE))
+  testthat::expect_true(grepl("set.seed(20260616)", tex, fixed = TRUE))
+  testthat::expect_false(grepl("set.seed(20260620)", tex, fixed = TRUE))
+
+  for (value in c("-0.039", "(-0.397, 0.291)", "0.375", "(0.302, 0.460)")) {
+    testthat::expect_true(
+      grepl(value, tex, fixed = TRUE),
+      info = sprintf("Example 1 posterior summary value %s is missing from exdqlm-jss.tex.", value)
+    )
+  }
+})
+
+testthat::test_that("M95 printed object excerpts match reference output", {
+  testthat::skip_if_not(
+    reference_sync_enabled(),
+    "Exact M95 print and summary matching is an author-side final synchronization check."
+  )
+
+  tex <- paste(readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE), collapse = "\n")
+  m95_print <- paste(readLines(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "logs", "M95-print.txt"),
+    warn = FALSE
+  ), collapse = "\n")
+  m95_summary <- paste(readLines(
+    file.path(repo_root, "analysis", "manuscript", "outputs", "logs", "M95-summary.txt"),
+    warn = FALSE
+  ), collapse = "\n")
+
+  for (value in c("Run-time: 78.187 seconds", "sigma  0.2003 0.02553", "gamma -4.5720 0.93906")) {
+    testthat::expect_true(
+      grepl(value, tex, fixed = TRUE),
+      info = sprintf("M95 displayed value %s is missing from exdqlm-jss.tex.", value)
+    )
+  }
+  testthat::expect_true(grepl("Run-time: 78.187 seconds", m95_print, fixed = TRUE))
+  testthat::expect_true(grepl("sigma  0.2003 0.02553", m95_summary, fixed = TRUE))
+  testthat::expect_true(grepl("gamma -4.5720 0.93906", m95_summary, fixed = TRUE))
+})
+
+testthat::test_that("manuscript interpretation follows the regenerated Example 3 and Example 4 results", {
+  tex <- paste(readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE), collapse = "\n")
+
+  for (phrase in c(
+    "the AMO coefficient is close to zero and its pointwise 95\\% CrI\noverlaps zero",
+    "rather than to claim that\nboth climate indices have separately resolved transfer coefficients",
+    "The MCMC posterior-simulation fit has the smaller holdout quantile RMSE in all three fits",
+    "MCMC gives smaller active-signal RMSE at \\(p_0 = 0.05\\) and \\(p_0 = 0.25\\), while LDVB is slightly smaller at \\(p_0 = 0.50\\)",
+    "Null-coefficient MAE is slightly smaller for LDVB at \\(p_0 = 0.05\\) and for MCMC at \\(p_0 = 0.25\\) and \\(p_0 = 0.50\\)"
+  )) {
+    testthat::expect_true(
+      grepl(phrase, tex, fixed = TRUE),
+      info = sprintf("Current-result interpretation missing from manuscript: %s", phrase)
+    )
+  }
+})
+
+testthat::test_that("manuscript no longer contains stale regenerated-output markers", {
+  tex <- paste(readLines(file.path(repo_root, "exdqlm-jss.tex"), warn = FALSE), collapse = "\n")
+
+  stale_markers <- c(
+    "25.15187",
+    "87.505",
+    "-4.1364",
+    "0.79171",
+    "0.2101 0.02172",
+    "52.65",
+    "251.81",
+    "24.991",
+    "128.725",
+    "24.19",
+    "82.67",
+    "44.95",
+    "82.19",
+    "29.20",
+    "82.73",
+    "MCMC gives slightly smaller active-signal RMSE in all three fits",
+    "LDVB is smaller at \\(p_0 = 0.50\\)"
+  )
+  for (marker in stale_markers) {
+    testthat::expect_false(
+      grepl(marker, tex, fixed = TRUE),
+      info = sprintf("Stale regenerated-output marker remains in exdqlm-jss.tex: %s", marker)
+    )
+  }
+})

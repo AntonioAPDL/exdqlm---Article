@@ -1,27 +1,27 @@
 settings=standard
 quantile run settings: n.burn=2000, n.mcmc=3000
-trace run settings: seed=20260620, n.burn=7000, n.mcmc=3000, thin=10, saved_for_plot=300
+trace run settings: seed=20260616, n.burn=7000, n.mcmc=3000, thin=10, saved_for_plot=300
 
 M50_trace sigma summary:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.1793  0.3269  0.3617  0.3567  0.3930  0.5459
+ 0.2559  0.3468  0.3725  0.3745  0.3991  0.5487
 
 M50_trace sigma summary (thinned chain used in ex1mcmc.png):
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.1793  0.3213  0.3585  0.3557  0.3932  0.5122
+ 0.2579  0.3507  0.3732  0.3760  0.3990  0.5018
 
 M50_trace gamma summary:
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
--0.75298 -0.25405 -0.08409 -0.13108  0.01794  0.53165
+-0.53146 -0.12913 -0.03421 -0.03914  0.05090  0.49979
 
 M50_trace gamma summary (thinned chain used in ex1mcmc.png):
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
--0.75118 -0.27457 -0.07857 -0.12785  0.02288  0.47180
+-0.49577 -0.13648 -0.03779 -0.04080  0.04924  0.46957
 
 M50_trace joint posterior summary:
-  parameter       mean       q025      median      q975
-1     sigma  0.3567416  0.2223814  0.36168618 0.4559249
-2     gamma -0.1310813 -0.6557850 -0.08409328 0.3788340
+  parameter        mean       q025      median      q975
+1     sigma  0.37451852  0.3017584  0.37250190 0.4596236
+2     gamma -0.03914314 -0.3969707 -0.03420937 0.2913487
 
 M50_dqlm gamma fixed:
 [1] 0
@@ -39,4 +39,4 @@ $gig
 
 Run times (seconds):
       M95.elapsed M50_trace.elapsed        M5.elapsed  M50_dqlm.elapsed
-           71.993           134.046            71.723            32.663
+           78.187           145.860            78.872            35.091

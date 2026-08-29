@@ -721,7 +721,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 87.505 seconds
+Run-time: 78.187 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -742,7 +742,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 87.505 seconds
+Run-time: 78.187 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -757,25 +757,28 @@ Stored draws:
 
 Scalar posterior summaries:
  Parameter    Mean      SD
-     sigma  0.2101 0.02172
-     gamma -4.1364 0.79171
+     sigma  0.2003 0.02553
+     gamma -4.5720 0.93906
 \end{CodeOutput}
 \end{CodeChunk}
 
-By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). For the diagnostic display, we run the unrestricted median model separately as \code{M50.trace} with a longer burn-in. Consistent with the symmetry of the data, the posterior mean of \(\gamma\) is \(-0.063\) with a 95\% credible interval \((-0.484, 0.282)\), while the posterior mean of \(\sigma\) is \(0.372\) with a 95\% credible interval \((0.281, 0.472)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} \citep{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
+By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). For the diagnostic display, we run the unrestricted median model separately as \code{M50.trace} with a longer burn-in. Consistent with the symmetry of the data, the posterior mean of \(\gamma\) is \(-0.039\) with a 95\% credible interval \((-0.397, 0.291)\), while the posterior mean of \(\sigma\) is \(0.375\) with a 95\% credible interval \((0.302, 0.460)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} \citep{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.82\textwidth]{ex1mcmc.png}
-\caption{Example 1: Lake Huron. Trace and density plots from the median run with 7000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are representative MCMC traces from the recorded reference run; exact trace paths may differ across reruns while retaining comparable posterior summaries.}
+\caption{Example 1: Lake Huron. Trace and density plots from the median run with 7000 burn-in iterations and 3000 retained draws. For readability, every 10th retained draw is used in the plotting step. The top row shows the posterior trace plots for \(\sigma\) and \(\gamma\), and the bottom row shows the corresponding posterior densities. The displayed paths are those produced by the recorded reference run.}
 \label{fig:ex1mcmc}
 \end{figure}
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> set.seed(20260620)
+R> set.seed(20260616)
 R> M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model, df = 0.9, dim.df = 2,
 +                         PriorGamma = list(m_gam = 0, s_gam = 0.1, df_gam = 1),
++                         init.from.vb = TRUE,
++                         vb_init_controls = list(method = "ldvb", verbose = FALSE),
++                         mh.proposal = "slice",
 +                         n.burn = 7000, n.mcmc = 3000,verbose = FALSE)
 R> par(mfcol = c(2, 2), mar = c(4.1, 4.1, 2.1, 1.0))
 R> keep.idx = seq(1, length(M50.trace$samp.sigma), by = 10)
@@ -1057,11 +1060,11 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{22.27} & \textbf{0.133} & 8.525 & 3851.4 \\
- & MCMC & 143.57 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
+ \tworowcell{DQLM} & LDVB & \textbf{23.40} & \textbf{0.133} & 8.525 & 3851.4 \\
+ & MCMC & 155.64 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
  \midrule
- \tworowcell{exDQLM} & LDVB & \textbf{42.95} & \textbf{0.107} & 6.558 & 3015.2 \\
- & MCMC & 190.29 & 0.152 & \textbf{5.147} & \textbf{2216.1} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{45.54} & \textbf{0.107} & 6.558 & 3015.2 \\
+ & MCMC & 207.00 & 0.152 & \textbf{5.147} & \textbf{2216.1} \\
  \bottomrule
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark setting B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.1, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
@@ -1307,7 +1310,12 @@ NOI and AMO coefficients within the transfer-function model. Setting
 \code{type = "state"} in \code{plot()} plots a single element of the
 augmented state vector \(\tilde{\vect{\theta}}_t\). In this fitted model,
 indices 8, 9, and 10 correspond to \(\zeta_t\), \(\psi_{\mathrm{NOI},t}\), and
-\(\psi_{\mathrm{AMO},t}\), respectively.
+\(\psi_{\mathrm{AMO},t}\), respectively. The NOI coefficient is estimated below
+zero, while the AMO coefficient is close to zero and its pointwise 95\% CrI
+overlaps zero. We therefore use this analysis to illustrate the specification,
+inspection, and forecasting of lagged transfer effects, rather than to claim that
+both climate indices have separately resolved transfer coefficients in these
+data.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1321,7 +1329,7 @@ R> plot(y.train, type = "n", ylim = c(-0.11, 0.01), xlab = "time", ylab = "compo
 R> plot(MTF, type = "state", index = 9, col = "steelblue", add = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(NOI, t)]))
-R> plot(y.train, type = "n", ylim = c(-0.005, 0.06), xlab = "time", ylab = "component CrIs")
+R> plot(y.train, type = "n", ylim = c(-0.015, 0.020), xlab = "time", ylab = "component CrIs")
 R> plot(MTF, type = "state", index = 10, col = "darkorange", add = TRUE)
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[list(AMO, t)]))
@@ -1600,7 +1608,7 @@ R> for (i in seq_along(p.grid)) {plot(diag.static[[i]], type = "coefficients",
 \label{fig:ex4static}
 \end{figure}
 
-Figure \ref{fig:ex4static} shows that, in this simulated realization, both methods recover the main sparse signal structure and shrink most null coefficients toward zero across the lower tail, lower-middle quantile, and median. Recovery is not uniform across coefficients: the smaller active coefficient is more difficult in the median fit, and a few null-coefficient intervals can miss zero. Across the three panels, the MCMC intervals tend to give slightly cleaner active-signal recovery, while the LDVB intervals provide a fast approximation to the same coefficient-level summaries.
+Figure \ref{fig:ex4static} shows that, in this simulated realization, both methods recover the main sparse signal structure and shrink most null coefficients toward zero across the lower tail, lower-middle quantile, and median. Recovery is not uniform across coefficients: the smaller active coefficient is more difficult in the median fit, and a few null-coefficient intervals can miss zero. Across the three panels, the MCMC intervals give cleaner active-signal recovery in the two lower-tail fits, while the median fit is closer; the LDVB intervals provide a faster approximation to the same coefficient-level summaries.
 
 \begin{table}[t!]
 \centering
@@ -1610,21 +1618,21 @@ Figure \ref{fig:ex4static} shows that, in this simulated realization, both metho
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{31.01} & 0.108 & \textbf{0.034} & 0.673 \\
- & MCMC & 68.15 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
+ \tworowcell{0.05} & LDVB & \textbf{33.82} & 0.108 & \textbf{0.034} & 0.673 \\
+ & MCMC & 82.70 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{27.50} & 0.310 & 0.078 & 0.371 \\
- & MCMC & 67.63 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
+ \tworowcell{0.25} & LDVB & \textbf{30.19} & 0.310 & 0.078 & 0.371 \\
+ & MCMC & 82.45 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
  \midrule
-\tworowcell{0.50} & LDVB & \textbf{12.39} & \textbf{0.128} & 0.103 & 0.341 \\
- & MCMC & 67.06 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
+\tworowcell{0.50} & LDVB & \textbf{13.54} & \textbf{0.128} & 0.103 & 0.341 \\
+ & MCMC & 82.90 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE summaries stored in the \code{exalStaticDiagnostic} objects returned by \code{diagnostics()}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is smaller at \(p_0 = 0.50\). MCMC gives slightly smaller active-signal RMSE in all three fits, whereas null-coefficient MAE favors LDVB for \(p_0 = 0.05\) and \(p_0 = 0.25\) and is essentially tied at the median. The LDVB fit is nevertheless faster in all three cases, with runtime reductions of roughly 2.2-fold at \(p_0 = 0.05\), 2.5-fold at \(p_0 = 0.25\), and 5.4-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
+Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE summaries stored in the \code{exalStaticDiagnostic} objects returned by \code{diagnostics()}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE in all three fits, although the median difference is small. MCMC gives smaller active-signal RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is slightly smaller at \(p_0 = 0.50\). Null-coefficient MAE is slightly smaller for LDVB at \(p_0 = 0.05\) and for MCMC at \(p_0 = 0.25\) and \(p_0 = 0.50\). The LDVB fit is nevertheless faster in all three cases, with runtime reductions of roughly 2.4-fold at \(p_0 = 0.05\), 2.7-fold at \(p_0 = 0.25\), and 6.1-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
 
 \section{Conclusion}
 \label{sec:summary}

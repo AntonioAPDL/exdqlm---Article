@@ -86,7 +86,7 @@ cfg_params <-
       kind = "Mersenne-Twister", normal_kind = "Inversion", sample_kind = "Rejection"),
       figures = list(width = 10L, height = 6L, res = 220L, pointsize = 11L),
       run_name = "standard", run_settings = list(standard = list(
-          ex1 = list(trace_seed = 20260620L, n_burn = 2000L, n_mcmc = 3000L,
+          ex1 = list(trace_seed = 20260616L, n_burn = 2000L, n_mcmc = 3000L,
               n_burn_trace = 7000L, n_mcmc_trace = 3000L, thin_trace = 10L,
               n_chains_kernel = 4L, n_burn_kernel = 2000L, n_mcmc_kernel = 1000L,
               thin_kernel_plot = 10L, synth_source_draws = 2000L,

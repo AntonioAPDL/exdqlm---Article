@@ -215,8 +215,8 @@ if (targeted_run) {
 } else {
   register_note("coverage", "All publication-set manuscript artifacts were targeted in this pipeline.")
 }
-register_note("timing", "Exact runtime printouts in manuscript are historical and expected to differ.")
-register_note("timing", "Runtime values depend on hardware and backend settings; the Example 4 table reflects the standard-profile reproduction run recorded here.")
+register_note("timing", "Runtime values in the manuscript are recorded elapsed times and are expected to differ across computers.")
+register_note("timing", "Runtime values depend on hardware and backend settings; benchmark tables reflect the standard-profile reproduction run recorded here.")
 register_note("benchmark", sprintf("Benchmark tables reported in the manuscript use backend setting %s; benchmark_backend_settings.csv defines both disclosed benchmark settings.", selected_benchmark_profile))
 register_note("benchmark", "benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.")
 register_note("scope", "Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.")

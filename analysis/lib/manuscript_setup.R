@@ -606,6 +606,10 @@ write_tracker <- function() {
       artifact_registry <<- rbind(existing, artifact_registry)
     }
   }
+  if (nrow(artifact_registry) > 0L) {
+    artifact_exists <- file.exists(file.path(repo_root, artifact_registry$relative_path))
+    artifact_registry <<- artifact_registry[artifact_exists, , drop = FALSE]
+  }
   utils::write.csv(artifact_registry, tracker_csv, row.names = FALSE)
 
   notes_csv <- file.path(tables_dir, "manuscript_repro_notes.csv")
@@ -616,6 +620,11 @@ write_tracker <- function() {
       existing_notes <- existing_notes[, required_notes, drop = FALSE]
       run_notes <<- unique(rbind(existing_notes, run_notes))
     }
+  }
+  if (nrow(run_notes) > 0L) {
+    stale_note <- grepl("benchmark_backend_profiles.csv", run_notes$detail, fixed = TRUE) |
+      grepl("Benchmark Profile", run_notes$detail, fixed = TRUE)
+    run_notes <<- run_notes[!stale_note, , drop = FALSE]
   }
   utils::write.csv(run_notes, notes_csv, row.names = FALSE)
 

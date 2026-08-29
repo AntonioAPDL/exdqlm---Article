@@ -1,15 +1,15 @@
 Dynamic quantile state-space fit
-Model: exDQLM (exAL)
-Inference engine: MCMC
-Quantile level (p0): 0.95
-Observations: 98
-State dimension: 2
-Discount factors (dimensions): 0.9 ( 2 )
-Burn-in: 2000
-Posterior draws: 3000
-State draws: 2 x 98 x 3000
-Posterior predictive draws: 98 x 3000
-Run-time: 71.993 seconds
+Model: exDQLM (exAL) 
+Inference engine: MCMC 
+Quantile level (p0): 0.95 
+Observations: 98 
+State dimension: 2 
+Discount factors (dimensions): 0.9 ( 2 ) 
+Burn-in: 2000 
+Posterior draws: 3000 
+State draws: 2 x 98 x 3000 
+Posterior predictive draws: 98 x 3000 
+Run-time: 78.187 seconds 
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()

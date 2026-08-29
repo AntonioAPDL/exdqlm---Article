@@ -390,7 +390,7 @@ sanitize_example <- function(lines) {
   lines <- gsub("screen_cache_key", "screen_step_id", lines, fixed = TRUE)
   lines <- gsub("cache_key", "step_id", lines, fixed = TRUE)
   lines <- gsub(
-    "Lake Huron uses cached fits; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements are profile-dependent (see ex1_run_summary).",
+    "Lake Huron public replication refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements depend on the reference computer (see ex1_run_summary).",
     "Lake Huron refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements depend on the reference computer (see ex1_run_summary).",
     lines,
     fixed = TRUE
