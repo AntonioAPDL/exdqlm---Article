@@ -147,9 +147,7 @@ rename_public_terms <- function(lines) {
     with_backend_profile = "with_backend_settings",
     load_or_fit_cache = "run_step",
     ex4_load_or_fit_cache_safe = "ex4_run_step",
-    ex4_seed_screen_cache_key = "ex4_seed_screen_step_id",
     trace_cache_key = "trace_step_id",
-    screen_cache_key = "screen_step_id",
     cache_key = "step_id",
     artifact_id = "output_id",
     artifact_type = "output_type",
@@ -321,6 +319,15 @@ sanitize_setup <- function(lines, cfg_params) {
       "}"
     )
   )
+  lines <- replace_function(
+    lines,
+    "resolve_ex4_dataset_seed_for_reporting",
+    c(
+      "resolve_ex4_dataset_seed_for_reporting <- function(cfg_ex4 = cfg_run$ex4) {",
+      "  as.integer(cfg_ex4$dataset_seed %||% NA_integer_)",
+      "}"
+    )
+  )
   lines <- replace_function(lines, "promote_publication_figures", character())
   lines <- replace_function(lines, "target_enabled", character())
   lines <- remove_call_blocks(lines, "register_note")
@@ -349,19 +356,23 @@ sanitize_setup <- function(lines, cfg_params) {
 sanitize_ex4_helpers <- function(lines) {
   lines <- replace_function(
     lines,
+    "ex4_resolve_dataset_seed",
+    c(
+      "ex4_resolve_dataset_seed <- function(cfg_ex4) {",
+      "  configured_seed <- as.integer(cfg_ex4$dataset_seed %||% (seed_value + 404L))",
+      "  if (!is.finite(configured_seed)) stop(\"Example 4 dataset_seed must be finite.\", call. = FALSE)",
+      "  configured_seed",
+      "}"
+    )
+  )
+  lines <- replace_function(
+    lines,
     "ex4_load_or_fit_cache_safe",
     c(
       "ex4_run_step <- function(step_id, expr, note = NULL) {",
       "  eval.parent(substitute(expr))",
       "}"
     )
-  )
-  lines <- gsub("ex4_seed_screen_cache_key", "ex4_seed_screen_step_id", lines, fixed = TRUE)
-  lines <- gsub(
-    "Run the ex4screen target first.",
-    "Use a configured Example 4 seed before running the full replication.",
-    lines,
-    fixed = TRUE
   )
   lines
 }
@@ -385,9 +396,7 @@ sanitize_example <- function(lines) {
   }
   lines <- gsub("ex4_load_or_fit_cache_safe", "ex4_run_step", lines, fixed = TRUE)
   lines <- gsub("load_or_fit_cache", "run_step", lines, fixed = TRUE)
-  lines <- gsub("ex4_seed_screen_cache_key", "ex4_seed_screen_step_id", lines, fixed = TRUE)
   lines <- gsub("trace_cache_key", "trace_step_id", lines, fixed = TRUE)
-  lines <- gsub("screen_cache_key", "screen_step_id", lines, fixed = TRUE)
   lines <- gsub("cache_key", "step_id", lines, fixed = TRUE)
   lines <- gsub(
     "Lake Huron public replication refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements depend on the reference computer (see ex1_run_summary).",
@@ -593,7 +602,6 @@ build_script <- function(repo_root, out_file) {
   cfg_params$manuscript_output <- cfg_params$promotion
   cfg_params$promotion <- NULL
   cfg_params$expected_exdqlm_version <- "1.1.1"
-
   setup <- sanitize_setup(read_file(file.path(repo_root, "analysis", "lib", "manuscript_setup.R")), cfg_params)
   ex4_helpers <- sanitize_ex4_helpers(read_file(file.path(repo_root, "analysis", "manuscript", "examples", "ex4_static", "helpers.R")))
   examples <- lapply(

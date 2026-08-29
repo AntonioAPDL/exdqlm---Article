@@ -159,7 +159,6 @@ main <- function() {
         "ex1_lake_huron/run.R",
         "ex2_sunspots/run.R",
         "ex3_big_tree/run.R",
-        "ex4_static/seed_screen.R",
         "ex4_static/run.R",
         "_manifest/run.R"
       ))

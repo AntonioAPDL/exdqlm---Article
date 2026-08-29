@@ -538,13 +538,17 @@ testthat::test_that("M95 printed object excerpts match reference output", {
     warn = FALSE
   ), collapse = "\n")
 
-  for (value in c("Run-time: 78.187 seconds", "sigma  0.2003 0.02553", "gamma -4.5720 0.93906")) {
+  runtime_line <- grep("Run-time:", strsplit(m95_print, "\n", fixed = TRUE)[[1]], value = TRUE)
+  runtime_line <- trimws(runtime_line)
+  testthat::expect_length(runtime_line, 1L)
+
+  for (value in c(runtime_line, "sigma  0.2003 0.02553", "gamma -4.5720 0.93906")) {
     testthat::expect_true(
       grepl(value, tex, fixed = TRUE),
       info = sprintf("M95 displayed value %s is missing from exdqlm-jss.tex.", value)
     )
   }
-  testthat::expect_true(grepl("Run-time: 78.187 seconds", m95_print, fixed = TRUE))
+  testthat::expect_true(grepl(runtime_line, m95_print, fixed = TRUE))
   testthat::expect_true(grepl("sigma  0.2003 0.02553", m95_summary, fixed = TRUE))
   testthat::expect_true(grepl("gamma -4.5720 0.93906", m95_summary, fixed = TRUE))
 })

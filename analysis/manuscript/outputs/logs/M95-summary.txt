@@ -9,7 +9,7 @@ Burn-in: 2000
 Posterior draws: 3000 
 State draws: 2 x 98 x 3000 
 Posterior predictive draws: 98 x 3000 
-Run-time: 78.187 seconds 
+Run-time: 78.232 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -43,4 +43,3 @@ $convergence
 1   converged         NA
 2 stop reason not stored
 3  iterations         NA
-

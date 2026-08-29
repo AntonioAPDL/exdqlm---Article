@@ -109,22 +109,19 @@ cfg_params <-
               n_is = 500L, n_samp = 1000L, forecast_n_samp = 1000L,
               tol = 0.05, lambda_grid = c(0.7, 0.75, 0.8, 0.85,
               0.9, 0.95, 0.99)), ex4 = list(n_train = 160L, holdout_n = 800L,
-              n_predictors = 8L, dataset_seed = 20260712L, dataset_seed_mode = "configured",
-              cov_rho = 0.5, sigma_eps = 1.5, true_beta = c(3,
-              1.5, 0, 0, 2, 0, 0, 0), p_levels = c(0.05, 0.25,
-              0.5), screen_target_p0 = 0.5, ldvb_max_iter = 260L,
+              n_predictors = 8L, dataset_seed = 20260712L, cov_rho = 0.5,
+              sigma_eps = 1.5, true_beta = c(3, 1.5, 0, 0, 2, 0,
+              0, 0), p_levels = c(0.05, 0.25, 0.5), ldvb_max_iter = 260L,
               ldvb_max_iter_tail = 420L, ldvb_tol = 1e-04, rhs_tau0 = 0.15,
-              rhs_zeta2_fixed = 9, screen_seeds = 20260711:20260718,
-              screen_extra_seed_count = 8L, screen_batch_size = 4L,
-              n_burn = 2000L, n_mcmc = 3000L, thin = 1L, n_samp = 3000L))),
-      manuscript_benchmark_setting = "B", benchmark_settings = list(
-          A = list(label = "pure-R baseline", use_cpp_kf = FALSE,
-              use_cpp_builders = FALSE, use_cpp_samplers = FALSE,
-              use_cpp_postpred = FALSE, use_cpp_mcmc = FALSE, cpp_mcmc_mode = "strict",
-              cpp_threads = 1L), B = list(label = "manuscript-matched backend",
-              use_cpp_kf = TRUE, use_cpp_builders = FALSE, use_cpp_samplers = FALSE,
-              use_cpp_postpred = FALSE, use_cpp_mcmc = TRUE, cpp_mcmc_mode = "fast",
-              cpp_threads = 1L)), manuscript_output = list(figures = c("ex1mcmc.png",
+              rhs_zeta2_fixed = 9, n_burn = 2000L, n_mcmc = 3000L,
+              thin = 1L, n_samp = 3000L))), manuscript_benchmark_setting = "B",
+      benchmark_settings = list(A = list(label = "pure-R baseline",
+          use_cpp_kf = FALSE, use_cpp_builders = FALSE, use_cpp_samplers = FALSE,
+          use_cpp_postpred = FALSE, use_cpp_mcmc = FALSE, cpp_mcmc_mode = "strict",
+          cpp_threads = 1L), B = list(label = "manuscript-matched backend",
+          use_cpp_kf = TRUE, use_cpp_builders = FALSE, use_cpp_samplers = FALSE,
+          use_cpp_postpred = FALSE, use_cpp_mcmc = TRUE, cpp_mcmc_mode = "fast",
+          cpp_threads = 1L)), manuscript_output = list(figures = c("ex1mcmc.png",
       "ex1quants.png", "ex2quant.png", "ex2checks.png", "ex3data.png",
       "ex3quantcomps.png", "ex3zetapsi.png", "ex3forecast.png",
       "ex4static.png")))
@@ -285,30 +282,7 @@ benchmark_settings_table <- function() {
 }
 
 resolve_ex4_dataset_seed_for_reporting <- function(cfg_ex4 = cfg_run$ex4) {
-  mode <- tolower(trimws(as.character(cfg_ex4$dataset_seed_mode %||% "configured")))
-  configured_seed <- as.integer(cfg_ex4$dataset_seed %||% NA_integer_)
-  if (!identical(mode, "screen_selection")) {
-    return(configured_seed)
-  }
-
-  target_p0 <- as.numeric(cfg_ex4$screen_target_p0 %||% 0.50)
-  selection_path <- file.path(
-    tables_dir,
-    sprintf("ex4_seed_screen_p%03d_selection.csv", round(100 * target_p0))
-  )
-  if (!file.exists(selection_path)) {
-    return(configured_seed)
-  }
-
-  selected_tab <- tryCatch(utils::read.csv(selection_path, stringsAsFactors = FALSE), error = function(e) NULL)
-  if (is.null(selected_tab) || !"selected" %in% names(selected_tab)) {
-    return(configured_seed)
-  }
-  selected_rows <- selected_tab[selected_tab$selected %in% c(TRUE, "TRUE", "True", "true", 1, "1"), , drop = FALSE]
-  if (nrow(selected_rows) != 1L) {
-    return(configured_seed)
-  }
-  as.integer(selected_rows$seed[[1L]])
+  as.integer(cfg_ex4$dataset_seed %||% NA_integer_)
 }
 
 benchmark_environment_table <- function() {
@@ -673,101 +647,10 @@ ex4_resolve_slope_coverage <- function(method_fit, beta_true) {
   )
 }
 
-ex4_screen_target_p0 <- function(cfg_ex4) {
-  as.numeric(cfg_ex4$screen_target_p0 %||% 0.50)
-}
-
-ex4_screen_file_stem <- function(cfg_ex4) {
-  sprintf("ex4_seed_screen_p%03d", round(100 * ex4_screen_target_p0(cfg_ex4)))
-}
-
-ex4_screen_candidate_batches <- function(cfg_ex4, seed_value) {
-  base_seeds <- as.integer(unlist(cfg_ex4$screen_seeds %||% (seed_value + 500L + seq_len(8L))))
-  base_seeds <- sort(unique(base_seeds))
-  if (length(base_seeds) < 2L) {
-    stop("Example 4 seed screen requires at least two candidate seeds.", call. = FALSE)
-  }
-
-  extra_seed_count <- as.integer(cfg_ex4$screen_extra_seed_count %||% 0L)
-  batch_size <- as.integer(cfg_ex4$screen_batch_size %||% length(base_seeds))
-  if (!is.finite(batch_size) || batch_size < 1L) batch_size <- length(base_seeds)
-
-  batches <- list(base_seeds)
-  if (extra_seed_count > 0L) {
-    extra_start <- max(base_seeds) + 1L
-    extra_seeds <- seq.int(extra_start, length.out = extra_seed_count)
-    extra_batches <- split(extra_seeds, ceiling(seq_along(extra_seeds) / batch_size))
-    batches <- c(batches, extra_batches)
-  }
-  batches
-}
-
-ex4_seed_selection_path <- function(cfg_ex4) {
-  file.path(tables_dir, sprintf("%s_selection.csv", ex4_screen_file_stem(cfg_ex4)))
-}
-
-ex4_seed_screen_step_id <- function(dataset_seed, cfg_ex4) {
-  sprintf(
-    "ex4_seed_screen_seed_%d_ns%d_b%d_k%d_v2",
-    as.integer(dataset_seed),
-    as.integer(cfg_ex4$n_samp %||% 200L),
-    as.integer(cfg_ex4$n_burn),
-    as.integer(cfg_ex4$n_mcmc)
-  )
-}
-
 ex4_resolve_dataset_seed <- function(cfg_ex4) {
-  mode <- tolower(trimws(as.character(cfg_ex4$dataset_seed_mode %||% "configured")))
   configured_seed <- as.integer(cfg_ex4$dataset_seed %||% (seed_value + 404L))
-  if (!mode %in% c("configured", "screen_selection")) {
-    stop(sprintf("Unsupported Example 4 dataset_seed_mode '%s'.", mode), call. = FALSE)
-  }
-  if (identical(mode, "configured")) {
-    return(list(
-      seed = configured_seed,
-      source = "configured",
-      target_p0 = ex4_screen_target_p0(cfg_ex4),
-      selection_file = NA_character_
-    ))
-  }
-
-  selection_path <- ex4_seed_selection_path(cfg_ex4)
-  if (!file.exists(selection_path)) {
-    stop(
-      sprintf(
-        paste(
-          "Example 4 is configured to use a screen-selected dataset seed, but the selection file was not found:",
-          "%s",
-          "Use a configured Example 4 seed before running the full replication."
-        ),
-        selection_path
-      ),
-      call. = FALSE
-    )
-  }
-
-  selected_tab <- utils::read.csv(selection_path, stringsAsFactors = FALSE)
-  if (!"selected" %in% names(selected_tab)) {
-    stop(sprintf("Example 4 seed-selection file is missing the 'selected' column: %s", selection_path), call. = FALSE)
-  }
-  selected_rows <- selected_tab[isTRUE(selected_tab$selected) | selected_tab$selected %in% c(TRUE, "TRUE", "True", "true", 1, "1"), , drop = FALSE]
-  if (nrow(selected_rows) != 1L) {
-    stop(
-      sprintf(
-        "Expected exactly one selected Example 4 seed in %s, found %d.",
-        selection_path,
-        nrow(selected_rows)
-      ),
-      call. = FALSE
-    )
-  }
-
-  list(
-    seed = as.integer(selected_rows$seed[[1L]]),
-    source = "screen_selection",
-    target_p0 = ex4_screen_target_p0(cfg_ex4),
-    selection_file = selection_path
-  )
+  if (!is.finite(configured_seed)) stop("Example 4 dataset_seed must be finite.", call. = FALSE)
+  configured_seed
 }
 
 ex4_simulate_target_quantile_sample <- function(X_raw, beta_slopes, sigma_eps, p0, z = NULL) {
@@ -3498,8 +3381,7 @@ need_ex4table <- TRUE
   n_burn <- as.integer(cfg_ex4$n_burn)
   n_mcmc <- as.integer(cfg_ex4$n_mcmc)
   thin <- as.integer(cfg_ex4$thin %||% 1L)
-  ex4_seed_info <- ex4_resolve_dataset_seed(cfg_ex4)
-  ex4_seed <- as.integer(ex4_seed_info$seed)
+  ex4_seed <- ex4_resolve_dataset_seed(cfg_ex4)
   rhs_ctrl <- ex4_build_rhs_ctrl(cfg_ex4)
   step_id <- sprintf(
     "ex4_static_rhsns_sparse_seed_%d_ns%d_b%d_k%d_tau%03d_zeta%03d_tol%s_iter%d_%d_v5",
@@ -3518,14 +3400,10 @@ need_ex4table <- TRUE
     ex4_fit_seed(ex4_seed, cfg_ex4, stop_on_failure = TRUE),
     note = step_id
   )
+
   capture_output_file("ex4_run_summary.txt", {
     cat(sprintf("settings=%s\n", selected_run))
     cat(sprintf("seed=%d\n", ex4_obj$seed))
-    cat(sprintf("seed_source=%s\n", ex4_seed_info$source))
-    if (!is.na(ex4_seed_info$selection_file)) {
-      cat(sprintf("seed_selection_file=%s\n", ex4_seed_info$selection_file))
-      cat(sprintf("seed_selection_target_p0=%0.2f\n", ex4_seed_info$target_p0))
-    }
     cat(sprintf("train_n=%d, holdout_n=%d, predictors=%d\n", train_n, holdout_n, predictor_n))
     cat(sprintf("ldvb_n.samp=%d, n.burn=%d, n.mcmc=%d\n", n_samp, n_burn, n_mcmc))
     cat(sprintf("cov_rho=%0.2f, sigma_eps=%0.2f\n", cov_rho, sigma_eps))
@@ -3613,8 +3491,6 @@ need_ex4table <- TRUE
 
   }
 
-  if (identical(ex4_seed_info$source, "screen_selection")) {
-  }
 
   log_msg("Example 4 (static Nishimura-Suchard RHS sparse simulation): complete")
 }

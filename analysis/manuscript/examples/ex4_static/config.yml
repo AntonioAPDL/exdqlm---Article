@@ -3,19 +3,15 @@ article_section: sec:ex4static
 title: Static exAL sparse regression benchmark
 script: run.R
 helper_script: helpers.R
-support_script: seed_screen.R
 parameter_source: analysis/config/params_manuscript.yml#profiles.*.ex4
 primary_target: ex4
 targets:
   all: ex4
   figure: ex4figure
   table: ex4table
-  seed_screen_auxiliary: ex4screen
 notes:
   - The publication run uses the configured dataset_seed from analysis/config/params_manuscript.yml.
-  - The seed screen is optional, explicit-only, and can be rerun independently when selecting a new dataset seed.
   - Article table values are inline in exdqlm-jss.tex and must be updated from generated CSVs after reruns.
 run_commands:
   standard: Rscript analysis/run_all.R --stage manuscript --targets ex4 --profile standard --skip-tests
-  seed_screen: Rscript analysis/run_all.R --stage manuscript --targets ex4screen --profile standard --force-refit --skip-tests
   tests: Rscript analysis/run_all.R --stage manuscript --tests-only

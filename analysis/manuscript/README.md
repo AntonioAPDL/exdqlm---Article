@@ -50,7 +50,7 @@ When updating an example:
   information.
 
 Optional developer targets can regenerate support outputs such as the Example 1
-kernel comparison or the Example 4 seed screen.
+kernel comparison.
 
 Large saved fit files are local accelerators. They are recreated by full or
 focused runs and should be excluded from the submitted archive if needed to
@@ -59,20 +59,14 @@ satisfy upload-size limits.
 ## Internal run commands
 
 The author-side runner supports full-stage regeneration, focused example
-reruns, tests-only checks, and the optional Example 4 seed screen. These
-commands are intended for repository maintenance, not for JSS reviewers. The
-generated root script `code.R` is the public batch interface submitted with the
-article.
+reruns, and tests-only checks. These commands are intended for repository
+maintenance, not for JSS reviewers. The generated root script `code.R` is the
+public batch interface submitted with the article.
 
 For internal maintenance, inspect the runner's help from the repository root and
 choose the narrowest target that matches the intended update. Source-package
 maintenance is also author-only; the submitted replication archive expects the
 matching package source tarball to be installed before execution.
-
-The optional Example 4 seed screen is intentionally explicit-only. A full
-standard manuscript run regenerates the Example 4 figure/table from the
-configured `dataset_seed`, but does not redo the seed screen unless the
-`ex4screen` target is supplied.
 
 ## Outputs
 

@@ -1,18 +1,22 @@
 # Manuscript Reproducibility Tracker
 
-Generated: 2026-08-29 01:50:33
+Generated: 2026-08-29 14:35:34
 Profile: standard
 Seed: 20260501
 
 ## Artifact Status
 
+- [reproduced] `ex1_model_output` -> `analysis/manuscript/outputs/logs/ex1_model_output.txt` (Example 1 model block). polytrend model object output.
+- [reproduced] `ex1_run_summary` -> `analysis/manuscript/outputs/logs/ex1_run_summary.txt` (Example 1 textual outputs). Includes backend metadata and high-iteration trace diagnostics.
+- [reproduced] `fig_ex1mcmc` -> `analysis/manuscript/outputs/figures/ex1mcmc.png` (fig:ex1mcmc). Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=10.
 - [reproduced] `tab_ex1_synthesis_bridge` -> `analysis/manuscript/outputs/tables/ex1_synthesis_bridge_check.csv` (auxiliary: Example 1 synthesis forecast-origin check). Checks that the forecast synthesis begins one Lake Huron time step after the observed-period synthesis endpoint; Figure 2(d) uses these endpoints for the visual interval bridge.
 - [reproduced] `fig_ex1quants` -> `analysis/manuscript/outputs/figures/ex1quants.png` (fig:ex1quants). Four-panel Lake Huron figure with quantile estimates/forecasts on the top row and predictive synthesis over the observed and forecast windows on the bottom row. Panel (d) uses a darker related forecast synthesis band and bridges the observed synthesis endpoint to the first forecast synthesis endpoint for visual continuity on the annual time scale.
 - [reproduced] `log_ex1_synthesis_summary` -> `analysis/manuscript/outputs/logs/ex1_synthesis_summary.txt` (auxiliary: Example 1 synthesis summary). Synthesis settings and compact summaries for the Lake Huron predictive synthesis figure.
 - [reproduced] `fig_ex1synth` -> `analysis/manuscript/outputs/figures/ex1synth.png` (auxiliary: Example 1 standalone synthesis figure). Standalone auxiliary figure for Lake Huron predictive synthesis combining the 0.05, 0.50, and 0.95 fitted models over the observed period and the eight-step forecast horizon, with a darker forecast synthesis band and one-step visual bridge at the forecast origin.
+- [approximate] `tab_ex1_runtime` -> `analysis/manuscript/outputs/tables/ex1_runtime_summary.csv` (Example 1 runtime statements). Runtimes vary by hardware/profile; trace run intentionally uses higher iterations.
 - [reproduced] `ex2_model_output` -> `analysis/manuscript/outputs/logs/ex2_model_output.txt` (Example 2 model matrix output). Combined trend/seasonal state-space matrix.
 - [reproduced] `ex2_run_summary` -> `analysis/manuscript/outputs/logs/ex2_run_summary.txt` (Example 2 textual outputs). Includes sigma summary and LDVB runtime diagnostics for the manuscript Example 2 workflow.
-- [reproduced] `log_ex2_benchmark_run_summary` -> `analysis/manuscript/outputs/logs/ex2_benchmark_run_summary.txt` (auxiliary: Example 2 dynamic benchmark summary). Runtime and diagnostics summary for the dynamic LDVB versus MCMC benchmark under the disclosed backend profile.
+- [reproduced] `log_ex2_benchmark_run_summary` -> `analysis/manuscript/outputs/logs/ex2_benchmark_run_summary.txt` (auxiliary: Example 2 dynamic benchmark summary). Runtime and diagnostics summary for the dynamic LDVB versus MCMC benchmark under the disclosed backend settings.
 - [reproduced] `tab_ex2_dynamic_benchmark` -> `analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv` (tab:ex2bench). Representative dynamic LDVB versus MCMC benchmark for Example 2 under backend setting B.
 - [reproduced] `fig_ex2quant` -> `analysis/manuscript/outputs/figures/ex2quant.png` (fig:ex2quant). Composite Sunspots figure with full-series panel, quantile-comparison panel, and gamma histogram.
 - [reproduced] `fig_ex2quant_ldvb` -> `analysis/manuscript/outputs/figures/ex2quant_ldvb.png` (new: fig ex2quant LDVB counterpart). Composite Sunspots figure with full-series panel, quantile-comparison panel, and gamma histogram.
@@ -40,10 +44,6 @@ Seed: 20260501
 - [reproduced] `log_ex4_run_summary` -> `analysis/manuscript/outputs/logs/ex4_run_summary.txt` (Example 4 textual outputs). Sparse Nishimura-Suchard RHS static simulation settings and recovery metrics for Example 4.
 - [reproduced] `tab_ex4static_summary` -> `analysis/manuscript/outputs/tables/ex4static_summary.csv` (tab:ex4static). Runtime and sparse-signal recovery metrics for LDVB and MCMC under the rhs_ns prior.
 - [reproduced] `fig_ex4static` -> `analysis/manuscript/outputs/figures/ex4static.png` (fig:ex4static). Sparse Nishimura-Suchard RHS static simulation coefficient-recovery comparison for p0 = 0.05, 0.25, 0.50.
-- [reproduced] `ex1_model_output` -> `analysis/manuscript/outputs/logs/ex1_model_output.txt` (Example 1 model block). polytrend model object output.
-- [reproduced] `ex1_run_summary` -> `analysis/manuscript/outputs/logs/ex1_run_summary.txt` (Example 1 textual outputs). Includes backend metadata and high-iteration trace diagnostics.
-- [reproduced] `fig_ex1mcmc` -> `analysis/manuscript/outputs/figures/ex1mcmc.png` (fig:ex1mcmc). Trace and density plots for sigma and gamma from a dedicated higher-iteration free-sigma median MCMC run with thinning=10.
-- [approximate] `tab_ex1_runtime` -> `analysis/manuscript/outputs/tables/ex1_runtime_summary.csv` (Example 1 runtime statements). Runtimes vary by hardware/profile; trace run intentionally uses higher iterations.
 - [reproduced] `tab_api_migration_map` -> `analysis/manuscript/outputs/tables/manuscript_api_migration_map.csv` (global code migration). Maps deprecated manuscript calls to current package API.
 - [reproduced] `tab_benchmark_backend_settings` -> `analysis/manuscript/outputs/tables/benchmark_backend_settings.csv` (auxiliary: benchmark backend settings). Defines setting A (pure-R baseline) and setting B (manuscript-matched backend).
 - [reproduced] `tab_benchmark_environment` -> `analysis/manuscript/outputs/tables/benchmark_environment.csv` (auxiliary: benchmark environment details). CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.
@@ -53,8 +53,9 @@ Seed: 20260501
 - api_update: Deprecated exdqlmChecks replaced by the diagnostics() generic.
 - api_update: Deprecated y= usage removed from exdqlmPlot/compPlot/exdqlmForecast calls; article examples now prefer plot(), predict(), and diagnostics().
 - ex2_policy: Example 2 manuscript workflow now uses LDVB and MCMC only; ISVB support artifacts were retired.
-- ex1: Lake Huron refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements depend on the reference computer (see ex1_run_summary).
-- ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=103).
+- backend: Benchmark setting B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
+- ex1: Lake Huron public replication refits the manuscript models; ex1mcmc uses a dedicated high-iteration median MCMC chain, and runtime statements depend on the reference computer (see ex1_run_summary).
+- ex2_ldvb_diag: Added LDVB diagnostic refit for convergence checks (tol=0.01, n.samp=3000, iter=200).
 - ex2: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
 - ex2_ldvb: Sunspots LDVB discount-factor screen selects seasonal discount factor=0.85 by CRPS for this run profile; KL is reported alongside it.
 - ex3: Example 3 selected lambda=0.990 using training-data PPLC with static transfer psi coefficients (discount fixed at 1.000).
@@ -66,7 +67,6 @@ Seed: 20260501
 - coverage: All publication-set manuscript artifacts were targeted in this pipeline.
 - timing: Runtime values in the manuscript are recorded elapsed times and are expected to differ across computers.
 - timing: Runtime values depend on hardware and backend settings; benchmark tables reflect the standard-profile reproduction run recorded here.
+- benchmark: Benchmark tables reported in the manuscript use backend setting B; benchmark_backend_settings.csv defines both disclosed benchmark settings.
 - benchmark: benchmark_environment.csv records CPU, R version, package/article state, backend options, seeds, and dataset sizes for the tracked benchmark run.
 - scope: Automated reproduction outputs are isolated under analysis/manuscript; manuscript text updates are tracked separately in exdqlm-jss.tex.
-- backend: Benchmark setting B (manuscript-matched backend) is active for manuscript runs; current MCMC backend options are exdqlm.use_cpp_mcmc=TRUE and exdqlm.cpp_mcmc_mode='fast'.
-- benchmark: Benchmark tables reported in the manuscript use backend setting B; benchmark_backend_settings.csv defines both disclosed benchmark settings.
