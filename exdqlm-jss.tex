@@ -895,7 +895,8 @@ R> plot(syn.fore, time = 1973:1980, add = TRUE, show.median = FALSE,
 R> abline(v = 1972, lty = 3)
 R> legend("bottomleft", legend = c("Observed-period synthesis (95%)",
 +          "Forecast synthesis (95%)"),
-+          fill = c(synth.obs.col, synth.fore.col), border = NA, bty = "n", cex = 0.66)
++       fill = c(synth.obs.col, synth.fore.col), border = NA, box.lty = 0, 
++       bg = adjustcolor("white", alpha.f = 0.86), bty = "o", cex = 0.66)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1327,10 +1328,12 @@ R> title(expression(zeta[t]))
 R> par(mar = c(3.8, 4.2, 2.1, 0.8))
 R> plot(y.train, type = "n", ylim = c(-0.11, 0.01), xlab = "time", ylab = "component CrIs")
 R> plot(MTF, type = "state", index = 9, col = "steelblue", add = TRUE)
+R> grid(col = "grey90")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(psi[list(NOI, t)]))
 R> plot(y.train, type = "n", ylim = c(-0.015, 0.020), xlab = "time", ylab = "component CrIs")
 R> plot(MTF, type = "state", index = 10, col = "darkorange", add = TRUE)
+R> grid(col = "grey90")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 2)
 R> title(expression(psi[list(AMO, t)]))
 \end{CodeInput}
