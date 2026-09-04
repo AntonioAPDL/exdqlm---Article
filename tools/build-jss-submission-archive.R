@@ -45,6 +45,15 @@ copy_tree <- function(from, to, pattern = NULL) {
   invisible(to)
 }
 
+copy_named <- function(from_dir, to_dir, files) {
+  from <- file.path(from_dir, files)
+  stop_missing(from, sprintf("Required files in %s", from_dir))
+  for (file in files) {
+    copy_one(file.path(from_dir, file), file.path(to_dir, file))
+  }
+  invisible(to_dir)
+}
+
 repo_root <- normalizePath(repo_root, winslash = "/", mustWork = TRUE)
 stamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
 out_parent <- normalizePath(file.path(repo_root, ".."), winslash = "/", mustWork = TRUE)
@@ -71,22 +80,51 @@ required_root <- file.path(repo_root, c(
 stop_missing(required_root, "Required submission file")
 stop_missing(file.path(repo_root, c("figures", "tables", "logs")), "Required output directory")
 
+figure_files <- c(
+  "ex1mcmc.png",
+  "ex1quants.png",
+  "ex2quant.png",
+  "ex2checks.png",
+  "ex3data.png",
+  "ex3quantcomps.png",
+  "ex3zetapsi.png",
+  "ex3forecast.png",
+  "ex4static.png"
+)
+table_files <- c(
+  "ex2_df_scan_kl.csv",
+  "ex2_dynamic_benchmark.csv",
+  "ex3_diagnostics_summary.csv",
+  "ex3_forecast_metrics.csv",
+  "ex4static_summary.csv"
+)
+log_files <- c(
+  "M95-print.txt",
+  "M95-summary.txt",
+  "MTF-median-kt.txt",
+  "sessionInfo.txt"
+)
+
 copy_one(file.path(repo_root, "README.md"), file.path(replication_dir, "README.md"))
 copy_one(file.path(repo_root, "manuscript-reproducibility-index.md"),
          file.path(replication_dir, "MANIFEST.txt"))
 copy_one(file.path(repo_root, "code.R"), file.path(replication_dir, "code.R"))
 copy_one(file.path(repo_root, "code.Rout"), file.path(replication_dir, "code.Rout"))
 copy_one(file.path(repo_root, "Rplots.pdf"), file.path(replication_dir, "Rplots.pdf"))
-copy_tree(file.path(repo_root, "figures"), file.path(replication_dir, "figures"))
-copy_tree(file.path(repo_root, "tables"), file.path(replication_dir, "tables"))
-copy_tree(file.path(repo_root, "logs"), file.path(replication_dir, "logs"))
+copy_named(file.path(repo_root, "figures"), file.path(replication_dir, "figures"),
+           figure_files)
+copy_named(file.path(repo_root, "tables"), file.path(replication_dir, "tables"),
+           table_files)
+copy_named(file.path(repo_root, "logs"), file.path(replication_dir, "logs"),
+           log_files)
 
 manuscript_dir <- file.path(replication_dir, "manuscript-source")
 for (file in c("exdqlm-jss.tex", "exdqlm-jss.bbl", "references.bib",
                "jss.cls", "jss.bst", "Sweave.sty", "jsslogo.jpg")) {
   copy_one(file.path(repo_root, file), file.path(manuscript_dir, file))
 }
-copy_tree(file.path(repo_root, "figures"), file.path(manuscript_dir, "figures"))
+copy_named(file.path(repo_root, "figures"), file.path(manuscript_dir, "figures"),
+           figure_files)
 
 old_wd <- setwd(replication_dir)
 on.exit(setwd(old_wd), add = TRUE)

@@ -6,9 +6,8 @@ and supporting output. The public entry point is the flat batch script `code.R`.
 ## Required package
 
 The manuscript and replication materials target `exdqlm` version 1.1.1. Install
-the submitted source tarball before running the script. This version uses serial
-R-controlled RNG streams in manuscript stochastic helpers and the stabilized
-default exAL scale-skewness updates for MCMC and LDVB.
+the submitted source tarball before running the script. This version uses
+R-controlled random-number streams for manuscript stochastic computations.
 
 ## Public command
 
@@ -45,22 +44,16 @@ R CMD BATCH --vanilla code.R code.Rout
 The full script also prints the fitted object `M95`, `summary(M95)`,
 `MTF$median.kt`, Tables 7--10, and `sessionInfo()` to `code.Rout`.
 
-## Supporting files
+## Supporting Files
 
-The full run records supporting information in:
-
-- `tables/benchmark_environment.csv`
-- `tables/benchmark_backend_settings.csv`
-- `logs/M95-print.txt`
-- `logs/M95-summary.txt`
-- `logs/MTF-median-kt.txt`
-- `logs/sessionInfo.txt`
+The full run records supporting information in `logs/M95-print.txt`,
+`logs/M95-summary.txt`, `logs/MTF-median-kt.txt`, and `logs/sessionInfo.txt`.
 
 Runtime values are elapsed fitting times on the recorded platform and should not
 be treated as machine-independent constants.
 
-## Development files
+## Development Files
 
 The repository keeps modular scripts under `analysis/` for author-side
-maintenance and for generating the flat public script. These files are useful
-for development but are not the public replication interface for JSS.
+maintenance. These files are useful for development but are not the public
+replication interface for JSS and are not needed to run the submitted archive.
