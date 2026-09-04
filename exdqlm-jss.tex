@@ -721,7 +721,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 78.232 seconds
+Run-time: 171.974 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -742,7 +742,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 78.232 seconds
+Run-time: 171.974 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -779,7 +779,7 @@ R> M50.trace = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model, df = 0.9, dim
 +                         init.from.vb = TRUE,
 +                         vb_init_controls = list(method = "ldvb", verbose = FALSE),
 +                         mh.proposal = "slice",
-+                         n.burn = 7000, n.mcmc = 3000,verbose = FALSE)
++                         n.burn = 7000, n.mcmc = 3000, verbose = FALSE)
 R> par(mfcol = c(2, 2), mar = c(4.1, 4.1, 2.1, 1.0))
 R> keep.idx = seq(1, length(M50.trace$samp.sigma), by = 10)
 R> sigma.trace = coda::mcmc(M50.trace$samp.sigma[keep.idx], thin = 10)
@@ -796,7 +796,8 @@ The unrestricted median run is used only to assess whether the additional skewne
 \begin{CodeChunk}
 \begin{CodeInput}
 R> M50.dqlm = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model, df = 0.9, dim.df = 2,
-+             gam.init = 0, fix.gamma = TRUE, n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
++             gam.init = 0, fix.gamma = TRUE, n.burn = 2000, n.mcmc = 3000,
++             verbose = FALSE)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -824,7 +825,7 @@ Next, we forecast the $k=8$ step-ahead distributions starting in 1972. To do thi
 \begin{CodeChunk}
 \begin{CodeInput}
 R> fFF = model$FF
-R> fGG =  model$GG
+R> fGG = model$GG
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1093,8 +1094,8 @@ R> diag.M2mcmc = diagnostics(M2mcmc)
 R> table7 = data.frame(
 +    model   = c("DQLM", "DQLM", "exDQLM", "exDQLM"),
 +    method  = c("LDVB", "MCMC", "LDVB", "MCMC"),
-+    runtime = c(M1$run.time, M1mcmc$run.time,
-+                M2$run.time, M2mcmc$run.time),
++    runtime = c(as.numeric(M1$run.time), as.numeric(M1mcmc$run.time),
++                as.numeric(M2$run.time), as.numeric(M2mcmc$run.time)),
 +    KL      = c(diag.M1$m1.KL,   diag.M1mcmc$m1.KL,
 +                diag.M2$m1.KL,   diag.M2mcmc$m1.KL),
 +    CRPS    = c(diag.M1$m1.CRPS, diag.M1mcmc$m1.CRPS,
@@ -1154,10 +1155,10 @@ months are treated as known future inputs; the display is therefore conditional
 on those covariates rather than an operational forecast of the climate indices.
 The complete overlap used here has 432 monthly observations. The first 414
 observations, January 1987 through June 2021, form the training period; the final
-18 observations, July 2021 through December 2022, form the forecast holdout. The essential data alignment is shown below. The replication script adds
-date and completeness checks, uses the same training-window scaling, and writes
-the aligned modeling data to
-\code{analysis/manuscript/outputs/tables/ex3\_model\_dataset.csv}.
+18 observations, July 2021 through December 2022, form the forecast holdout.
+The essential data alignment is shown below. The replication script uses the
+same date construction, merge, training-window split, and training-window
+scaling shown in the code blocks for this example.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1346,7 +1347,7 @@ visually close.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(NA, ylim = c(-1.5, 1.5), xlim = c(2016, 2020), ylab = "covariate contribution")
+R> plot(NA, ylim = c(-2.5, 3), xlim = c(2016, 2020), ylab = "covariate contribution")
 R> grid(col = "grey90")
 R> plot(MREG, type = "component", index = 8:9, add = TRUE, col = "steelblue")
 R> plot(MTF, type = "component", index = 8, add = TRUE, col = "forestgreen")
@@ -1712,10 +1713,10 @@ R> for (i in seq_along(p.grid)) {
 +    qrmse.m1 = diag.i$m1.ref_rmse
 +    qrmse.m2 = diag.i$m2.ref_rmse
 +    table10 = rbind(table10,
-+                    data.frame(p0 = p0, method = "LDVB", runtime = M.ldvb[[i]]$run.time,
++                    data.frame(p0 = p0, method = "LDVB", runtime = as.numeric(M.ldvb[[i]]$run.time),
 +                               active.rmse = active.rmse.m1, null.mae = null.mae.m1,
 +                               holdout.qrmse = qrmse.m1),
-+                    data.frame(p0 = p0, method = "MCMC", runtime = M.mcmc[[i]]$run.time,
++                    data.frame(p0 = p0, method = "MCMC", runtime = as.numeric(M.mcmc[[i]]$run.time),
 +                               active.rmse = active.rmse.m2, null.mae = null.mae.m2,
 +                               holdout.qrmse = qrmse.m2))
 + }
