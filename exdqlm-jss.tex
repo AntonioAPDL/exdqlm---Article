@@ -806,9 +806,9 @@ The results are \code{exdqlmMCMC} objects that can be used for analysis and fore
 \begin{CodeInput}
 R> par(mfrow = c(2, 2), mar = c(4.4, 4.1, 2.2, 1.2), oma = c(0, 0, 0.8, 0))
 R> plot(M95); title("(a) Dynamic quantiles")
-R> plot(M50.dqlm, add = TRUE, col = "blue")
-R> plot(M5, add = TRUE, col = "forest green")
-R> legend("topright", lty = 1, bty = "n", col = c("purple", "blue", "forest green"),
+R> plot(M50.dqlm, add = TRUE, col = "steelblue")
+R> plot(M5, add = TRUE, col = "forestgreen")
+R> legend("topright", lty = 1, bty = "n", col = c("purple", "steelblue", "forestgreen"),
 +        legend = c(expression('p'[0]*'=0.95'), expression('p'[0]*'=0.50'),
 +                   expression('p'[0]*'=0.05')))
 \end{CodeInput}
@@ -842,8 +842,8 @@ R> fc50 = predict(M50.dqlm, start.t = length(LakeHuron), k = 8,
 R> fc05 = predict(M5, start.t = length(LakeHuron), k = 8,
 +                fFF = fFF, fGG = fGG, return.draws = TRUE)
 R> plot(fc95, add = TRUE)
-R> plot(fc50, add = TRUE, cols = c("blue", "light blue"))
-R> plot(fc05, add = TRUE, cols = c("forest green", "green"))
+R> plot(fc50, add = TRUE, cols = c("steelblue", "light blue"))
+R> plot(fc05, add = TRUE, cols = c("forestgreen", "darkseagreen"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -907,7 +907,16 @@ R> legend("bottomleft", legend = c("Observed-period synthesis (95%)",
 \subsection{Sunspots}
 \label{sec:ex2}
 
-For our next example, we use the yearly Sunspot time series from the package \pkg{datasets}. The data are yearly counts for sunspots from 1700 to 1988, shown in Figure \ref{fig:ex2quant}. In this example we show how to use the \pkg{dlm} package to create the state-space model, combine blocks of a state-space model, apply the LDVB approximation through \code{exdqlmLDVB()}, perform visual model diagnostics to compare the exDQLM with the DQLM, and use those diagnostics for discount-factor selection.
+For our next example, we use the yearly Sunspot time series from the package \pkg{datasets}. 
+
+\begin{CodeChunk}
+    \begin{CodeInput}
+R> plot.ts(sunspot.year, col = "dark grey", ylab = "sunspot count", xlab = "year")
+R> title("Sunspot time series")
+    \end{CodeInput}
+\end{CodeChunk}
+
+The data are yearly counts for sunspots from 1700 to 1988, shown in Figure \ref{fig:ex2quant}. In this example we show how to use the \pkg{dlm} package to create the state-space model, combine blocks of a state-space model, apply the LDVB approximation through \code{exdqlmLDVB()}, perform visual model diagnostics to compare the exDQLM with the DQLM, and use those diagnostics for discount-factor selection.
 
 Upper-tail sunspot activity is a natural setting for illustrating dynamic quantile modeling of cyclic count data. We therefore model the \(0.85\) quantile in this example. Although sunspot activity is recorded as a count, we use the continuous exAL working likelihood to model its upper conditional quantile; the example is not intended as a discrete-count likelihood analysis. Again, we begin by building the state-space structure used to estimate the quantile. Here we choose to model the quantile with a first order polynomial trend component as well as a Fourier form seasonal component that incorporates a fundamental period every 11 observations (years), as well as some of its corresponding harmonics. This results in a dynamic model with a total of 9 state parameters, 1 for the first order polynomial component and 8 for the seasonal component. The \pkg{exdqlm} functions are compatible with time-invariant \code{dlm} objects from the \pkg{dlm} package. For example, we create the first order trend component with the function \code{dlmModPoly()} from the \pkg{dlm} package, then use \code{as.exdqlm()} to turn the output into an \code{exdqlm} object.
 \begin{CodeChunk}
@@ -961,9 +970,9 @@ We can visualize the differences between the two resulting dynamic quantiles wit
 \begin{CodeChunk}
 \begin{CodeInput}
 R> plot(sunspot.year, xlim = c(1780, 1830), col = "dark grey", ylab = "quantile 95% CrIs")
-R> plot(M1, add = TRUE, col = "red")
-R> plot(M2, add = TRUE, col = "blue")
-R> legend("topleft", lty = 1, bty = "n", col = c("red", "blue"), legend= c("DQLM", "exDQLM"))
+R> plot(M1, add = TRUE, col = "red2")
+R> plot(M2, add = TRUE, col = "steelblue")
+R> legend("topleft", lty = 1, bty = "n", col = c("red2", "steelblue"), legend= c("DQLM", "exDQLM"))
 R> title("LDVB fit for p0 = 0.85")
 \end{CodeInput}
 \end{CodeChunk}
@@ -992,7 +1001,7 @@ To further examine the two models, we use the \code{diagnostics()} method to cre
 \begin{CodeInput}
 R> par(mfrow = c(2, 3))
 R> diagM1M2 = diagnostics(M1, M2)
-R> plot(diagM1M2, cols = c("red", "blue"))
+R> plot(diagM1M2, cols = c("red2", "steelblue"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1025,10 +1034,10 @@ R> round(df.scan, 3)
 \end{CodeInput}
 \begin{CodeOutput}
    X1   X2   CRPS    KL
-1 0.9 0.85  6.235 0.120
-2 0.9 0.90  8.261 0.145
-3 0.9 0.95 12.458 0.173
-4 0.9 1.00 20.233 0.256
+1 0.9 0.85  6.567 0.107
+2 0.9 0.90  8.210 0.146
+3 0.9 0.95 10.854 0.173
+4 0.9 1.00 14.731 0.247
 \end{CodeOutput}
 \begin{CodeInput}
 R> possible.dfs[which.min(metrics[, "CRPS"]), ]
@@ -1062,17 +1071,41 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
  \tworowcell{DQLM} & LDVB & \textbf{23.84} & \textbf{0.133} & 8.525 & 3851.4 \\
- & MCMC & 153.02 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
- \midrule
+ & MCMC & 153.02 & 0.176 & \textbf{7.605} & \textbf{2954.9} \\
+ \midrule   
  \tworowcell{exDQLM} & LDVB & \textbf{43.48} & \textbf{0.107} & 6.558 & 3015.2 \\
- & MCMC & 200.02 & 0.152 & \textbf{5.147} & \textbf{2216.1} \\
- \bottomrule
+ & MCMC & 200.02 & 0.164 & \textbf{5.091} & \textbf{2194.8} \\
+ \bottomrule   
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark setting B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.1, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
-Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. Within each model class, LDVB is substantially faster. For both DQLM and exDQLM, LDVB gives the smaller KL value, while MCMC gives smaller CRPS and PPLC values. Comparing model classes within each inferential method, the exDQLM improves the LDVB diagnostics relative to the DQLM, and under MCMC it improves the predictive-score criteria CRPS and PPLC. The comparison shows why runtime is reported together with predictive criteria rather than by itself.
+Table \ref{tab:ex2bench} gives a compact runtime-and-diagnostic comparison. \code{print()} on the following data frame will produce the results. 
+
+\begin{CodeChunk}
+    \begin{CodeInput}
+R> diag.M1 = diagnostics(M1)      
+R> diag.M1mcmc = diagnostics(M1mcmc)  
+R> diag.M2 = diagnostics(M2)      
+R> diag.M2mcmc = diagnostics(M2mcmc) 
+
+R> table7 = data.frame(
++    model   = c("DQLM", "DQLM", "exDQLM", "exDQLM"),
++    method  = c("LDVB", "MCMC", "LDVB", "MCMC"),
++    runtime = c(M1$run.time, M1mcmc$run.time,
++                M2$run.time, M2mcmc$run.time),
++    KL      = c(diag.M1$m1.KL,   diag.M1mcmc$m1.KL,
++                diag.M2$m1.KL,   diag.M2mcmc$m1.KL),
++    CRPS    = c(diag.M1$m1.CRPS, diag.M1mcmc$m1.CRPS,
++                diag.M2$m1.CRPS, diag.M2mcmc$m1.CRPS),
++    PPLC    = c(diag.M1$m1.pplc, diag.M1mcmc$m1.pplc,
++                diag.M2$m1.pplc, diag.M2mcmc$m1.pplc)
+R> )
+    \end{CodeInput}
+\end{CodeChunk}
+
+Within each model class, LDVB is substantially faster. For both DQLM and exDQLM, LDVB gives the smaller KL value, while MCMC gives smaller CRPS and PPLC values. Comparing model classes within each inferential method, the exDQLM improves the LDVB diagnostics relative to the DQLM, and under MCMC it improves the predictive-score criteria CRPS and PPLC. The comparison shows why runtime is reported together with predictive criteria rather than by itself.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1121,8 +1154,7 @@ months are treated as known future inputs; the display is therefore conditional
 on those covariates rather than an operational forecast of the climate indices.
 The complete overlap used here has 432 monthly observations. The first 414
 observations, January 1987 through June 2021, form the training period; the final
-18 observations, July 2021 through December 2022, form the forecast holdout. The
-following chunk shows the essential data alignment. The replication script adds
+18 observations, July 2021 through December 2022, form the forecast holdout. The essential data alignment is shown below. The replication script adds
 date and completeness checks, uses the same training-window scaling, and writes
 the aligned modeling data to
 \code{analysis/manuscript/outputs/tables/ex3\_model\_dataset.csv}.
@@ -1143,6 +1175,28 @@ R> X.train = scale(X.raw[1:414, ])
 R> X.holdout = scale(X.raw[415:432, ], center = attr(X.train, "scaled:center"),
 +                   scale = attr(X.train, "scaled:scale"))
 \end{CodeInput}
+\end{CodeChunk}
+
+These data can be seen in Figure \ref{fig:ex3data} and plotted as follows.
+
+\begin{CodeChunk}
+    \begin{CodeInput}
+R> par(mfrow = c(2, 1), mar = c(3.0, 4.2, 1.0, 0.8), oma = c(1.6, 0, 0, 0))
+R> plot(y.fit, col = "grey35", ylab = "log flow", xlab = "", lwd = 1.1)
+R> grid(col = "grey88")
+R> abline(v = xy.coords(y.fit)$x[414], col = "orange", lty = 5, lwd = 1.2)
+R> 
+R> plot(NA, xlab = "", ylab = "standardized index", xlim = range(time(y.fit)), ylim = c(-4.3,4) )
+R> lines(as.numeric(time(y.fit)), scale(X.raw[,1]), col ="steelblue", lwd = 1.6, lty = 1)
+R> lines(as.numeric(time(y.fit)), scale(X.raw[,2]), col = "red2", lwd = 1.6, lty = 2)
+R> grid(col = "grey88")
+R> legend(
++    "topleft", legend = c("NOI", "AMO"), col = c("steelblue","red2"),
++    lty = c(1,2), lwd = 1.6, bty = "n", ncol = 2
+R> )
+R> abline(v = xy.coords(y.fit)$x[414], col = "orange", lty = 5, lwd = 1.2)
+R> mtext("time", side = 1, outer = TRUE, line = 0.4)
+    \end{CodeInput}
 \end{CodeChunk}
 
 The baseline state-space model contains a first-order polynomial trend and a Fourier-form seasonal component with period 12. The seasonal block includes \(h = 1\), \(h = 2\), and \(h \approx 0.147\), corresponding to annual, semiannual, and approximately 7-year cycles on the monthly scale.
@@ -1245,9 +1299,9 @@ R> plot(y.train, col = "grey", ylim = c(1, 8), xlim = c(2016, 2020),
 R> grid(col = "grey90")
 R> plot(M0, add = TRUE)
 R> plot(MREG, add = TRUE, col = "steelblue")
-R> plot(MTF, add = TRUE, col = "forest green")
+R> plot(MTF, add = TRUE, col = "forestgreen")
 R> legend("topleft", legend = c("M0 no covariates", "MREG direct regression",
-+                "MTF transfer function"), col = c("purple", "steelblue", "forest green"),
++                "MTF transfer function"), col = c("purple", "steelblue", "forestgreen"),
 +                lty = 1, lwd = 1.5, bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
@@ -1278,7 +1332,7 @@ R> plot(NA, ylim = c(-2, 2), xlim = c(2016, 2020), ylab = "seasonal components")
 R> grid(col = "grey90")
 R> plot(M0, type = "component", index = 2:7, add = TRUE)
 R> plot(MREG, type = "component", index = 2:7, add = TRUE, col = "steelblue")
-R> plot(MTF, type = "component", index = 2:7, add = TRUE, col = "forest green")
+R> plot(MTF, type = "component", index = 2:7, add = TRUE, col = "forestgreen")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1295,10 +1349,10 @@ visually close.
 R> plot(NA, ylim = c(-1.5, 1.5), xlim = c(2016, 2020), ylab = "covariate contribution")
 R> grid(col = "grey90")
 R> plot(MREG, type = "component", index = 8:9, add = TRUE, col = "steelblue")
-R> plot(MTF, type = "component", index = 8, add = TRUE, col = "forest green")
+R> plot(MTF, type = "component", index = 8, add = TRUE, col = "forestgreen")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> legend("topleft", legend = c("MREG direct", "MTF transfer"),
-+        col = c("steelblue", "forest green"), lty = 1, lwd = 1.5, bty = "n")
++        col = c("steelblue", "forestgreen"), lty = 1, lwd = 1.5, bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1321,7 +1375,7 @@ data.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE))
-R> plot(MTF, type = "state", index = 8, col = "forest green", add = FALSE)
+R> plot(MTF, type = "state", index = 8, col = "forestgreen", add = FALSE)
 R> grid(col = "grey90")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(zeta[t]))
@@ -1420,7 +1474,7 @@ R> plot(y.fit, col = "grey70", xlim = c(2020, 2023), ylim = c(1,8),
 R> grid(col = "grey90")
 R> plot(fc.M0, add = TRUE, cols = c("purple", "plum"))
 R> plot(fc.MREG, add = TRUE, cols = c("steelblue", "lightblue"))
-R> plot(fc.MTF, add = TRUE, cols = c("forest green", "darkseagreen"))
+R> plot(fc.MTF, add = TRUE, cols = c("forestgreen", "darkseagreen"))
 R> t.all = as.numeric(time(y.fit))
 R> hold.idx = 415:432
 R> lines(t.all[hold.idx], y.fit[hold.idx], col = "darkorange", lwd = 1.4)
@@ -1428,7 +1482,7 @@ R> points(t.all[hold.idx], y.fit[hold.idx], col = "darkorange", pch = 1, cex = 0
 R> abline(v = t.all[hold.idx[1]], col = "orange", lty = 5, lwd = 1.2)
 R> legend("topleft", legend = c("M0 no covariates", "MREG direct regression",
 +            "MTF transfer", "held-out observations"),
-+            col = c("purple", "steelblue", "forest green", "darkorange"),
++            col = c("purple", "steelblue", "forestgreen", "darkorange"),
 +            lty = 1, pch = c(NA, NA, NA, 1), bty = "n")
 \end{CodeInput}
 \end{CodeChunk}
@@ -1635,7 +1689,41 @@ Figure \ref{fig:ex4static} shows that, in this simulated realization, both metho
 \label{tab:ex4static}
 \end{table}
 
-Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE summaries stored in the \code{exalStaticDiagnostic} objects returned by \code{diagnostics()}. The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE in all three fits, although the median difference is small. MCMC gives smaller active-signal RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is slightly smaller at \(p_0 = 0.50\). Null-coefficient MAE is slightly smaller for LDVB at \(p_0 = 0.05\) and for MCMC at \(p_0 = 0.25\) and \(p_0 = 0.50\). The LDVB fit is nevertheless faster in all three cases, with runtime reductions of roughly 2.2-fold at \(p_0 = 0.05\), 2.5-fold at \(p_0 = 0.25\), and 5.5-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
+Table \ref{tab:ex4static} includes active-signal RMSE and null-coefficient MAE summaries stored in the \code{exalStaticDiagnostic} objects returned by \code{diagnostics()}. 
+
+\begin{CodeChunk}
+    \begin{CodeInput}
+R> active.idx = which(beta.true != 0) + 1   
+R> null.idx   = which(beta.true == 0) + 1
+
+R> table10 = data.frame(p0 = numeric(0), method = character(0), runtime = numeric(0),
++                       active.rmse = numeric(0), null.mae = numeric(0),
++                       holdout.qrmse = numeric(0), stringsAsFactors = FALSE)
+R> 
+R> for (i in seq_along(p.grid)) {
++    p0 = p.grid[i]
++    diag.i = diag.static[[i]]
++    beta.m1 = diag.i$m1.beta.mean
++    beta.m2 = diag.i$m2.beta.mean
++    active.rmse.m1 = sqrt(mean((beta.m1[active.idx] - beta.true[beta.true != 0])^2))
++    null.mae.m1    = mean(abs(beta.m1[null.idx]))
++    active.rmse.m2 = sqrt(mean((beta.m2[active.idx] - beta.true[beta.true != 0])^2))
++    null.mae.m2    = mean(abs(beta.m2[null.idx]))
++    qrmse.m1 = diag.i$m1.ref_rmse
++    qrmse.m2 = diag.i$m2.ref_rmse
++    table10 = rbind(table10,
++                    data.frame(p0 = p0, method = "LDVB", runtime = M.ldvb[[i]]$run.time,
++                               active.rmse = active.rmse.m1, null.mae = null.mae.m1,
++                               holdout.qrmse = qrmse.m1),
++                    data.frame(p0 = p0, method = "MCMC", runtime = M.mcmc[[i]]$run.time,
++                               active.rmse = active.rmse.m2, null.mae = null.mae.m2,
++                               holdout.qrmse = qrmse.m2))
+R> }
+    \end{CodeInput}
+\end{CodeChunk}
+
+
+The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE in all three fits, although the median difference is small. MCMC gives smaller active-signal RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is slightly smaller at \(p_0 = 0.50\). Null-coefficient MAE is slightly smaller for LDVB at \(p_0 = 0.05\) and for MCMC at \(p_0 = 0.25\) and \(p_0 = 0.50\). The LDVB fit is nevertheless faster in all three cases, with runtime reductions of roughly 2.2-fold at \(p_0 = 0.05\), 2.5-fold at \(p_0 = 0.25\), and 5.5-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
 
 \section{Conclusion}
 \label{sec:summary}
