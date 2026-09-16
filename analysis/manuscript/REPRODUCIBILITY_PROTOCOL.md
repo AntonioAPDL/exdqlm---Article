@@ -10,7 +10,7 @@ local package paths, or author-side fit files. Install the submitted package
 source tarball first:
 
 ```sh
-R CMD INSTALL exdqlm_1.1.1.tar.gz
+R CMD INSTALL exdqlm_1.1.2.tar.gz
 ```
 
 Then run the full manuscript replication:
@@ -39,12 +39,10 @@ RNGversion("4.6.0")
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 ```
 
-The script also requires `exdqlm` version 1.1.1 at load time. The package patch
-for 1.1.1 makes compiled stochastic helper paths use serial R-controlled RNG
-streams, avoiding OpenMP worker RNG calls and wall-clock/thread-indexed seeds.
-The same patch uses the stabilized exAL scale-skewness defaults exercised by
-the manuscript rerun: an exact scale-collapsed gamma update for MCMC and a
-structured `q(gamma) q(sigma | gamma)` factor for LDVB.
+The script also requires `exdqlm` version 1.1.2 at load time. This CRAN release
+is the public package version used for the final manuscript rerun and includes
+the fixed-seed dynamic MCMC reproducibility correction needed for the JSS
+replication checks.
 
 The thread environment variables are set before R starts so BLAS/OpenMP
 configuration is visible to the full R session. Runtime values are expected to
@@ -72,7 +70,7 @@ development files are not the public execution interface.
 
 Before resubmission, the required author checks are:
 
-- package test suite and `R CMD check` for `exdqlm_1.1.1.tar.gz`;
+- package test suite and `R CMD check` for `exdqlm_1.1.2.tar.gz`;
 - `R CMD BATCH --vanilla code.R code.Rout`;
 - manuscript and response compilation;
 - archive extraction in a directory without Git metadata, followed by the

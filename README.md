@@ -16,12 +16,13 @@ The JSS resubmission should contain these files:
 - `exdqlm-jss.pdf`: manuscript PDF, including appendices.
 - `response-to-editor.pdf`: point-by-point response to the prescreening
   comments.
-- `exdqlm_1.1.1.tar.gz`: `exdqlm` package source tarball.
+- `exdqlm_1.1.2.tar.gz`: `exdqlm` package source tarball.
 - `exdqlm-jss-replication.tar.gz`: article source and replication materials.
 
-The package source is version 1.1.1 of `exdqlm`, a narrow reproducibility patch
-for the manuscript rerun. It corrects compiled stochastic helper paths so the
-manuscript computations use serial R-controlled random-number streams.
+The package source is version 1.1.2 of `exdqlm`, the public CRAN version used
+for the final manuscript rerun. The 1.1.x patch line tightens fixed-seed
+reproducibility for the manuscript computations, including platform-stable fast
+dynamic MCMC state simulation.
 
 ## Replication script
 
@@ -40,13 +41,13 @@ saved fit objects, inspect Git metadata, or require local paths.
 Install the submitted package source tarball before running the replication:
 
 ```sh
-R CMD INSTALL exdqlm_1.1.1.tar.gz
+R CMD INSTALL exdqlm_1.1.2.tar.gz
 ```
 
 Confirm the installed version:
 
 ```sh
-Rscript -e 'stopifnot(as.character(packageVersion("exdqlm")) == "1.1.1")'
+Rscript -e 'stopifnot(as.character(packageVersion("exdqlm")) == "1.1.2")'
 ```
 
 ## Run the replication
@@ -65,7 +66,7 @@ R CMD BATCH --vanilla code.R code.Rout
 
 The full run can take substantial time because it refits Bayesian dynamic and
 static quantile models. On the reference Linux platform used for the manuscript,
-the complete batch run finished in about 64 minutes. Runtime values are platform
+the complete batch run finished in about 42 minutes. Runtime values are platform
 dependent, so the manuscript and generated output record the reference
 environment.
 

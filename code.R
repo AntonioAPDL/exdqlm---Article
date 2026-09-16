@@ -1,5 +1,9 @@
 #!/usr/bin/env Rscript
 
+# exdqlm JSS replication script
+# Run from this directory with:
+# R CMD BATCH --vanilla code.R code.Rout
+
 rm(list = ls(all.names = TRUE))
 
 run.start = proc.time()[["elapsed"]]
@@ -23,8 +27,8 @@ for (pkg in c("exdqlm", "coda", "dlm", "MASS")) {
 }
 
 suppressPackageStartupMessages(library("exdqlm"))
-if (as.character(packageVersion("exdqlm")) != "1.1.1") {
-  stop("This replication script requires exdqlm version 1.1.1.", call. = FALSE)
+if (as.character(packageVersion("exdqlm")) != "1.1.2") {
+  stop("This replication script requires exdqlm version 1.1.2.", call. = FALSE)
 }
 
 options(exdqlm.use_cpp_kf = TRUE,
@@ -70,6 +74,11 @@ write_table = function(x, file) {
   invisible(file.path("tables", file))
 }
 
+print_jss_heading = function(label) {
+  rule = paste(rep("=", 78), collapse = "")
+  cat("\n", rule, "\n", label, "\n", rule, "\n", sep = "")
+}
+
 cat("exdqlm JSS replication run\n")
 cat(sprintf("R version: %s\n", R.version.string))
 cat(sprintf("exdqlm version: %s\n", as.character(packageVersion("exdqlm"))))
@@ -100,8 +109,10 @@ M5 = exdqlmMCMC(y = LakeHuron, p0 = 0.05, model = model, df = 0.9, dim.df = 2,
                 PriorGamma = list(m_gam = 1, s_gam = 0.1, df_gam = 1),
                 n.burn = 2000, n.mcmc = 3000, verbose = FALSE)
 
-## --- 
+## ---
+print_jss_heading("M95")
 M95
+print_jss_heading("summary(M95)")
 summary(M95)
 
 ## --- 
@@ -292,6 +303,7 @@ table7.print = transform(table7,
                          KL = round(KL, 3),
                          CRPS = round(CRPS, 3),
                          PPLC = round(PPLC, 1))
+print_jss_heading("Table 7 / tab:ex2bench")
 print(table7.print, row.names = FALSE)
 write_table(table7.print, "ex2_dynamic_benchmark.csv")
 
@@ -427,8 +439,9 @@ abline(h = 0, col = "orange", lty = 3, lwd = 2)
 title(expression(psi[list(AMO, t)]))
 save_current_plot("ex3zetapsi.png")
 
-## --- 
-MTF$median.kt
+## ---
+print_jss_heading("MTF$median.kt")
+print(MTF$median.kt)
 writeLines(capture.output(MTF$median.kt), file.path("logs", "MTF-median-kt.txt"))
 
 ## --- 
@@ -491,6 +504,7 @@ tab.ex3 = data.frame(model = c("M0", "MREG", "MTF"),
                      PPLC = c(diag.M0$m1.pplc, diag.MREG$m1.pplc, diag.MTF$m1.pplc))
 tab.ex3.print = transform(tab.ex3, KL = round(KL, 3), CRPS = round(CRPS, 3),
                           PPLC = round(PPLC, 1))
+print_jss_heading("Table 8 / tab:ex3")
 print(tab.ex3.print, row.names = FALSE)
 write_table(tab.ex3.print, "ex3_diagnostics_summary.csv")
 
@@ -504,6 +518,7 @@ tab.ex3.fc = data.frame(model = c("M0", "MREG", "MTF"),
                         CRPS = c(fc.diag.M0$m1.CRPS, fc.diag.MREG$m1.CRPS, fc.diag.MTF$m1.CRPS))
 tab.ex3.fc.print = transform(tab.ex3.fc, check.loss = round(check.loss, 3),
                              CRPS = round(CRPS, 3))
+print_jss_heading("Table 9 / tab:ex3forecastmetrics")
 print(tab.ex3.fc.print, row.names = FALSE)
 write_table(tab.ex3.fc.print, "ex3_forecast_metrics.csv")
 
@@ -601,6 +616,7 @@ table10.print = transform(table10,
                           active.rmse = round(active.rmse, 3),
                           null.mae = round(null.mae, 3),
                           holdout.qrmse = round(holdout.qrmse, 3))
+print_jss_heading("Table 10 / tab:ex4static")
 print(table10.print, row.names = FALSE)
 write_table(table10.print, "ex4static_summary.csv")
 

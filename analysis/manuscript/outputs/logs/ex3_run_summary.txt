@@ -1,5 +1,5 @@
 settings=standard
-package_source=exdqlm_1.1.1
+package_source=CRAN exdqlm 1.1.2
 p0=0.15
 trend_prior_m0=3.912023, trend_prior_C0=1.000
 climate_coef_prior_C0=1.000
@@ -58,24 +58,16 @@ Convergence:
 3  MREG   95      TRUE
 
 Final-training package diagnostics from diagnostics():
-                   model                  label        KL KL_flipped      CRPS
-1         M0_no_transfer         M0 no transfer 0.1220467 0.06611444 0.4161584
-2 MREG_direct_regression MREG direct regression 0.1084268 0.03935311 0.3470891
-3  MTF_transfer_function  MTF transfer function 0.1489126 0.07723087 0.3135160
-      PPLC
-1 177.9442
-2 160.6239
-3 141.6944
+  model    KL  CRPS  PPLC
+1    M0 0.122 0.416 177.9
+2  MREG 0.108 0.347 160.6
+3   MTF 0.149 0.314 141.7
 
 Final holdout forecast metrics from diagnostics():
-                   model                  label horizon mean_check_loss
-1         M0_no_transfer         M0 no transfer      18       0.1197884
-2 MREG_direct_regression MREG direct regression      18       0.1138821
-3  MTF_transfer_function  MTF transfer function      18       0.2212879
-       CRPS
-1 0.4728687
-2 0.3990580
-3 0.8026444
+  model check.loss  CRPS
+1    M0      0.120 0.473
+2  MREG      0.114 0.399
+3   MTF      0.221 0.803
 
 Sensitivity forecast metrics:
                    model                  label horizon mean_check_loss

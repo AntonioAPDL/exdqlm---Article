@@ -38,12 +38,12 @@ with a point-by-point response.
 The submitted files are:
 \begin{itemize}
 \item \code{exdqlm-jss.pdf}: manuscript PDF.
-\item \code{exdqlm\_1.1.1.tar.gz}: software source.
+\item \code{exdqlm\_1.1.2.tar.gz}: software source.
 \item \code{exdqlm-jss-replication.tar.gz}: replication archive.
 \item \code{response-to-editor.pdf}: this response.
 \end{itemize}
 
-The package source is version 1.1.1 of \pkg{exdqlm}. This is a narrow
+The package source is version 1.1.2 of \pkg{exdqlm}. This is a narrow
 reproducibility patch for the manuscript rerun: it does not change the exported
 API or manuscript conclusions.
 
@@ -99,12 +99,13 @@ and
 \code{RNGkind("Mersenne-Twister", "Inversion", "Rejection")}.
 \]
 It also stops immediately unless the loaded package is \pkg{exdqlm} version
-1.1.1.
+1.1.2.
 
-While investigating the differences reported by the editors, we also tightened
-the package's stochastic reproducibility controls. Version 1.1.1 is the public
-package version used for the resubmission, and the full JSS replication was
-rerun with this version.
+While investigating the differences reported by the editors, we identified a
+fixed-seed platform discrepancy in the fast dynamic MCMC path and corrected it
+before rerunning the article. Version 1.1.2 is the public CRAN package version
+used for the resubmission, and the full JSS replication was rerun with this
+version.
 
 The manuscript and README now state the reference environment and the thread
 variables used before launching \proglang{R}. Runtime values are still described
@@ -167,10 +168,10 @@ article and in the batch output.
 
 Before resubmission we ran the following checks with \proglang{R} 4.6.0:
 \begin{itemize}
-\item targeted package repeatability tests for compiled samplers, dynamic MCMC,
-  and static MCMC;
+\item targeted package repeatability checks for the fixed-seed dynamic MCMC
+  path relevant to the manuscript;
 \item the package test suite and CRAN submission checks for
-  \code{exdqlm\_1.1.1.tar.gz};
+  \code{exdqlm\_1.1.2.tar.gz};
 \item \code{R CMD BATCH --vanilla code.R code.Rout};
 \item manuscript and response compilation; and
 \item archive extraction, checksum verification, script parsing, package-version

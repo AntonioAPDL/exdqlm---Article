@@ -446,7 +446,6 @@ main <- function() {
   ex3_prose_requirements <- c(
     "first 414",
     "final 18",
-    "ex3\\_model\\_dataset.csv",
     "January 1987 through June 2021",
     "July 2021 through December 2022"
   )
@@ -461,7 +460,7 @@ main <- function() {
       paste(missing_ex3_prose, collapse = ", ")
     ))
   } else {
-    ok("Example 3 prose records the data window, train/holdout split, and aligned-data artifact")
+    ok("Example 3 prose records the data window and train/holdout split")
   }
   low_level_ex3_patterns <- c(
     "date >= as\\.Date",

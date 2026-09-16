@@ -141,7 +141,7 @@ testthat::test_that("package resolver includes current and generic source checko
 
   testthat::expect_true("exdqlm" %in% candidates)
   testthat::expect_true("exdqlm__wt__1p1p0_exdqlm_article" %in% candidates)
-  testthat::expect_true("exdqlm__wt__1.1.1-jss" %in% candidates)
+  testthat::expect_true("exdqlm__wt__1.1.2-jss" %in% candidates)
   testthat::expect_true("exdqlm__wt__0p5p0_exdqlm_article" %in% candidates)
 })
 
@@ -239,7 +239,7 @@ testthat::test_that("RNG and benchmark backend reproducibility policy is explici
   testthat::skip_if_not_installed("yaml")
   cfg <- yaml::read_yaml(file.path(repo_root, "analysis", "config", "params_manuscript.yml"))
 
-  testthat::expect_identical(as.character(cfg$expected_exdqlm_version), "1.1.1")
+  testthat::expect_identical(as.character(cfg$expected_exdqlm_version), "1.1.2")
   testthat::expect_identical(as.character(cfg$rng$kind), "Mersenne-Twister")
   testthat::expect_identical(as.character(cfg$rng$normal_kind), "Inversion")
   testthat::expect_identical(as.character(cfg$rng$sample_kind), "Rejection")
@@ -262,7 +262,6 @@ testthat::test_that("preflight enforces the manuscript code policy", {
   testthat::expect_true(any(grepl("low-level Example 3 markers", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("first 414", check_lines, fixed = TRUE)))
   testthat::expect_true(any(grepl("final 18", check_lines, fixed = TRUE)))
-  testthat::expect_true(any(grepl("ex3\\\\_model\\\\_dataset.csv", check_lines, fixed = TRUE)))
 })
 
 testthat::test_that("manuscript examples avoid data-centered prior means", {
@@ -317,11 +316,7 @@ testthat::test_that("Example 3 uses static climate coefficients in the three-mod
 })
 
 testthat::test_that("Example 3 canonical output tables include all three models", {
-  expected_models <- c(
-    "M0_no_transfer",
-    "MREG_direct_regression",
-    "MTF_transfer_function"
-  )
+  expected_models <- c("M0", "MREG", "MTF")
   table_paths <- file.path(repo_root, c(
     "analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv",
     "analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv"
@@ -354,7 +349,7 @@ testthat::test_that("Example 3 forecast metrics are registered and package-score
   }
 
   fc <- utils::read.csv(fc_path, stringsAsFactors = FALSE)
-  testthat::expect_true(all(c("model", "label", "horizon", "mean_check_loss", "CRPS") %in% names(fc)))
+  testthat::expect_true(all(c("model", "check.loss", "CRPS") %in% names(fc)))
   testthat::expect_false(any(c(
     "quantile_coverage", "n_exceedances", "interval_score",
     "coverage", "mean_interval_width"
@@ -363,53 +358,39 @@ testthat::test_that("Example 3 forecast metrics are registered and package-score
 
 testthat::test_that("generated manuscript tables are coherent", {
   ex2 <- read_required_csv("analysis/manuscript/outputs/tables/ex2_dynamic_benchmark.csv")
-  expect_columns(
-    ex2,
-    c("model", "method", "runtime_sec", "KL", "CRPS", "pplc", "backend_settings"),
-    "Example 2 benchmark table"
-  )
+  expect_columns(ex2, c("model", "method", "runtime", "KL", "CRPS", "PPLC"),
+                 "Example 2 benchmark table")
   testthat::expect_true(all(c("DQLM", "exDQLM") %in% ex2$model))
   testthat::expect_true(all(c("LDVB", "MCMC") %in% ex2$method))
-  expect_finite_columns(ex2, c("runtime_sec", "KL", "CRPS", "pplc"), "Example 2 benchmark table")
-  testthat::expect_true(all(ex2$runtime_sec > 0))
+  expect_finite_columns(ex2, c("runtime", "KL", "CRPS", "PPLC"), "Example 2 benchmark table")
+  testthat::expect_true(all(ex2$runtime > 0))
   testthat::expect_true(all(ex2$CRPS >= 0))
-  testthat::expect_true(all(ex2$pplc >= 0))
+  testthat::expect_true(all(ex2$PPLC >= 0))
 
-  expected_models <- c(
-    "M0_no_transfer",
-    "MREG_direct_regression",
-    "MTF_transfer_function"
-  )
+  expected_models <- c("M0", "MREG", "MTF")
 
   ex3 <- read_required_csv("analysis/manuscript/outputs/tables/ex3_diagnostics_summary.csv")
-  expect_columns(ex3, c("model", "label", "KL", "KL_flipped", "CRPS", "PPLC"), "Example 3 diagnostics table")
+  expect_columns(ex3, c("model", "KL", "CRPS", "PPLC"), "Example 3 diagnostics table")
   testthat::expect_true(all(expected_models %in% ex3$model))
-  expect_finite_columns(ex3, c("KL", "KL_flipped", "CRPS", "PPLC"), "Example 3 diagnostics table")
+  expect_finite_columns(ex3, c("KL", "CRPS", "PPLC"), "Example 3 diagnostics table")
   testthat::expect_true(all(ex3$CRPS >= 0))
   testthat::expect_true(all(ex3$PPLC >= 0))
 
   ex3_fc <- read_required_csv("analysis/manuscript/outputs/tables/ex3_forecast_metrics.csv")
-  expect_columns(ex3_fc, c("model", "label", "horizon", "mean_check_loss", "CRPS"), "Example 3 forecast table")
+  expect_columns(ex3_fc, c("model", "check.loss", "CRPS"), "Example 3 forecast table")
   testthat::expect_true(all(expected_models %in% ex3_fc$model))
-  expect_finite_columns(ex3_fc, c("horizon", "mean_check_loss", "CRPS"), "Example 3 forecast table")
-  testthat::expect_true(all(ex3_fc$horizon > 0))
-  testthat::expect_true(all(ex3_fc$mean_check_loss >= 0))
+  expect_finite_columns(ex3_fc, c("check.loss", "CRPS"), "Example 3 forecast table")
+  testthat::expect_true(all(ex3_fc$check.loss >= 0))
   testthat::expect_true(all(ex3_fc$CRPS >= 0))
 
   ex4 <- read_required_csv("analysis/manuscript/outputs/tables/ex4static_summary.csv")
-  expect_columns(
-    ex4,
-    c("p0", "method", "runtime_sec", "active_signal_rmse", "inactive_signal_mae", "holdout_quantile_rmse"),
-    "Example 4 static summary table"
-  )
+  expect_columns(ex4, c("p0", "method", "runtime", "active.rmse", "null.mae", "holdout.qrmse"),
+                 "Example 4 static summary table")
   testthat::expect_true(all(c("LDVB", "MCMC") %in% ex4$method))
-  expect_finite_columns(
-    ex4,
-    c("p0", "runtime_sec", "active_signal_rmse", "inactive_signal_mae", "holdout_quantile_rmse"),
-    "Example 4 static summary table"
-  )
+  expect_finite_columns(ex4, c("p0", "runtime", "active.rmse", "null.mae", "holdout.qrmse"),
+                        "Example 4 static summary table")
   testthat::expect_true(all(ex4$p0 > 0 & ex4$p0 < 1))
-  testthat::expect_true(all(ex4$runtime_sec > 0))
+  testthat::expect_true(all(ex4$runtime > 0))
 
   env <- read_required_csv(
     "analysis/manuscript/outputs/tables/benchmark_environment.csv",
@@ -453,10 +434,10 @@ testthat::test_that("main manuscript inline table values match generated outputs
     stringsAsFactors = FALSE
   )
   for (i in seq_len(nrow(ex2))) {
-    expect_value(ex2$runtime_sec[[i]], 2)
+    expect_value(ex2$runtime[[i]], 2)
     expect_value(ex2$KL[[i]], 3)
     expect_value(ex2$CRPS[[i]], 3)
-    expect_value(ex2$pplc[[i]], 1)
+    expect_value(ex2$PPLC[[i]], 1)
   }
 
   ex3 <- utils::read.csv(
@@ -466,7 +447,7 @@ testthat::test_that("main manuscript inline table values match generated outputs
   for (i in seq_len(nrow(ex3))) {
     expect_value(ex3$KL[[i]], 3)
     expect_value(ex3$CRPS[[i]], 3)
-    expect_value(ex3$PPLC[[i]], 3)
+    expect_value(ex3$PPLC[[i]], 1)
   }
 
   ex3_fc <- utils::read.csv(
@@ -474,7 +455,7 @@ testthat::test_that("main manuscript inline table values match generated outputs
     stringsAsFactors = FALSE
   )
   for (i in seq_len(nrow(ex3_fc))) {
-    expect_value(ex3_fc$mean_check_loss[[i]], 3)
+    expect_value(ex3_fc$check.loss[[i]], 3)
     expect_value(ex3_fc$CRPS[[i]], 3)
   }
 
@@ -483,10 +464,10 @@ testthat::test_that("main manuscript inline table values match generated outputs
     stringsAsFactors = FALSE
   )
   for (i in seq_len(nrow(ex4))) {
-    expect_value(ex4$runtime_sec[[i]], 2)
-    expect_value(ex4$active_signal_rmse[[i]], 3)
-    expect_value(ex4$inactive_signal_mae[[i]], 3)
-    expect_value(ex4$holdout_quantile_rmse[[i]], 3)
+    expect_value(ex4$runtime[[i]], 2)
+    expect_value(ex4$active.rmse[[i]], 3)
+    expect_value(ex4$null.mae[[i]], 3)
+    expect_value(ex4$holdout.qrmse[[i]], 3)
   }
 
   env <- utils::read.csv(
@@ -514,7 +495,7 @@ testthat::test_that("Example 1 displayed MCMC trace seed and summaries match ref
   testthat::expect_true(grepl("set.seed(20260616)", tex, fixed = TRUE))
   testthat::expect_false(grepl("set.seed(20260620)", tex, fixed = TRUE))
 
-  for (value in c("-0.039", "(-0.397, 0.291)", "0.375", "(0.302, 0.460)")) {
+  for (value in c("-0.004", "(-0.388, 0.475)", "0.373", "(0.279, 0.461)")) {
     testthat::expect_true(
       grepl(value, tex, fixed = TRUE),
       info = sprintf("Example 1 posterior summary value %s is missing from exdqlm-jss.tex.", value)
@@ -542,15 +523,15 @@ testthat::test_that("M95 printed object excerpts match reference output", {
   runtime_line <- trimws(runtime_line)
   testthat::expect_length(runtime_line, 1L)
 
-  for (value in c(runtime_line, "sigma  0.2003 0.02553", "gamma -4.5720 0.93906")) {
+  for (value in c(runtime_line, "sigma  0.2067 0.02494", "gamma -4.3171 0.88387")) {
     testthat::expect_true(
       grepl(value, tex, fixed = TRUE),
       info = sprintf("M95 displayed value %s is missing from exdqlm-jss.tex.", value)
     )
   }
   testthat::expect_true(grepl(runtime_line, m95_print, fixed = TRUE))
-  testthat::expect_true(grepl("sigma  0.2003 0.02553", m95_summary, fixed = TRUE))
-  testthat::expect_true(grepl("gamma -4.5720 0.93906", m95_summary, fixed = TRUE))
+  testthat::expect_true(grepl("sigma  0.2067 0.02494", m95_summary, fixed = TRUE))
+  testthat::expect_true(grepl("gamma -4.3171 0.88387", m95_summary, fixed = TRUE))
 })
 
 testthat::test_that("manuscript interpretation follows the regenerated Example 3 and Example 4 results", {

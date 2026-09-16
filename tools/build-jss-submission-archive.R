@@ -155,9 +155,9 @@ if (nzchar(pkg_tarball)) {
   pkg_tarball <- normalizePath(pkg_tarball, winslash = "/", mustWork = TRUE)
   copy_one(pkg_tarball, file.path(submission_dir, basename(pkg_tarball)))
 } else {
-  pkg_dest <- file.path(submission_dir, "exdqlm_1.1.1.tar.gz")
+  pkg_dest <- file.path(submission_dir, "exdqlm_1.1.2.tar.gz")
   utils::download.file(
-    "https://cran.r-project.org/src/contrib/exdqlm_1.1.1.tar.gz",
+    "https://cran.r-project.org/src/contrib/exdqlm_1.1.2.tar.gz",
     destfile = pkg_dest,
     mode = "wb",
     quiet = TRUE
@@ -169,5 +169,5 @@ cat(sprintf("%s\n", submission_dir))
 cat("Upload these four files to JSS:\n")
 cat(sprintf("- %s\n", file.path(submission_dir, "exdqlm-jss.pdf")))
 cat(sprintf("- %s\n", file.path(submission_dir, "response-to-editor.pdf")))
-cat(sprintf("- %s\n", file.path(submission_dir, "exdqlm_1.1.1.tar.gz")))
+cat(sprintf("- %s\n", file.path(submission_dir, "exdqlm_1.1.2.tar.gz")))
 cat(sprintf("- %s\n", replication_tar))

@@ -601,7 +601,7 @@ build_script <- function(repo_root, out_file) {
   cfg_params$benchmark_profiles <- NULL
   cfg_params$manuscript_output <- cfg_params$promotion
   cfg_params$promotion <- NULL
-  cfg_params$expected_exdqlm_version <- "1.1.1"
+  cfg_params$expected_exdqlm_version <- "1.1.2"
   setup <- sanitize_setup(read_file(file.path(repo_root, "analysis", "lib", "manuscript_setup.R")), cfg_params)
   ex4_helpers <- sanitize_ex4_helpers(read_file(file.path(repo_root, "analysis", "manuscript", "examples", "ex4_static", "helpers.R")))
   examples <- lapply(

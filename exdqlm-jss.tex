@@ -101,7 +101,7 @@
 
 Quantile regression has become a widely used alternative to mean-based modeling in static settings. However, dynamic quantile methods and accompanying software remain comparatively limited. In Bayesian parametric quantile regression, the asymmetric Laplace (AL) likelihood has played a central role because it is linked to the check-loss function used in classical quantile regression \citep{yu2001bayesian,koenkerquantile} and allows convenient mixture representations for posterior computation. Nevertheless, the AL distribution can be restrictive as an error model. More flexible error distributions have been studied extensively in the Bayesian nonparametric literature \citep{kottas2009bayesian,reich2009flexible,taddy2010bayesian}; however, the resulting methods can be computationally demanding for dynamic models and longer time series.
 
-\citet{yan2025family} introduce the extended asymmetric Laplace (exAL) distribution, a parametric extension of the AL distribution that preserves many of its computational advantages while relaxing some restrictive assumptions. Their work also develops Bayesian exAL regression for static quantile models. Building on the exAL family, \citet{me} developed the extended dynamic quantile linear model (exDQLM) framework for modeling time-varying quantiles, together with Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes (ISVB) inference and a transfer-function extension for lagged covariate effects. The Laplace--delta variational Bayes (LDVB) implementation considered here follows the general nonconjugate variational inference strategy of \citet{wang2013nonconjugatevb}, specialized to the exAL scale--skewness block; in version 1.1.1, the default LDVB scale--skewness factor is a structured \(q(\gamma)q(\sigma\mid\gamma)\) approximation that keeps the conditional GIG scale structure explicit. Thus, the exAL distribution, the exDQLM state-space model formulation, the MCMC and ISVB algorithms in \citet{me}, and the general nonconjugate variational strategy constitute the principal methodological foundations behind the present work.
+\citet{yan2025family} introduce the extended asymmetric Laplace (exAL) distribution, a parametric extension of the AL distribution that preserves many of its computational advantages while relaxing some restrictive assumptions. Their work also develops Bayesian exAL regression for static quantile models. Building on the exAL family, \citet{me} developed the extended dynamic quantile linear model (exDQLM) framework for modeling time-varying quantiles, together with Markov chain Monte Carlo (MCMC) and importance-sampling variational Bayes (ISVB) inference and a transfer-function extension for lagged covariate effects. The Laplace--delta variational Bayes (LDVB) implementation considered here follows the general nonconjugate variational inference strategy of \citet{wang2013nonconjugatevb}, specialized to the exAL scale--skewness block; in version 1.1.2, the default LDVB scale--skewness factor is a structured \(q(\gamma)q(\sigma\mid\gamma)\) approximation that keeps the conditional GIG scale structure explicit. Thus, the exAL distribution, the exDQLM state-space model formulation, the MCMC and ISVB algorithms in \citet{me}, and the general nonconjugate variational strategy constitute the principal methodological foundations behind the present work.
 
 The contribution of the present article is software-centered. The \proglang{R} package \pkg{exdqlm} turns these methodological components into an integrated workflow for specifying, fitting, inspecting, diagnosing, forecasting, and reproducing Bayesian dynamic and static quantile analyses. The package makes five main software contributions:
 \begin{itemize}
@@ -155,7 +155,7 @@ Most other \proglang{R} packages relevant here implement static quantile regress
 Quantile-regression software implementations are also available in Python, MATLAB and Julia, but they are general static quantile regression tools and do not provide the Bayesian latent-state quantile workflow considered here.
 \pkg{exdqlm} is not intended to replace broad general-purpose quantile-regression toolkits, additive quantile-regression packages, or software designed specifically for joint multi-quantile estimation. Its role is more specific: it fills a gap between general quantile-regression software and general Gaussian state-space software by providing a dedicated Bayesian workflow for dynamic quantile state-space models. General state-space packages in \proglang{R}, such as \pkg{dlm} \citep{dlm} and \pkg{dynr} \citep{dynr}, remain useful for dynamic modeling, but they do not provide the quantile likelihoods, filtered and smoothed quantile-state summaries, diagnostics, forecasting, or synthesis tools targeted here.
 
-The \code{exdqlm} package is distributed under the MIT License and is available from the Comprehensive R Archive Network at \url{https://CRAN.R-project.org/package=exdqlm}. The package source submitted with this article is version 1.1.1, a reproducibility patch built on the public 1.1.x package line.
+The \code{exdqlm} package is distributed under the MIT License and is available from the Comprehensive R Archive Network at \url{https://CRAN.R-project.org/package=exdqlm}. The package source submitted with this article is version 1.1.2, a reproducibility patch built on the public 1.1.x package line.
 
 The remainder of the paper is organized as follows. Section \ref{sec:exdqlm} summarizes the modeling framework, including algorithms used for posterior inference and transfer-function state augmentation for nonlinear input effects. It also discusses static quantile regression as a special case of the framework. Section \ref{sec:diags} details the model diagnostics and forecasting method implemented in the package. Section \ref{sec:design} describes the package design and implementation, including the object families and standard methods used by the examples. Section \ref{sec:exs} illustrates the package through four examples. Section \ref{sec:summary} summarizes the package capabilities, and Appendices A--F collect selected posterior targets, package-specific computational blocks, diagnostic formulas, and predictive-synthesis details used by the implementation.
 
@@ -498,12 +498,12 @@ The function \code{quantileSynthesis()} combines posterior predictive draws from
 
 The object system also provides several extension points. Compatible user-supplied state-space specifications can be converted to \code{exdqlm} objects through \code{as.exdqlm()} and combined with existing model components through the \code{+} method. For developers, the shared fitted-object families provide a pattern for incorporating additional inference engines: an engine-specific class can also include \code{exdqlmFit} or \code{exalStaticFit} in its class vector and thereby use the common methods, with specialized methods supplied only when its behavior differs. Additional displays and post-processing procedures can similarly be implemented as S3 methods for the fitted, forecast, diagnostic, or synthesis object families.
 
-Computationally intensive operations have \proglang{C++} implementations through \pkg{Rcpp},  with \proglang{R} implementations retained for numerical parity checks and portability. These include the exported exAL density, distribution, quantile, and random-generation utilities; selected Kalman recursions and model builders; posterior and latent-variable sampling paths; posterior predictive simulation; and MCMC backend routing. Package options control backend routing for Kalman recursions, model builders, posterior sampling, posterior predictive simulation, and MCMC routing. In version 1.1.1, compiled stochastic helper paths used by the manuscript run through serial \proglang{R}-controlled random-number streams, rather than worker-thread or private C++ random-number streams.
+Computationally intensive operations have \proglang{C++} implementations through \pkg{Rcpp},  with \proglang{R} implementations retained for numerical parity checks and portability. These include the exported exAL density, distribution, quantile, and random-generation utilities; selected Kalman recursions and model builders; posterior and latent-variable sampling paths; posterior predictive simulation; and MCMC backend routing. Package options control backend routing for Kalman recursions, model builders, posterior sampling, posterior predictive simulation, and MCMC routing. In the 1.1.x patch line, compiled stochastic helper paths used by the manuscript run through serial \proglang{R}-controlled random-number streams, rather than worker-thread or private C++ random-number streams; version 1.1.2 also uses a platform-stable covariance square root for the fast dynamic MCMC state-simulation path.
 
 The variational routines return standardized traces for the ELBO, scale, skewness, and convergence diagnostics, with the closed-form, structured scale--skewness, and legacy Laplace--delta ELBO components documented in the appendices. The examples use fixed benchmark settings, recorded random-number seeds, and a documented reference environment so that run times and stochastic outputs are reproducible.
 
 \paragraph{Computational details and replication.}
-The manuscript results were generated with \proglang{R} 4.6.0 and \pkg{exdqlm} 1.1.1 on x86\_64 Linux. The replication script sets \code{RNGversion("4.6.0")} and \code{RNGkind("Mersenne-Twister", "Inversion", "Rejection")} before applying the recorded seeds. Native thread variables for OpenMP and common BLAS implementations are set to one before launching \proglang{R}; the benchmark settings used in the examples enable the \code{"fast"} C++ MCMC backend and keep stochastic compiled helper streams controlled by the \proglang{R} random-number generator. The submitted replication archive contains a flat \code{code.R} script intended to be run with \code{R CMD BATCH --vanilla code.R code.Rout}. That run prints fitted-object output, Tables 7--10, selected scalar summaries, and \code{sessionInfo()} to \code{code.Rout}, and writes the manuscript figures to \code{Rplots.pdf} and to the PNG files used by this article. Runtime entries in the tables are elapsed fitting times on the recorded reference platform and are not intended to be machine-independent constants.
+The manuscript results were generated with \proglang{R} 4.6.0 and \pkg{exdqlm} 1.1.2 on x86\_64 Linux. The replication script sets \code{RNGversion("4.6.0")} and \code{RNGkind("Mersenne-Twister", "Inversion", "Rejection")} before applying the recorded seeds. Native thread variables for OpenMP and common BLAS implementations are set to one before launching \proglang{R}; the benchmark settings used in the examples enable the \code{"fast"} C++ MCMC backend and keep stochastic compiled helper streams controlled by the \proglang{R} random-number generator. The submitted replication archive contains a flat \code{code.R} script intended to be run with \code{R CMD BATCH --vanilla code.R code.Rout}. That run prints fitted-object output, Tables 7--10, selected scalar summaries, and \code{sessionInfo()} to \code{code.Rout}, and writes the manuscript figures to \code{Rplots.pdf} and to the PNG files used by this article. Runtime entries in the tables are elapsed fitting times on the recorded reference platform and are not intended to be machine-independent constants.
 These computational controls affect implementation and performance rather than the statistical models being fitted.
 
 \begin{table}[!htbp]
@@ -721,7 +721,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 171.974 seconds
+Run-time: 93.9 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -742,7 +742,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 171.974 seconds
+Run-time: 93.9 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -757,12 +757,12 @@ Stored draws:
 
 Scalar posterior summaries:
  Parameter    Mean      SD
-     sigma  0.2003 0.02553
-     gamma -4.5720 0.93906
+     sigma  0.2067 0.02494
+     gamma -4.3171 0.88387
 \end{CodeOutput}
 \end{CodeChunk}
 
-By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). For the diagnostic display, we run the unrestricted median model separately as \code{M50.trace} with a longer burn-in. Consistent with the symmetry of the data, the posterior mean of \(\gamma\) is \(-0.039\) with a 95\% credible interval \((-0.397, 0.291)\), while the posterior mean of \(\sigma\) is \(0.375\) with a 95\% credible interval \((0.302, 0.460)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} \citep{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
+By default, \code{exdqlmMCMC()} uses the package's LDVB routine, \code{exdqlmLDVB()}, to warm-start the chain. This initialization choice is separate from the subsequent MCMC kernel. Because the data are relatively symmetric, we do not expect the skewness parameter \(\gamma\) to be far from zero at \(p_0 = 0.5\). For the diagnostic display, we run the unrestricted median model separately as \code{M50.trace} with a longer burn-in. Consistent with the symmetry of the data, the posterior mean of \(\gamma\) is \(-0.004\) with a 95\% credible interval \((-0.388, 0.475)\), while the posterior mean of \(\sigma\) is \(0.373\) with a 95\% credible interval \((0.279, 0.461)\). All retained samples in the output of \code{exdqlmMCMC()} are \code{mcmc} objects, so we can use the package \pkg{coda} \citep{coda} to examine the trace and density plots of both \(\sigma\) and \(\gamma\). For readability, we plot every 10th retained draw in Figure \ref{fig:ex1mcmc}.
 
 \begin{figure}[t]
 \centering
@@ -1071,14 +1071,14 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{42.04} & \textbf{0.133} & 8.525 & 3851.4 \\
- & MCMC & 282.85 & 0.175 & \textbf{7.608} & \textbf{2969.0} \\
+ \tworowcell{DQLM} & LDVB & \textbf{22.99} & \textbf{0.133} & 8.525 & 3851.4 \\
+ & MCMC & 118.52 & 0.170 & \textbf{7.580} & \textbf{2966.0} \\
  \midrule   
- \tworowcell{exDQLM} & LDVB & \textbf{98.07} & \textbf{0.107} & 6.558 & 3015.2 \\
- & MCMC & 383.95 & 0.152 & \textbf{5.147} & \textbf{2216.1} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{81.14} & \textbf{0.107} & 6.558 & 3015.2 \\
+ & MCMC & 166.39 & 0.212 & \textbf{5.120} & \textbf{2206.8} \\
  \bottomrule   
 \end{tabular}
-\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark setting B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.1, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
+\caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark setting B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.2, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
 \label{tab:ex2bench}
 \end{table}
 
@@ -1118,7 +1118,7 @@ Within each model class, LDVB is substantially faster. For both DQLM and exDQLM,
 
 For the third example, we use observed average monthly water flow (cubic feet
 per second) at the Big Tree gauge of the San Lorenzo River in Santa Cruz
-County, CA \citep{btflow}. The \pkg{exdqlm} version 1.1.1 used for this
+County, CA \citep{btflow}. The \pkg{exdqlm} version 1.1.2 used for this
 article includes these measurements as the monthly time series \code{BTflow},
 which extends through March 2026. Here we use the complete overlap between
 \code{BTflow} and the package data frame \code{climateIndices},
@@ -1512,9 +1512,9 @@ R> tab.ex3 = data.frame(model = c("M0", "MREG", "MTF"),
  \toprule
  Model & KL & CRPS & PPLC \\
  \midrule
- \code{M0} no covariates & 0.122 & 0.416 & 177.944 \\
- \code{MREG} direct regression & \textbf{0.108} & 0.347 & 160.624 \\
- \code{MTF} transfer function & 0.149 & \textbf{0.314} & \textbf{141.694} \\
+ \code{M0} no covariates & 0.122 & 0.416 & 177.9 \\
+ \code{MREG} direct regression & \textbf{0.108} & 0.347 & 160.6 \\
+ \code{MTF} transfer function & 0.149 & \textbf{0.314} & \textbf{141.7} \\
  \bottomrule
 \end{tabular}
 \caption{Example 3: Big Tree water flow. Package diagnostics from
@@ -1676,14 +1676,14 @@ Figure \ref{fig:ex4static} shows that, in this simulated realization, both metho
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{50.49} & 0.108 & \textbf{0.034} & 0.673 \\
- & MCMC & 104.39 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
+ \tworowcell{0.05} & LDVB & \textbf{31.22} & 0.108 & \textbf{0.034} & 0.673 \\
+ & MCMC & 75.69 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{43.30} & 0.310 & 0.078 & 0.371 \\
- & MCMC & 110.19 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
+ \tworowcell{0.25} & LDVB & \textbf{31.62} & 0.310 & 0.078 & 0.371 \\
+ & MCMC & 74.72 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
  \midrule
-\tworowcell{0.50} & LDVB & \textbf{22.01} & \textbf{0.128} & 0.103 & 0.341 \\
- & MCMC & 142.12 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
+\tworowcell{0.50} & LDVB & \textbf{12.51} & \textbf{0.128} & 0.103 & 0.341 \\
+ & MCMC & 75.75 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
@@ -1724,7 +1724,7 @@ R> for (i in seq_along(p.grid)) {
 \end{CodeChunk}
 
 
-The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE in all three fits, although the median difference is small. MCMC gives smaller active-signal RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is slightly smaller at \(p_0 = 0.50\). Null-coefficient MAE is slightly smaller for LDVB at \(p_0 = 0.05\) and for MCMC at \(p_0 = 0.25\) and \(p_0 = 0.50\). The LDVB fit is nevertheless faster in all three cases, with runtime reductions of roughly 2.1-fold at \(p_0 = 0.05\), 2.5-fold at \(p_0 = 0.25\), and 6.5-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
+The results reinforce the visual comparison in Figure \ref{fig:ex4static}. The MCMC posterior-simulation fit has the smaller holdout quantile RMSE in all three fits, although the median difference is small. MCMC gives smaller active-signal RMSE at \(p_0 = 0.05\) and \(p_0 = 0.25\), while LDVB is slightly smaller at \(p_0 = 0.50\). Null-coefficient MAE is slightly smaller for LDVB at \(p_0 = 0.05\) and for MCMC at \(p_0 = 0.25\) and \(p_0 = 0.50\). The LDVB fit is nevertheless faster in all three cases, with runtime reductions of roughly 2.4-fold at \(p_0 = 0.05\), 2.4-fold at \(p_0 = 0.25\), and 6.1-fold at \(p_0 = 0.50\). In this benchmark, the LDVB approximation is useful as a rapid first-pass screen, while static MCMC provides a more expensive posterior-simulation comparison when interval accuracy or posterior tail behavior is central.
 
 \section{Conclusion}
 \label{sec:summary}
@@ -1992,7 +1992,7 @@ Section~\ref{sec:static_rhs}.
 The nonconjugate part of the exAL posterior is the joint scale--skewness
 block $(\sigma,\gamma)$. The LDVB routines in \pkg{exdqlm} specialize
 nonconjugate variational inference \citep{wang2013nonconjugatevb} to this
-block. In version 1.1.1, the default implementation uses a structured
+block. In version 1.1.2, the default implementation uses a structured
 \(q(\gamma)q(\sigma\mid\gamma)\) factor that preserves the conditional GIG
 scale kernel. The earlier two-dimensional Laplace--delta factor on transformed
 coordinates remains available for comparison and backward-compatible

@@ -5,9 +5,10 @@ and supporting output. The public entry point is the flat batch script `code.R`.
 
 ## Required package
 
-The manuscript and replication materials target `exdqlm` version 1.1.1. Install
-the submitted source tarball before running the script. This version uses
-R-controlled random-number streams for manuscript stochastic computations.
+The manuscript and replication materials target `exdqlm` version 1.1.2. Install
+the submitted source tarball before running the script. This public CRAN
+version is the final reference version used for the manuscript rerun and
+tightens fixed-seed reproducibility for the manuscript stochastic computations.
 
 ## Public command
 
