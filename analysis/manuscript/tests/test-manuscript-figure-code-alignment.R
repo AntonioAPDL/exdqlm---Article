@@ -51,7 +51,7 @@ testthat::test_that("displayed figure chunks retain canonical visual markers", {
   testthat::expect_false(grepl("add.band", fig6, fixed = TRUE))
   testthat::expect_true(grepl("ylim = c(1, 8)", fig6_top, fixed = TRUE))
   testthat::expect_true(grepl("ylim = c(-2, 2)", fig6_seasonal, fixed = TRUE))
-  testthat::expect_true(grepl("ylim = c(-1.5, 1.5)", fig6_covariate, fixed = TRUE))
+  testthat::expect_true(grepl("ylim = c(-2.5, 3)", fig6_covariate, fixed = TRUE))
 
   fig7 <- code_text(chunks, "chunk_032")
   testthat::expect_true(grepl("type = \"state\"", fig7, fixed = TRUE))
