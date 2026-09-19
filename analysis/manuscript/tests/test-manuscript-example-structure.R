@@ -71,7 +71,8 @@ testthat::test_that("Example 3 manuscript preprocessing is reader-facing", {
 
   testthat::expect_true(any(grepl("first 414", tex, fixed = TRUE)))
   testthat::expect_true(any(grepl("final 18", tex, fixed = TRUE)))
-  testthat::expect_true(any(grepl("ex3\\\\_model\\\\_dataset.csv", tex)))
+  testthat::expect_true(any(grepl("BTflow", tex, fixed = TRUE)))
+  testthat::expect_true(any(grepl("climateIndices", tex, fixed = TRUE)))
   testthat::expect_true(any(grepl("window\\(y\\.fit, end = c\\(2021, 6\\)\\)", tex)))
   testthat::expect_true(any(grepl("X\\.train = scale\\(X\\.raw\\[1:414, \\]\\)", tex)))
   testthat::expect_false(any(grepl("date >= as\\.Date|date <= as\\.Date|train\\.ind|holdout\\.ind", tex)))
