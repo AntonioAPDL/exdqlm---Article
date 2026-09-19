@@ -133,7 +133,7 @@ coda::traceplot(sigma.trace, main = "sigma trace")
 coda::densplot(sigma.trace, main = "sigma density")
 coda::traceplot(gamma.trace, main = "gamma trace")
 coda::densplot(gamma.trace, main = "gamma density")
-save_current_plot("ex1mcmc.png")
+save_current_plot("ex1mcmc.png", height = 5, width = 7)
 
 ## --- 
 M50.dqlm = exdqlmMCMC(y = LakeHuron, p0 = 0.50, model = model, df = 0.9, dim.df = 2,
@@ -197,7 +197,7 @@ legend("bottomleft", legend = c("Observed-period synthesis (95%)",
                                 "Forecast synthesis (95%)"),
        fill = c(synth.obs.col, synth.fore.col), border = NA, box.lty = 0, 
        bg = adjustcolor("white", alpha.f = 0.86), bty = "o", cex = 0.66)
-save_current_plot("ex1quants.png")
+save_current_plot("ex1quants.png", height = 5.75, width = 7)
 
 
 ## ============================================================================
@@ -240,14 +240,14 @@ title("LDVB fit for p0 = 0.85")
 hist(M2$samp.gamma, xlab = expression(gamma), main = "",
      col = adjustcolor("#4C72B0", alpha.f = 0.22), border = "#4C72B0")
 abline(v = median(M2$samp.gamma), col = "#4C72B0", lwd = 2)
-title("exDQLM posterior draws of gamma (p0 = 0.85)")
-save_current_plot("ex2quant.png")
+title("posterior draws of gamma (p0 = 0.85)")
+save_current_plot("ex2quant.png", height = 5.5, width = 7.5)
 
 ## --- Figure 4
 par(mfrow = c(2, 3))
 diagM1M2 = diagnostics(M1, M2)
 plot(diagM1M2, cols = c("red2", "steelblue"))
-save_current_plot("ex2checks.png")
+save_current_plot("ex2checks.png", height = 5, width = 7)
 
 ## --- 
 possible.dfs = cbind(0.9, seq(0.85, 1, 0.05))
@@ -263,7 +263,7 @@ for (i in 1:nrow(possible.dfs)) {
   metrics[i, ] = c(temp.check$m1.CRPS, temp.check$m1.KL)
 }
 df.scan = data.frame(possible.dfs, CRPS = metrics[, "CRPS"], KL = metrics[, "KL"])
-df.scan.print = round(df.scan, 3)
+df.scan.print = transform(df.scan, CRPS = round(CRPS, 2), KL = round(KL, 3))
 print(df.scan.print, row.names = FALSE)
 write_table(df.scan.print, "ex2_df_scan_kl.csv")
 
@@ -346,7 +346,7 @@ legend(
 )
 abline(v = xy.coords(y.fit)$x[414], col = "orange", lty = 5, lwd = 1.2)
 mtext("time", side = 1, outer = TRUE, line = 0.4)
-save_current_plot("ex3data.png")
+save_current_plot("ex3data.png", height = 5, width = 7.5)
 
 ## --- 
 trend.comp = polytrendMod(1, m0 = log(50), C0 = 1)
@@ -416,16 +416,16 @@ plot(MTF, type = "component", index = 8, add = TRUE, col = "forestgreen")
 abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 legend("topleft", legend = c("MREG direct", "MTF transfer"),
        col = c("steelblue", "forestgreen"), lty = 1, lwd = 1.5, bty = "n")
-save_current_plot("ex3quantcomps.png")
+save_current_plot("ex3quantcomps.png", height = 6.5, width = 7.5)
 
 ## --- Figure 7
 layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE))
+par(mar = c(3.8, 4.2, 2.1, 0.8))
 plot(MTF, type = "state", index = 8, col = "forestgreen", add = FALSE)
 grid(col = "grey90")
 abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 title(expression(zeta[t]))
 
-par(mar = c(3.8, 4.2, 2.1, 0.8))
 plot(y.train, type = "n", ylim = c(-0.11, 0.01), xlab = "time", ylab = "component CrIs")
 plot(MTF, type = "state", index = 9, col = "steelblue", add = TRUE)
 grid(col = "grey90")
@@ -437,7 +437,7 @@ plot(MTF, type = "state", index = 10, col = "darkorange", add = TRUE)
 grid(col = "grey90")
 abline(h = 0, col = "orange", lty = 3, lwd = 2)
 title(expression(psi[list(AMO, t)]))
-save_current_plot("ex3zetapsi.png")
+save_current_plot("ex3zetapsi.png", height = 5, width = 7.5)
 
 ## ---
 print_jss_heading("MTF$median.kt")
@@ -477,8 +477,10 @@ fc.MTF = predict(MTF, start.t = length(y.train), k = k.fore, fFF = FTF.future,
                  fGG = GTF.future, return.draws = TRUE, n.samp = 1000, seed = 20265201)
 
 ## --- Figure 8
-plot(y.fit, col = "grey70", xlim = c(2020, 2023), ylim = c(1,8),
+par(mfrow = c(1, 1))
+plot(y.fit, col = "grey70", xlim = c(2020, 2023), ylim = c(0.5,8), xaxt = "n",
      ylab = "log flow / forecast quantile", xlab = "time")
+axis(side = 1, at = seq(2020, 2023, by = 1))
 grid(col = "grey90")
 plot(fc.M0, add = TRUE, cols = c("purple", "plum"))
 plot(fc.MREG, add = TRUE, cols = c("steelblue", "lightblue"))
@@ -492,7 +494,7 @@ legend("topleft", legend = c("M0 no covariates", "MREG direct regression",
                              "MTF transfer", "held-out observations"),
        col = c("purple", "steelblue", "forestgreen", "darkorange"),
        lty = 1, pch = c(NA, NA, NA, 1), bty = "n")
-save_current_plot("ex3forecast.png")
+save_current_plot("ex3forecast.png", height = 6, width = 7.5)
 
 ## --- Table 8
 diag.M0 = diagnostics(M0)
@@ -577,7 +579,7 @@ for (i in seq_along(p.grid)) {plot(diag.static[[i]], type = "coefficients",
                                                                                       "MCMC 95% interval"), beta.ref.label = "truth", ylim = y.lim,
                                    ylab = if (i == 1) "coefficient value" else "",
                                    main = sprintf("p0 = %.2f", p.grid[i]), legend = i == 1)}
-save_current_plot("ex4static.png")
+save_current_plot("ex4static.png", height = 5.5, width = 8)
 
 ## --- Table 10
 

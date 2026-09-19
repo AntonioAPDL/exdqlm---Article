@@ -27,4 +27,4 @@
 "ex4_train_n","160"
 "ex4_holdout_n","800"
 "ex4_dataset_seed","20260712"
-"full_batch_elapsed_seconds","2498.571"
+"full_batch_elapsed_seconds","2425.085"

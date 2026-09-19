@@ -721,7 +721,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 93.9 seconds
+Run-time: 78.458 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -742,7 +742,7 @@ Burn-in: 2000
 Posterior draws: 3000
 State draws: 2 x 98 x 3000
 Posterior predictive draws: 98 x 3000
-Run-time: 93.9 seconds
+Run-time: 78.458 seconds
 
 Class: "exdqlmMCMC" "exdqlmFit"
 Use with: summary(), plot(), predict(), diagnostics()
@@ -992,7 +992,7 @@ To examine whether the added flexibility of the exDQLM is supported by the fitte
 R> hist(M2$samp.gamma, xlab = expression(gamma), main = "",
 +        col = adjustcolor("#4C72B0", alpha.f = 0.22), border = "#4C72B0")
 R> abline(v = median(M2$samp.gamma), col = "#4C72B0", lwd = 2)
-R> title("exDQLM posterior draws of gamma (p0 = 0.85)")
+R> title("posterior draws of gamma (p0 = 0.85)")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1031,14 +1031,15 @@ R> for (i in 1:nrow(possible.dfs)) {
 +   metrics[i, ] = c(temp.check$m1.CRPS, temp.check$m1.KL)
 + }
 R> df.scan = data.frame(possible.dfs, CRPS = metrics[, "CRPS"], KL = metrics[, "KL"])
-R> round(df.scan, 3)
+R> df.scan.print = transform(df.scan, CRPS = round(CRPS, 2), KL = round(KL, 3))
+R> print(df.scan.print, row.names = FALSE)
 \end{CodeInput}
 \begin{CodeOutput}
-   X1   X2   CRPS    KL
-1 0.9 0.85  6.567 0.107
-2 0.9 0.90  8.210 0.146
-3 0.9 0.95 10.854 0.173
-4 0.9 1.00 14.732 0.247
+  X1   X2  CRPS    KL
+ 0.9 0.85  6.57 0.107
+ 0.9 0.90  8.21 0.146
+ 0.9 0.95 10.85 0.173
+ 0.9 1.00 14.73 0.247
 \end{CodeOutput}
 \begin{CodeInput}
 R> possible.dfs[which.min(metrics[, "CRPS"]), ]
@@ -1071,11 +1072,11 @@ R> M2mcmc = exdqlmMCMC(y = sunspot.year, p0 = 0.85, model = model, df = c(0.9, 0
  \toprule
  model & method & \shortstack{runtime\\(s)} & KL & CRPS & PPLC \\
  \midrule
- \tworowcell{DQLM} & LDVB & \textbf{22.99} & \textbf{0.133} & 8.525 & 3851.4 \\
- & MCMC & 118.52 & 0.170 & \textbf{7.580} & \textbf{2966.0} \\
+ \tworowcell{DQLM} & LDVB & \textbf{22.53} & \textbf{0.133} & 8.525 & 3851.4 \\
+ & MCMC & 125.48 & 0.170 & \textbf{7.580} & \textbf{2966.0} \\
  \midrule   
- \tworowcell{exDQLM} & LDVB & \textbf{81.14} & \textbf{0.107} & 6.558 & 3015.2 \\
- & MCMC & 166.39 & 0.212 & \textbf{5.120} & \textbf{2206.8} \\
+ \tworowcell{exDQLM} & LDVB & \textbf{73.46} & \textbf{0.107} & 6.558 & 3015.2 \\
+ & MCMC & 174.66 & 0.212 & \textbf{5.120} & \textbf{2206.8} \\
  \bottomrule   
 \end{tabular}
 \caption{Example 2: representative dynamic benchmark for the DQLM and exDQLM fits at \(p_0 = 0.85\). Each row reports fit runtime together with the deterministic KL normality diagnostic, the mean CRPS from posterior predictive empirical quantiles, and the posterior predictive loss criterion (PPLC). The LDVB rows use \code{n.samp = 3000}. The MCMC rows use 2000 burn-in iterations and 3000 retained draws. Runtimes are fit elapsed times stored in the returned fit objects and exclude diagnostic calculations, plotting, table construction, and manuscript rendering. They were measured under benchmark setting B on an Intel Xeon E5-4650 CPU with \proglang{R} 4.6.0, \pkg{exdqlm} version 1.1.2, the C++ MCMC backend in \code{"fast"} mode, and \code{exdqlm.cpp\_threads = 1L}. Because the columns are the comparison metrics, bold entries indicate the smaller value within each model block; displayed ties are left unbolded.}
@@ -1376,11 +1377,11 @@ data.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> layout(matrix(c(1, 1, 2, 3), nrow = 2, byrow = TRUE))
+R> par(mar = c(3.8, 4.2, 2.1, 0.8))
 R> plot(MTF, type = "state", index = 8, col = "forestgreen", add = FALSE)
 R> grid(col = "grey90")
 R> abline(h = 0, col = "orange", lty = 3, lwd = 1.4)
 R> title(expression(zeta[t]))
-R> par(mar = c(3.8, 4.2, 2.1, 0.8))
 R> plot(y.train, type = "n", ylim = c(-0.11, 0.01), xlab = "time", ylab = "component CrIs")
 R> plot(MTF, type = "state", index = 9, col = "steelblue", add = TRUE)
 R> grid(col = "grey90")
@@ -1470,8 +1471,10 @@ origin and the conditional forecasts after it.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> plot(y.fit, col = "grey70", xlim = c(2020, 2023), ylim = c(1,8),
-        ylab = "log flow / forecast quantile", xlab = "time")
+R> par(mfrow = c(1, 1))
+R> plot(y.fit, col = "grey70", xlim = c(2020, 2023), ylim = c(0.5,8), xaxt = "n",
++        ylab = "log flow / forecast quantile", xlab = "time")
+R> axis(side = 1, at = seq(2020, 2023, by = 1))
 R> grid(col = "grey90")
 R> plot(fc.M0, add = TRUE, cols = c("purple", "plum"))
 R> plot(fc.MREG, add = TRUE, cols = c("steelblue", "lightblue"))
@@ -1676,14 +1679,14 @@ Figure \ref{fig:ex4static} shows that, in this simulated realization, both metho
  \toprule
  \(p_0\) & method & \shortstack{runtime\\(s)} & \shortstack{active\\RMSE} & \shortstack{null\\MAE} & \shortstack{holdout\\qRMSE} \\
  \midrule
- \tworowcell{0.05} & LDVB & \textbf{31.22} & 0.108 & \textbf{0.034} & 0.673 \\
- & MCMC & 75.69 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
+ \tworowcell{0.05} & LDVB & \textbf{31.46} & 0.108 & \textbf{0.034} & 0.673 \\
+ & MCMC & 71.92 & \textbf{0.069} & 0.035 & \textbf{0.594} \\
  \midrule
- \tworowcell{0.25} & LDVB & \textbf{31.62} & 0.310 & 0.078 & 0.371 \\
- & MCMC & 74.72 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
+ \tworowcell{0.25} & LDVB & \textbf{27.74} & 0.310 & 0.078 & 0.371 \\
+ & MCMC & 71.19 & \textbf{0.271} & \textbf{0.065} & \textbf{0.329} \\
  \midrule
-\tworowcell{0.50} & LDVB & \textbf{12.51} & \textbf{0.128} & 0.103 & 0.341 \\
- & MCMC & 75.75 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
+\tworowcell{0.50} & LDVB & \textbf{12.66} & \textbf{0.128} & 0.103 & 0.341 \\
+ & MCMC & 71.77 & 0.141 & \textbf{0.083} & \textbf{0.335} \\
  \bottomrule
 \end{tabular}}
 \caption{Example 4: runtime and sparse-signal recovery metrics for the static exAL fits under the \code{rhs\_ns} prior. The LDVB rows use \code{n.samp = 3000}, and the MCMC rows use 2000 burn-in iterations and 3000 retained draws. The active RMSE is computed over the three nonzero coefficients, the null MAE is computed over the five zero coefficients, and the holdout quantile RMSE is computed against the true target quantile on an independent holdout sample of size 800. Because the columns are the comparison metrics, bold entries indicate the smaller value within each quantile block; displayed ties are left unbolded.}
